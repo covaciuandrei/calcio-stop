@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import "./App.css";
 import AddProductForm from "./components/AddProductForm";
+import ArchivedProductList from "./components/ArchivedProducts";
 import EditProduct from "./components/EditProduct";
 import ProductList from "./components/ProductList";
 import SaleForm from "./components/SaleForm";
@@ -59,6 +60,9 @@ const App: React.FC = () => {
                     setProducts={setProducts}
                     setArchivedProducts={setArchivedProducts}
                   />
+                </div>
+                <div className="card">
+                  <ArchivedProductList archivedProducts={archivedProducts} />
                 </div>
                 <div className="card">
                   <SaleForm
