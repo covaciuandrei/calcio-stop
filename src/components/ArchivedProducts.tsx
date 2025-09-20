@@ -5,9 +5,10 @@ import { getNamesetInfo } from '../utils/utils';
 interface Props {
   archivedProducts: Product[];
   namesets: Nameset[];
+  archivedNamesets: Nameset[];
 }
 
-const ArchivedProducts: React.FC<Props> = ({ archivedProducts, namesets }) => {
+const ArchivedProducts: React.FC<Props> = ({ archivedProducts, namesets, archivedNamesets }) => {
   return (
     <div>
       {archivedProducts.length === 0 ? (
@@ -41,19 +42,19 @@ const ArchivedProducts: React.FC<Props> = ({ archivedProducts, namesets }) => {
                 </td>
                 <td>
                   {(() => {
-                    const namesetInfo = getNamesetInfo(p.namesetId, namesets);
+                    const namesetInfo = getNamesetInfo(p.namesetId, namesets, archivedNamesets);
                     return namesetInfo.season;
                   })()}
                 </td>
                 <td>
                   {(() => {
-                    const namesetInfo = getNamesetInfo(p.namesetId, namesets);
+                    const namesetInfo = getNamesetInfo(p.namesetId, namesets, archivedNamesets);
                     return namesetInfo.playerName;
                   })()}
                 </td>
                 <td>
                   {(() => {
-                    const namesetInfo = getNamesetInfo(p.namesetId, namesets);
+                    const namesetInfo = getNamesetInfo(p.namesetId, namesets, archivedNamesets);
                     return namesetInfo.number > 0 ? namesetInfo.number : '-';
                   })()}
                 </td>

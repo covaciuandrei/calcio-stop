@@ -7,12 +7,21 @@ interface Props {
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
   namesets: Nameset[];
   setNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
+  archivedNamesets: Nameset[];
+  setArchivedNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
 }
 
 const adultSizes: AdultSize[] = ['S', 'M', 'L', 'XL', 'XXL'];
 const kidSizes: KidSize[] = ['22', '24', '26', '28'];
 
-const EditProduct: React.FC<Props> = ({ products, setProducts, namesets, setNamesets }) => {
+const EditProduct: React.FC<Props> = ({
+  products,
+  setProducts,
+  namesets,
+  setNamesets,
+  archivedNamesets,
+  setArchivedNamesets,
+}) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 

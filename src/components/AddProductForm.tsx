@@ -7,12 +7,21 @@ interface Props {
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
   namesets: Nameset[];
   setNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
+  archivedNamesets: Nameset[];
+  setArchivedNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
 }
 
 const adultSizes: AdultSize[] = ['S', 'M', 'L', 'XL', 'XXL'];
 const kidSizes: KidSize[] = ['22', '24', '26', '28'];
 
-const AddProductForm: React.FC<Props> = ({ products, setProducts, namesets, setNamesets }) => {
+const AddProductForm: React.FC<Props> = ({
+  products,
+  setProducts,
+  namesets,
+  setNamesets,
+  archivedNamesets,
+  setArchivedNamesets,
+}) => {
   const [name, setName] = useState('');
   const [type, setType] = useState<ProductType>(ProductType.SHIRT);
   const [sizes, setSizes] = useState<ProductSizeQuantity[]>([]);

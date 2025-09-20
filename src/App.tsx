@@ -16,6 +16,7 @@ const App: React.FC = () => {
   const [archivedProducts, setArchivedProducts] = useState<Product[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
   const [namesets, setNamesets] = useState<Nameset[]>([]);
+  const [archivedNamesets, setArchivedNamesets] = useState<Nameset[]>([]);
 
   // Load from localStorage
   useEffect(() => {
@@ -23,6 +24,7 @@ const App: React.FC = () => {
     setArchivedProducts(JSON.parse(localStorage.getItem('archivedProducts') || '[]'));
     setSales(JSON.parse(localStorage.getItem('sales') || '[]'));
     setNamesets(JSON.parse(localStorage.getItem('namesets') || '[]'));
+    setArchivedNamesets(JSON.parse(localStorage.getItem('archivedNamesets') || '[]'));
   }, []);
 
   // Save to localStorage
@@ -41,6 +43,10 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('namesets', JSON.stringify(namesets));
   }, [namesets]);
+
+  useEffect(() => {
+    localStorage.setItem('archivedNamesets', JSON.stringify(archivedNamesets));
+  }, [archivedNamesets]);
 
   return (
     <Router>
@@ -69,6 +75,8 @@ const App: React.FC = () => {
                 setSales={setSales}
                 namesets={namesets}
                 setNamesets={setNamesets}
+                archivedNamesets={archivedNamesets}
+                setArchivedNamesets={setArchivedNamesets}
               />
             }
           />
@@ -83,6 +91,7 @@ const App: React.FC = () => {
                 archivedProducts={archivedProducts}
                 setArchivedProducts={setArchivedProducts}
                 namesets={namesets}
+                archivedNamesets={archivedNamesets}
               />
             }
           />
@@ -94,6 +103,8 @@ const App: React.FC = () => {
                 setProducts={setProducts}
                 namesets={namesets}
                 setNamesets={setNamesets}
+                archivedNamesets={archivedNamesets}
+                setArchivedNamesets={setArchivedNamesets}
               />
             }
           />
@@ -105,6 +116,8 @@ const App: React.FC = () => {
                 setProducts={setProducts}
                 namesets={namesets}
                 setNamesets={setNamesets}
+                archivedNamesets={archivedNamesets}
+                setArchivedNamesets={setArchivedNamesets}
               />
             }
           />
@@ -120,6 +133,7 @@ const App: React.FC = () => {
                   sales={sales}
                   setSales={setSales}
                   namesets={namesets}
+                  archivedNamesets={archivedNamesets}
                 />
                 <SaleHistory
                   sales={sales}
@@ -127,6 +141,7 @@ const App: React.FC = () => {
                   archivedProducts={archivedProducts}
                   setSales={setSales}
                   namesets={namesets}
+                  archivedNamesets={archivedNamesets}
                 />
               </>
             }
@@ -135,11 +150,27 @@ const App: React.FC = () => {
           {/* Archived */}
           <Route
             path="/archived"
-            element={<ArchivedProducts archivedProducts={archivedProducts} namesets={namesets} />}
+            element={
+              <ArchivedProducts
+                archivedProducts={archivedProducts}
+                namesets={namesets}
+                archivedNamesets={archivedNamesets}
+              />
+            }
           />
 
           {/* Namesets */}
-          <Route path="/namesets" element={<NamesetSection namesets={namesets} setNamesets={setNamesets} />} />
+          <Route
+            path="/namesets"
+            element={
+              <NamesetSection
+                namesets={namesets}
+                setNamesets={setNamesets}
+                archivedNamesets={archivedNamesets}
+                setArchivedNamesets={setArchivedNamesets}
+              />
+            }
+          />
         </Routes>
       </div>
     </Router>

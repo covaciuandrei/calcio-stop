@@ -2,14 +2,17 @@ import React, { useState } from 'react';
 import { Nameset } from '../types/types';
 import { generateSeasons } from '../utils/utils';
 import AddNamesetForm from './AddNamesetForm';
+import ArchivedNamesets from './ArchivedNamesets';
 import NamesetTableList from './NamesetTableList';
 
 interface Props {
   namesets: Nameset[];
   setNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
+  archivedNamesets: Nameset[];
+  setArchivedNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
 }
 
-const NamesetSection: React.FC<Props> = ({ namesets, setNamesets }) => {
+const NamesetSection: React.FC<Props> = ({ namesets, setNamesets, archivedNamesets, setArchivedNamesets }) => {
   const [editingNameset, setEditingNameset] = useState<Nameset | null>(null);
   const [playerName, setPlayerName] = useState('');
   const [number, setNumber] = useState<number | ''>('');
@@ -19,6 +22,15 @@ const NamesetSection: React.FC<Props> = ({ namesets, setNamesets }) => {
   const handleDelete = (id: string) => {
     if (!window.confirm('Are you sure you want to delete this nameset?')) return;
     setNamesets(namesets.filter((n) => n.id !== id));
+  };
+
+  const handleArchive = (id: string) => {
+    if (!window.confirm('Are you sure you want to archive this nameset?')) return;
+    const namesetToArchive = namesets.find((n) => n.id === id);
+    if (namesetToArchive) {
+      setArchivedNamesets((prev) => [...prev, namesetToArchive]);
+      setNamesets(namesets.filter((n) => n.id !== id));
+    }
   };
 
   const handleEditClick = (n: Nameset) => {
@@ -57,7 +69,21 @@ const NamesetSection: React.FC<Props> = ({ namesets, setNamesets }) => {
         <AddNamesetForm namesets={namesets} setNamesets={setNamesets} />
       </div>
 
-      <NamesetTableList namesets={namesets} onEdit={handleEditClick} onDelete={handleDelete} />
+      <NamesetTableList
+        namesets={namesets}
+        onEdit={handleEditClick}
+        onDelete={handleDelete}
+        onArchive={handleArchive}
+      />
+
+      <div className="form-section">
+        <h4>Archived Namesets</h4>
+        <ArchivedNamesets
+          archivedNamesets={archivedNamesets}
+          setArchivedNamesets={setArchivedNamesets}
+          setNamesets={setNamesets}
+        />
+      </div>
 
       {editingNameset && (
         <div className="modal">

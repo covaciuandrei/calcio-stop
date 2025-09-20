@@ -5,9 +5,10 @@ interface Props {
   namesets: Nameset[];
   onEdit: (n: Nameset) => void;
   onDelete: (id: string) => void;
+  onArchive: (id: string) => void;
 }
 
-const NamesetTableList: React.FC<Props> = ({ namesets, onEdit, onDelete }) => {
+const NamesetTableList: React.FC<Props> = ({ namesets, onEdit, onDelete, onArchive }) => {
   if (namesets.length === 0) {
     return <p>No namesets available.</p>;
   }
@@ -33,6 +34,9 @@ const NamesetTableList: React.FC<Props> = ({ namesets, onEdit, onDelete }) => {
             <td>
               <button onClick={() => onEdit(n)} className="btn btn-warning">
                 Edit
+              </button>
+              <button onClick={() => onArchive(n.id)} className="btn btn-secondary">
+                Archive
               </button>
               <button onClick={() => onDelete(n.id)} className="btn btn-danger">
                 Delete

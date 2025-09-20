@@ -9,9 +9,17 @@ interface Props {
   archivedProducts: Product[];
   setArchivedProducts: React.Dispatch<React.SetStateAction<Product[]>>;
   namesets: Nameset[];
+  archivedNamesets: Nameset[];
 }
 
-const ProductList: React.FC<Props> = ({ products, setProducts, archivedProducts, setArchivedProducts, namesets }) => {
+const ProductList: React.FC<Props> = ({
+  products,
+  setProducts,
+  archivedProducts,
+  setArchivedProducts,
+  namesets,
+  archivedNamesets,
+}) => {
   const navigate = useNavigate();
 
   const deleteProduct = (id: string) => {
@@ -57,19 +65,19 @@ const ProductList: React.FC<Props> = ({ products, setProducts, archivedProducts,
                 </td>
                 <td>
                   {(() => {
-                    const namesetInfo = getNamesetInfo(p.namesetId, namesets);
+                    const namesetInfo = getNamesetInfo(p.namesetId, namesets, archivedNamesets);
                     return namesetInfo.season;
                   })()}
                 </td>
                 <td>
                   {(() => {
-                    const namesetInfo = getNamesetInfo(p.namesetId, namesets);
+                    const namesetInfo = getNamesetInfo(p.namesetId, namesets, archivedNamesets);
                     return namesetInfo.playerName;
                   })()}
                 </td>
                 <td>
                   {(() => {
-                    const namesetInfo = getNamesetInfo(p.namesetId, namesets);
+                    const namesetInfo = getNamesetInfo(p.namesetId, namesets, archivedNamesets);
                     return namesetInfo.number > 0 ? namesetInfo.number : '-';
                   })()}
                 </td>

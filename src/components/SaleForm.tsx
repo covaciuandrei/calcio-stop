@@ -8,9 +8,10 @@ interface Props {
   sales: Sale[];
   setSales: React.Dispatch<React.SetStateAction<Sale[]>>;
   namesets: Nameset[];
+  archivedNamesets: Nameset[];
 }
 
-const SaleForm: React.FC<Props> = ({ products, setProducts, sales, setSales, namesets }) => {
+const SaleForm: React.FC<Props> = ({ products, setProducts, sales, setSales, namesets, archivedNamesets }) => {
   const [productId, setProductId] = useState('');
   const [size, setSize] = useState('');
   const [quantity, setQuantity] = useState<number>(1);
@@ -105,7 +106,7 @@ const SaleForm: React.FC<Props> = ({ products, setProducts, sales, setSales, nam
         <select value={productId} onChange={(e) => setProductId(e.target.value)}>
           <option value="">Select product</option>
           {products.map((p) => {
-            const namesetInfo = getNamesetInfo(p.namesetId, namesets);
+            const namesetInfo = getNamesetInfo(p.namesetId, namesets, archivedNamesets);
             return (
               <option key={p.id} value={p.id}>
                 {p.name} - {namesetInfo.playerName} #{namesetInfo.number > 0 ? namesetInfo.number : '-'}

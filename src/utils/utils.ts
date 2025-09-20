@@ -8,13 +8,21 @@ export const generateSeasons = (start = 1990, end = 2030): string[] =>
 
 export const getNamesetInfo = (
   namesetId: string | null,
-  namesets: Nameset[]
+  namesets: Nameset[],
+  archivedNamesets: Nameset[] = []
 ): { playerName: string; number: number; season: string } => {
   if (!namesetId) {
     return { playerName: '-', number: 0, season: '-' };
   }
 
-  const nameset = namesets.find((n) => n.id === namesetId);
+  // First check in active namesets
+  let nameset = namesets.find((n) => n.id === namesetId);
+
+  // If not found, check in archived namesets
+  if (!nameset) {
+    nameset = archivedNamesets.find((n) => n.id === namesetId);
+  }
+
   if (!nameset) {
     return { playerName: '-', number: 0, season: '-' };
   }

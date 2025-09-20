@@ -8,9 +8,10 @@ interface Props {
   archivedProducts: Product[];
   setSales: React.Dispatch<React.SetStateAction<Sale[]>>;
   namesets: Nameset[];
+  archivedNamesets: Nameset[];
 }
 
-const SaleHistory: React.FC<Props> = ({ sales, products, archivedProducts, setSales, namesets }) => {
+const SaleHistory: React.FC<Props> = ({ sales, products, archivedProducts, setSales, namesets, archivedNamesets }) => {
   const [editingSale, setEditingSale] = useState<Sale | null>(null);
   const [editQuantity, setEditQuantity] = useState<number>(0);
   const [editPrice, setEditPrice] = useState<number>(0);
@@ -21,7 +22,7 @@ const SaleHistory: React.FC<Props> = ({ sales, products, archivedProducts, setSa
     const product = products.find((p) => p.id === productId) || archivedProducts.find((p) => p.id === productId);
 
     if (!product) return 'Unknown product';
-    const namesetInfo = getNamesetInfo(product.namesetId, namesets);
+    const namesetInfo = getNamesetInfo(product.namesetId, namesets, archivedNamesets);
     return `${product.name} - ${product.type} - ${namesetInfo.playerName} #${
       namesetInfo.number > 0 ? namesetInfo.number : '-'
     }`;

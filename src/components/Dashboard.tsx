@@ -1,6 +1,7 @@
 import React from 'react';
 import { Nameset, Product, Sale } from '../types/types';
 import AddProductForm from './AddProductForm';
+import ArchivedNamesets from './ArchivedNamesets';
 import ArchivedProducts from './ArchivedProducts';
 import NamesetSection from './NamesetSection';
 import ProductList from './ProductList';
@@ -16,6 +17,8 @@ interface Props {
   setSales: React.Dispatch<React.SetStateAction<Sale[]>>;
   namesets: Nameset[];
   setNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
+  archivedNamesets: Nameset[];
+  setArchivedNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
 }
 
 const Dashboard: React.FC<Props> = ({
@@ -27,6 +30,8 @@ const Dashboard: React.FC<Props> = ({
   setSales,
   namesets,
   setNamesets,
+  archivedNamesets,
+  setArchivedNamesets,
 }) => {
   return (
     <div>
@@ -35,13 +40,27 @@ const Dashboard: React.FC<Props> = ({
       {/* Add Product Card */}
       <div className="card">
         <div className="card-header mini-header mini-header-blue">Add Product</div>
-        <AddProductForm products={products} setProducts={setProducts} namesets={namesets} setNamesets={setNamesets} />
+        <AddProductForm
+          products={products}
+          setProducts={setProducts}
+          namesets={namesets}
+          setNamesets={setNamesets}
+          archivedNamesets={archivedNamesets}
+          setArchivedNamesets={setArchivedNamesets}
+        />
       </div>
 
       {/* Record Sale Card */}
       <div className="card">
         <div className="card-header mini-header mini-header-orange">Record Sale</div>
-        <SaleForm products={products} setProducts={setProducts} sales={sales} setSales={setSales} namesets={namesets} />
+        <SaleForm
+          products={products}
+          setProducts={setProducts}
+          sales={sales}
+          setSales={setSales}
+          namesets={namesets}
+          archivedNamesets={archivedNamesets}
+        />
       </div>
 
       {/* Products Table */}
@@ -54,6 +73,7 @@ const Dashboard: React.FC<Props> = ({
           archivedProducts={archivedProducts}
           setArchivedProducts={setArchivedProducts}
           namesets={namesets}
+          archivedNamesets={archivedNamesets}
         />
       </div>
 
@@ -67,6 +87,7 @@ const Dashboard: React.FC<Props> = ({
           archivedProducts={archivedProducts}
           setSales={setSales}
           namesets={namesets}
+          archivedNamesets={archivedNamesets}
         />
       </div>
 
@@ -74,14 +95,30 @@ const Dashboard: React.FC<Props> = ({
       <div className="card">
         <div className="card-header mini-header mini-header-red">Archived Products</div>
         <h3 className="card-section-header">Archived List</h3>
-        <ArchivedProducts archivedProducts={archivedProducts} namesets={namesets} />
+        <ArchivedProducts archivedProducts={archivedProducts} namesets={namesets} archivedNamesets={archivedNamesets} />
       </div>
 
       {/* Namesets */}
       <div className="card">
         <div className="card-header mini-header mini-header-purple">Namesets</div>
         <h3 className="card-section-header">Manage Namesets</h3>
-        <NamesetSection namesets={namesets} setNamesets={setNamesets} />
+        <NamesetSection
+          namesets={namesets}
+          setNamesets={setNamesets}
+          archivedNamesets={archivedNamesets}
+          setArchivedNamesets={setArchivedNamesets}
+        />
+      </div>
+
+      {/* Archived Namesets */}
+      <div className="card">
+        <div className="card-header mini-header mini-header-red">Archived Namesets</div>
+        <h3 className="card-section-header">Archived Namesets List</h3>
+        <ArchivedNamesets
+          archivedNamesets={archivedNamesets}
+          setArchivedNamesets={setArchivedNamesets}
+          setNamesets={setNamesets}
+        />
       </div>
     </div>
   );
