@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Link, Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import {
+  NavLink,
+  Route,
+  BrowserRouter as Router,
+  Routes,
+} from "react-router-dom";
 import "./App.css";
 import AddProductForm from "./components/AddProductForm";
 import ArchivedProducts from "./components/ArchivedProducts";
@@ -39,20 +44,15 @@ const App: React.FC = () => {
   return (
     <Router>
       <div className="app-container">
-        <nav style={{ marginBottom: 16 }}>
-          <Link to="/" style={{ marginRight: 12 }}>
+        {/* ✅ Styled Navbar */}
+        <nav className="navbar">
+          <NavLink to="/" end>
             Dashboard
-          </Link>
-          <Link to="/products" style={{ marginRight: 12 }}>
-            Products
-          </Link>
-          <Link to="/add" style={{ marginRight: 12 }}>
-            Add Product
-          </Link>
-          <Link to="/sales" style={{ marginRight: 12 }}>
-            Sales
-          </Link>
-          <Link to="/archived">Archived</Link>
+          </NavLink>
+          <NavLink to="/products">Products</NavLink>
+          <NavLink to="/add">Add Product</NavLink>
+          <NavLink to="/sales">Sales</NavLink>
+          <NavLink to="/archived">Archived</NavLink>
         </nav>
 
         <Routes>
