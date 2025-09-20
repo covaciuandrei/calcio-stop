@@ -149,7 +149,7 @@ const SaleForm: React.FC<Props> = ({ products, setProducts, sales, setSales, nam
         <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
       </div>
 
-      <div style={{ alignSelf: 'flex-end' }}>
+      <div className="form-button-container">
         <button onClick={handleSale} className="btn btn-success">
           Record Sale
         </button>

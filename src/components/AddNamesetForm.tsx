@@ -66,7 +66,7 @@ const AddNamesetForm: React.FC<Props> = ({ namesets, setNamesets, onAdd }) => {
           ))}
         </select>
       </div>
-      <div style={{ alignSelf: 'flex-end' }}>
+      <div className="form-button-container">
         <button type="submit" className="btn btn-success">
           Save
         </button>

@@ -120,7 +120,7 @@ const EditProduct: React.FC<Props> = ({ products, setProducts, namesets, setName
           <input type="number" min={0} value={price} onChange={(e) => setPrice(Number(e.target.value || 0))} />
         </div>
 
-        <div style={{ alignSelf: 'flex-end' }}>
+        <div className="form-button-container">
           <button onClick={handleSave} className="btn btn-success">
             Save Changes
           </button>

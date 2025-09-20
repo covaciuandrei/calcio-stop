@@ -36,6 +36,20 @@ const NamesetPicker: React.FC<Props> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Prevent body scrolling when dropdown is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   const selectedNameset = namesets.find((n) => n.id === selectedNamesetId);
 
   const filteredNamesets = namesets.filter(

@@ -100,7 +100,7 @@ const AddProductForm: React.FC<Props> = ({ products, setProducts, namesets, setN
         <input type="number" min={0} value={price} onChange={(e) => setPrice(Number(e.target.value || 0))} />
       </div>
 
-      <div style={{ alignSelf: 'flex-end' }}>
+      <div className="form-button-container">
         <button onClick={addProduct} className="btn btn-success">
           Add Product
         </button>
