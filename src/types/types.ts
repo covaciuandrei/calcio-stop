@@ -34,3 +34,10 @@ export interface Sale {
   customerName: string;
   date: string;
 }
+
+export interface Nameset {
+  id: string;
+  playerName: string;   // e.g. "Messi"
+  number: number;       // e.g. 10
+  season: string;       // e.g. "2025/2026"
+}

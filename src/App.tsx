@@ -10,41 +10,48 @@ import AddProductForm from "./components/AddProductForm";
 import ArchivedProducts from "./components/ArchivedProducts";
 import Dashboard from "./components/Dashboard";
 import EditProduct from "./components/EditProduct";
+import NamesetSection from "./components/NamesetSection";
 import ProductList from "./components/ProductList";
 import SaleForm from "./components/SaleForm";
 import SaleHistory from "./components/SaleHistory";
-import { Product, Sale } from "./types/types";
+import { Nameset, Product, Sale } from "./types/types";
 
 const App: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [archivedProducts, setArchivedProducts] = useState<Product[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
+  const [namesets, setNamesets] = useState<Nameset[]>([]);
 
+  // Load from localStorage
   useEffect(() => {
-    const savedProducts = JSON.parse(localStorage.getItem("products") || "[]");
-    const savedArchived = JSON.parse(
-      localStorage.getItem("archivedProducts") || "[]"
+    setProducts(JSON.parse(localStorage.getItem("products") || "[]"));
+    setArchivedProducts(
+      JSON.parse(localStorage.getItem("archivedProducts") || "[]")
     );
-    const savedSales = JSON.parse(localStorage.getItem("sales") || "[]");
-    setProducts(savedProducts);
-    setArchivedProducts(savedArchived);
-    setSales(savedSales);
+    setSales(JSON.parse(localStorage.getItem("sales") || "[]"));
+    setNamesets(JSON.parse(localStorage.getItem("namesets") || "[]"));
   }, []);
 
+  // Save to localStorage
   useEffect(() => {
     localStorage.setItem("products", JSON.stringify(products));
   }, [products]);
+
   useEffect(() => {
     localStorage.setItem("archivedProducts", JSON.stringify(archivedProducts));
   }, [archivedProducts]);
+
   useEffect(() => {
     localStorage.setItem("sales", JSON.stringify(sales));
   }, [sales]);
 
+  useEffect(() => {
+    localStorage.setItem("namesets", JSON.stringify(namesets));
+  }, [namesets]);
+
   return (
     <Router>
       <div className="app-container">
-        {/* ✅ Styled Navbar */}
         <nav className="navbar">
           <NavLink to="/" end>
             Dashboard
@@ -53,6 +60,7 @@ const App: React.FC = () => {
           <NavLink to="/add">Add Product</NavLink>
           <NavLink to="/sales">Sales</NavLink>
           <NavLink to="/archived">Archived</NavLink>
+          <NavLink to="/namesets">Namesets</NavLink>
         </nav>
 
         <Routes>
@@ -66,33 +74,30 @@ const App: React.FC = () => {
                 setArchivedProducts={setArchivedProducts}
                 sales={sales}
                 setSales={setSales}
+                namesets={namesets}
+                setNamesets={setNamesets}
               />
             }
           />
 
+          {/* Products */}
           <Route
             path="/products"
             element={
-              <div className="card">
-                <ProductList
-                  products={products}
-                  setProducts={setProducts}
-                  archivedProducts={archivedProducts}
-                  setArchivedProducts={setArchivedProducts}
-                />
-              </div>
+              <ProductList
+                products={products}
+                setProducts={setProducts}
+                archivedProducts={archivedProducts}
+                setArchivedProducts={setArchivedProducts}
+              />
             }
           />
-
           <Route
             path="/add"
             element={
-              <div className="card">
-                <AddProductForm products={products} setProducts={setProducts} />
-              </div>
+              <AddProductForm products={products} setProducts={setProducts} />
             }
           />
-
           <Route
             path="/edit/:id"
             element={
@@ -100,36 +105,38 @@ const App: React.FC = () => {
             }
           />
 
+          {/* Sales */}
           <Route
             path="/sales"
             element={
               <>
-                <div className="card">
-                  <SaleForm
-                    products={products}
-                    setProducts={setProducts}
-                    sales={sales}
-                    setSales={setSales}
-                  />
-                </div>
-                <div className="card">
-                  <SaleHistory
-                    sales={sales}
-                    products={products}
-                    archivedProducts={archivedProducts}
-                    setSales={setSales}
-                  />
-                </div>
+                <SaleForm
+                  products={products}
+                  setProducts={setProducts}
+                  sales={sales}
+                  setSales={setSales}
+                />
+                <SaleHistory
+                  sales={sales}
+                  products={products}
+                  archivedProducts={archivedProducts}
+                  setSales={setSales}
+                />
               </>
             }
           />
 
+          {/* Archived */}
           <Route
             path="/archived"
+            element={<ArchivedProducts archivedProducts={archivedProducts} />}
+          />
+
+          {/* Namesets */}
+          <Route
+            path="/namesets"
             element={
-              <div className="card">
-                <ArchivedProducts archivedProducts={archivedProducts} />
-              </div>
+              <NamesetSection namesets={namesets} setNamesets={setNamesets} />
             }
           />
         </Routes>

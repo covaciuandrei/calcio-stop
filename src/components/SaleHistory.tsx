@@ -21,7 +21,9 @@ const SaleHistory: React.FC<Props> = ({ sales, products, archivedProducts, setSa
       archivedProducts.find(p => p.id === productId);
 
     if (!product) return "Unknown product";
-    return `${product.name} - ${product.type} - ${product.playerName} #${product.equipmentNumber > 0 ? product.equipmentNumber : "-"}`;
+    return `${product.name} - ${product.type} - ${product.playerName} #${
+      product.equipmentNumber > 0 ? product.equipmentNumber : "-"
+    }`;
   };
 
   const handleDelete = (id: string) => {
@@ -34,26 +36,34 @@ const SaleHistory: React.FC<Props> = ({ sales, products, archivedProducts, setSa
     setEditQuantity(sale.quantity);
     setEditPrice(sale.priceSold);
     setEditCustomer(sale.customerName);
-    // convert ISO to yyyy-mm-dd for input
     setEditDate(new Date(sale.date).toISOString().slice(0, 10));
   };
 
   const handleSaveEdit = () => {
     if (!editingSale) return;
-    setSales(prev => prev.map(s => s.id === editingSale.id ? {
-      ...s,
-      quantity: editQuantity,
-      priceSold: editPrice,
-      customerName: editCustomer,
-      date: editDate ? new Date(editDate).toISOString() : new Date().toISOString()
-    } : s));
+    setSales(prev =>
+      prev.map(s =>
+        s.id === editingSale.id
+          ? {
+              ...s,
+              quantity: editQuantity,
+              priceSold: editPrice,
+              customerName: editCustomer,
+              date: editDate
+                ? new Date(editDate).toISOString()
+                : new Date().toISOString(),
+            }
+          : s
+      )
+    );
     setEditingSale(null);
   };
 
   return (
     <div>
-      <h2>Sale History</h2>
-      {sales.length === 0 ? <p>No sales recorded.</p> : (
+      {sales.length === 0 ? (
+        <p>No sales recorded.</p>
+      ) : (
         <table>
           <thead>
             <tr>
@@ -72,7 +82,11 @@ const SaleHistory: React.FC<Props> = ({ sales, products, archivedProducts, setSa
                 <td>{getProductDetails(s.productId)}</td>
                 <td>{s.size}</td>
                 <td>{s.quantity}</td>
-                <td>{s.priceSold.toFixed ? `$${s.priceSold.toFixed(2)}` : s.priceSold}</td>
+                <td>
+                  {s.priceSold.toFixed
+                    ? `$${s.priceSold.toFixed(2)}`
+                    : s.priceSold}
+                </td>
                 <td>{s.customerName || "N/A"}</td>
                 <td>{new Date(s.date).toLocaleString()}</td>
                 <td>
@@ -91,19 +105,37 @@ const SaleHistory: React.FC<Props> = ({ sales, products, archivedProducts, setSa
             <h3>Edit Sale</h3>
             <label>
               Quantity:
-              <input type="number" value={editQuantity} onChange={e => setEditQuantity(Number(e.target.value || 0))} />
+              <input
+                type="number"
+                value={editQuantity}
+                onChange={e =>
+                  setEditQuantity(Number(e.target.value || 0))
+                }
+              />
             </label>
             <label>
               Price:
-              <input type="number" value={editPrice} onChange={e => setEditPrice(Number(e.target.value || 0))} />
+              <input
+                type="number"
+                value={editPrice}
+                onChange={e => setEditPrice(Number(e.target.value || 0))}
+              />
             </label>
             <label>
               Customer:
-              <input type="text" value={editCustomer} onChange={e => setEditCustomer(e.target.value)} />
+              <input
+                type="text"
+                value={editCustomer}
+                onChange={e => setEditCustomer(e.target.value)}
+              />
             </label>
             <label>
               Date:
-              <input type="date" value={editDate} onChange={e => setEditDate(e.target.value)} />
+              <input
+                type="date"
+                value={editDate}
+                onChange={e => setEditDate(e.target.value)}
+              />
             </label>
             <div className="modal-buttons">
               <button onClick={handleSaveEdit}>Save</button>
