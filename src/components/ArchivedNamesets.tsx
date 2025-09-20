@@ -5,9 +5,10 @@ interface Props {
   archivedNamesets: Nameset[];
   setArchivedNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
   setNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
+  searchTerm?: string;
 }
 
-const ArchivedNamesets: React.FC<Props> = ({ archivedNamesets, setArchivedNamesets, setNamesets }) => {
+const ArchivedNamesets: React.FC<Props> = ({ archivedNamesets, setArchivedNamesets, setNamesets, searchTerm = '' }) => {
   const handleRestore = (id: string) => {
     if (!window.confirm('Are you sure you want to restore this nameset?')) return;
     const namesetToRestore = archivedNamesets.find((n) => n.id === id);
@@ -22,8 +23,20 @@ const ArchivedNamesets: React.FC<Props> = ({ archivedNamesets, setArchivedNamese
     setArchivedNamesets(archivedNamesets.filter((n) => n.id !== id));
   };
 
+  // Filter namesets based on search term
+  const filteredNamesets = archivedNamesets.filter(
+    (nameset) =>
+      nameset.playerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      nameset.season.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      nameset.number.toString().includes(searchTerm)
+  );
+
   if (archivedNamesets.length === 0) {
     return <p>No archived namesets available.</p>;
+  }
+
+  if (filteredNamesets.length === 0 && searchTerm) {
+    return <p>No archived namesets found matching "{searchTerm}".</p>;
   }
 
   return (
@@ -38,7 +51,7 @@ const ArchivedNamesets: React.FC<Props> = ({ archivedNamesets, setArchivedNamese
         </tr>
       </thead>
       <tbody>
-        {archivedNamesets.map((n) => (
+        {filteredNamesets.map((n) => (
           <tr key={n.id}>
             <td>{n.playerName}</td>
             <td>{n.number}</td>

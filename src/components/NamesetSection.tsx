@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Nameset } from '../types/types';
 import { generateSeasons } from '../utils/utils';
 import AddNamesetForm from './AddNamesetForm';
-import ArchivedNamesets from './ArchivedNamesets';
 import NamesetTableList from './NamesetTableList';
 
 interface Props {
@@ -75,15 +74,6 @@ const NamesetSection: React.FC<Props> = ({ namesets, setNamesets, archivedNamese
         onDelete={handleDelete}
         onArchive={handleArchive}
       />
-
-      <div className="form-section">
-        <h4>Archived Namesets</h4>
-        <ArchivedNamesets
-          archivedNamesets={archivedNamesets}
-          setArchivedNamesets={setArchivedNamesets}
-          setNamesets={setNamesets}
-        />
-      </div>
 
       {editingNameset && (
         <div className="modal">
