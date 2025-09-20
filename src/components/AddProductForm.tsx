@@ -52,67 +52,58 @@ const AddProductForm: React.FC<Props> = ({ products, setProducts, namesets, setN
   };
 
   return (
-    <div>
-      <h2>Add Product</h2>
+    <div className="form-inline">
+      <div className="form-group">
+        <label>Product Name</label>
+        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Real Madrid Home" />
+      </div>
 
-      <div className="form-inline">
-        <div className="form-group">
-          <label>Product Name</label>
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Real Madrid Home" />
+      <div className="form-group">
+        <label>Type</label>
+        <select value={type} onChange={(e) => setType(e.target.value as ProductType)}>
+          {Object.values(ProductType).map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="form-group" style={{ width: '100%' }}>
+        <label>Sizes & Quantities</label>
+        <div className="size-quantity-grid">
+          {sizes.map((sq) => (
+            <div key={sq.size} className="size-quantity-item">
+              <div className="size-quantity-label">{sq.size}</div>
+              <input
+                type="number"
+                min={0}
+                value={sq.quantity}
+                onChange={(e) => handleQuantityChange(sq.size, Number(e.target.value || 0))}
+                className="size-quantity-input"
+              />
+            </div>
+          ))}
         </div>
+      </div>
 
-        <div className="form-group">
-          <label>Type</label>
-          <select value={type} onChange={(e) => setType(e.target.value as ProductType)}>
-            {Object.values(ProductType).map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-        </div>
+      <NamesetPicker
+        namesets={namesets}
+        setNamesets={setNamesets}
+        selectedNamesetId={selectedNamesetId}
+        onNamesetSelect={setSelectedNamesetId}
+        placeholder="Select a nameset (optional)"
+      />
 
-        <div style={{ width: '100%' }}>
-          <label>Sizes & Quantities</label>
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 6 }}>
-            {sizes.map((sq) => (
-              <div
-                key={sq.size}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  minWidth: 90,
-                }}
-              >
-                <div style={{ fontWeight: 600 }}>{sq.size}</div>
-                <input
-                  type="number"
-                  min={0}
-                  value={sq.quantity}
-                  onChange={(e) => handleQuantityChange(sq.size, Number(e.target.value || 0))}
-                  style={{ padding: 6 }}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
+      <div className="form-group">
+        <label>Price (per unit)</label>
+        <input type="number" min={0} value={price} onChange={(e) => setPrice(Number(e.target.value || 0))} />
+      </div>
 
-        <NamesetPicker
-          namesets={namesets}
-          setNamesets={setNamesets}
-          selectedNamesetId={selectedNamesetId}
-          onNamesetSelect={setSelectedNamesetId}
-          placeholder="Select a nameset (optional)"
-        />
-
-        <div className="form-group">
-          <label>Price (per unit)</label>
-          <input type="number" min={0} value={price} onChange={(e) => setPrice(Number(e.target.value || 0))} />
-        </div>
-
-        <div style={{ alignSelf: 'flex-end' }}>
-          <button onClick={addProduct}>Add Product</button>
-        </div>
+      <div style={{ alignSelf: 'flex-end' }}>
+        <button onClick={addProduct} className="btn btn-success">
+          Add Product
+        </button>
       </div>
     </div>
   );

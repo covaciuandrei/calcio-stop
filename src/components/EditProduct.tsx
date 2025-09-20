@@ -71,7 +71,7 @@ const EditProduct: React.FC<Props> = ({ products, setProducts, namesets, setName
 
   return (
     <div className="card">
-      <h2>Edit Product</h2>
+      <h1 className="section-header">Edit Product</h1>
       <div className="form-inline">
         <div className="form-group">
           <label>Product Name</label>
@@ -89,24 +89,18 @@ const EditProduct: React.FC<Props> = ({ products, setProducts, namesets, setName
           </select>
         </div>
 
-        <div style={{ width: '100%' }}>
+        <div className="form-group" style={{ width: '100%' }}>
           <label>Sizes & Quantities</label>
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 6 }}>
+          <div className="size-quantity-grid">
             {sizes.map((sq) => (
-              <div
-                key={sq.size}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  minWidth: 90,
-                }}
-              >
-                <div style={{ fontWeight: 600 }}>{sq.size}</div>
+              <div key={sq.size} className="size-quantity-item">
+                <div className="size-quantity-label">{sq.size}</div>
                 <input
                   type="number"
                   min={0}
                   value={sq.quantity}
                   onChange={(e) => handleSizeQuantityChange(sq.size, Number(e.target.value || 0))}
+                  className="size-quantity-input"
                 />
               </div>
             ))}
@@ -127,7 +121,9 @@ const EditProduct: React.FC<Props> = ({ products, setProducts, namesets, setName
         </div>
 
         <div style={{ alignSelf: 'flex-end' }}>
-          <button onClick={handleSave}>Save Changes</button>
+          <button onClick={handleSave} className="btn btn-success">
+            Save Changes
+          </button>
         </div>
       </div>
     </div>

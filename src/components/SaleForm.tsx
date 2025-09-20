@@ -99,61 +99,60 @@ const SaleForm: React.FC<Props> = ({ products, setProducts, sales, setSales, nam
   };
 
   return (
-    <div>
-      <h2>Record Sale</h2>
-      <div className="form-inline">
-        <div className="form-group">
-          <label>Product</label>
-          <select value={productId} onChange={(e) => setProductId(e.target.value)}>
-            <option value="">Select product</option>
-            {products.map((p) => {
-              const namesetInfo = getNamesetInfo(p.namesetId, namesets);
-              return (
-                <option key={p.id} value={p.id}>
-                  {p.name} - {namesetInfo.playerName} #{namesetInfo.number > 0 ? namesetInfo.number : '-'}
-                </option>
-              );
-            })}
-          </select>
-        </div>
+    <div className="form-inline">
+      <div className="form-group">
+        <label>Product</label>
+        <select value={productId} onChange={(e) => setProductId(e.target.value)}>
+          <option value="">Select product</option>
+          {products.map((p) => {
+            const namesetInfo = getNamesetInfo(p.namesetId, namesets);
+            return (
+              <option key={p.id} value={p.id}>
+                {p.name} - {namesetInfo.playerName} #{namesetInfo.number > 0 ? namesetInfo.number : '-'}
+              </option>
+            );
+          })}
+        </select>
+      </div>
 
-        <div className="form-group">
-          <label>Size</label>
-          <select value={size} onChange={(e) => setSize(e.target.value)}>
-            <option value="">Select size</option>
-            {products
-              .find((p) => p.id === productId)
-              ?.sizes.map((sq) => (
-                <option key={sq.size} value={sq.size}>
-                  {sq.size} (stock: {sq.quantity})
-                </option>
-              ))}
-          </select>
-        </div>
+      <div className="form-group">
+        <label>Size</label>
+        <select value={size} onChange={(e) => setSize(e.target.value)}>
+          <option value="">Select size</option>
+          {products
+            .find((p) => p.id === productId)
+            ?.sizes.map((sq) => (
+              <option key={sq.size} value={sq.size}>
+                {sq.size} (stock: {sq.quantity})
+              </option>
+            ))}
+        </select>
+      </div>
 
-        <div className="form-group">
-          <label>Quantity</label>
-          <input type="number" min={1} value={quantity} onChange={(e) => setQuantity(Number(e.target.value || 1))} />
-        </div>
+      <div className="form-group">
+        <label>Quantity</label>
+        <input type="number" min={1} value={quantity} onChange={(e) => setQuantity(Number(e.target.value || 1))} />
+      </div>
 
-        <div className="form-group">
-          <label>Price Sold</label>
-          <input type="number" min={0} value={priceSold} onChange={(e) => setPriceSold(Number(e.target.value || 0))} />
-        </div>
+      <div className="form-group">
+        <label>Price Sold</label>
+        <input type="number" min={0} value={priceSold} onChange={(e) => setPriceSold(Number(e.target.value || 0))} />
+      </div>
 
-        <div className="form-group">
-          <label>Customer Name</label>
-          <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
-        </div>
+      <div className="form-group">
+        <label>Customer Name</label>
+        <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
+      </div>
 
-        <div className="form-group">
-          <label>Date</label>
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-        </div>
+      <div className="form-group">
+        <label>Date</label>
+        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+      </div>
 
-        <div style={{ alignSelf: 'flex-end' }}>
-          <button onClick={handleSale}>Record Sale</button>
-        </div>
+      <div style={{ alignSelf: 'flex-end' }}>
+        <button onClick={handleSale} className="btn btn-success">
+          Record Sale
+        </button>
       </div>
     </div>
   );

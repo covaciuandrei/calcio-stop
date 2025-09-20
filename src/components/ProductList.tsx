@@ -23,7 +23,6 @@ const ProductList: React.FC<Props> = ({ products, setProducts, archivedProducts,
 
   return (
     <div>
-      <h2>Products</h2>
       {products.length === 0 ? (
         <p>No products available.</p>
       ) : (
@@ -46,11 +45,13 @@ const ProductList: React.FC<Props> = ({ products, setProducts, archivedProducts,
                 <td>{p.name}</td>
                 <td>{p.type}</td>
                 <td>
-                  {p.sizes.map((sq) => (
-                    <div key={sq.size}>
-                      {sq.size}: {sq.quantity}
-                    </div>
-                  ))}
+                  <div className="size-quantity-display">
+                    {p.sizes.map((sq) => (
+                      <div key={sq.size} className="size-quantity-item">
+                        {sq.size}: {sq.quantity}
+                      </div>
+                    ))}
+                  </div>
                 </td>
                 <td>
                   {(() => {
@@ -70,12 +71,14 @@ const ProductList: React.FC<Props> = ({ products, setProducts, archivedProducts,
                     return namesetInfo.number > 0 ? namesetInfo.number : '-';
                   })()}
                 </td>
-                <td>{p.price.toFixed ? p.price.toFixed(2) : p.price}</td>
+                <td className="price-display">${p.price.toFixed ? p.price.toFixed(2) : p.price}</td>
                 <td>
                   <Link to={`/edit/${p.id}`}>
-                    <button>Edit</button>
+                    <button className="btn btn-warning">Edit</button>
                   </Link>
-                  <button onClick={() => deleteProduct(p.id)}>Delete</button>
+                  <button onClick={() => deleteProduct(p.id)} className="btn btn-danger">
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}

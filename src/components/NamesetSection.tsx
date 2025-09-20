@@ -48,7 +48,10 @@ const NamesetSection: React.FC<Props> = ({ namesets, setNamesets }) => {
 
   return (
     <div>
-      <AddNamesetForm namesets={namesets} setNamesets={setNamesets} />
+      <div className="form-section">
+        <h4>Add New Nameset</h4>
+        <AddNamesetForm namesets={namesets} setNamesets={setNamesets} />
+      </div>
 
       <NamesetTableList namesets={namesets} onEdit={handleEditClick} onDelete={handleDelete} />
 
@@ -76,8 +79,12 @@ const NamesetSection: React.FC<Props> = ({ namesets, setNamesets }) => {
             </label>
 
             <div className="modal-buttons">
-              <button onClick={handleSaveEdit}>Save</button>
-              <button onClick={() => setEditingNameset(null)}>Cancel</button>
+              <button onClick={handleSaveEdit} className="btn btn-success">
+                Save
+              </button>
+              <button onClick={() => setEditingNameset(null)} className="btn btn-secondary">
+                Cancel
+              </button>
             </div>
           </div>
         </div>

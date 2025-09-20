@@ -1,5 +1,5 @@
-import React from "react";
-import { Nameset } from "../types/types";
+import React from 'react';
+import { Nameset } from '../types/types';
 
 interface Props {
   namesets: Nameset[];
@@ -29,8 +29,12 @@ const NamesetTableList: React.FC<Props> = ({ namesets, onEdit, onDelete }) => {
             <td>{n.number}</td>
             <td>{n.season}</td>
             <td>
-              <button onClick={() => onEdit(n)}>Edit</button>
-              <button onClick={() => onDelete(n.id)}>Delete</button>
+              <button onClick={() => onEdit(n)} className="btn btn-warning">
+                Edit
+              </button>
+              <button onClick={() => onDelete(n.id)} className="btn btn-danger">
+                Delete
+              </button>
             </td>
           </tr>
         ))}

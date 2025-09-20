@@ -81,12 +81,16 @@ const SaleHistory: React.FC<Props> = ({ sales, products, archivedProducts, setSa
                 <td>{getProductDetails(s.productId)}</td>
                 <td>{s.size}</td>
                 <td>{s.quantity}</td>
-                <td>{s.priceSold.toFixed ? `$${s.priceSold.toFixed(2)}` : s.priceSold}</td>
+                <td className="price-display">${s.priceSold.toFixed ? s.priceSold.toFixed(2) : s.priceSold}</td>
                 <td>{s.customerName || 'N/A'}</td>
                 <td>{new Date(s.date).toLocaleString()}</td>
                 <td>
-                  <button onClick={() => handleEditClick(s)}>Edit</button>
-                  <button onClick={() => handleDelete(s.id)}>Delete</button>
+                  <button onClick={() => handleEditClick(s)} className="btn btn-warning">
+                    Edit
+                  </button>
+                  <button onClick={() => handleDelete(s.id)} className="btn btn-danger">
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}
@@ -119,8 +123,12 @@ const SaleHistory: React.FC<Props> = ({ sales, products, archivedProducts, setSa
               <input type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} />
             </label>
             <div className="modal-buttons">
-              <button onClick={handleSaveEdit}>Save</button>
-              <button onClick={() => setEditingSale(null)}>Cancel</button>
+              <button onClick={handleSaveEdit} className="btn btn-success">
+                Save
+              </button>
+              <button onClick={() => setEditingSale(null)} className="btn btn-secondary">
+                Cancel
+              </button>
             </div>
           </div>
         </div>

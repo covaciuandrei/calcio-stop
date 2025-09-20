@@ -10,7 +10,6 @@ interface Props {
 const ArchivedProducts: React.FC<Props> = ({ archivedProducts, namesets }) => {
   return (
     <div>
-      <h2>Archived Products</h2>
       {archivedProducts.length === 0 ? (
         <p>No archived products.</p>
       ) : (
@@ -32,11 +31,13 @@ const ArchivedProducts: React.FC<Props> = ({ archivedProducts, namesets }) => {
                 <td>{p.name}</td>
                 <td>{p.type}</td>
                 <td>
-                  {p.sizes.map((sq) => (
-                    <div key={sq.size}>
-                      {sq.size}: {sq.quantity}
-                    </div>
-                  ))}
+                  <div className="size-quantity-display">
+                    {p.sizes.map((sq) => (
+                      <div key={sq.size} className="size-quantity-item">
+                        {sq.size}: {sq.quantity}
+                      </div>
+                    ))}
+                  </div>
                 </td>
                 <td>
                   {(() => {
@@ -56,7 +57,7 @@ const ArchivedProducts: React.FC<Props> = ({ archivedProducts, namesets }) => {
                     return namesetInfo.number > 0 ? namesetInfo.number : '-';
                   })()}
                 </td>
-                <td>{p.price.toFixed ? p.price.toFixed(2) : p.price}</td>
+                <td className="price-display">${p.price.toFixed ? p.price.toFixed(2) : p.price}</td>
               </tr>
             ))}
           </tbody>

@@ -34,33 +34,43 @@ const AddNamesetForm: React.FC<Props> = ({ namesets, setNamesets, onAdd }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="card">
-      <h4>Add Nameset</h4>
-      <input
-        type="text"
-        placeholder="Player Name"
-        value={playerName}
-        onChange={(e) => setPlayerName(e.target.value)}
-        required
-      />
-      <input
-        type="number"
-        placeholder="Number (positive)"
-        min={1}
-        value={number}
-        onChange={(e) => setNumber(parseInt(e.target.value) || '')}
-        required
-      />
-      <select value={season} onChange={(e) => setSeason(e.target.value)}>
-        {generateSeasons().map((s: string) => (
-          <option key={s} value={s}>
-            {s}
-          </option>
-        ))}
-      </select>
-      <button type="submit" className="btn">
-        Save
-      </button>
+    <form onSubmit={handleSubmit} className="form-inline">
+      <div className="form-group">
+        <label>Player Name</label>
+        <input
+          type="text"
+          placeholder="Player Name"
+          value={playerName}
+          onChange={(e) => setPlayerName(e.target.value)}
+          required
+        />
+      </div>
+      <div className="form-group">
+        <label>Number</label>
+        <input
+          type="number"
+          placeholder="Number (positive)"
+          min={1}
+          value={number}
+          onChange={(e) => setNumber(parseInt(e.target.value) || '')}
+          required
+        />
+      </div>
+      <div className="form-group">
+        <label>Season</label>
+        <select value={season} onChange={(e) => setSeason(e.target.value)}>
+          {generateSeasons().map((s: string) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div style={{ alignSelf: 'flex-end' }}>
+        <button type="submit" className="btn btn-success">
+          Save
+        </button>
+      </div>
     </form>
   );
 };
