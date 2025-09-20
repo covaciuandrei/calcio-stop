@@ -576,10 +576,14 @@ table button:last-of-type:hover {
 
 /* Button alignment and form layout improvements */
 .form-button-container {
-  display: flex;
-  align-items: flex-end;
-  min-height: 38px;
-  padding-top: 20px;
+  display: block;
+  margin-top: 20px;
+  padding-top: 0;
+}
+
+.form-button-container button {
+  height: 38px;
+  box-sizing: border-box;
 }
 
 .form-inline {
