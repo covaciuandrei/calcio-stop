@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Product, Sale } from "../types/types";
 
 interface Props {
@@ -8,47 +8,70 @@ interface Props {
   setSales: React.Dispatch<React.SetStateAction<Sale[]>>;
 }
 
-const SaleForm: React.FC<Props> = ({
-  products,
-  setProducts,
-  sales,
-  setSales,
-}) => {
+const SaleForm: React.FC<Props> = ({ products, setProducts, sales, setSales }) => {
   const [productId, setProductId] = useState("");
-  const [quantity, setQuantity] = useState(1);
-  const [priceSold, setPriceSold] = useState(0);
+  const [size, setSize] = useState("");
+  const [quantity, setQuantity] = useState<number>(1);
+  const [priceSold, setPriceSold] = useState<number>(0);
   const [customerName, setCustomerName] = useState("");
   const [date, setDate] = useState("");
 
+  // when product changes, default size selection to first available size
+  useEffect(() => {
+    const p = products.find(pp => pp.id === productId);
+    if (p) {
+      if (p.sizes && p.sizes.length > 0) {
+        setSize(p.sizes[0].size);
+      } else {
+        setSize("");
+      }
+      // default priceSold to product.price
+      setPriceSold(p?.price || 0);
+    } else {
+      setSize("");
+      setPriceSold(0);
+    }
+  }, [productId, products]);
+
   const handleSale = () => {
-    if (!productId || quantity <= 0 || priceSold <= 0) {
-      alert("Please fill all required fields");
-      return;
-    }
+    if (!productId) { alert("Select product"); return; }
+    if (!size) { alert("Select size"); return; }
+    if (quantity <= 0) { alert("Quantity must be > 0"); return; }
+    if (priceSold <= 0) { alert("Enter price"); return; }
 
-    const product = products.find((p) => p.id === productId);
+    const product = products.find(p => p.id === productId);
     if (!product) return;
-    if (product.quantity < quantity) {
-      alert("Not enough stock");
-      return;
-    }
 
-    const updatedProducts = products.map((p) =>
-      p.id === productId ? { ...p, quantity: p.quantity - quantity } : p
-    );
+    const sizeObj = product.sizes.find(sq => sq.size === size);
+    if (!sizeObj) { alert("Selected size not found"); return; }
+    if (sizeObj.quantity < quantity) { alert("Not enough stock for that size"); return; }
+
+    // decrement size quantity
+    const updatedProducts = products.map(p => {
+      if (p.id !== productId) return p;
+      return {
+        ...p,
+        sizes: p.sizes.map(sq => sq.size === size ? { ...sq, quantity: sq.quantity - quantity } : sq)
+      };
+    });
+
     setProducts(updatedProducts);
 
     const newSale: Sale = {
       id: Date.now().toString(),
       productId,
+      size,
       quantity,
       priceSold,
-      customerName,
+      customerName: customerName || "N/A",
       date: date ? new Date(date).toISOString() : new Date().toISOString(),
     };
+
     setSales([...sales, newSale]);
 
+    // reset small fields
     setProductId("");
+    setSize("");
     setQuantity(1);
     setPriceSold(0);
     setCustomerName("");
@@ -61,15 +84,23 @@ const SaleForm: React.FC<Props> = ({
       <div className="form-inline">
         <div className="form-group">
           <label>Product</label>
-          <select
-            value={productId}
-            onChange={(e) => setProductId(e.target.value)}
-          >
+          <select value={productId} onChange={e => setProductId(e.target.value)}>
             <option value="">Select product</option>
-            {products.map((p) => (
+            {products.map(p => (
               <option key={p.id} value={p.id}>
-                {p.name} - {p.type} - {p.size} ({p.season}) - {p.playerName} #
-                {p.equipmentNumber}
+                {p.name} - {p.playerName} #{p.equipmentNumber > 0 ? p.equipmentNumber : "-"}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label>Size</label>
+          <select value={size} onChange={e => setSize(e.target.value)}>
+            <option value="">Select size</option>
+            {products.find(p => p.id === productId)?.sizes.map(sq => (
+              <option key={sq.size} value={sq.size}>
+                {sq.size} (stock: {sq.quantity})
               </option>
             ))}
           </select>
@@ -77,43 +108,27 @@ const SaleForm: React.FC<Props> = ({
 
         <div className="form-group">
           <label>Quantity</label>
-          <input
-            type="number"
-            value={quantity}
-            onChange={(e) => setQuantity(Number(e.target.value))}
-          />
+          <input type="number" min={1} value={quantity} onChange={e => setQuantity(Number(e.target.value || 1))} />
         </div>
 
         <div className="form-group">
           <label>Price Sold</label>
-          <input
-            type="number"
-            value={priceSold}
-            onChange={(e) => setPriceSold(Number(e.target.value))}
-            placeholder="e.g. 55"
-          />
+          <input type="number" min={0} value={priceSold} onChange={e => setPriceSold(Number(e.target.value || 0))} />
         </div>
 
         <div className="form-group">
           <label>Customer Name</label>
-          <input
-            type="text"
-            value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
-            placeholder="e.g. John Doe"
-          />
+          <input type="text" value={customerName} onChange={e => setCustomerName(e.target.value)} />
         </div>
 
         <div className="form-group">
           <label>Date</label>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
+          <input type="date" value={date} onChange={e => setDate(e.target.value)} />
         </div>
 
-        <button onClick={handleSale}>Record Sale</button>
+        <div style={{ alignSelf: "flex-end" }}>
+          <button onClick={handleSale}>Record Sale</button>
+        </div>
       </div>
     </div>
   );

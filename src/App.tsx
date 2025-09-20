@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { Link, Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import "./App.css";
 import AddProductForm from "./components/AddProductForm";
-import ArchivedProductList from "./components/ArchivedProducts";
+import ArchivedProducts from "./components/ArchivedProducts";
+import Dashboard from "./components/Dashboard";
 import EditProduct from "./components/EditProduct";
 import ProductList from "./components/ProductList";
 import SaleForm from "./components/SaleForm";
@@ -14,7 +15,6 @@ const App: React.FC = () => {
   const [archivedProducts, setArchivedProducts] = useState<Product[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
 
-  // Load from localStorage
   useEffect(() => {
     const savedProducts = JSON.parse(localStorage.getItem("products") || "[]");
     const savedArchived = JSON.parse(
@@ -26,15 +26,12 @@ const App: React.FC = () => {
     setSales(savedSales);
   }, []);
 
-  // Save to localStorage
   useEffect(() => {
     localStorage.setItem("products", JSON.stringify(products));
   }, [products]);
-
   useEffect(() => {
     localStorage.setItem("archivedProducts", JSON.stringify(archivedProducts));
   }, [archivedProducts]);
-
   useEffect(() => {
     localStorage.setItem("sales", JSON.stringify(sales));
   }, [sales]);
@@ -42,28 +39,71 @@ const App: React.FC = () => {
   return (
     <Router>
       <div className="app-container">
-        <h1>Stock Manager</h1>
+        <nav style={{ marginBottom: 16 }}>
+          <Link to="/" style={{ marginRight: 12 }}>
+            Dashboard
+          </Link>
+          <Link to="/products" style={{ marginRight: 12 }}>
+            Products
+          </Link>
+          <Link to="/add" style={{ marginRight: 12 }}>
+            Add Product
+          </Link>
+          <Link to="/sales" style={{ marginRight: 12 }}>
+            Sales
+          </Link>
+          <Link to="/archived">Archived</Link>
+        </nav>
+
         <Routes>
           <Route
             path="/"
             element={
+              <Dashboard
+                products={products}
+                setProducts={setProducts}
+                archivedProducts={archivedProducts}
+                setArchivedProducts={setArchivedProducts}
+                sales={sales}
+                setSales={setSales}
+              />
+            }
+          />
+
+          <Route
+            path="/products"
+            element={
+              <div className="card">
+                <ProductList
+                  products={products}
+                  setProducts={setProducts}
+                  archivedProducts={archivedProducts}
+                  setArchivedProducts={setArchivedProducts}
+                />
+              </div>
+            }
+          />
+
+          <Route
+            path="/add"
+            element={
+              <div className="card">
+                <AddProductForm products={products} setProducts={setProducts} />
+              </div>
+            }
+          />
+
+          <Route
+            path="/edit/:id"
+            element={
+              <EditProduct products={products} setProducts={setProducts} />
+            }
+          />
+
+          <Route
+            path="/sales"
+            element={
               <>
-                <div className="card">
-                  <AddProductForm
-                    products={products}
-                    setProducts={setProducts}
-                  />
-                </div>
-                <div className="card">
-                  <ProductList
-                    products={products}
-                    setProducts={setProducts}
-                    setArchivedProducts={setArchivedProducts}
-                  />
-                </div>
-                <div className="card">
-                  <ArchivedProductList archivedProducts={archivedProducts} />
-                </div>
                 <div className="card">
                   <SaleForm
                     products={products}
@@ -83,10 +123,13 @@ const App: React.FC = () => {
               </>
             }
           />
+
           <Route
-            path="/edit/:id"
+            path="/archived"
             element={
-              <EditProduct products={products} setProducts={setProducts} />
+              <div className="card">
+                <ArchivedProducts archivedProducts={archivedProducts} />
+              </div>
             }
           />
         </Routes>
