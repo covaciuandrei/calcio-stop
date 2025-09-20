@@ -34,6 +34,26 @@ const AddProductForm: React.FC<Props> = ({ products, setProducts, namesets, setN
       alert('Please enter product name');
       return;
     }
+
+    // Calculate total quantity of all sizes in the product
+    const totalProductQuantity = sizes.reduce((total, sizeQty) => total + sizeQty.quantity, 0);
+
+    if (totalProductQuantity <= 0) {
+      alert('Please add at least one item to the product');
+      return;
+    }
+
+    // Check if nameset has available quantity
+    if (selectedNamesetId) {
+      const selectedNameset = namesets.find((n) => n.id === selectedNamesetId);
+      if (selectedNameset && selectedNameset.quantity < totalProductQuantity) {
+        alert(
+          `Selected nameset only has ${selectedNameset.quantity} available, but you're trying to add ${totalProductQuantity} items`
+        );
+        return;
+      }
+    }
+
     const newProduct: Product = {
       id: Date.now().toString(),
       name: name.trim(),
@@ -42,7 +62,18 @@ const AddProductForm: React.FC<Props> = ({ products, setProducts, namesets, setN
       namesetId: selectedNamesetId,
       price: Number(price) || 0,
     };
+
     setProducts([...products, newProduct]);
+
+    // Decrement nameset quantity by the total product quantity if a nameset was selected
+    if (selectedNamesetId) {
+      setNamesets((prevNamesets) =>
+        prevNamesets.map((n) =>
+          n.id === selectedNamesetId ? { ...n, quantity: Math.max(0, n.quantity - totalProductQuantity) } : n
+        )
+      );
+    }
+
     // reset
     setName('');
     setType(ProductType.SHIRT);

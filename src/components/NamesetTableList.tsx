@@ -19,6 +19,7 @@ const NamesetTableList: React.FC<Props> = ({ namesets, onEdit, onDelete }) => {
           <th>Player</th>
           <th>Number</th>
           <th>Season</th>
+          <th>Quantity</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -28,6 +29,7 @@ const NamesetTableList: React.FC<Props> = ({ namesets, onEdit, onDelete }) => {
             <td>{n.playerName}</td>
             <td>{n.number}</td>
             <td>{n.season}</td>
+            <td className="price-display">{n.quantity}</td>
             <td>
               <button onClick={() => onEdit(n)} className="btn btn-warning">
                 Edit

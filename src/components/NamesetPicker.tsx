@@ -54,9 +54,10 @@ const NamesetPicker: React.FC<Props> = ({
 
   const filteredNamesets = namesets.filter(
     (nameset) =>
-      nameset.playerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      nameset.season.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      nameset.number.toString().includes(searchTerm)
+      (nameset.playerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        nameset.season.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        nameset.number.toString().includes(searchTerm)) &&
+      nameset.quantity > 0 // Only show namesets with available quantity
   );
 
   const handleNamesetSelect = (nameset: Nameset | null) => {
@@ -138,7 +139,9 @@ const NamesetPicker: React.FC<Props> = ({
                   <div style={{ fontWeight: '500' }}>
                     {nameset.playerName} #{nameset.number}
                   </div>
-                  <div style={{ fontSize: '12px', color: '#666' }}>{nameset.season}</div>
+                  <div style={{ fontSize: '12px', color: '#666' }}>
+                    {nameset.season} • Qty: {nameset.quantity}
+                  </div>
                 </div>
               ))
             )}

@@ -14,6 +14,7 @@ const NamesetSection: React.FC<Props> = ({ namesets, setNamesets }) => {
   const [playerName, setPlayerName] = useState('');
   const [number, setNumber] = useState<number | ''>('');
   const [season, setSeason] = useState('2025/2026');
+  const [quantity, setQuantity] = useState<number | ''>('');
 
   const handleDelete = (id: string) => {
     if (!window.confirm('Are you sure you want to delete this nameset?')) return;
@@ -25,11 +26,13 @@ const NamesetSection: React.FC<Props> = ({ namesets, setNamesets }) => {
     setPlayerName(n.playerName);
     setNumber(n.number);
     setSeason(n.season);
+    setQuantity(n.quantity);
   };
 
   const handleSaveEdit = () => {
     if (!playerName.trim()) return alert('Player name cannot be empty');
     if (number === '' || number < 1) return alert('Number must be positive');
+    if (quantity === '' || quantity < 0) return alert('Quantity must be 0 or greater');
 
     setNamesets((prev) =>
       prev.map((n) =>
@@ -39,6 +42,7 @@ const NamesetSection: React.FC<Props> = ({ namesets, setNamesets }) => {
               playerName: playerName.trim(),
               number: Number(number),
               season,
+              quantity: Number(quantity),
             }
           : n
       )
@@ -76,6 +80,15 @@ const NamesetSection: React.FC<Props> = ({ namesets, setNamesets }) => {
                   </option>
                 ))}
               </select>
+            </label>
+            <label>
+              Quantity:
+              <input
+                type="number"
+                min={0}
+                value={quantity}
+                onChange={(e) => setQuantity(parseInt(e.target.value) || '')}
+              />
             </label>
 
             <div className="modal-buttons">

@@ -38,4 +38,5 @@ export interface Nameset {
   playerName: string; // e.g. "Messi"
   number: number; // e.g. 10
   season: string; // e.g. "2025/2026"
+  quantity: number; // available quantity of this nameset
 }

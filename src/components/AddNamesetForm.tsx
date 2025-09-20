@@ -13,17 +13,20 @@ const AddNamesetForm: React.FC<Props> = ({ namesets, setNamesets, onAdd }) => {
   const [playerName, setPlayerName] = useState('');
   const [number, setNumber] = useState<number | ''>('');
   const [season, setSeason] = useState('2025/2026');
+  const [quantity, setQuantity] = useState<number | ''>('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!playerName.trim()) return alert('Player name cannot be empty');
     if (number === '' || number < 1) return alert('Number must be positive');
+    if (quantity === '' || quantity < 0) return alert('Quantity must be 0 or greater');
 
     const newNameset: Nameset = {
       id: uuidv4(),
       playerName: playerName.trim(),
       number: Number(number),
       season,
+      quantity: Number(quantity),
     };
 
     setNamesets([...namesets, newNameset]);
@@ -31,6 +34,7 @@ const AddNamesetForm: React.FC<Props> = ({ namesets, setNamesets, onAdd }) => {
     setPlayerName('');
     setNumber('');
     setSeason('2025/2026');
+    setQuantity('');
   };
 
   return (
@@ -65,6 +69,17 @@ const AddNamesetForm: React.FC<Props> = ({ namesets, setNamesets, onAdd }) => {
             </option>
           ))}
         </select>
+      </div>
+      <div className="form-group">
+        <label>Quantity</label>
+        <input
+          type="number"
+          placeholder="Available quantity"
+          min={0}
+          value={quantity}
+          onChange={(e) => setQuantity(parseInt(e.target.value) || '')}
+          required
+        />
       </div>
       <div className="form-button-container">
         <button type="submit" className="btn btn-success">
