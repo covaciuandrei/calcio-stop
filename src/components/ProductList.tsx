@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Nameset, Product } from '../types/types';
 import { getNamesetInfo } from '../utils/utils';
 
@@ -12,6 +12,8 @@ interface Props {
 }
 
 const ProductList: React.FC<Props> = ({ products, setProducts, archivedProducts, setArchivedProducts, namesets }) => {
+  const navigate = useNavigate();
+
   const deleteProduct = (id: string) => {
     if (!window.confirm('Are you sure you want to delete this product?')) return;
     const productToArchive = products.find((p) => p.id === id);
@@ -73,9 +75,9 @@ const ProductList: React.FC<Props> = ({ products, setProducts, archivedProducts,
                 </td>
                 <td className="price-display">${p.price.toFixed ? p.price.toFixed(2) : p.price}</td>
                 <td>
-                  <Link to={`/edit/${p.id}`}>
-                    <button className="btn btn-warning">Edit</button>
-                  </Link>
+                  <button onClick={() => navigate(`/edit/${p.id}`)} className="btn btn-warning">
+                    Edit
+                  </button>
                   <button onClick={() => deleteProduct(p.id)} className="btn btn-danger">
                     Delete
                   </button>
