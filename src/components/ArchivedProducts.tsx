@@ -1,15 +1,19 @@
-import React from "react";
-import { Product } from "../types/types";
+import React from 'react';
+import { Nameset, Product } from '../types/types';
+import { getNamesetInfo } from '../utils/utils';
 
 interface Props {
   archivedProducts: Product[];
+  namesets: Nameset[];
 }
 
-const ArchivedProducts: React.FC<Props> = ({ archivedProducts }) => {
+const ArchivedProducts: React.FC<Props> = ({ archivedProducts, namesets }) => {
   return (
     <div>
       <h2>Archived Products</h2>
-      {archivedProducts.length === 0 ? <p>No archived products.</p> : (
+      {archivedProducts.length === 0 ? (
+        <p>No archived products.</p>
+      ) : (
         <table>
           <thead>
             <tr>
@@ -23,16 +27,35 @@ const ArchivedProducts: React.FC<Props> = ({ archivedProducts }) => {
             </tr>
           </thead>
           <tbody>
-            {archivedProducts.map(p => (
+            {archivedProducts.map((p) => (
               <tr key={p.id}>
                 <td>{p.name}</td>
                 <td>{p.type}</td>
                 <td>
-                  {p.sizes.map(sq => <div key={sq.size}>{sq.size}: {sq.quantity}</div>)}
+                  {p.sizes.map((sq) => (
+                    <div key={sq.size}>
+                      {sq.size}: {sq.quantity}
+                    </div>
+                  ))}
                 </td>
-                <td>{p.season}</td>
-                <td>{p.playerName || "-"}</td>
-                <td>{p.equipmentNumber > 0 ? p.equipmentNumber : "-"}</td>
+                <td>
+                  {(() => {
+                    const namesetInfo = getNamesetInfo(p.namesetId, namesets);
+                    return namesetInfo.season;
+                  })()}
+                </td>
+                <td>
+                  {(() => {
+                    const namesetInfo = getNamesetInfo(p.namesetId, namesets);
+                    return namesetInfo.playerName;
+                  })()}
+                </td>
+                <td>
+                  {(() => {
+                    const namesetInfo = getNamesetInfo(p.namesetId, namesets);
+                    return namesetInfo.number > 0 ? namesetInfo.number : '-';
+                  })()}
+                </td>
                 <td>{p.price.toFixed ? p.price.toFixed(2) : p.price}</td>
               </tr>
             ))}

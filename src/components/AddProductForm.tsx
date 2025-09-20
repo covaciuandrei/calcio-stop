@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { AdultSize, KidSize, Product, ProductSizeQuantity, ProductType } from '../types/types';
-import { generateSeasons } from '../utils/utils';
+import { AdultSize, KidSize, Nameset, Product, ProductSizeQuantity, ProductType } from '../types/types';
+import NamesetPicker from './NamesetPicker';
 
 interface Props {
   products: Product[];
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
+  namesets: Nameset[];
+  setNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
 }
 
 const adultSizes: AdultSize[] = ['S', 'M', 'L', 'XL', 'XXL'];
 const kidSizes: KidSize[] = ['22', '24', '26', '28'];
 
-const AddProductForm: React.FC<Props> = ({ products, setProducts }) => {
+const AddProductForm: React.FC<Props> = ({ products, setProducts, namesets, setNamesets }) => {
   const [name, setName] = useState('');
   const [type, setType] = useState<ProductType>(ProductType.SHIRT);
   const [sizes, setSizes] = useState<ProductSizeQuantity[]>([]);
-  const [season, setSeason] = useState('2025/2026');
-  const [playerName, setPlayerName] = useState('-');
-  const [equipmentNumber, setEquipmentNumber] = useState<number>(0);
+  const [selectedNamesetId, setSelectedNamesetId] = useState<string | null>(null);
   const [price, setPrice] = useState<number>(0);
 
   useEffect(() => {
@@ -39,18 +39,14 @@ const AddProductForm: React.FC<Props> = ({ products, setProducts }) => {
       name: name.trim(),
       type,
       sizes,
-      season,
-      playerName: playerName || '-',
-      equipmentNumber: Number(equipmentNumber) || 0,
+      namesetId: selectedNamesetId,
       price: Number(price) || 0,
     };
     setProducts([...products, newProduct]);
     // reset
     setName('');
     setType(ProductType.SHIRT);
-    setSeason('2025/2026');
-    setPlayerName('-');
-    setEquipmentNumber(0);
+    setSelectedNamesetId(null);
     setPrice(0);
     // sizes will reset via effect when type resets
   };
@@ -101,31 +97,13 @@ const AddProductForm: React.FC<Props> = ({ products, setProducts }) => {
           </div>
         </div>
 
-        <div className="form-group">
-          <label>Season</label>
-          <select value={season} onChange={(e) => setSeason(e.target.value)}>
-            {generateSeasons().map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label>Player Name</label>
-          <input value={playerName} onChange={(e) => setPlayerName(e.target.value)} placeholder="e.g. Messi or -" />
-        </div>
-
-        <div className="form-group">
-          <label>Equipment Number</label>
-          <input
-            type="number"
-            min={0}
-            value={equipmentNumber}
-            onChange={(e) => setEquipmentNumber(Number(e.target.value || 0))}
-          />
-        </div>
+        <NamesetPicker
+          namesets={namesets}
+          setNamesets={setNamesets}
+          selectedNamesetId={selectedNamesetId}
+          onNamesetSelect={setSelectedNamesetId}
+          placeholder="Select a nameset (optional)"
+        />
 
         <div className="form-group">
           <label>Price (per unit)</label>

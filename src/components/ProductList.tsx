@@ -1,28 +1,32 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { Product } from "../types/types";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Nameset, Product } from '../types/types';
+import { getNamesetInfo } from '../utils/utils';
 
 interface Props {
   products: Product[];
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
   archivedProducts: Product[];
   setArchivedProducts: React.Dispatch<React.SetStateAction<Product[]>>;
+  namesets: Nameset[];
 }
 
-const ProductList: React.FC<Props> = ({ products, setProducts, archivedProducts, setArchivedProducts }) => {
+const ProductList: React.FC<Props> = ({ products, setProducts, archivedProducts, setArchivedProducts, namesets }) => {
   const deleteProduct = (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) return;
-    const productToArchive = products.find(p => p.id === id);
+    if (!window.confirm('Are you sure you want to delete this product?')) return;
+    const productToArchive = products.find((p) => p.id === id);
     if (productToArchive) {
-      setArchivedProducts(prev => [...prev, productToArchive]);
+      setArchivedProducts((prev) => [...prev, productToArchive]);
     }
-    setProducts(products.filter(p => p.id !== id));
+    setProducts(products.filter((p) => p.id !== id));
   };
 
   return (
     <div>
       <h2>Products</h2>
-      {products.length === 0 ? <p>No products available.</p> : (
+      {products.length === 0 ? (
+        <p>No products available.</p>
+      ) : (
         <table>
           <thead>
             <tr>
@@ -37,21 +41,40 @@ const ProductList: React.FC<Props> = ({ products, setProducts, archivedProducts,
             </tr>
           </thead>
           <tbody>
-            {products.map(p => (
+            {products.map((p) => (
               <tr key={p.id}>
                 <td>{p.name}</td>
                 <td>{p.type}</td>
                 <td>
-                  {p.sizes.map(sq => (
-                    <div key={sq.size}>{sq.size}: {sq.quantity}</div>
+                  {p.sizes.map((sq) => (
+                    <div key={sq.size}>
+                      {sq.size}: {sq.quantity}
+                    </div>
                   ))}
                 </td>
-                <td>{p.season}</td>
-                <td>{p.playerName || "-"}</td>
-                <td>{p.equipmentNumber > 0 ? p.equipmentNumber : "-"}</td>
+                <td>
+                  {(() => {
+                    const namesetInfo = getNamesetInfo(p.namesetId, namesets);
+                    return namesetInfo.season;
+                  })()}
+                </td>
+                <td>
+                  {(() => {
+                    const namesetInfo = getNamesetInfo(p.namesetId, namesets);
+                    return namesetInfo.playerName;
+                  })()}
+                </td>
+                <td>
+                  {(() => {
+                    const namesetInfo = getNamesetInfo(p.namesetId, namesets);
+                    return namesetInfo.number > 0 ? namesetInfo.number : '-';
+                  })()}
+                </td>
                 <td>{p.price.toFixed ? p.price.toFixed(2) : p.price}</td>
                 <td>
-                  <Link to={`/edit/${p.id}`}><button>Edit</button></Link>
+                  <Link to={`/edit/${p.id}`}>
+                    <button>Edit</button>
+                  </Link>
                   <button onClick={() => deleteProduct(p.id)}>Delete</button>
                 </td>
               </tr>

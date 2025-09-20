@@ -1,20 +1,15 @@
-import React, { useEffect, useState } from "react";
-import {
-  NavLink,
-  Route,
-  BrowserRouter as Router,
-  Routes,
-} from "react-router-dom";
-import "./App.css";
-import AddProductForm from "./components/AddProductForm";
-import ArchivedProducts from "./components/ArchivedProducts";
-import Dashboard from "./components/Dashboard";
-import EditProduct from "./components/EditProduct";
-import NamesetSection from "./components/NamesetSection";
-import ProductList from "./components/ProductList";
-import SaleForm from "./components/SaleForm";
-import SaleHistory from "./components/SaleHistory";
-import { Nameset, Product, Sale } from "./types/types";
+import React, { useEffect, useState } from 'react';
+import { NavLink, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import './App.css';
+import AddProductForm from './components/AddProductForm';
+import ArchivedProducts from './components/ArchivedProducts';
+import Dashboard from './components/Dashboard';
+import EditProduct from './components/EditProduct';
+import NamesetSection from './components/NamesetSection';
+import ProductList from './components/ProductList';
+import SaleForm from './components/SaleForm';
+import SaleHistory from './components/SaleHistory';
+import { Nameset, Product, Sale } from './types/types';
 
 const App: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -24,29 +19,27 @@ const App: React.FC = () => {
 
   // Load from localStorage
   useEffect(() => {
-    setProducts(JSON.parse(localStorage.getItem("products") || "[]"));
-    setArchivedProducts(
-      JSON.parse(localStorage.getItem("archivedProducts") || "[]")
-    );
-    setSales(JSON.parse(localStorage.getItem("sales") || "[]"));
-    setNamesets(JSON.parse(localStorage.getItem("namesets") || "[]"));
+    setProducts(JSON.parse(localStorage.getItem('products') || '[]'));
+    setArchivedProducts(JSON.parse(localStorage.getItem('archivedProducts') || '[]'));
+    setSales(JSON.parse(localStorage.getItem('sales') || '[]'));
+    setNamesets(JSON.parse(localStorage.getItem('namesets') || '[]'));
   }, []);
 
   // Save to localStorage
   useEffect(() => {
-    localStorage.setItem("products", JSON.stringify(products));
+    localStorage.setItem('products', JSON.stringify(products));
   }, [products]);
 
   useEffect(() => {
-    localStorage.setItem("archivedProducts", JSON.stringify(archivedProducts));
+    localStorage.setItem('archivedProducts', JSON.stringify(archivedProducts));
   }, [archivedProducts]);
 
   useEffect(() => {
-    localStorage.setItem("sales", JSON.stringify(sales));
+    localStorage.setItem('sales', JSON.stringify(sales));
   }, [sales]);
 
   useEffect(() => {
-    localStorage.setItem("namesets", JSON.stringify(namesets));
+    localStorage.setItem('namesets', JSON.stringify(namesets));
   }, [namesets]);
 
   return (
@@ -89,19 +82,30 @@ const App: React.FC = () => {
                 setProducts={setProducts}
                 archivedProducts={archivedProducts}
                 setArchivedProducts={setArchivedProducts}
+                namesets={namesets}
               />
             }
           />
           <Route
             path="/add"
             element={
-              <AddProductForm products={products} setProducts={setProducts} />
+              <AddProductForm
+                products={products}
+                setProducts={setProducts}
+                namesets={namesets}
+                setNamesets={setNamesets}
+              />
             }
           />
           <Route
             path="/edit/:id"
             element={
-              <EditProduct products={products} setProducts={setProducts} />
+              <EditProduct
+                products={products}
+                setProducts={setProducts}
+                namesets={namesets}
+                setNamesets={setNamesets}
+              />
             }
           />
 
@@ -115,12 +119,14 @@ const App: React.FC = () => {
                   setProducts={setProducts}
                   sales={sales}
                   setSales={setSales}
+                  namesets={namesets}
                 />
                 <SaleHistory
                   sales={sales}
                   products={products}
                   archivedProducts={archivedProducts}
                   setSales={setSales}
+                  namesets={namesets}
                 />
               </>
             }
@@ -129,16 +135,11 @@ const App: React.FC = () => {
           {/* Archived */}
           <Route
             path="/archived"
-            element={<ArchivedProducts archivedProducts={archivedProducts} />}
+            element={<ArchivedProducts archivedProducts={archivedProducts} namesets={namesets} />}
           />
 
           {/* Namesets */}
-          <Route
-            path="/namesets"
-            element={
-              <NamesetSection namesets={namesets} setNamesets={setNamesets} />
-            }
-          />
+          <Route path="/namesets" element={<NamesetSection namesets={namesets} setNamesets={setNamesets} />} />
         </Routes>
       </div>
     </Router>
