@@ -17,11 +17,8 @@ const NamesetSection: React.FC<Props> = ({ namesets, setNamesets, archivedNamese
   const [number, setNumber] = useState<number | ''>('');
   const [season, setSeason] = useState('2025/2026');
   const [quantity, setQuantity] = useState<number | ''>('');
-
-  const handleDelete = (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this nameset?')) return;
-    setNamesets(namesets.filter((n) => n.id !== id));
-  };
+  const [isNamesetsExpanded, setIsNamesetsExpanded] = useState(true);
+  const [namesetsSearchTerm, setNamesetsSearchTerm] = useState('');
 
   const handleArchive = (id: string) => {
     if (!window.confirm('Are you sure you want to archive this nameset?')) return;
@@ -63,17 +60,75 @@ const NamesetSection: React.FC<Props> = ({ namesets, setNamesets, archivedNamese
 
   return (
     <div>
-      <div className="form-section">
-        <h4>Add New Nameset</h4>
-        <AddNamesetForm namesets={namesets} setNamesets={setNamesets} />
+      {/* Add New Nameset Card */}
+      <div className="card">
+        <div className="card-header mini-header mini-header-green">
+          <span>Add New Nameset</span>
+        </div>
+        <div className="card-content">
+          <AddNamesetForm namesets={namesets} setNamesets={setNamesets} />
+        </div>
       </div>
 
-      <NamesetTableList
-        namesets={namesets}
-        onEdit={handleEditClick}
-        onDelete={handleDelete}
-        onArchive={handleArchive}
-      />
+      {/* Namesets List Card */}
+      <div className="card">
+        {namesets.length > 0 ? (
+          <>
+            <div
+              className="card-header mini-header mini-header-orange"
+              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+              onClick={() => setIsNamesetsExpanded(!isNamesetsExpanded)}
+            >
+              <span>Active Namesets ({namesets.length})</span>
+              <span style={{ fontSize: '12px' }}>{isNamesetsExpanded ? '▼' : '▶'}</span>
+            </div>
+            {!isNamesetsExpanded && (
+              <div style={{ padding: '10px 20px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
+                There are {namesets.length} namesets available.
+              </div>
+            )}
+            {isNamesetsExpanded && (
+              <>
+                <h3 className="card-section-header">Active Namesets List</h3>
+                {namesets.length >= 2 && (
+                  <div style={{ marginBottom: '15px' }}>
+                    <input
+                      type="text"
+                      placeholder="Search namesets..."
+                      value={namesetsSearchTerm}
+                      onChange={(e) => setNamesetsSearchTerm(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        border: '1px solid #ccc',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                      }}
+                    />
+                  </div>
+                )}
+                <div style={{ maxHeight: '700px', overflowY: 'auto' }}>
+                  <NamesetTableList
+                    namesets={namesets}
+                    onEdit={handleEditClick}
+                    onArchive={handleArchive}
+                    searchTerm={namesetsSearchTerm}
+                  />
+                </div>
+              </>
+            )}
+          </>
+        ) : (
+          <>
+            <div className="card-header mini-header mini-header-orange">
+              <span>Active Namesets (0)</span>
+            </div>
+            <div style={{ padding: '10px 20px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
+              No active namesets available.
+            </div>
+          </>
+        )}
+      </div>
 
       {editingNameset && (
         <div className="modal">

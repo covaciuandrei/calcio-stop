@@ -96,23 +96,23 @@ button:active,
   transform: translateY(0);
 }
 
-/* Improved Tables with rounded corners */
+/* Clean Table Styling */
 table {
   width: 100%;
-  border-collapse: separate; /* Changed from collapse to separate for rounded corners */
-  border-spacing: 0;
+  border-collapse: collapse;
   margin-top: 10px;
   background-color: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   border-radius: 8px;
   overflow: hidden;
+  border: 2px solid #f8f9fa;
 }
 
 th,
 td {
   padding: 12px 15px;
   text-align: left;
-  border-bottom: 1px solid #e9ecef;
+  border: 1px solid #e9ecef;
 }
 
 th {
@@ -124,32 +124,51 @@ th {
   letter-spacing: 0.5px;
 }
 
-/* First and last header cells for rounded corners */
+/* Rounded corners for header cells */
 th:first-child {
-  border-top-left-radius: 8px;
+  border-top-left-radius: 6px;
 }
 
 th:last-child {
-  border-top-right-radius: 8px;
+  border-top-right-radius: 6px;
 }
 
-/* Remove border-bottom from last row */
-tr:last-child td {
-  border-bottom: none;
-}
-
-/* First and last cells in last row for rounded corners */
+/* Rounded corners for bottom row cells */
 tr:last-child td:first-child {
-  border-bottom-left-radius: 8px;
+  border-bottom-left-radius: 6px;
 }
 
 tr:last-child td:last-child {
-  border-bottom-right-radius: 8px;
+  border-bottom-right-radius: 6px;
+}
+
+/* Alternating row colors */
+tbody tr:nth-child(odd) {
+  background-color: white;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
 }
 
 tbody tr:hover {
-  background-color: #f8f9fa;
+  background-color: #e3f2fd !important;
   transition: background-color 0.2s;
+}
+
+/* Hide scroll indicators */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: none;
+}
+
+/* Expand Add Product card when nameset dropdown is open */
+body.nameset-dropdown-open .add-product-card {
+  min-height: 700px;
 }
 
 /* Table action buttons */
@@ -455,8 +474,8 @@ table button:last-of-type:hover {
 
 /* Nameset picker styling */
 .nameset-picker {
-  position: relative;
-  z-index: 10;
+  position: relative; /* parent for absolute positioning */
+  z-index: 1000;
 }
 
 .nameset-picker-trigger {
@@ -464,7 +483,6 @@ table button:last-of-type:hover {
   border: 1px solid #ccc;
   border-radius: 6px;
   cursor: pointer;
-  background-color: #fff;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -476,90 +494,174 @@ table button:last-of-type:hover {
     box-shadow 0.2s;
 }
 
-.nameset-picker-trigger:hover {
-  border-color: #3498db;
-}
-
 .nameset-picker-trigger:focus {
   outline: none;
-  border-color: #3498db;
-  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+  /* border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2); */
+}
+
+.nameset-picker-trigger.disabled {
+  cursor: not-allowed;
+  border: 1px solid rgb(95, 95, 95);
 }
 
 .nameset-picker-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-top: none;
-  border-radius: 0 0 6px 6px;
+  position: fixed;
+  width: 240px;
   max-height: 400px;
+  background: white;
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  z-index: 10000;
   overflow: hidden;
-  z-index: 1000;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .nameset-picker-add-button {
-  padding: 8px 12px;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #eee;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   font-weight: 500;
-  transition: background-color 0.2s;
+  font-size: 13px;
+  transition: all 0.2s ease;
+  border: none;
 }
 
 .nameset-picker-add-button:hover {
-  background-color: #e9ecef;
+  background: linear-gradient(135deg, #2980b9, #1f5f8b);
+  transform: translateY(-1px);
 }
 
 .nameset-picker-search {
-  padding: 8px 12px;
-  border-bottom: 1px solid #eee;
+  padding: 8px 10px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e1e5e9;
+  box-sizing: border-box;
 }
 
 .nameset-picker-search input {
   width: 100%;
   padding: 6px 8px;
-  border: 1px solid #ddd;
+  border: 1px solid #d1d5db;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 12px;
   margin: 0;
+  background-color: #fff;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.nameset-picker-search input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
 .nameset-picker-list {
-  max-height: 300px;
+  max-height: 200px;
   overflow-y: auto;
+  background-color: #fff;
 }
 
 .nameset-picker-option {
   padding: 8px 12px;
   cursor: pointer;
-  border-bottom: 1px solid #f0f0f0;
-  transition: background-color 0.2s;
+  border-bottom: 1px solid #f1f3f4;
+  transition: all 0.2s ease;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
 .nameset-picker-option:hover {
-  background-color: #f8f9fa;
+  background-color: #f1f5f9;
+  transform: translateX(2px);
 }
 
 .nameset-picker-option.selected {
   background-color: #e3f2fd;
+  color: #1976d2;
+  border-left: 3px solid #3498db;
 }
 
 .nameset-picker-option.no-nameset {
   font-style: italic;
-  color: #666;
+  color: #6b7280;
+  background-color: #f9fafb;
 }
 
 .nameset-picker-empty {
-  padding: 20px;
+  padding: 15px 12px;
   text-align: center;
-  color: #666;
+  color: #6b7280;
+  font-size: 13px;
+  background-color: #f9fafb;
+}
+
+/* Ensure dropdown content is properly styled */
+.nameset-picker-dropdown > div {
+  width: 100%;
+}
+
+.nameset-picker-dropdown input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Fix form styling in dropdown */
+.nameset-picker-dropdown .form-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+}
+
+.nameset-picker-dropdown .form-group {
+  display: flex;
+  flex-direction: column;
+  min-width: auto;
+  width: 100%;
+}
+
+.nameset-picker-dropdown .form-group label {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #2c3e50;
+}
+
+.nameset-picker-dropdown .form-group input,
+.nameset-picker-dropdown .form-group select {
+  height: 32px;
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 13px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.nameset-picker-dropdown .form-button-container {
+  margin-top: 10px;
+  padding-top: 0;
+}
+
+.nameset-picker-dropdown .form-button-container button {
+  height: 32px;
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  background-color: #27ae60;
+  color: white;
+  width: 100%;
 }
 
 /* Form improvements */
@@ -577,13 +679,18 @@ table button:last-of-type:hover {
 /* Button alignment and form layout improvements */
 .form-button-container {
   display: block;
-  margin-top: 20px;
+  margin-top: 0;
   padding-top: 0;
+  width: 100%;
+  flex-basis: 100%;
 }
 
 .form-button-container button {
   height: 38px;
+  padding: 8px 16px;
   box-sizing: border-box;
+  width: auto;
+  min-width: 120px;
 }
 
 .form-inline {

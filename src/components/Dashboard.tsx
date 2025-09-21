@@ -40,7 +40,7 @@ const Dashboard: React.FC<Props> = ({
       <h1 className="section-header">Dashboard Overview</h1>
 
       {/* Add Product Card */}
-      <div className="card">
+      <div className="card add-product-card">
         <div className="card-header mini-header mini-header-blue">Add Product</div>
         <AddProductForm
           products={products}
@@ -100,76 +100,75 @@ const Dashboard: React.FC<Props> = ({
         <ArchivedProducts archivedProducts={archivedProducts} namesets={namesets} archivedNamesets={archivedNamesets} />
       </div>
 
-      {/* Namesets */}
+      {/* Manage Namesets */}
       <div className="card">
-        <div className="card-header mini-header mini-header-purple">Namesets</div>
-        <h3 className="card-section-header">Manage Namesets</h3>
+        <div className="card-header mini-header mini-header-purple">Manage Namesets</div>
         <NamesetSection
           namesets={namesets}
           setNamesets={setNamesets}
           archivedNamesets={archivedNamesets}
           setArchivedNamesets={setArchivedNamesets}
         />
-      </div>
 
-      {/* Archived Namesets */}
-      <div className="card">
-        {archivedNamesets.length > 0 ? (
-          <>
-            <div
-              className="card-header mini-header mini-header-red"
-              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
-              onClick={() => setIsArchivedNamesetsExpanded(!isArchivedNamesetsExpanded)}
-            >
-              <span>Archived Namesets ({archivedNamesets.length})</span>
-              <span style={{ fontSize: '12px' }}>{isArchivedNamesetsExpanded ? '▼' : '▶'}</span>
-            </div>
-            {!isArchivedNamesetsExpanded && (
-              <div style={{ padding: '10px 20px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
-                There are {archivedNamesets.length} namesets available.
+        {/* Archived Namesets Card */}
+        <div className="card" style={{ marginTop: '20px' }}>
+          {archivedNamesets.length > 0 ? (
+            <>
+              <div
+                className="card-header mini-header mini-header-red"
+                style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                onClick={() => setIsArchivedNamesetsExpanded(!isArchivedNamesetsExpanded)}
+              >
+                <span>Archived Namesets ({archivedNamesets.length})</span>
+                <span style={{ fontSize: '12px' }}>{isArchivedNamesetsExpanded ? '▼' : '▶'}</span>
               </div>
-            )}
-            {isArchivedNamesetsExpanded && (
-              <>
-                <h3 className="card-section-header">Archived Namesets List</h3>
-                {archivedNamesets.length >= 2 && (
-                  <div style={{ marginBottom: '15px' }}>
-                    <input
-                      type="text"
-                      placeholder="Search archived namesets..."
-                      value={archivedNamesetsSearchTerm}
-                      onChange={(e) => setArchivedNamesetsSearchTerm(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '8px 12px',
-                        border: '1px solid #ccc',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                      }}
+              {!isArchivedNamesetsExpanded && (
+                <div style={{ padding: '10px 20px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
+                  There are {archivedNamesets.length} namesets available.
+                </div>
+              )}
+              {isArchivedNamesetsExpanded && (
+                <>
+                  <h3 className="card-section-header">Archived Namesets List</h3>
+                  {archivedNamesets.length >= 2 && (
+                    <div style={{ marginBottom: '15px' }}>
+                      <input
+                        type="text"
+                        placeholder="Search archived namesets..."
+                        value={archivedNamesetsSearchTerm}
+                        onChange={(e) => setArchivedNamesetsSearchTerm(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #ccc',
+                          borderRadius: '6px',
+                          fontSize: '14px',
+                        }}
+                      />
+                    </div>
+                  )}
+                  <div style={{ maxHeight: '700px', overflowY: 'auto' }}>
+                    <ArchivedNamesets
+                      archivedNamesets={archivedNamesets}
+                      setArchivedNamesets={setArchivedNamesets}
+                      setNamesets={setNamesets}
+                      searchTerm={archivedNamesetsSearchTerm}
                     />
                   </div>
-                )}
-                <div style={{ maxHeight: '700px', overflowY: 'auto' }}>
-                  <ArchivedNamesets
-                    archivedNamesets={archivedNamesets}
-                    setArchivedNamesets={setArchivedNamesets}
-                    setNamesets={setNamesets}
-                    searchTerm={archivedNamesetsSearchTerm}
-                  />
-                </div>
-              </>
-            )}
-          </>
-        ) : (
-          <>
-            <div className="card-header mini-header mini-header-red">
-              <span>Archived Namesets (0)</span>
-            </div>
-            <div style={{ padding: '10px 20px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
-              No archived namesets available.
-            </div>
-          </>
-        )}
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              <div className="card-header mini-header mini-header-red">
+                <span>Archived Namesets (0)</span>
+              </div>
+              <div style={{ padding: '10px 20px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
+                No archived namesets available.
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

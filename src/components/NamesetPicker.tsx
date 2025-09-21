@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Nameset } from '../types/types';
 import AddNamesetForm from './AddNamesetForm';
 
@@ -6,7 +7,7 @@ interface Props {
   namesets: Nameset[];
   setNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
   selectedNamesetId: string | null;
-  onNamesetSelect: (namesetId: string | null) => void;
+  onNamesetSelect: (id: string) => void;
   placeholder?: string;
 }
 
@@ -15,147 +16,131 @@ const NamesetPicker: React.FC<Props> = ({
   setNamesets,
   selectedNamesetId,
   onNamesetSelect,
-  placeholder = 'Select a nameset...',
+  placeholder = 'Select a nameset',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showAddForm, setShowAddForm] = useState(false);
+  const [search, setSearch] = useState('');
+  const [adding, setAdding] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
+  // Close dropdown or modal when clicking outside and update position on scroll
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        pickerRef.current &&
+        !pickerRef.current.contains(event.target as Node) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
-        setSearchTerm('');
-        setShowAddForm(false);
+        setAdding(false);
       }
     };
 
+    const updatePosition = () => {
+      if (isOpen && dropdownRef.current && pickerRef.current) {
+        const rect = pickerRef.current.getBoundingClientRect();
+        dropdownRef.current.style.left = `${rect.left}px`;
+        dropdownRef.current.style.top = `${rect.bottom}px`;
+      }
+    };
+
+    const handleScroll = () => {
+      updatePosition();
+    };
+
+    const handleResize = () => {
+      updatePosition();
+    };
+
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    window.addEventListener('scroll', handleScroll, true);
+    window.addEventListener('resize', handleResize);
 
-  // Prevent body scrolling when dropdown is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-
-    // Cleanup on unmount
     return () => {
-      document.body.style.overflow = 'unset';
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll, true);
+      window.removeEventListener('resize', handleResize);
     };
   }, [isOpen]);
 
-  const selectedNameset = namesets.find((n) => n.id === selectedNamesetId);
-
   const filteredNamesets = namesets.filter(
-    (nameset) =>
-      (nameset.playerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        nameset.season.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        nameset.number.toString().includes(searchTerm)) &&
-      nameset.quantity > 0 // Only show namesets with available quantity
+    (n) => n.playerName.toLowerCase().includes(search.toLowerCase()) || n.number.toString().includes(search)
   );
 
-  const handleNamesetSelect = (nameset: Nameset | null) => {
-    onNamesetSelect(nameset?.id || null);
-    setIsOpen(false);
-    setSearchTerm('');
-    setShowAddForm(false);
-  };
-
-  const handleAddNew = () => {
-    setShowAddForm(true);
-  };
-
-  const handleNewNamesetAdded = (newNameset: Nameset) => {
-    setShowAddForm(false);
-    handleNamesetSelect(newNameset);
-  };
+  const selectedNameset = namesets.find((n) => n.id === selectedNamesetId);
 
   return (
-    <div className="form-group nameset-picker" ref={dropdownRef}>
-      <label>Nameset</label>
-      <div className="nameset-picker-trigger" onClick={() => setIsOpen(!isOpen)}>
-        <span style={{ color: selectedNameset ? '#000' : '#999' }}>
-          {selectedNameset
-            ? `${selectedNameset.playerName} #${selectedNameset.number} (${selectedNameset.season})`
-            : placeholder}
-        </span>
-        <span style={{ fontSize: '12px' }}>{isOpen ? '▲' : '▼'}</span>
+    <div className="nameset-picker" ref={pickerRef} style={{ width: '200px' }}>
+      <div
+        className={`nameset-picker-trigger ${adding ? 'disabled' : ''}`}
+        onClick={() => !adding && setIsOpen((prev) => !prev)}
+      >
+        {selectedNameset ? `${selectedNameset.playerName} (${selectedNameset.number})` : placeholder}
+        <span style={{ marginLeft: 'auto' }}>▼</span>
       </div>
 
-      {isOpen && (
-        <div className="nameset-picker-dropdown">
-          {/* Add New Button */}
-          <div className="nameset-picker-add-button" onClick={handleAddNew}>
-            <span style={{ fontSize: '16px' }}>+</span>
-            Add New Nameset
-          </div>
-
-          {/* Add Nameset Form */}
-          {showAddForm && (
-            <div style={{ padding: '12px', borderBottom: '1px solid #eee' }}>
-              <AddNamesetForm namesets={namesets} setNamesets={setNamesets} onAdd={handleNewNamesetAdded} />
+      {/* Dropdown for selecting existing namesets */}
+      {isOpen &&
+        !adding &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            className="nameset-picker-dropdown"
+            style={{
+              width: 280,
+              left: pickerRef.current?.getBoundingClientRect().left,
+              top: pickerRef.current?.getBoundingClientRect().bottom,
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <div className="nameset-picker-add-button" onClick={() => setAdding(true)}>
+              + Add Nameset
             </div>
-          )}
-
-          {/* Search Box */}
-          {namesets.length > 0 && (
             <div className="nameset-picker-search">
-              <input
-                type="text"
-                placeholder="Search namesets..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onClick={(e) => e.stopPropagation()}
-              />
+              <input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
-          )}
-
-          {/* Nameset List */}
-          <div className="nameset-picker-list">
-            {/* No nameset option */}
-            <div
-              className={`nameset-picker-option ${selectedNamesetId === null ? 'selected' : ''} no-nameset`}
-              onClick={() => handleNamesetSelect(null)}
-            >
-              No nameset
-            </div>
-
-            {/* Nameset options */}
-            {filteredNamesets.length === 0 && namesets.length > 0 ? (
-              <div className="nameset-picker-empty">No namesets found</div>
-            ) : (
-              filteredNamesets.map((nameset) => (
+            <div className="nameset-picker-list">
+              {filteredNamesets.length === 0 && <div className="nameset-picker-empty">No namesets found</div>}
+              {filteredNamesets.map((n) => (
                 <div
-                  key={nameset.id}
-                  className={`nameset-picker-option ${selectedNamesetId === nameset.id ? 'selected' : ''}`}
-                  onClick={() => handleNamesetSelect(nameset)}
+                  key={n.id}
+                  className={`nameset-picker-option ${n.id === selectedNamesetId ? 'selected' : ''}`}
+                  onClick={() => {
+                    onNamesetSelect(n.id);
+                    setIsOpen(false);
+                  }}
                 >
-                  <div style={{ fontWeight: '500' }}>
-                    {nameset.playerName} #{nameset.number}
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#666' }}>
-                    {nameset.season} • Qty: {nameset.quantity}
-                  </div>
+                  {n.playerName} ({n.number})
                 </div>
-              ))
-            )}
+              ))}
+            </div>
+          </div>,
+          document.body
+        )}
 
-            {/* Empty state */}
-            {namesets.length === 0 && !showAddForm && (
-              <div className="nameset-picker-empty">
-                <div>No namesets available</div>
-                <div style={{ fontSize: '12px', marginTop: '4px' }}>Click "Add New Nameset" to create one</div>
+      {/* Modal for adding a new nameset */}
+      {adding &&
+        createPortal(
+          <div className="modal" onMouseDown={() => setAdding(false)}>
+            <div className="modal-content" onMouseDown={(e) => e.stopPropagation()}>
+              <h3>Add Nameset</h3>
+              <AddNamesetForm
+                namesets={namesets}
+                setNamesets={setNamesets}
+                onAdd={(newNameset) => {
+                  onNamesetSelect(newNameset.id);
+                  setAdding(false);
+                }}
+              />
+              <div className="modal-buttons">
+                <button onClick={() => setAdding(false)}>Cancel</button>
               </div>
-            )}
-          </div>
-        </div>
-      )}
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

@@ -127,13 +127,16 @@ const AddProductForm: React.FC<Props> = ({
         </div>
       </div>
 
-      <NamesetPicker
-        namesets={namesets}
-        setNamesets={setNamesets}
-        selectedNamesetId={selectedNamesetId}
-        onNamesetSelect={setSelectedNamesetId}
-        placeholder="Select a nameset (optional)"
-      />
+      <div className="form-group">
+        <label>Select a nameset</label>
+        <NamesetPicker
+          namesets={namesets}
+          setNamesets={setNamesets}
+          selectedNamesetId={selectedNamesetId}
+          onNamesetSelect={setSelectedNamesetId}
+          placeholder="Ex: Messi 10"
+        />{' '}
+      </div>
 
       <div className="form-group">
         <label>Price (per unit)</label>

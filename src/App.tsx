@@ -5,7 +5,7 @@ import AddProductForm from './components/AddProductForm';
 import ArchivedProducts from './components/ArchivedProducts';
 import Dashboard from './components/Dashboard';
 import EditProduct from './components/EditProduct';
-import NamesetSection from './components/NamesetSection';
+import NamesetsPage from './components/NamesetsPage';
 import ProductList from './components/ProductList';
 import SaleForm from './components/SaleForm';
 import SaleHistory from './components/SaleHistory';
@@ -163,7 +163,7 @@ const App: React.FC = () => {
           <Route
             path="/namesets"
             element={
-              <NamesetSection
+              <NamesetsPage
                 namesets={namesets}
                 setNamesets={setNamesets}
                 archivedNamesets={archivedNamesets}
