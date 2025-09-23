@@ -20,6 +20,7 @@ export interface Product {
   type: ProductType;
   sizes: ProductSizeQuantity[]; // list of sizes + quantities
   namesetId: string | null; // reference to nameset, null if no nameset
+  teamId: string | null; // reference to team, null if no team
   price: number; // default price per unit
 }
 
@@ -39,4 +40,9 @@ export interface Nameset {
   number: number; // e.g. 10
   season: string; // e.g. "2025/2026"
   quantity: number; // available quantity of this nameset
+}
+
+export interface Team {
+  id: string;
+  name: string; // e.g. "Real Madrid", "Barcelona"
 }

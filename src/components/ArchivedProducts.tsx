@@ -1,14 +1,16 @@
 import React from 'react';
-import { Nameset, Product } from '../types/types';
-import { getNamesetInfo } from '../utils/utils';
+import { Nameset, Product, Team } from '../types/types';
+import { getNamesetInfo, getTeamInfo } from '../utils/utils';
 
 interface Props {
   archivedProducts: Product[];
   namesets: Nameset[];
   archivedNamesets: Nameset[];
+  teams: Team[];
+  archivedTeams: Team[];
 }
 
-const ArchivedProducts: React.FC<Props> = ({ archivedProducts, namesets, archivedNamesets }) => {
+const ArchivedProducts: React.FC<Props> = ({ archivedProducts, namesets, archivedNamesets, teams, archivedTeams }) => {
   return (
     <div>
       {archivedProducts.length === 0 ? (
@@ -17,7 +19,8 @@ const ArchivedProducts: React.FC<Props> = ({ archivedProducts, namesets, archive
         <table>
           <thead>
             <tr>
-              <th>Name</th>
+              <th>Team</th>
+              <th>Notes</th>
               <th>Type</th>
               <th>Sizes & Quantities</th>
               <th>Season</th>
@@ -29,7 +32,8 @@ const ArchivedProducts: React.FC<Props> = ({ archivedProducts, namesets, archive
           <tbody>
             {archivedProducts.map((p) => (
               <tr key={p.id}>
-                <td>{p.name}</td>
+                <td>{getTeamInfo(p.teamId, teams, archivedTeams)}</td>
+                <td>{p.name || '-'}</td>
                 <td>{p.type}</td>
                 <td>
                   <div className="size-quantity-display">

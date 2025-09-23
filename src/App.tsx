@@ -4,12 +4,12 @@ import './App.css';
 import AddProductForm from './components/AddProductForm';
 import ArchivedProducts from './components/ArchivedProducts';
 import Dashboard from './components/Dashboard';
-import EditProduct from './components/EditProduct';
 import NamesetsPage from './components/NamesetsPage';
 import ProductList from './components/ProductList';
 import SaleForm from './components/SaleForm';
 import SaleHistory from './components/SaleHistory';
-import { Nameset, Product, Sale } from './types/types';
+import TeamsPage from './components/TeamsPage';
+import { Nameset, Product, Sale, Team } from './types/types';
 
 const App: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -17,6 +17,8 @@ const App: React.FC = () => {
   const [sales, setSales] = useState<Sale[]>([]);
   const [namesets, setNamesets] = useState<Nameset[]>([]);
   const [archivedNamesets, setArchivedNamesets] = useState<Nameset[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [archivedTeams, setArchivedTeams] = useState<Team[]>([]);
 
   // Load from localStorage
   useEffect(() => {
@@ -25,6 +27,8 @@ const App: React.FC = () => {
     setSales(JSON.parse(localStorage.getItem('sales') || '[]'));
     setNamesets(JSON.parse(localStorage.getItem('namesets') || '[]'));
     setArchivedNamesets(JSON.parse(localStorage.getItem('archivedNamesets') || '[]'));
+    setTeams(JSON.parse(localStorage.getItem('teams') || '[]'));
+    setArchivedTeams(JSON.parse(localStorage.getItem('archivedTeams') || '[]'));
   }, []);
 
   // Save to localStorage
@@ -48,6 +52,14 @@ const App: React.FC = () => {
     localStorage.setItem('archivedNamesets', JSON.stringify(archivedNamesets));
   }, [archivedNamesets]);
 
+  useEffect(() => {
+    localStorage.setItem('teams', JSON.stringify(teams));
+  }, [teams]);
+
+  useEffect(() => {
+    localStorage.setItem('archivedTeams', JSON.stringify(archivedTeams));
+  }, [archivedTeams]);
+
   return (
     <Router>
       <div className="app-container">
@@ -60,6 +72,7 @@ const App: React.FC = () => {
           <NavLink to="/sales">Sales</NavLink>
           <NavLink to="/archived">Archived</NavLink>
           <NavLink to="/namesets">Namesets</NavLink>
+          <NavLink to="/teams">Teams</NavLink>
         </nav>
 
         <Routes>
@@ -77,6 +90,10 @@ const App: React.FC = () => {
                 setNamesets={setNamesets}
                 archivedNamesets={archivedNamesets}
                 setArchivedNamesets={setArchivedNamesets}
+                teams={teams}
+                setTeams={setTeams}
+                archivedTeams={archivedTeams}
+                setArchivedTeams={setArchivedTeams}
               />
             }
           />
@@ -85,14 +102,23 @@ const App: React.FC = () => {
           <Route
             path="/products"
             element={
-              <ProductList
-                products={products}
-                setProducts={setProducts}
-                archivedProducts={archivedProducts}
-                setArchivedProducts={setArchivedProducts}
-                namesets={namesets}
-                archivedNamesets={archivedNamesets}
-              />
+              <div className="card">
+                {' '}
+                <ProductList
+                  products={products}
+                  setProducts={setProducts}
+                  archivedProducts={archivedProducts}
+                  setArchivedProducts={setArchivedProducts}
+                  namesets={namesets}
+                  setNamesets={setNamesets}
+                  archivedNamesets={archivedNamesets}
+                  setArchivedNamesets={setArchivedNamesets}
+                  teams={teams}
+                  setTeams={setTeams}
+                  archivedTeams={archivedTeams}
+                  setArchivedTeams={setArchivedTeams}
+                />
+              </div>
             }
           />
           <Route
@@ -105,19 +131,10 @@ const App: React.FC = () => {
                 setNamesets={setNamesets}
                 archivedNamesets={archivedNamesets}
                 setArchivedNamesets={setArchivedNamesets}
-              />
-            }
-          />
-          <Route
-            path="/edit/:id"
-            element={
-              <EditProduct
-                products={products}
-                setProducts={setProducts}
-                namesets={namesets}
-                setNamesets={setNamesets}
-                archivedNamesets={archivedNamesets}
-                setArchivedNamesets={setArchivedNamesets}
+                teams={teams}
+                setTeams={setTeams}
+                archivedTeams={archivedTeams}
+                setArchivedTeams={setArchivedTeams}
               />
             }
           />
@@ -134,6 +151,8 @@ const App: React.FC = () => {
                   setSales={setSales}
                   namesets={namesets}
                   archivedNamesets={archivedNamesets}
+                  teams={teams}
+                  archivedTeams={archivedTeams}
                 />
                 <SaleHistory
                   sales={sales}
@@ -142,6 +161,8 @@ const App: React.FC = () => {
                   setSales={setSales}
                   namesets={namesets}
                   archivedNamesets={archivedNamesets}
+                  teams={teams}
+                  archivedTeams={archivedTeams}
                 />
               </>
             }
@@ -155,6 +176,8 @@ const App: React.FC = () => {
                 archivedProducts={archivedProducts}
                 namesets={namesets}
                 archivedNamesets={archivedNamesets}
+                teams={teams}
+                archivedTeams={archivedTeams}
               />
             }
           />
@@ -168,6 +191,19 @@ const App: React.FC = () => {
                 setNamesets={setNamesets}
                 archivedNamesets={archivedNamesets}
                 setArchivedNamesets={setArchivedNamesets}
+              />
+            }
+          />
+
+          {/* Teams */}
+          <Route
+            path="/teams"
+            element={
+              <TeamsPage
+                teams={teams}
+                setTeams={setTeams}
+                archivedTeams={archivedTeams}
+                setArchivedTeams={setArchivedTeams}
               />
             }
           />

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { AdultSize, KidSize, Nameset, Product, ProductSizeQuantity, ProductType } from '../types/types';
+import { AdultSize, KidSize, Nameset, Product, ProductSizeQuantity, ProductType, Team } from '../types/types';
 import NamesetPicker from './NamesetPicker';
+import TeamPicker from './TeamPicker';
 
 interface Props {
   products: Product[];
@@ -9,6 +10,10 @@ interface Props {
   setNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
   archivedNamesets: Nameset[];
   setArchivedNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
+  teams: Team[];
+  setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
+  archivedTeams: Team[];
+  setArchivedTeams: React.Dispatch<React.SetStateAction<Team[]>>;
 }
 
 const adultSizes: AdultSize[] = ['S', 'M', 'L', 'XL', 'XXL'];
@@ -21,11 +26,16 @@ const AddProductForm: React.FC<Props> = ({
   setNamesets,
   archivedNamesets,
   setArchivedNamesets,
+  teams,
+  setTeams,
+  archivedTeams,
+  setArchivedTeams,
 }) => {
   const [name, setName] = useState('');
   const [type, setType] = useState<ProductType>(ProductType.SHIRT);
   const [sizes, setSizes] = useState<ProductSizeQuantity[]>([]);
   const [selectedNamesetId, setSelectedNamesetId] = useState<string | null>(null);
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [price, setPrice] = useState<number>(0);
 
   useEffect(() => {
@@ -39,8 +49,9 @@ const AddProductForm: React.FC<Props> = ({
   };
 
   const addProduct = () => {
-    if (!name.trim()) {
-      alert('Please enter product name');
+    // Product notes are optional if a team is selected
+    if (!name.trim() && !selectedTeamId) {
+      alert('Please enter product notes or select a team');
       return;
     }
 
@@ -65,10 +76,11 @@ const AddProductForm: React.FC<Props> = ({
 
     const newProduct: Product = {
       id: Date.now().toString(),
-      name: name.trim(),
+      name: name.trim() || '', // Allow empty notes if team is selected
       type,
       sizes,
       namesetId: selectedNamesetId,
+      teamId: selectedTeamId,
       price: Number(price) || 0,
     };
 
@@ -87,6 +99,7 @@ const AddProductForm: React.FC<Props> = ({
     setName('');
     setType(ProductType.SHIRT);
     setSelectedNamesetId(null);
+    setSelectedTeamId(null);
     setPrice(0);
     // sizes will reset via effect when type resets
   };
@@ -94,8 +107,14 @@ const AddProductForm: React.FC<Props> = ({
   return (
     <div className="form-inline">
       <div className="form-group">
-        <label>Product Name</label>
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Real Madrid Home" />
+        <label>Select a team</label>
+        <TeamPicker
+          teams={teams}
+          setTeams={setTeams}
+          selectedTeamId={selectedTeamId}
+          onTeamSelect={setSelectedTeamId}
+          placeholder="Ex: Real Madrid"
+        />{' '}
       </div>
 
       <div className="form-group">
@@ -107,6 +126,15 @@ const AddProductForm: React.FC<Props> = ({
             </option>
           ))}
         </select>
+      </div>
+
+      <div className="form-group">
+        <label>Product Notes {selectedTeamId ? '(optional)' : ''}</label>
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder={selectedTeamId ? 'e.g. Home, Away, Third (optional)' : 'e.g. Real Madrid Home'}
+        />
       </div>
 
       <div className="form-group" style={{ width: '100%' }}>

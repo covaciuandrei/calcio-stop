@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Nameset, Product, Sale } from '../types/types';
+import { Nameset, Product, Sale, Team } from '../types/types';
 import AddProductForm from './AddProductForm';
 import ArchivedNamesets from './ArchivedNamesets';
 import ArchivedProducts from './ArchivedProducts';
@@ -19,6 +19,10 @@ interface Props {
   setNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
   archivedNamesets: Nameset[];
   setArchivedNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
+  teams: Team[];
+  setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
+  archivedTeams: Team[];
+  setArchivedTeams: React.Dispatch<React.SetStateAction<Team[]>>;
 }
 
 const Dashboard: React.FC<Props> = ({
@@ -32,6 +36,10 @@ const Dashboard: React.FC<Props> = ({
   setNamesets,
   archivedNamesets,
   setArchivedNamesets,
+  teams,
+  setTeams,
+  archivedTeams,
+  setArchivedTeams,
 }) => {
   const [isArchivedNamesetsExpanded, setIsArchivedNamesetsExpanded] = useState(false);
   const [archivedNamesetsSearchTerm, setArchivedNamesetsSearchTerm] = useState('');
@@ -49,6 +57,10 @@ const Dashboard: React.FC<Props> = ({
           setNamesets={setNamesets}
           archivedNamesets={archivedNamesets}
           setArchivedNamesets={setArchivedNamesets}
+          teams={teams}
+          setTeams={setTeams}
+          archivedTeams={archivedTeams}
+          setArchivedTeams={setArchivedTeams}
         />
       </div>
 
@@ -62,6 +74,8 @@ const Dashboard: React.FC<Props> = ({
           setSales={setSales}
           namesets={namesets}
           archivedNamesets={archivedNamesets}
+          teams={teams}
+          archivedTeams={archivedTeams}
         />
       </div>
 
@@ -75,7 +89,13 @@ const Dashboard: React.FC<Props> = ({
           archivedProducts={archivedProducts}
           setArchivedProducts={setArchivedProducts}
           namesets={namesets}
+          setNamesets={setNamesets}
           archivedNamesets={archivedNamesets}
+          setArchivedNamesets={setArchivedNamesets}
+          teams={teams}
+          setTeams={setTeams}
+          archivedTeams={archivedTeams}
+          setArchivedTeams={setArchivedTeams}
         />
       </div>
 
@@ -90,6 +110,8 @@ const Dashboard: React.FC<Props> = ({
           setSales={setSales}
           namesets={namesets}
           archivedNamesets={archivedNamesets}
+          teams={teams}
+          archivedTeams={archivedTeams}
         />
       </div>
 
@@ -97,7 +119,13 @@ const Dashboard: React.FC<Props> = ({
       <div className="card">
         <div className="card-header mini-header mini-header-red">Archived Products</div>
         <h3 className="card-section-header">Archived List</h3>
-        <ArchivedProducts archivedProducts={archivedProducts} namesets={namesets} archivedNamesets={archivedNamesets} />
+        <ArchivedProducts
+          archivedProducts={archivedProducts}
+          namesets={namesets}
+          archivedNamesets={archivedNamesets}
+          teams={teams}
+          archivedTeams={archivedTeams}
+        />
       </div>
 
       {/* Manage Namesets */}

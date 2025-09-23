@@ -1,4 +1,4 @@
-import { Nameset } from '../types/types';
+import { Nameset, Team } from '../types/types';
 
 export const generateSeasons = (start = 1990, end = 2030): string[] =>
   Array.from({ length: end - start + 1 }, (_, i) => {
@@ -32,4 +32,28 @@ export const getNamesetInfo = (
     number: nameset.number,
     season: nameset.season,
   };
+};
+
+export const getTeamInfo = (
+  teamId: string | null,
+  teams: Team[],
+  archivedTeams: Team[] = []
+): string => {
+  if (!teamId) {
+    return '-';
+  }
+
+  // First check in active teams
+  let team = teams.find((t) => t.id === teamId);
+
+  // If not found, check in archived teams
+  if (!team) {
+    team = archivedTeams.find((t) => t.id === teamId);
+  }
+
+  if (!team) {
+    return '-';
+  }
+
+  return team.name;
 };

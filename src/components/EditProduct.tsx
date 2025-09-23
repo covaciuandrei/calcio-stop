@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AdultSize, KidSize, Nameset, Product, ProductSizeQuantity, ProductType } from '../types/types';
+import { AdultSize, KidSize, Nameset, Product, ProductSizeQuantity, ProductType, Team } from '../types/types';
 import NamesetPicker from './NamesetPicker';
+import TeamPicker from './TeamPicker';
 interface Props {
   products: Product[];
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
@@ -9,6 +10,10 @@ interface Props {
   setNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
   archivedNamesets: Nameset[];
   setArchivedNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
+  teams: Team[];
+  setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
+  archivedTeams: Team[];
+  setArchivedTeams: React.Dispatch<React.SetStateAction<Team[]>>;
 }
 
 const adultSizes: AdultSize[] = ['S', 'M', 'L', 'XL', 'XXL'];
@@ -21,6 +26,10 @@ const EditProduct: React.FC<Props> = ({
   setNamesets,
   archivedNamesets,
   setArchivedNamesets,
+  teams,
+  setTeams,
+  archivedTeams,
+  setArchivedTeams,
 }) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -30,6 +39,7 @@ const EditProduct: React.FC<Props> = ({
   const [type, setType] = useState<ProductType>(ProductType.SHIRT);
   const [sizes, setSizes] = useState<ProductSizeQuantity[]>([]);
   const [selectedNamesetId, setSelectedNamesetId] = useState<string | null>(null);
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [price, setPrice] = useState<number>(0);
 
   useEffect(() => {
@@ -38,18 +48,25 @@ const EditProduct: React.FC<Props> = ({
     setType(product.type);
     setSizes(product.sizes);
     setSelectedNamesetId(product.namesetId);
+    setSelectedTeamId(product.teamId);
     setPrice(product.price || 0);
   }, [product]);
 
   useEffect(() => {
-    // if type changed and sizes empty, initialize default sizes (but keep existing sizes if present)
-    if (!product) return;
-    if (!sizes || sizes.length === 0) {
-      const initial = (type === ProductType.KID_KIT ? kidSizes : adultSizes).map((s) => ({ size: s, quantity: 0 }));
-      setSizes(initial);
+    // When product loads, set the sizes from the product
+    if (product && product.sizes) {
+      setSizes(product.sizes);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [type]);
+  }, [product]);
+
+  useEffect(() => {
+    // Only update sizes when type changes AND we don't have existing sizes from the product
+    if (!product || (product.sizes && product.sizes.length > 0)) return;
+
+    const newSizes = type === ProductType.KID_KIT ? kidSizes : adultSizes;
+    const initialSizes = newSizes.map((s) => ({ size: s, quantity: 0 }));
+    setSizes(initialSizes);
+  }, [type, product]);
 
   if (!product) return <p>Product not found.</p>;
 
@@ -58,24 +75,25 @@ const EditProduct: React.FC<Props> = ({
   };
 
   const handleSave = () => {
-    if (!name.trim()) {
-      alert('Enter product name');
+    // Product notes are optional if a team is selected
+    if (!name.trim() && !selectedTeamId) {
+      alert('Please enter product notes or select a team');
       return;
     }
     const updated = products.map((p) =>
       p.id === product.id
         ? {
             ...p,
-            name: name.trim(),
+            name: name.trim() || '', // Allow empty notes if team is selected
             type,
             sizes,
             namesetId: selectedNamesetId,
+            teamId: selectedTeamId,
             price: Number(price) || 0,
           }
         : p
     );
     setProducts(updated);
-    navigate('/');
   };
 
   return (
@@ -83,8 +101,14 @@ const EditProduct: React.FC<Props> = ({
       <h1 className="section-header">Edit Product</h1>
       <div className="form-inline">
         <div className="form-group">
-          <label>Product Name</label>
-          <input value={name} onChange={(e) => setName(e.target.value)} />
+          <label>Select a team</label>
+          <TeamPicker
+            teams={teams}
+            setTeams={setTeams}
+            selectedTeamId={selectedTeamId}
+            onTeamSelect={setSelectedTeamId}
+            placeholder="Select a team (optional)"
+          />
         </div>
 
         <div className="form-group">
@@ -96,6 +120,15 @@ const EditProduct: React.FC<Props> = ({
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="form-group">
+          <label>Product Notes {selectedTeamId ? '(optional)' : ''}</label>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={selectedTeamId ? 'e.g. Home, Away, Third (optional)' : 'e.g. Real Madrid Home'}
+          />
         </div>
 
         <div className="form-group" style={{ width: '100%' }}>
@@ -116,16 +149,19 @@ const EditProduct: React.FC<Props> = ({
           </div>
         </div>
 
-        <NamesetPicker
-          namesets={namesets}
-          setNamesets={setNamesets}
-          selectedNamesetId={selectedNamesetId}
-          onNamesetSelect={setSelectedNamesetId}
-          placeholder="Select a nameset (optional)"
-        />
+        <div className="form-group">
+          <label>Select a nameset</label>
+          <NamesetPicker
+            namesets={namesets}
+            setNamesets={setNamesets}
+            selectedNamesetId={selectedNamesetId}
+            onNamesetSelect={setSelectedNamesetId}
+            placeholder="Select a nameset (optional)"
+          />
+        </div>
 
         <div className="form-group">
-          <label>Price</label>
+          <label>Price (per unit)</label>
           <input type="number" min={0} value={price} onChange={(e) => setPrice(Number(e.target.value || 0))} />
         </div>
 

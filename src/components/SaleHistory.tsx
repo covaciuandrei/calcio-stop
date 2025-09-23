@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Nameset, Product, Sale } from '../types/types';
+import { Nameset, Product, Sale, Team } from '../types/types';
 import { getNamesetInfo } from '../utils/utils';
 
 interface Props {
@@ -9,9 +9,20 @@ interface Props {
   setSales: React.Dispatch<React.SetStateAction<Sale[]>>;
   namesets: Nameset[];
   archivedNamesets: Nameset[];
+  teams: Team[];
+  archivedTeams: Team[];
 }
 
-const SaleHistory: React.FC<Props> = ({ sales, products, archivedProducts, setSales, namesets, archivedNamesets }) => {
+const SaleHistory: React.FC<Props> = ({
+  sales,
+  products,
+  archivedProducts,
+  setSales,
+  namesets,
+  archivedNamesets,
+  teams,
+  archivedTeams,
+}) => {
   const [editingSale, setEditingSale] = useState<Sale | null>(null);
   const [editQuantity, setEditQuantity] = useState<number>(0);
   const [editPrice, setEditPrice] = useState<number>(0);
