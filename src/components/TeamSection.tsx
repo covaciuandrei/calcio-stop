@@ -29,11 +29,6 @@ const TeamSection: React.FC<Props> = ({ teams, setTeams, archivedTeams, setArchi
     setEditName('');
   };
 
-  const handleCancelEdit = () => {
-    setEditingTeam(null);
-    setEditName('');
-  };
-
   const handleArchive = (id: string) => {
     if (!window.confirm('Are you sure you want to archive this team?')) return;
     const teamToArchive = teams.find((t) => t.id === id);
