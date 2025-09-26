@@ -3,13 +3,14 @@ import { NavLink, Route, BrowserRouter as Router, Routes } from 'react-router-do
 import './App.css';
 import AddProductForm from './components/AddProductForm';
 import ArchivedProducts from './components/ArchivedProducts';
+import BadgesPage from './components/BadgesPage';
 import Dashboard from './components/Dashboard';
 import NamesetsPage from './components/NamesetsPage';
 import ProductList from './components/ProductList';
 import SaleForm from './components/SaleForm';
 import SaleHistory from './components/SaleHistory';
 import TeamsPage from './components/TeamsPage';
-import { Nameset, Product, Sale, Team } from './types/types';
+import { Badge, Nameset, Product, Sale, Team } from './types/types';
 
 const App: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -19,6 +20,8 @@ const App: React.FC = () => {
   const [archivedNamesets, setArchivedNamesets] = useState<Nameset[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [archivedTeams, setArchivedTeams] = useState<Team[]>([]);
+  const [badges, setBadges] = useState<Badge[]>([]);
+  const [archivedBadges, setArchivedBadges] = useState<Badge[]>([]);
 
   // Load from localStorage
   useEffect(() => {
@@ -29,6 +32,8 @@ const App: React.FC = () => {
     setArchivedNamesets(JSON.parse(localStorage.getItem('archivedNamesets') || '[]'));
     setTeams(JSON.parse(localStorage.getItem('teams') || '[]'));
     setArchivedTeams(JSON.parse(localStorage.getItem('archivedTeams') || '[]'));
+    setBadges(JSON.parse(localStorage.getItem('badges') || '[]'));
+    setArchivedBadges(JSON.parse(localStorage.getItem('archivedBadges') || '[]'));
   }, []);
 
   // Save to localStorage
@@ -60,6 +65,14 @@ const App: React.FC = () => {
     localStorage.setItem('archivedTeams', JSON.stringify(archivedTeams));
   }, [archivedTeams]);
 
+  useEffect(() => {
+    localStorage.setItem('badges', JSON.stringify(badges));
+  }, [badges]);
+
+  useEffect(() => {
+    localStorage.setItem('archivedBadges', JSON.stringify(archivedBadges));
+  }, [archivedBadges]);
+
   return (
     <Router>
       <div className="app-container">
@@ -73,6 +86,7 @@ const App: React.FC = () => {
           <NavLink to="/archived">Archived</NavLink>
           <NavLink to="/namesets">Namesets</NavLink>
           <NavLink to="/teams">Teams</NavLink>
+          <NavLink to="/badges">Badges</NavLink>
         </nav>
 
         <Routes>
@@ -94,6 +108,10 @@ const App: React.FC = () => {
                 setTeams={setTeams}
                 archivedTeams={archivedTeams}
                 setArchivedTeams={setArchivedTeams}
+                badges={badges}
+                setBadges={setBadges}
+                archivedBadges={archivedBadges}
+                setArchivedBadges={setArchivedBadges}
               />
             }
           />
@@ -204,6 +222,19 @@ const App: React.FC = () => {
                 setTeams={setTeams}
                 archivedTeams={archivedTeams}
                 setArchivedTeams={setArchivedTeams}
+              />
+            }
+          />
+
+          {/* Badges */}
+          <Route
+            path="/badges"
+            element={
+              <BadgesPage
+                badges={badges}
+                setBadges={setBadges}
+                archivedBadges={archivedBadges}
+                setArchivedBadges={setArchivedBadges}
               />
             }
           />

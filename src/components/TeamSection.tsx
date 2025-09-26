@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Team } from '../types/types';
 import AddTeamForm from './AddTeamForm';
 import TeamTableList from './TeamTableList';
@@ -110,26 +111,28 @@ const TeamSection: React.FC<Props> = ({ teams, setTeams, archivedTeams, setArchi
         )}
       </div>
 
-      {editingTeam && (
-        <div className="modal">
-          <div className="modal-content">
-            <h3>Edit Team</h3>
-            <label>
-              Team Name:
-              <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} />
-            </label>
+      {editingTeam &&
+        createPortal(
+          <div className="modal">
+            <div className="modal-content" style={{ maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto' }}>
+              <h3>Edit Team</h3>
+              <label>
+                Team Name:
+                <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} />
+              </label>
 
-            <div className="modal-buttons">
-              <button onClick={handleSaveEdit} className="btn btn-success">
-                Save
-              </button>
-              <button onClick={() => setEditingTeam(null)} className="btn btn-secondary">
-                Cancel
-              </button>
+              <div className="modal-buttons">
+                <button onClick={handleSaveEdit} className="btn btn-success">
+                  Save
+                </button>
+                <button onClick={() => setEditingTeam(null)} className="btn btn-secondary">
+                  Cancel
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

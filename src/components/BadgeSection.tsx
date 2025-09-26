@@ -1,103 +1,99 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Nameset } from '../types/types';
+import { Badge } from '../types/types';
 import { generateSeasons } from '../utils/utils';
-import AddNamesetForm from './AddNamesetForm';
-import NamesetTableList from './NamesetTableList';
+import AddBadgeForm from './AddBadgeForm';
+import BadgeTableList from './BadgeTableList';
 
 interface Props {
-  namesets: Nameset[];
-  setNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
-  archivedNamesets: Nameset[];
-  setArchivedNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
+  badges: Badge[];
+  setBadges: React.Dispatch<React.SetStateAction<Badge[]>>;
+  archivedBadges: Badge[];
+  setArchivedBadges: React.Dispatch<React.SetStateAction<Badge[]>>;
 }
 
-const NamesetSection: React.FC<Props> = ({ namesets, setNamesets, archivedNamesets, setArchivedNamesets }) => {
-  const [editingNameset, setEditingNameset] = useState<Nameset | null>(null);
-  const [playerName, setPlayerName] = useState('');
-  const [number, setNumber] = useState<number | ''>('');
+const BadgeSection: React.FC<Props> = ({ badges, setBadges, archivedBadges, setArchivedBadges }) => {
+  const [editingBadge, setEditingBadge] = useState<Badge | null>(null);
+  const [name, setName] = useState('');
   const [season, setSeason] = useState('2025/2026');
   const [quantity, setQuantity] = useState<number | ''>('');
-  const [isNamesetsExpanded, setIsNamesetsExpanded] = useState(true);
-  const [namesetsSearchTerm, setNamesetsSearchTerm] = useState('');
+  const [isBadgesExpanded, setIsBadgesExpanded] = useState(true);
+  const [badgesSearchTerm, setBadgesSearchTerm] = useState('');
 
   const handleArchive = (id: string) => {
-    if (!window.confirm('Are you sure you want to archive this nameset?')) return;
-    const namesetToArchive = namesets.find((n) => n.id === id);
-    if (namesetToArchive) {
-      setArchivedNamesets((prev) => [...prev, namesetToArchive]);
-      setNamesets(namesets.filter((n) => n.id !== id));
+    if (!window.confirm('Are you sure you want to archive this badge?')) return;
+    const badgeToArchive = badges.find((b) => b.id === id);
+    if (badgeToArchive) {
+      setArchivedBadges((prev) => [...prev, badgeToArchive]);
+      setBadges(badges.filter((b) => b.id !== id));
     }
   };
 
-  const handleEditClick = (n: Nameset) => {
-    setEditingNameset(n);
-    setPlayerName(n.playerName);
-    setNumber(n.number);
-    setSeason(n.season);
-    setQuantity(n.quantity);
+  const handleEditClick = (b: Badge) => {
+    setEditingBadge(b);
+    setName(b.name);
+    setSeason(b.season);
+    setQuantity(b.quantity);
   };
 
   const handleSaveEdit = () => {
-    if (!playerName.trim()) return alert('Player name cannot be empty');
-    if (number === '' || number < 1) return alert('Number must be positive');
+    if (!name.trim()) return alert('Badge name cannot be empty');
     if (quantity === '' || quantity < 0) return alert('Quantity must be 0 or greater');
 
-    setNamesets((prev) =>
-      prev.map((n) =>
-        n.id === editingNameset?.id
+    setBadges((prev) =>
+      prev.map((b) =>
+        b.id === editingBadge?.id
           ? {
-              ...n,
-              playerName: playerName.trim(),
-              number: Number(number),
+              ...b,
+              name: name.trim(),
               season,
               quantity: Number(quantity),
             }
-          : n
+          : b
       )
     );
-    setEditingNameset(null);
+    setEditingBadge(null);
   };
 
   return (
     <div>
-      {/* Add New Nameset Card */}
+      {/* Add New Badge Card */}
       <div className="card">
         <div className="card-header mini-header mini-header-green">
-          <span>Add New Nameset</span>
+          <span>Add New Badge</span>
         </div>
         <div className="card-content">
-          <AddNamesetForm namesets={namesets} setNamesets={setNamesets} />
+          <AddBadgeForm badges={badges} setBadges={setBadges} />
         </div>
       </div>
 
-      {/* Namesets List Card */}
+      {/* Badges List Card */}
       <div className="card">
-        {namesets.length > 0 ? (
+        {badges.length > 0 ? (
           <>
             <div
               className="card-header mini-header mini-header-orange"
               style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
-              onClick={() => setIsNamesetsExpanded(!isNamesetsExpanded)}
+              onClick={() => setIsBadgesExpanded(!isBadgesExpanded)}
             >
-              <span>Active Namesets ({namesets.length})</span>
-              <span style={{ fontSize: '12px' }}>{isNamesetsExpanded ? '▼' : '▶'}</span>
+              <span>Active Badges ({badges.length})</span>
+              <span style={{ fontSize: '12px' }}>{isBadgesExpanded ? '▼' : '▶'}</span>
             </div>
-            {!isNamesetsExpanded && (
+            {!isBadgesExpanded && (
               <div style={{ padding: '10px 20px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
-                There are {namesets.length} namesets available.
+                There are {badges.length} badges available.
               </div>
             )}
-            {isNamesetsExpanded && (
+            {isBadgesExpanded && (
               <>
-                <h3 className="card-section-header">Active Namesets List</h3>
-                {namesets.length >= 2 && (
+                <h3 className="card-section-header">Active Badges List</h3>
+                {badges.length >= 2 && (
                   <div style={{ marginBottom: '15px' }}>
                     <input
                       type="text"
-                      placeholder="Search namesets..."
-                      value={namesetsSearchTerm}
-                      onChange={(e) => setNamesetsSearchTerm(e.target.value)}
+                      placeholder="Search badges..."
+                      value={badgesSearchTerm}
+                      onChange={(e) => setBadgesSearchTerm(e.target.value)}
                       style={{
                         width: '100%',
                         padding: '8px 12px',
@@ -109,11 +105,11 @@ const NamesetSection: React.FC<Props> = ({ namesets, setNamesets, archivedNamese
                   </div>
                 )}
                 <div style={{ maxHeight: '700px', overflowY: 'auto' }}>
-                  <NamesetTableList
-                    namesets={namesets}
+                  <BadgeTableList
+                    badges={badges}
                     onEdit={handleEditClick}
                     onArchive={handleArchive}
-                    searchTerm={namesetsSearchTerm}
+                    searchTerm={badgesSearchTerm}
                   />
                 </div>
               </>
@@ -122,32 +118,23 @@ const NamesetSection: React.FC<Props> = ({ namesets, setNamesets, archivedNamese
         ) : (
           <>
             <div className="card-header mini-header mini-header-orange">
-              <span>Active Namesets (0)</span>
+              <span>Active Badges (0)</span>
             </div>
             <div style={{ padding: '10px 20px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
-              No active namesets available.
+              No active badges available.
             </div>
           </>
         )}
       </div>
 
-      {editingNameset &&
+      {editingBadge &&
         createPortal(
           <div className="modal">
             <div className="modal-content" style={{ maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto' }}>
-              <h3>Edit Nameset</h3>
+              <h3>Edit Badge</h3>
               <label>
-                Player Name:
-                <input type="text" value={playerName} onChange={(e) => setPlayerName(e.target.value)} />
-              </label>
-              <label>
-                Number:
-                <input
-                  type="number"
-                  min={1}
-                  value={number}
-                  onChange={(e) => setNumber(parseInt(e.target.value) || '')}
-                />
+                Badge Name:
+                <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
               </label>
               <label>
                 Season:
@@ -173,7 +160,7 @@ const NamesetSection: React.FC<Props> = ({ namesets, setNamesets, archivedNamese
                 <button onClick={handleSaveEdit} className="btn btn-success">
                   Save
                 </button>
-                <button onClick={() => setEditingNameset(null)} className="btn btn-secondary">
+                <button onClick={() => setEditingBadge(null)} className="btn btn-secondary">
                   Cancel
                 </button>
               </div>
@@ -185,4 +172,4 @@ const NamesetSection: React.FC<Props> = ({ namesets, setNamesets, archivedNamese
   );
 };
 
-export default NamesetSection;
+export default BadgeSection;
