@@ -312,6 +312,7 @@ table button:last-of-type:hover {
 .modal-content input {
   margin: 0;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .modal-buttons {

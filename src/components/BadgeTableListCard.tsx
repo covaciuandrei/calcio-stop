@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { createPortal } from 'react-dom';
 import { Badge } from '../types/types';
-import { generateSeasons } from '../utils/utils';
-import AddBadgeForm from './AddBadgeForm';
 import BadgeTableList from './BadgeTableList';
+import EditBadgeModal from './EditBadgeModal';
 
 interface Props {
   badges: Badge[];
@@ -12,11 +10,8 @@ interface Props {
   setArchivedBadges: React.Dispatch<React.SetStateAction<Badge[]>>;
 }
 
-const BadgeSection: React.FC<Props> = ({ badges, setBadges, archivedBadges, setArchivedBadges }) => {
+const BadgeTableListCard: React.FC<Props> = ({ badges, setBadges, archivedBadges, setArchivedBadges }) => {
   const [editingBadge, setEditingBadge] = useState<Badge | null>(null);
-  const [name, setName] = useState('');
-  const [season, setSeason] = useState('2025/2026');
-  const [quantity, setQuantity] = useState<number | ''>('');
   const [isBadgesExpanded, setIsBadgesExpanded] = useState(true);
   const [badgesSearchTerm, setBadgesSearchTerm] = useState('');
 
@@ -31,43 +26,10 @@ const BadgeSection: React.FC<Props> = ({ badges, setBadges, archivedBadges, setA
 
   const handleEditClick = (b: Badge) => {
     setEditingBadge(b);
-    setName(b.name);
-    setSeason(b.season);
-    setQuantity(b.quantity);
-  };
-
-  const handleSaveEdit = () => {
-    if (!name.trim()) return alert('Badge name cannot be empty');
-    if (quantity === '' || quantity < 0) return alert('Quantity must be 0 or greater');
-
-    setBadges((prev) =>
-      prev.map((b) =>
-        b.id === editingBadge?.id
-          ? {
-              ...b,
-              name: name.trim(),
-              season,
-              quantity: Number(quantity),
-            }
-          : b
-      )
-    );
-    setEditingBadge(null);
   };
 
   return (
-    <div>
-      {/* Add New Badge Card */}
-      <div className="card">
-        <div className="card-header mini-header mini-header-green">
-          <span>Add New Badge</span>
-        </div>
-        <div className="card-content">
-          <AddBadgeForm badges={badges} setBadges={setBadges} />
-        </div>
-      </div>
-
-      {/* Badges List Card */}
+    <>
       <div className="card">
         {badges.length > 0 ? (
           <>
@@ -127,49 +89,9 @@ const BadgeSection: React.FC<Props> = ({ badges, setBadges, archivedBadges, setA
         )}
       </div>
 
-      {editingBadge &&
-        createPortal(
-          <div className="modal">
-            <div className="modal-content" style={{ maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto' }}>
-              <h3>Edit Badge</h3>
-              <label>
-                Badge Name:
-                <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
-              </label>
-              <label>
-                Season:
-                <select value={season} onChange={(e) => setSeason(e.target.value)}>
-                  {generateSeasons().map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Quantity:
-                <input
-                  type="number"
-                  min={0}
-                  value={quantity}
-                  onChange={(e) => setQuantity(parseInt(e.target.value) || '')}
-                />
-              </label>
-
-              <div className="modal-buttons">
-                <button onClick={handleSaveEdit} className="btn btn-success">
-                  Save
-                </button>
-                <button onClick={() => setEditingBadge(null)} className="btn btn-secondary">
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>,
-          document.body
-        )}
-    </div>
+      <EditBadgeModal editingBadge={editingBadge} setEditingBadge={setEditingBadge} setBadges={setBadges} />
+    </>
   );
 };
 
-export default BadgeSection;
+export default BadgeTableListCard;
