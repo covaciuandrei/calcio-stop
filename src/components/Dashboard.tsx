@@ -7,6 +7,7 @@ import NamesetsPage from './NamesetsPage';
 import ProductList from './ProductList';
 import SaleForm from './SaleForm';
 import SaleHistory from './SaleHistory';
+import TeamsPage from './TeamsPage';
 
 interface Props {
   products: Product[];
@@ -142,6 +143,17 @@ const Dashboard: React.FC<Props> = ({
           setNamesets={setNamesets}
           archivedNamesets={archivedNamesets}
           setArchivedNamesets={setArchivedNamesets}
+        />
+      </div>
+
+      {/* Manage Teams */}
+      <div className="card">
+        <div className="card-header mini-header mini-header-purple">Manage Teams</div>
+        <TeamsPage
+          teams={teams}
+          setTeams={setTeams}
+          archivedTeams={archivedTeams}
+          setArchivedTeams={setArchivedTeams}
         />
       </div>
 

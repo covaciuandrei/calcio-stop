@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { createPortal } from 'react-dom';
 import { Team } from '../types/types';
-import AddTeamForm from './AddTeamForm';
+import EditTeamModal from './EditTeamModal';
 import TeamTableList from './TeamTableList';
 
 interface Props {
@@ -11,47 +10,26 @@ interface Props {
   setArchivedTeams: React.Dispatch<React.SetStateAction<Team[]>>;
 }
 
-const TeamSection: React.FC<Props> = ({ teams, setTeams, archivedTeams, setArchivedTeams }) => {
+const TeamsTableListCard: React.FC<Props> = ({ teams, setTeams, archivedTeams, setArchivedTeams }) => {
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
-  const [editName, setEditName] = useState('');
   const [isTeamsExpanded, setIsTeamsExpanded] = useState(true);
   const [teamsSearchTerm, setTeamsSearchTerm] = useState('');
-
-  const handleEditClick = (team: Team) => {
-    setEditingTeam(team);
-    setEditName(team.name);
-  };
-
-  const handleSaveEdit = () => {
-    if (!editName.trim()) return alert('Team name cannot be empty');
-
-    setTeams((prev) => prev.map((t) => (t.id === editingTeam!.id ? { ...t, name: editName.trim() } : t)));
-    setEditingTeam(null);
-    setEditName('');
-  };
 
   const handleArchive = (id: string) => {
     if (!window.confirm('Are you sure you want to archive this team?')) return;
     const teamToArchive = teams.find((t) => t.id === id);
     if (teamToArchive) {
       setArchivedTeams((prev) => [...prev, teamToArchive]);
-      setTeams((prev) => prev.filter((t) => t.id !== id));
+      setTeams(teams.filter((t) => t.id !== id));
     }
   };
 
-  return (
-    <div>
-      {/* Add New Team Card */}
-      <div className="card">
-        <div className="card-header mini-header mini-header-green">
-          <span>Add New Team</span>
-        </div>
-        <div className="card-content">
-          <AddTeamForm teams={teams} setTeams={setTeams} />
-        </div>
-      </div>
+  const handleEditClick = (t: Team) => {
+    setEditingTeam(t);
+  };
 
-      {/* Teams List Card */}
+  return (
+    <>
       <div className="card">
         {teams.length > 0 ? (
           <>
@@ -111,30 +89,9 @@ const TeamSection: React.FC<Props> = ({ teams, setTeams, archivedTeams, setArchi
         )}
       </div>
 
-      {editingTeam &&
-        createPortal(
-          <div className="modal">
-            <div className="modal-content" style={{ maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto' }}>
-              <h3>Edit Team</h3>
-              <label>
-                Team Name:
-                <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} />
-              </label>
-
-              <div className="modal-buttons">
-                <button onClick={handleSaveEdit} className="btn btn-success">
-                  Save
-                </button>
-                <button onClick={() => setEditingTeam(null)} className="btn btn-secondary">
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>,
-          document.body
-        )}
-    </div>
+      <EditTeamModal editingTeam={editingTeam} setEditingTeam={setEditingTeam} setTeams={setTeams} />
+    </>
   );
 };
 
-export default TeamSection;
+export default TeamsTableListCard;
