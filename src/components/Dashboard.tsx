@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Badge, Nameset, Product, Sale, Team } from '../types/types';
 import AddProductForm from './AddProductForm';
-import ArchivedNamesets from './ArchivedNamesets';
 import ArchivedProducts from './ArchivedProducts';
 import BadgesPage from './BadgesPage';
-import NamesetSection from './NamesetSection';
+import NamesetsPage from './NamesetsPage';
 import ProductList from './ProductList';
 import SaleForm from './SaleForm';
 import SaleHistory from './SaleHistory';
@@ -50,9 +49,6 @@ const Dashboard: React.FC<Props> = ({
   archivedBadges,
   setArchivedBadges,
 }) => {
-  const [isArchivedNamesetsExpanded, setIsArchivedNamesetsExpanded] = useState(false);
-  const [archivedNamesetsSearchTerm, setArchivedNamesetsSearchTerm] = useState('');
-
   return (
     <div>
       <h1 className="section-header">Dashboard Overview</h1>
@@ -141,72 +137,12 @@ const Dashboard: React.FC<Props> = ({
       {/* Manage Namesets */}
       <div className="card">
         <div className="card-header mini-header mini-header-purple">Manage Namesets</div>
-        <NamesetSection
+        <NamesetsPage
           namesets={namesets}
           setNamesets={setNamesets}
           archivedNamesets={archivedNamesets}
           setArchivedNamesets={setArchivedNamesets}
         />
-
-        {/* Archived Namesets Card */}
-        <div className="card" style={{ marginTop: '20px' }}>
-          {archivedNamesets.length > 0 ? (
-            <>
-              <div
-                className="card-header mini-header mini-header-red"
-                style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
-                onClick={() => setIsArchivedNamesetsExpanded(!isArchivedNamesetsExpanded)}
-              >
-                <span>Archived Namesets ({archivedNamesets.length})</span>
-                <span style={{ fontSize: '12px' }}>{isArchivedNamesetsExpanded ? '▼' : '▶'}</span>
-              </div>
-              {!isArchivedNamesetsExpanded && (
-                <div style={{ padding: '10px 20px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
-                  There are {archivedNamesets.length} namesets available.
-                </div>
-              )}
-              {isArchivedNamesetsExpanded && (
-                <>
-                  <h3 className="card-section-header">Archived Namesets List</h3>
-                  {archivedNamesets.length >= 2 && (
-                    <div style={{ marginBottom: '15px' }}>
-                      <input
-                        type="text"
-                        placeholder="Search archived namesets..."
-                        value={archivedNamesetsSearchTerm}
-                        onChange={(e) => setArchivedNamesetsSearchTerm(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '8px 12px',
-                          border: '1px solid #ccc',
-                          borderRadius: '6px',
-                          fontSize: '14px',
-                        }}
-                      />
-                    </div>
-                  )}
-                  <div style={{ maxHeight: '700px', overflowY: 'auto' }}>
-                    <ArchivedNamesets
-                      archivedNamesets={archivedNamesets}
-                      setArchivedNamesets={setArchivedNamesets}
-                      setNamesets={setNamesets}
-                      searchTerm={archivedNamesetsSearchTerm}
-                    />
-                  </div>
-                </>
-              )}
-            </>
-          ) : (
-            <>
-              <div className="card-header mini-header mini-header-red">
-                <span>Archived Namesets (0)</span>
-              </div>
-              <div style={{ padding: '10px 20px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
-                No archived namesets available.
-              </div>
-            </>
-          )}
-        </div>
       </div>
 
       {/* Manage Badges */}

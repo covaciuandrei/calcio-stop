@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import { createPortal } from 'react-dom';
 import { Nameset } from '../types/types';
-import { generateSeasons } from '../utils/utils';
-import AddNamesetForm from './AddNamesetForm';
+import EditNamesetModal from './EditNamesetModal';
 import NamesetTableList from './NamesetTableList';
 
 interface Props {
@@ -12,12 +10,8 @@ interface Props {
   setArchivedNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
 }
 
-const NamesetSection: React.FC<Props> = ({ namesets, setNamesets, archivedNamesets, setArchivedNamesets }) => {
+const NamesetsTableListCard: React.FC<Props> = ({ namesets, setNamesets, archivedNamesets, setArchivedNamesets }) => {
   const [editingNameset, setEditingNameset] = useState<Nameset | null>(null);
-  const [playerName, setPlayerName] = useState('');
-  const [number, setNumber] = useState<number | ''>('');
-  const [season, setSeason] = useState('2025/2026');
-  const [quantity, setQuantity] = useState<number | ''>('');
   const [isNamesetsExpanded, setIsNamesetsExpanded] = useState(true);
   const [namesetsSearchTerm, setNamesetsSearchTerm] = useState('');
 
@@ -32,46 +26,10 @@ const NamesetSection: React.FC<Props> = ({ namesets, setNamesets, archivedNamese
 
   const handleEditClick = (n: Nameset) => {
     setEditingNameset(n);
-    setPlayerName(n.playerName);
-    setNumber(n.number);
-    setSeason(n.season);
-    setQuantity(n.quantity);
-  };
-
-  const handleSaveEdit = () => {
-    if (!playerName.trim()) return alert('Player name cannot be empty');
-    if (number === '' || number < 1) return alert('Number must be positive');
-    if (quantity === '' || quantity < 0) return alert('Quantity must be 0 or greater');
-
-    setNamesets((prev) =>
-      prev.map((n) =>
-        n.id === editingNameset?.id
-          ? {
-              ...n,
-              playerName: playerName.trim(),
-              number: Number(number),
-              season,
-              quantity: Number(quantity),
-            }
-          : n
-      )
-    );
-    setEditingNameset(null);
   };
 
   return (
-    <div>
-      {/* Add New Nameset Card */}
-      <div className="card">
-        <div className="card-header mini-header mini-header-green">
-          <span>Add New Nameset</span>
-        </div>
-        <div className="card-content">
-          <AddNamesetForm namesets={namesets} setNamesets={setNamesets} />
-        </div>
-      </div>
-
-      {/* Namesets List Card */}
+    <>
       <div className="card">
         {namesets.length > 0 ? (
           <>
@@ -131,58 +89,13 @@ const NamesetSection: React.FC<Props> = ({ namesets, setNamesets, archivedNamese
         )}
       </div>
 
-      {editingNameset &&
-        createPortal(
-          <div className="modal">
-            <div className="modal-content" style={{ maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto' }}>
-              <h3>Edit Nameset</h3>
-              <label>
-                Player Name:
-                <input type="text" value={playerName} onChange={(e) => setPlayerName(e.target.value)} />
-              </label>
-              <label>
-                Number:
-                <input
-                  type="number"
-                  min={1}
-                  value={number}
-                  onChange={(e) => setNumber(parseInt(e.target.value) || '')}
-                />
-              </label>
-              <label>
-                Season:
-                <select value={season} onChange={(e) => setSeason(e.target.value)}>
-                  {generateSeasons().map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Quantity:
-                <input
-                  type="number"
-                  min={0}
-                  value={quantity}
-                  onChange={(e) => setQuantity(parseInt(e.target.value) || '')}
-                />
-              </label>
-
-              <div className="modal-buttons">
-                <button onClick={handleSaveEdit} className="btn btn-success">
-                  Save
-                </button>
-                <button onClick={() => setEditingNameset(null)} className="btn btn-secondary">
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>,
-          document.body
-        )}
-    </div>
+      <EditNamesetModal
+        editingNameset={editingNameset}
+        setEditingNameset={setEditingNameset}
+        setNamesets={setNamesets}
+      />
+    </>
   );
 };
 
-export default NamesetSection;
+export default NamesetsTableListCard;
