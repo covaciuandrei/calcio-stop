@@ -1,0 +1,14 @@
+/* Shared styles for form components */
+
+.fullWidthGroup {
+  width: 100%;
+}
+
+.sizeQuantityGrid {
+  margin-top: var(--space-3);
+}
+
+.modalContentScrollable {
+  max-height: 90vh;
+  overflow-y: auto;
+}

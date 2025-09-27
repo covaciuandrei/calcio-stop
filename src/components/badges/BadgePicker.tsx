@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Badge } from '../../types';
+import styles from '../shared/Picker.module.css';
 import AddBadgeForm from './AddBadgeForm';
 
 interface Props {
@@ -70,9 +71,9 @@ const BadgePicker: React.FC<Props> = ({
   const selectedBadge = badges.find((b) => b.id === selectedBadgeId);
 
   return (
-    <div className="nameset-picker" ref={pickerRef} style={{ width: '200px' }}>
+    <div className={styles.picker} ref={pickerRef} style={{ width: '200px' }}>
       <div
-        className={`nameset-picker-trigger ${adding ? 'disabled' : ''}`}
+        className={`${styles.pickerTrigger} ${adding ? styles.disabled : ''}`}
         onClick={() => !adding && setIsOpen((prev) => !prev)}
       >
         {selectedBadge ? selectedBadge.name : placeholder}
@@ -85,7 +86,7 @@ const BadgePicker: React.FC<Props> = ({
         createPortal(
           <div
             ref={dropdownRef}
-            className="nameset-picker-dropdown"
+            className={styles.pickerDropdown}
             style={{
               width: 280,
               left: pickerRef.current?.getBoundingClientRect().left,
@@ -93,18 +94,18 @@ const BadgePicker: React.FC<Props> = ({
             }}
             onMouseDown={(e) => e.stopPropagation()}
           >
-            <div className="nameset-picker-add-button" onClick={() => setAdding(true)}>
+            <div className={styles.pickerAddButton} onClick={() => setAdding(true)}>
               + Add Badge
             </div>
-            <div className="nameset-picker-search">
+            <div className={styles.pickerSearch}>
               <input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
-            <div className="nameset-picker-list">
-              {filteredBadges.length === 0 && <div className="nameset-picker-empty">No badges found</div>}
+            <div className={styles.pickerList}>
+              {filteredBadges.length === 0 && <div className={styles.pickerEmpty}>No badges found</div>}
               {filteredBadges.map((b) => (
                 <div
                   key={b.id}
-                  className={`nameset-picker-option ${b.id === selectedBadgeId ? 'selected' : ''}`}
+                  className={`${styles.pickerOption} ${b.id === selectedBadgeId ? styles.selected : ''}`}
                   onClick={() => {
                     onBadgeSelect(b.id);
                     setIsOpen(false);
@@ -123,7 +124,7 @@ const BadgePicker: React.FC<Props> = ({
         createPortal(
           <div
             ref={dropdownRef}
-            className="nameset-picker-dropdown"
+            className={styles.pickerDropdown}
             style={{
               width: 280,
               left: pickerRef.current?.getBoundingClientRect().left,
@@ -131,14 +132,7 @@ const BadgePicker: React.FC<Props> = ({
             }}
             onMouseDown={(e) => e.stopPropagation()}
           >
-            <div
-              style={{
-                padding: '10px',
-                boxSizing: 'border-box',
-                width: '100%',
-                overflow: 'hidden',
-              }}
-            >
+            <div className={styles.pickerFormContainer}>
               <AddBadgeForm
                 badges={badges}
                 setBadges={setBadges}
@@ -147,22 +141,7 @@ const BadgePicker: React.FC<Props> = ({
                   setAdding(false);
                 }}
               />
-              <button
-                style={{
-                  marginTop: '10px',
-                  backgroundColor: '#e74c3c',
-                  color: 'white',
-                  padding: '6px 12px',
-                  borderRadius: '4px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  width: '100%',
-                  height: '32px',
-                  fontSize: '13px',
-                  boxSizing: 'border-box',
-                }}
-                onClick={() => setAdding(false)}
-              >
+              <button className={styles.pickerCancelButton} onClick={() => setAdding(false)}>
                 Cancel
               </button>
             </div>

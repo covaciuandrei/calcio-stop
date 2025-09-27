@@ -49,8 +49,6 @@ const Dashboard: React.FC<Props> = ({
 }) => {
   return (
     <div>
-      <h1 className="section-header">Dashboard Overview</h1>
-
       {/* Manage Products */}
       <div className="card">
         <div className="card-header mini-header mini-header-purple">Manage Products</div>

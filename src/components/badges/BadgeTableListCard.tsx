@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Badge } from '../../types';
+import styles from '../shared/TableListCard.module.css';
 import BadgeTableList from './BadgeTableList';
 import EditBadgeModal from './EditBadgeModal';
 
@@ -34,39 +35,30 @@ const BadgeTableListCard: React.FC<Props> = ({ badges, setBadges, archivedBadges
         {badges.length > 0 ? (
           <>
             <div
-              className="card-header mini-header mini-header-orange"
-              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+              className={`card-header mini-header mini-header-orange ${styles.expandableHeader}`}
               onClick={() => setIsBadgesExpanded(!isBadgesExpanded)}
             >
               <span>Active Badges ({badges.length})</span>
-              <span style={{ fontSize: '12px' }}>{isBadgesExpanded ? '▼' : '▶'}</span>
+              <span className={`${styles.expandIcon} ${isBadgesExpanded ? styles.expanded : styles.collapsed}`}>▼</span>
             </div>
             {!isBadgesExpanded && (
-              <div style={{ padding: '10px 20px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
-                There are {badges.length} badges available.
-              </div>
+              <div className={styles.collapsedContent}>There are {badges.length} badges available.</div>
             )}
             {isBadgesExpanded && (
               <>
                 <h3 className="card-section-header">Active Badges List</h3>
                 {badges.length >= 2 && (
-                  <div style={{ marginBottom: '15px' }}>
+                  <div className={styles.searchContainer}>
                     <input
                       type="text"
                       placeholder="Search badges..."
                       value={badgesSearchTerm}
                       onChange={(e) => setBadgesSearchTerm(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '8px 12px',
-                        border: '1px solid #ccc',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                      }}
+                      className={styles.searchInput}
                     />
                   </div>
                 )}
-                <div style={{ maxHeight: '700px', overflowY: 'auto' }}>
+                <div className={styles.tableContainer}>
                   <BadgeTableList
                     badges={badges}
                     onEdit={handleEditClick}
@@ -82,9 +74,7 @@ const BadgeTableListCard: React.FC<Props> = ({ badges, setBadges, archivedBadges
             <div className="card-header mini-header mini-header-orange">
               <span>Active Badges (0)</span>
             </div>
-            <div style={{ padding: '10px 20px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
-              No active badges available.
-            </div>
+            <div className={styles.emptyState}>No active badges available.</div>
           </>
         )}
       </div>

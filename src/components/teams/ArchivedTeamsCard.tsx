@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Team } from '../../types';
+import styles from '../shared/TableListCard.module.css';
 import ArchivedTeams from './ArchivedTeams';
 
 interface Props {
@@ -14,43 +15,36 @@ const ArchivedTeamsCard: React.FC<Props> = ({ teams, setTeams, archivedTeams, se
   const [archivedTeamsSearchTerm, setArchivedTeamsSearchTerm] = useState('');
 
   return (
-    <div className="card" style={{ marginTop: '20px' }}>
+    <div className="card" style={{ marginTop: 'var(--space-5)' }}>
       {archivedTeams.length > 0 ? (
         <>
           <div
-            className="card-header mini-header mini-header-red"
-            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+            className={`card-header mini-header mini-header-red ${styles.expandableHeader}`}
             onClick={() => setIsArchivedTeamsExpanded(!isArchivedTeamsExpanded)}
           >
             <span>Archived Teams ({archivedTeams.length})</span>
-            <span style={{ fontSize: '12px' }}>{isArchivedTeamsExpanded ? '▼' : '▶'}</span>
+            <span className={`${styles.expandIcon} ${isArchivedTeamsExpanded ? styles.expanded : styles.collapsed}`}>
+              ▼
+            </span>
           </div>
           {!isArchivedTeamsExpanded && (
-            <div style={{ padding: '10px 20px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
-              There are {archivedTeams.length} teams available.
-            </div>
+            <div className={styles.collapsedContent}>There are {archivedTeams.length} teams available.</div>
           )}
           {isArchivedTeamsExpanded && (
             <>
               <h3 className="card-section-header">Archived Teams List</h3>
               {archivedTeams.length >= 2 && (
-                <div style={{ marginBottom: '15px' }}>
+                <div className={styles.searchContainer}>
                   <input
                     type="text"
                     placeholder="Search archived teams..."
                     value={archivedTeamsSearchTerm}
                     onChange={(e) => setArchivedTeamsSearchTerm(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #ccc',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                    }}
+                    className={styles.searchInput}
                   />
                 </div>
               )}
-              <div style={{ maxHeight: '700px', overflowY: 'auto' }}>
+              <div className={styles.tableContainer}>
                 <ArchivedTeams
                   archivedTeams={archivedTeams}
                   setArchivedTeams={setArchivedTeams}
@@ -66,9 +60,7 @@ const ArchivedTeamsCard: React.FC<Props> = ({ teams, setTeams, archivedTeams, se
           <div className="card-header mini-header mini-header-red">
             <span>Archived Teams (0)</span>
           </div>
-          <div style={{ padding: '10px 20px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
-            No archived teams available.
-          </div>
+          <div className={styles.emptyState}>No archived teams available.</div>
         </>
       )}
     </div>

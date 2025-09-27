@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Nameset } from '../../types';
+import styles from '../shared/TableListCard.module.css';
 import EditNamesetModal from './EditNamesetModal';
 import NamesetTableList from './NamesetTableList';
 
@@ -34,39 +35,32 @@ const NamesetsTableListCard: React.FC<Props> = ({ namesets, setNamesets, archive
         {namesets.length > 0 ? (
           <>
             <div
-              className="card-header mini-header mini-header-orange"
-              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+              className={`card-header mini-header mini-header-orange ${styles.expandableHeader}`}
               onClick={() => setIsNamesetsExpanded(!isNamesetsExpanded)}
             >
               <span>Active Namesets ({namesets.length})</span>
-              <span style={{ fontSize: '12px' }}>{isNamesetsExpanded ? '▼' : '▶'}</span>
+              <span className={`${styles.expandIcon} ${isNamesetsExpanded ? styles.expanded : styles.collapsed}`}>
+                ▼
+              </span>
             </div>
             {!isNamesetsExpanded && (
-              <div style={{ padding: '10px 20px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
-                There are {namesets.length} namesets available.
-              </div>
+              <div className={styles.collapsedContent}>There are {namesets.length} namesets available.</div>
             )}
             {isNamesetsExpanded && (
               <>
                 <h3 className="card-section-header">Active Namesets List</h3>
                 {namesets.length >= 2 && (
-                  <div style={{ marginBottom: '15px' }}>
+                  <div className={styles.searchContainer}>
                     <input
                       type="text"
                       placeholder="Search namesets..."
                       value={namesetsSearchTerm}
                       onChange={(e) => setNamesetsSearchTerm(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '8px 12px',
-                        border: '1px solid #ccc',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                      }}
+                      className={styles.searchInput}
                     />
                   </div>
                 )}
-                <div style={{ maxHeight: '700px', overflowY: 'auto' }}>
+                <div className={styles.tableContainer}>
                   <NamesetTableList
                     namesets={namesets}
                     onEdit={handleEditClick}
@@ -82,9 +76,7 @@ const NamesetsTableListCard: React.FC<Props> = ({ namesets, setNamesets, archive
             <div className="card-header mini-header mini-header-orange">
               <span>Active Namesets (0)</span>
             </div>
-            <div style={{ padding: '10px 20px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
-              No active namesets available.
-            </div>
+            <div className={styles.emptyState}>No active namesets available.</div>
           </>
         )}
       </div>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Nameset, Product, Team } from '../../types';
+import styles from '../shared/TableListCard.module.css';
 import EditProductModal from './EditProductModal';
 import ProductsTableList from './ProductsTableList';
 
@@ -55,39 +56,32 @@ const ProductsTableListCard: React.FC<Props> = ({
         {products.length > 0 ? (
           <>
             <div
-              className="card-header mini-header mini-header-orange"
-              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+              className={`card-header mini-header mini-header-orange ${styles.expandableHeader}`}
               onClick={() => setIsProductsExpanded(!isProductsExpanded)}
             >
               <span>Active Products ({products.length})</span>
-              <span style={{ fontSize: '12px' }}>{isProductsExpanded ? '▼' : '▶'}</span>
+              <span className={`${styles.expandIcon} ${isProductsExpanded ? styles.expanded : styles.collapsed}`}>
+                ▼
+              </span>
             </div>
             {!isProductsExpanded && (
-              <div style={{ padding: '10px 20px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
-                There are {products.length} products available.
-              </div>
+              <div className={styles.collapsedContent}>There are {products.length} products available.</div>
             )}
             {isProductsExpanded && (
               <>
                 <h3 className="card-section-header">Product List</h3>
                 {products.length >= 2 && (
-                  <div style={{ marginBottom: '15px' }}>
+                  <div className={styles.searchContainer}>
                     <input
                       type="text"
                       placeholder="Search products..."
                       value={productsSearchTerm}
                       onChange={(e) => setProductsSearchTerm(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '8px 12px',
-                        border: '1px solid #ccc',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                      }}
+                      className={styles.searchInput}
                     />
                   </div>
                 )}
-                <div style={{ maxHeight: '700px', overflowY: 'auto' }}>
+                <div className={styles.tableContainer}>
                   <ProductsTableList
                     products={products}
                     onEdit={handleEditClick}
@@ -107,9 +101,7 @@ const ProductsTableListCard: React.FC<Props> = ({
             <div className="card-header mini-header mini-header-orange">
               <span>Active Products (0)</span>
             </div>
-            <div style={{ padding: '10px 20px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
-              No active products available.
-            </div>
+            <div className={styles.emptyState}>No active products available.</div>
           </>
         )}
       </div>

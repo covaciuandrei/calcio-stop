@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Nameset, Product, ProductSizeQuantity, ProductType, Team } from '../../types';
 import NamesetPicker from '../namesets/NamesetPicker';
+import styles from '../shared/Form.module.css';
 import TeamPicker from '../teams/TeamPicker';
 
 interface Props {
@@ -77,7 +78,7 @@ const EditProductModal: React.FC<Props> = ({
 
   return createPortal(
     <div className="modal">
-      <div className="modal-content" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
+      <div className={`modal-content ${styles.modalContentScrollable}`}>
         <h3>Edit Product</h3>
 
         <label>
@@ -114,7 +115,7 @@ const EditProductModal: React.FC<Props> = ({
 
         <label>
           Sizes & Quantities:
-          <div className="size-quantity-grid" style={{ marginTop: '10px' }}>
+          <div className={`size-quantity-grid ${styles.sizeQuantityGrid}`}>
             {sizes.map((sq) => (
               <div key={sq.size} className="size-quantity-item">
                 <div className="size-quantity-label">{sq.size}</div>

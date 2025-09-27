@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Nameset, Product, Sale, Team } from '../../types';
+import styles from '../shared/TableListCard.module.css';
 import EditSaleModal from './EditSaleModal';
 import SalesTableList from './SalesTableList';
 
@@ -41,39 +42,30 @@ const SalesTableListCard: React.FC<Props> = ({
         {sales.length > 0 ? (
           <>
             <div
-              className="card-header mini-header mini-header-orange"
-              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+              className={`card-header mini-header mini-header-orange ${styles.expandableHeader}`}
               onClick={() => setIsSalesExpanded(!isSalesExpanded)}
             >
               <span>Sales History ({sales.length})</span>
-              <span style={{ fontSize: '12px' }}>{isSalesExpanded ? '▼' : '▶'}</span>
+              <span className={`${styles.expandIcon} ${isSalesExpanded ? styles.expanded : styles.collapsed}`}>▼</span>
             </div>
             {!isSalesExpanded && (
-              <div style={{ padding: '10px 20px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
-                There are {sales.length} sales recorded.
-              </div>
+              <div className={styles.collapsedContent}>There are {sales.length} sales recorded.</div>
             )}
             {isSalesExpanded && (
               <>
                 <h3 className="card-section-header">Sales History</h3>
                 {sales.length >= 2 && (
-                  <div style={{ marginBottom: '15px' }}>
+                  <div className={styles.searchContainer}>
                     <input
                       type="text"
                       placeholder="Search sales..."
                       value={salesSearchTerm}
                       onChange={(e) => setSalesSearchTerm(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '8px 12px',
-                        border: '1px solid #ccc',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                      }}
+                      className={styles.searchInput}
                     />
                   </div>
                 )}
-                <div style={{ maxHeight: '700px', overflowY: 'auto' }}>
+                <div className={styles.tableContainer}>
                   <SalesTableList
                     sales={sales}
                     products={products}
@@ -94,9 +86,7 @@ const SalesTableListCard: React.FC<Props> = ({
             <div className="card-header mini-header mini-header-orange">
               <span>Sales History (0)</span>
             </div>
-            <div style={{ padding: '10px 20px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
-              No sales recorded.
-            </div>
+            <div className={styles.emptyState}>No sales recorded.</div>
           </>
         )}
       </div>

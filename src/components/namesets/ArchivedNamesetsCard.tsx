@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Nameset } from '../../types';
+import styles from '../shared/TableListCard.module.css';
 import ArchivedNamesets from './ArchivedNamesets';
 
 interface Props {
@@ -14,43 +15,36 @@ const ArchivedNamesetsCard: React.FC<Props> = ({ namesets, setNamesets, archived
   const [archivedNamesetsSearchTerm, setArchivedNamesetsSearchTerm] = useState('');
 
   return (
-    <div className="card" style={{ marginTop: '20px' }}>
+    <div className="card" style={{ marginTop: 'var(--space-5)' }}>
       {archivedNamesets.length > 0 ? (
         <>
           <div
-            className="card-header mini-header mini-header-red"
-            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+            className={`card-header mini-header mini-header-red ${styles.expandableHeader}`}
             onClick={() => setIsArchivedNamesetsExpanded(!isArchivedNamesetsExpanded)}
           >
             <span>Archived Namesets ({archivedNamesets.length})</span>
-            <span style={{ fontSize: '12px' }}>{isArchivedNamesetsExpanded ? '▼' : '▶'}</span>
+            <span className={`${styles.expandIcon} ${isArchivedNamesetsExpanded ? styles.expanded : styles.collapsed}`}>
+              ▼
+            </span>
           </div>
           {!isArchivedNamesetsExpanded && (
-            <div style={{ padding: '10px 20px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
-              There are {archivedNamesets.length} namesets available.
-            </div>
+            <div className={styles.collapsedContent}>There are {archivedNamesets.length} namesets available.</div>
           )}
           {isArchivedNamesetsExpanded && (
             <>
               <h3 className="card-section-header">Archived Namesets List</h3>
               {archivedNamesets.length >= 2 && (
-                <div style={{ marginBottom: '15px' }}>
+                <div className={styles.searchContainer}>
                   <input
                     type="text"
                     placeholder="Search archived namesets..."
                     value={archivedNamesetsSearchTerm}
                     onChange={(e) => setArchivedNamesetsSearchTerm(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #ccc',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                    }}
+                    className={styles.searchInput}
                   />
                 </div>
               )}
-              <div style={{ maxHeight: '700px', overflowY: 'auto' }}>
+              <div className={styles.tableContainer}>
                 <ArchivedNamesets
                   archivedNamesets={archivedNamesets}
                   setArchivedNamesets={setArchivedNamesets}
@@ -66,9 +60,7 @@ const ArchivedNamesetsCard: React.FC<Props> = ({ namesets, setNamesets, archived
           <div className="card-header mini-header mini-header-red">
             <span>Archived Namesets (0)</span>
           </div>
-          <div style={{ padding: '10px 20px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
-            No archived namesets available.
-          </div>
+          <div className={styles.emptyState}>No archived namesets available.</div>
         </>
       )}
     </div>

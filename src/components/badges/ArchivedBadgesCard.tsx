@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Badge } from '../../types';
+import styles from '../shared/TableListCard.module.css';
 import ArchivedBadges from './ArchivedBadges';
 
 interface Props {
@@ -14,43 +15,36 @@ const ArchivedBadgesCard: React.FC<Props> = ({ badges, setBadges, archivedBadges
   const [archivedBadgesSearchTerm, setArchivedBadgesSearchTerm] = useState('');
 
   return (
-    <div className="card" style={{ marginTop: '20px' }}>
+    <div className="card" style={{ marginTop: 'var(--space-5)' }}>
       {archivedBadges.length > 0 ? (
         <>
           <div
-            className="card-header mini-header mini-header-red"
-            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+            className={`card-header mini-header mini-header-red ${styles.expandableHeader}`}
             onClick={() => setIsArchivedBadgesExpanded(!isArchivedBadgesExpanded)}
           >
             <span>Archived Badges ({archivedBadges.length})</span>
-            <span style={{ fontSize: '12px' }}>{isArchivedBadgesExpanded ? '▼' : '▶'}</span>
+            <span className={`${styles.expandIcon} ${isArchivedBadgesExpanded ? styles.expanded : styles.collapsed}`}>
+              ▼
+            </span>
           </div>
           {!isArchivedBadgesExpanded && (
-            <div style={{ padding: '10px 20px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
-              There are {archivedBadges.length} badges available.
-            </div>
+            <div className={styles.collapsedContent}>There are {archivedBadges.length} badges available.</div>
           )}
           {isArchivedBadgesExpanded && (
             <>
               <h3 className="card-section-header">Archived Badges List</h3>
               {archivedBadges.length >= 2 && (
-                <div style={{ marginBottom: '15px' }}>
+                <div className={styles.searchContainer}>
                   <input
                     type="text"
                     placeholder="Search archived badges..."
                     value={archivedBadgesSearchTerm}
                     onChange={(e) => setArchivedBadgesSearchTerm(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #ccc',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                    }}
+                    className={styles.searchInput}
                   />
                 </div>
               )}
-              <div style={{ maxHeight: '700px', overflowY: 'auto' }}>
+              <div className={styles.tableContainer}>
                 <ArchivedBadges
                   archivedBadges={archivedBadges}
                   setArchivedBadges={setArchivedBadges}
@@ -66,9 +60,7 @@ const ArchivedBadgesCard: React.FC<Props> = ({ badges, setBadges, archivedBadges
           <div className="card-header mini-header mini-header-red">
             <span>Archived Badges (0)</span>
           </div>
-          <div style={{ padding: '10px 20px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
-            No archived badges available.
-          </div>
+          <div className={styles.emptyState}>No archived badges available.</div>
         </>
       )}
     </div>

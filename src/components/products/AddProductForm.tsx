@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { AdultSize, KidSize, Nameset, Product, ProductSizeQuantity, ProductType, Team } from '../../types';
 import NamesetPicker from '../namesets/NamesetPicker';
+import styles from '../shared/Form.module.css';
 import TeamPicker from '../teams/TeamPicker';
 
 interface Props {
@@ -137,7 +138,7 @@ const AddProductForm: React.FC<Props> = ({
         />
       </div>
 
-      <div className="form-group" style={{ width: '100%' }}>
+      <div className={`form-group ${styles.fullWidthGroup}`}>
         <label>Sizes & Quantities</label>
         <div className="size-quantity-grid">
           {sizes.map((sq) => (
