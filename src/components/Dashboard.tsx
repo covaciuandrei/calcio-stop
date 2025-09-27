@@ -1,10 +1,8 @@
 import React from 'react';
 import { Badge, Nameset, Product, Sale, Team } from '../types/types';
-import AddProductForm from './AddProductForm';
-import ArchivedProducts from './ArchivedProducts';
 import BadgesPage from './BadgesPage';
 import NamesetsPage from './NamesetsPage';
-import ProductList from './ProductList';
+import ProductsPage from './ProductsPage';
 import SalesPage from './SalesPage';
 import TeamsPage from './TeamsPage';
 
@@ -53,12 +51,14 @@ const Dashboard: React.FC<Props> = ({
     <div>
       <h1 className="section-header">Dashboard Overview</h1>
 
-      {/* Add Product Card */}
-      <div className="card add-product-card">
-        <div className="card-header mini-header mini-header-blue">Add Product</div>
-        <AddProductForm
+      {/* Manage Products */}
+      <div className="card">
+        <div className="card-header mini-header mini-header-purple">Manage Products</div>
+        <ProductsPage
           products={products}
           setProducts={setProducts}
+          archivedProducts={archivedProducts}
+          setArchivedProducts={setArchivedProducts}
           namesets={namesets}
           setNamesets={setNamesets}
           archivedNamesets={archivedNamesets}
@@ -78,39 +78,6 @@ const Dashboard: React.FC<Props> = ({
           setProducts={setProducts}
           sales={sales}
           setSales={setSales}
-          namesets={namesets}
-          archivedNamesets={archivedNamesets}
-          teams={teams}
-          archivedTeams={archivedTeams}
-        />
-      </div>
-
-      {/* Products Table */}
-      <div className="card">
-        <div className="card-header mini-header mini-header-green">Products</div>
-        <h3 className="card-section-header">Product List</h3>
-        <ProductList
-          products={products}
-          setProducts={setProducts}
-          archivedProducts={archivedProducts}
-          setArchivedProducts={setArchivedProducts}
-          namesets={namesets}
-          setNamesets={setNamesets}
-          archivedNamesets={archivedNamesets}
-          setArchivedNamesets={setArchivedNamesets}
-          teams={teams}
-          setTeams={setTeams}
-          archivedTeams={archivedTeams}
-          setArchivedTeams={setArchivedTeams}
-        />
-      </div>
-
-      {/* Archived Products */}
-      <div className="card">
-        <div className="card-header mini-header mini-header-red">Archived Products</div>
-        <h3 className="card-section-header">Archived List</h3>
-        <ArchivedProducts
-          archivedProducts={archivedProducts}
           namesets={namesets}
           archivedNamesets={archivedNamesets}
           teams={teams}

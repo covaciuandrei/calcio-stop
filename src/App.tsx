@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import './App.css';
-import AddProductForm from './components/AddProductForm';
 import BadgesPage from './components/BadgesPage';
 import Dashboard from './components/Dashboard';
 import NamesetsPage from './components/NamesetsPage';
-import ProductList from './components/ProductList';
+import ProductsPage from './components/ProductsPage';
 import SalesPage from './components/SalesPage';
 import TeamsPage from './components/TeamsPage';
 import { Badge, Nameset, Product, Sale, Team } from './types/types';
@@ -79,7 +78,6 @@ const App: React.FC = () => {
             Dashboard
           </NavLink>
           <NavLink to="/products">Products</NavLink>
-          <NavLink to="/add">Add Product</NavLink>
           <NavLink to="/sales">Sales</NavLink>
           <NavLink to="/namesets">Namesets</NavLink>
           <NavLink to="/teams">Teams</NavLink>
@@ -117,9 +115,8 @@ const App: React.FC = () => {
           <Route
             path="/products"
             element={
-              <div className="card">
-                {' '}
-                <ProductList
+              <>
+                <ProductsPage
                   products={products}
                   setProducts={setProducts}
                   archivedProducts={archivedProducts}
@@ -133,24 +130,7 @@ const App: React.FC = () => {
                   archivedTeams={archivedTeams}
                   setArchivedTeams={setArchivedTeams}
                 />
-              </div>
-            }
-          />
-          <Route
-            path="/add"
-            element={
-              <AddProductForm
-                products={products}
-                setProducts={setProducts}
-                namesets={namesets}
-                setNamesets={setNamesets}
-                archivedNamesets={archivedNamesets}
-                setArchivedNamesets={setArchivedNamesets}
-                teams={teams}
-                setTeams={setTeams}
-                archivedTeams={archivedTeams}
-                setArchivedTeams={setArchivedTeams}
-              />
+              </>
             }
           />
 
