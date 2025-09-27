@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { NavLink, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import './App.css';
 import AddProductForm from './components/AddProductForm';
-import ArchivedProducts from './components/ArchivedProducts';
 import BadgesPage from './components/BadgesPage';
 import Dashboard from './components/Dashboard';
 import NamesetsPage from './components/NamesetsPage';
@@ -82,7 +81,6 @@ const App: React.FC = () => {
           <NavLink to="/products">Products</NavLink>
           <NavLink to="/add">Add Product</NavLink>
           <NavLink to="/sales">Sales</NavLink>
-          <NavLink to="/archived">Archived</NavLink>
           <NavLink to="/namesets">Namesets</NavLink>
           <NavLink to="/teams">Teams</NavLink>
           <NavLink to="/badges">Badges</NavLink>
@@ -172,20 +170,6 @@ const App: React.FC = () => {
                   archivedTeams={archivedTeams}
                 />
               </>
-            }
-          />
-
-          {/* Archived */}
-          <Route
-            path="/archived"
-            element={
-              <ArchivedProducts
-                archivedProducts={archivedProducts}
-                namesets={namesets}
-                archivedNamesets={archivedNamesets}
-                teams={teams}
-                archivedTeams={archivedTeams}
-              />
             }
           />
 
