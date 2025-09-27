@@ -1,4 +1,4 @@
-import { Badge, Nameset, Team } from '../types/types';
+import { Nameset, Team } from '../types';
 
 export const generateSeasons = (start = 1990, end = 2030): string[] =>
   Array.from({ length: end - start + 1 }, (_, i) => {
@@ -52,32 +52,4 @@ export const getTeamInfo = (teamId: string | null, teams: Team[], archivedTeams:
   }
 
   return team.name;
-};
-
-export const getBadgeInfo = (
-  badgeId: string | null,
-  badges: Badge[],
-  archivedBadges: Badge[] = []
-): { name: string; season: string; quantity: number } => {
-  if (!badgeId) {
-    return { name: '-', season: '-', quantity: 0 };
-  }
-
-  // First check in active badges
-  let badge = badges.find((b) => b.id === badgeId);
-
-  // If not found, check in archived badges
-  if (!badge) {
-    badge = archivedBadges.find((b) => b.id === badgeId);
-  }
-
-  if (!badge) {
-    return { name: 'Unknown badge', season: '-', quantity: 0 };
-  }
-
-  return {
-    name: badge.name,
-    season: badge.season,
-    quantity: badge.quantity,
-  };
 };

@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import './App.css';
-import BadgesPage from './components/BadgesPage';
+import BadgesPage from './components/badges/BadgesPage';
 import Dashboard from './components/Dashboard';
-import NamesetsPage from './components/NamesetsPage';
-import ProductsPage from './components/ProductsPage';
-import SalesPage from './components/SalesPage';
-import TeamsPage from './components/TeamsPage';
-import { Badge, Nameset, Product, Sale, Team } from './types/types';
+import NamesetsPage from './components/namesets/NamesetsPage';
+import ProductsPage from './components/products/ProductsPage';
+import SalesPage from './components/sales/SalesPage';
+import TeamsPage from './components/teams/TeamsPage';
+import { Badge, Nameset, Product, Sale, Team } from './types';
 
 const App: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);

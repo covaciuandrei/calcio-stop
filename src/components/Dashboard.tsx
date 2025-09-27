@@ -1,10 +1,10 @@
 import React from 'react';
-import { Badge, Nameset, Product, Sale, Team } from '../types/types';
-import BadgesPage from './BadgesPage';
-import NamesetsPage from './NamesetsPage';
-import ProductsPage from './ProductsPage';
-import SalesPage from './SalesPage';
-import TeamsPage from './TeamsPage';
+import { Badge, Nameset, Product, Sale, Team } from '../types';
+import BadgesPage from './badges/BadgesPage';
+import NamesetsPage from './namesets/NamesetsPage';
+import ProductsPage from './products/ProductsPage';
+import SalesPage from './sales/SalesPage';
+import TeamsPage from './teams/TeamsPage';
 
 interface Props {
   products: Product[];
