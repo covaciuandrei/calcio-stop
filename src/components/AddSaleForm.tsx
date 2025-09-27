@@ -13,7 +13,7 @@ interface Props {
   archivedTeams: Team[];
 }
 
-const SaleForm: React.FC<Props> = ({
+const AddSaleForm: React.FC<Props> = ({
   products,
   setProducts,
   sales,
@@ -170,4 +170,4 @@ const SaleForm: React.FC<Props> = ({
   );
 };
 
-export default SaleForm;
+export default AddSaleForm;
