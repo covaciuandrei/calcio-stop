@@ -5,8 +5,7 @@ import ArchivedProducts from './ArchivedProducts';
 import BadgesPage from './BadgesPage';
 import NamesetsPage from './NamesetsPage';
 import ProductList from './ProductList';
-import SaleForm from './SaleForm';
-import SaleHistory from './SaleHistory';
+import SalesPage from './SalesPage';
 import TeamsPage from './TeamsPage';
 
 interface Props {
@@ -71,10 +70,10 @@ const Dashboard: React.FC<Props> = ({
         />
       </div>
 
-      {/* Record Sale Card */}
+      {/* Manage Sales */}
       <div className="card">
-        <div className="card-header mini-header mini-header-orange">Record Sale</div>
-        <SaleForm
+        <div className="card-header mini-header mini-header-purple">Manage Sales</div>
+        <SalesPage
           products={products}
           setProducts={setProducts}
           sales={sales}
@@ -103,22 +102,6 @@ const Dashboard: React.FC<Props> = ({
           setTeams={setTeams}
           archivedTeams={archivedTeams}
           setArchivedTeams={setArchivedTeams}
-        />
-      </div>
-
-      {/* Sales Table */}
-      <div className="card">
-        <div className="card-header mini-header mini-header-yellow">Sales</div>
-        <h3 className="card-section-header">Sale History</h3>
-        <SaleHistory
-          sales={sales}
-          products={products}
-          archivedProducts={archivedProducts}
-          setSales={setSales}
-          namesets={namesets}
-          archivedNamesets={archivedNamesets}
-          teams={teams}
-          archivedTeams={archivedTeams}
         />
       </div>
 

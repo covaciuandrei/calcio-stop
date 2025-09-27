@@ -7,8 +7,7 @@ import BadgesPage from './components/BadgesPage';
 import Dashboard from './components/Dashboard';
 import NamesetsPage from './components/NamesetsPage';
 import ProductList from './components/ProductList';
-import SaleForm from './components/SaleForm';
-import SaleHistory from './components/SaleHistory';
+import SalesPage from './components/SalesPage';
 import TeamsPage from './components/TeamsPage';
 import { Badge, Nameset, Product, Sale, Team } from './types/types';
 
@@ -162,20 +161,10 @@ const App: React.FC = () => {
             path="/sales"
             element={
               <>
-                <SaleForm
+                <SalesPage
                   products={products}
                   setProducts={setProducts}
                   sales={sales}
-                  setSales={setSales}
-                  namesets={namesets}
-                  archivedNamesets={archivedNamesets}
-                  teams={teams}
-                  archivedTeams={archivedTeams}
-                />
-                <SaleHistory
-                  sales={sales}
-                  products={products}
-                  archivedProducts={archivedProducts}
                   setSales={setSales}
                   namesets={namesets}
                   archivedNamesets={archivedNamesets}
