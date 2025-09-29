@@ -5,6 +5,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  transition: background-color var(--transition-slow);
+}
+
+.expandableHeader:hover {
+  background-color: var(--primary-200) !important;
 }
 
 .expandIcon {
@@ -25,6 +30,23 @@
   font-size: var(--font-size-sm);
   color: var(--gray-500);
   font-style: italic;
+  text-align: left;
+}
+
+.collapsibleContent {
+  overflow: hidden;
+  transition:
+    max-height var(--transition-slow),
+    opacity var(--transition-slow);
+  max-height: 2000px; /* Large enough to accommodate content */
+  opacity: 1;
+}
+
+.collapsibleContent.collapsed {
+  max-height: 0;
+  opacity: 0;
+  margin: 0;
+  padding: 0;
 }
 
 .searchContainer {
