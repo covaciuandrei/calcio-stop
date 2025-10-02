@@ -1,16 +1,18 @@
 import React from 'react';
-import { Nameset, Product, Team } from '../../types';
+import { useArchivedNamesets, useArchivedTeams, useNamesetsList, useTeamsList } from '../../stores';
+import { Product } from '../../types';
 import { getNamesetInfo, getTeamInfo } from '../../utils/utils';
 
 interface Props {
   archivedProducts: Product[];
-  namesets: Nameset[];
-  archivedNamesets: Nameset[];
-  teams: Team[];
-  archivedTeams: Team[];
 }
 
-const ArchivedProducts: React.FC<Props> = ({ archivedProducts, namesets, archivedNamesets, teams, archivedTeams }) => {
+const ArchivedProducts: React.FC<Props> = ({ archivedProducts }) => {
+  // Get data from stores
+  const namesets = useNamesetsList();
+  const archivedNamesets = useArchivedNamesets();
+  const teams = useTeamsList();
+  const archivedTeams = useArchivedTeams();
   return (
     <div>
       {archivedProducts.length === 0 ? (

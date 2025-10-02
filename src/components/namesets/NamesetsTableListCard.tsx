@@ -1,28 +1,21 @@
 import React, { useState } from 'react';
+import { useNamesetsActions, useNamesetsList } from '../../stores';
 import { Nameset } from '../../types';
 import styles from '../shared/TableListCard.module.css';
 import EditNamesetModal from './EditNamesetModal';
 import NamesetTableList from './NamesetTableList';
 
-interface Props {
-  namesets: Nameset[];
-  setNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
-  archivedNamesets: Nameset[];
-  setArchivedNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
-}
-
-const NamesetsTableListCard: React.FC<Props> = ({ namesets, setNamesets, archivedNamesets, setArchivedNamesets }) => {
+const NamesetsTableListCard: React.FC = () => {
+  // Get data and actions from stores
+  const namesets = useNamesetsList();
+  const { archiveNameset } = useNamesetsActions();
   const [editingNameset, setEditingNameset] = useState<Nameset | null>(null);
   const [isNamesetsExpanded, setIsNamesetsExpanded] = useState(true);
   const [namesetsSearchTerm, setNamesetsSearchTerm] = useState('');
 
   const handleArchive = (id: string) => {
     if (!window.confirm('Are you sure you want to archive this nameset?')) return;
-    const namesetToArchive = namesets.find((n) => n.id === id);
-    if (namesetToArchive) {
-      setArchivedNamesets((prev) => [...prev, namesetToArchive]);
-      setNamesets(namesets.filter((n) => n.id !== id));
-    }
+    archiveNameset(id);
   };
 
   const handleEditClick = (n: Nameset) => {
@@ -81,11 +74,7 @@ const NamesetsTableListCard: React.FC<Props> = ({ namesets, setNamesets, archive
         )}
       </div>
 
-      <EditNamesetModal
-        editingNameset={editingNameset}
-        setEditingNameset={setEditingNameset}
-        setNamesets={setNamesets}
-      />
+      <EditNamesetModal editingNameset={editingNameset} setEditingNameset={setEditingNameset} />
     </>
   );
 };

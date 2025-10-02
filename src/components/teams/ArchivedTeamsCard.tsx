@@ -1,16 +1,11 @@
 import React, { useState } from 'react';
-import { Team } from '../../types';
+import { useArchivedTeams } from '../../stores';
 import styles from '../shared/TableListCard.module.css';
 import ArchivedTeams from './ArchivedTeams';
 
-interface Props {
-  teams: Team[];
-  setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
-  archivedTeams: Team[];
-  setArchivedTeams: React.Dispatch<React.SetStateAction<Team[]>>;
-}
-
-const ArchivedTeamsCard: React.FC<Props> = ({ teams, setTeams, archivedTeams, setArchivedTeams }) => {
+const ArchivedTeamsCard: React.FC = () => {
+  // Get data from store
+  const archivedTeams = useArchivedTeams();
   const [isArchivedTeamsExpanded, setIsArchivedTeamsExpanded] = useState(false);
   const [archivedTeamsSearchTerm, setArchivedTeamsSearchTerm] = useState('');
 
@@ -45,12 +40,7 @@ const ArchivedTeamsCard: React.FC<Props> = ({ teams, setTeams, archivedTeams, se
                 </div>
               )}
               <div className={styles.tableContainer}>
-                <ArchivedTeams
-                  archivedTeams={archivedTeams}
-                  setArchivedTeams={setArchivedTeams}
-                  setTeams={setTeams}
-                  searchTerm={archivedTeamsSearchTerm}
-                />
+                <ArchivedTeams archivedTeams={archivedTeams} searchTerm={archivedTeamsSearchTerm} />
               </div>
             </>
           )}

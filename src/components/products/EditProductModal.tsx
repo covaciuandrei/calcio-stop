@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Nameset, Product, ProductSizeQuantity, ProductType, Team } from '../../types';
+import { useProductsActions } from '../../stores';
+import { Product, ProductSizeQuantity, ProductType } from '../../types';
 import NamesetPicker from '../namesets/NamesetPicker';
 import styles from '../shared/Form.module.css';
 import TeamPicker from '../teams/TeamPicker';
@@ -8,22 +9,11 @@ import TeamPicker from '../teams/TeamPicker';
 interface Props {
   editingProduct: Product | null;
   setEditingProduct: React.Dispatch<React.SetStateAction<Product | null>>;
-  setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
-  namesets: Nameset[];
-  setNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
-  teams: Team[];
-  setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
 }
 
-const EditProductModal: React.FC<Props> = ({
-  editingProduct,
-  setEditingProduct,
-  setProducts,
-  namesets,
-  setNamesets,
-  teams,
-  setTeams,
-}) => {
+const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }) => {
+  // Get store actions
+  const { updateProduct } = useProductsActions();
   const [name, setName] = useState(editingProduct?.name || '');
   const [type, setType] = useState<ProductType>(editingProduct?.type || ProductType.SHIRT);
   const [sizes, setSizes] = useState<ProductSizeQuantity[]>(editingProduct?.sizes || []);
@@ -52,21 +42,14 @@ const EditProductModal: React.FC<Props> = ({
       return;
     }
 
-    setProducts((prev) =>
-      prev.map((p) =>
-        p.id === editingProduct.id
-          ? {
-              ...p,
-              name: name.trim() || '',
-              type,
-              sizes,
-              namesetId: selectedNamesetId,
-              teamId: selectedTeamId,
-              price: Number(price) || 0,
-            }
-          : p
-      )
-    );
+    updateProduct(editingProduct.id, {
+      name: name.trim() || '',
+      type,
+      sizes,
+      namesetId: selectedNamesetId,
+      teamId: selectedTeamId,
+      price: Number(price) || 0,
+    });
     setEditingProduct(null);
   };
 
@@ -84,8 +67,6 @@ const EditProductModal: React.FC<Props> = ({
         <label>
           Select a team:
           <TeamPicker
-            teams={teams}
-            setTeams={setTeams}
             selectedTeamId={selectedTeamId}
             onTeamSelect={setSelectedTeamId}
             placeholder="Select a team (optional)"
@@ -134,8 +115,6 @@ const EditProductModal: React.FC<Props> = ({
         <label>
           Select a nameset:
           <NamesetPicker
-            namesets={namesets}
-            setNamesets={setNamesets}
             selectedNamesetId={selectedNamesetId}
             onNamesetSelect={setSelectedNamesetId}
             placeholder="Select a nameset (optional)"

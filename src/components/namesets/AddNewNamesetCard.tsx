@@ -1,20 +1,14 @@
 import React from 'react';
-import { Nameset } from '../../types';
 import AddNamesetForm from './AddNamesetForm';
 
-interface Props {
-  namesets: Nameset[];
-  setNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
-}
-
-const AddNewNamesetCard: React.FC<Props> = ({ namesets, setNamesets }) => {
+const AddNewNamesetCard: React.FC = () => {
   return (
     <div className="card">
       <div className="card-header mini-header mini-header-green">
         <span>Add New Nameset</span>
       </div>
       <div className="card-content">
-        <AddNamesetForm namesets={namesets} setNamesets={setNamesets} />
+        <AddNamesetForm />
       </div>
     </div>
   );

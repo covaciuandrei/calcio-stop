@@ -1,23 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Nameset } from '../../types';
+import { useNamesetsList } from '../../stores';
 import AddNamesetForm from './AddNamesetForm';
 
 interface Props {
-  namesets: Nameset[];
-  setNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
   selectedNamesetId: string | null;
   onNamesetSelect: (id: string) => void;
   placeholder?: string;
 }
 
-const NamesetPicker: React.FC<Props> = ({
-  namesets,
-  setNamesets,
-  selectedNamesetId,
-  onNamesetSelect,
-  placeholder = 'Select a nameset',
-}) => {
+const NamesetPicker: React.FC<Props> = ({ selectedNamesetId, onNamesetSelect, placeholder = 'Select a nameset' }) => {
+  // Get namesets from store
+  const namesets = useNamesetsList();
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [adding, setAdding] = useState(false);
@@ -127,8 +121,6 @@ const NamesetPicker: React.FC<Props> = ({
             <div className="modal-content" onMouseDown={(e) => e.stopPropagation()}>
               <h3>Add Nameset</h3>
               <AddNamesetForm
-                namesets={namesets}
-                setNamesets={setNamesets}
                 onAdd={(newNameset) => {
                   onNamesetSelect(newNameset.id);
                   setAdding(false);

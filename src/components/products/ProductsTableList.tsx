@@ -1,5 +1,6 @@
 import React from 'react';
-import { Nameset, Product, Team } from '../../types';
+import { useArchivedNamesets, useArchivedTeams, useNamesetsList, useTeamsList } from '../../stores';
+import { Product } from '../../types';
 import { getNamesetInfo, getTeamInfo } from '../../utils/utils';
 
 interface Props {
@@ -7,22 +8,14 @@ interface Props {
   onEdit: (product: Product) => void;
   onDelete: (id: string) => void;
   searchTerm?: string;
-  namesets: Nameset[];
-  archivedNamesets: Nameset[];
-  teams: Team[];
-  archivedTeams: Team[];
 }
 
-const ProductsTableList: React.FC<Props> = ({
-  products,
-  onEdit,
-  onDelete,
-  searchTerm = '',
-  namesets,
-  archivedNamesets,
-  teams,
-  archivedTeams,
-}) => {
+const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, searchTerm = '' }) => {
+  // Get data from stores
+  const namesets = useNamesetsList();
+  const archivedNamesets = useArchivedNamesets();
+  const teams = useTeamsList();
+  const archivedTeams = useArchivedTeams();
   // Filter products based on search term
   const filteredProducts = products.filter((product) => {
     const teamInfo = getTeamInfo(product.teamId, teams, archivedTeams);

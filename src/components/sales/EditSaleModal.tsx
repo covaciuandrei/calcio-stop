@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useSalesActions } from '../../stores';
 import { Sale } from '../../types';
 
 interface Props {
   editingSale: Sale | null;
   setEditingSale: React.Dispatch<React.SetStateAction<Sale | null>>;
-  setSales: React.Dispatch<React.SetStateAction<Sale[]>>;
 }
 
-const EditSaleModal: React.FC<Props> = ({ editingSale, setEditingSale, setSales }) => {
+const EditSaleModal: React.FC<Props> = ({ editingSale, setEditingSale }) => {
+  // Get store actions
+  const { updateSale } = useSalesActions();
   const [quantity, setQuantity] = useState<number>(editingSale?.quantity || 0);
   const [priceSold, setPriceSold] = useState<number>(editingSale?.priceSold || 0);
   const [customerName, setCustomerName] = useState<string>(editingSale?.customerName || '');
@@ -27,19 +29,12 @@ const EditSaleModal: React.FC<Props> = ({ editingSale, setEditingSale, setSales 
   const handleSaveEdit = () => {
     if (!editingSale) return;
 
-    setSales((prev) =>
-      prev.map((s) =>
-        s.id === editingSale.id
-          ? {
-              ...s,
-              quantity,
-              priceSold,
-              customerName,
-              date: date ? new Date(date).toISOString() : new Date().toISOString(),
-            }
-          : s
-      )
-    );
+    updateSale(editingSale.id, {
+      quantity,
+      priceSold,
+      customerName,
+      date: date ? new Date(date).toISOString() : new Date().toISOString(),
+    });
     setEditingSale(null);
   };
 

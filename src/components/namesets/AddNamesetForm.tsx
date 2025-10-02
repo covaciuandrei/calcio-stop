@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { useNamesetsActions } from '../../stores';
 import { Nameset } from '../../types';
 import { generateSeasons } from '../../utils/utils';
 
 interface Props {
-  namesets: Nameset[];
-  setNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
   onAdd?: (newNameset: Nameset) => void;
 }
 
-const AddNamesetForm: React.FC<Props> = ({ namesets, setNamesets, onAdd }) => {
+const AddNamesetForm: React.FC<Props> = ({ onAdd }) => {
+  // Get store actions
+  const { addNameset } = useNamesetsActions();
   const [playerName, setPlayerName] = useState('');
   const [number, setNumber] = useState<number | ''>('');
   const [season, setSeason] = useState('2025/2026');
@@ -29,7 +30,7 @@ const AddNamesetForm: React.FC<Props> = ({ namesets, setNamesets, onAdd }) => {
       quantity: Number(quantity),
     };
 
-    setNamesets([...namesets, newNameset]);
+    addNameset(newNameset);
     if (onAdd) onAdd(newNameset);
     setPlayerName('');
     setNumber('');

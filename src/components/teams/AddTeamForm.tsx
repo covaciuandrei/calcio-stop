@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { useTeamsActions } from '../../stores';
 import { Team } from '../../types';
 
 interface Props {
-  teams: Team[];
-  setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
   onAdd?: (newTeam: Team) => void;
   isInDropdown?: boolean;
 }
 
-const AddTeamForm: React.FC<Props> = ({ teams, setTeams, onAdd, isInDropdown = false }) => {
+const AddTeamForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
+  // Get store actions
+  const { addTeam } = useTeamsActions();
   const [name, setName] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -21,7 +22,7 @@ const AddTeamForm: React.FC<Props> = ({ teams, setTeams, onAdd, isInDropdown = f
       name: name.trim(),
     };
 
-    setTeams([...teams, newTeam]);
+    addTeam(newTeam);
     if (onAdd) onAdd(newTeam);
     setName('');
   };

@@ -1,24 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Team } from '../../types';
+import { useTeamsList } from '../../stores';
 import styles from '../shared/Picker.module.css';
 import AddTeamForm from './AddTeamForm';
 
 interface Props {
-  teams: Team[];
-  setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
   selectedTeamId: string | null;
   onTeamSelect: (id: string) => void;
   placeholder?: string;
 }
 
-const TeamPicker: React.FC<Props> = ({
-  teams,
-  setTeams,
-  selectedTeamId,
-  onTeamSelect,
-  placeholder = 'Select a team',
-}) => {
+const TeamPicker: React.FC<Props> = ({ selectedTeamId, onTeamSelect, placeholder = 'Select a team' }) => {
+  // Get teams from store
+  const teams = useTeamsList();
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [adding, setAdding] = useState(false);
@@ -134,8 +128,6 @@ const TeamPicker: React.FC<Props> = ({
           >
             <div className={styles.pickerFormContainer}>
               <AddTeamForm
-                teams={teams}
-                setTeams={setTeams}
                 onAdd={(newTeam) => {
                   onTeamSelect(newTeam.id);
                   setAdding(false);

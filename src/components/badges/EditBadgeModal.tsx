@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useBadgesActions } from '../../stores';
 import { Badge } from '../../types';
 import { generateSeasons } from '../../utils/utils';
 
 interface Props {
   editingBadge: Badge | null;
   setEditingBadge: React.Dispatch<React.SetStateAction<Badge | null>>;
-  setBadges: React.Dispatch<React.SetStateAction<Badge[]>>;
 }
 
-const EditBadgeModal: React.FC<Props> = ({ editingBadge, setEditingBadge, setBadges }) => {
+const EditBadgeModal: React.FC<Props> = ({ editingBadge, setEditingBadge }) => {
+  // Get store actions
+  const { updateBadge } = useBadgesActions();
   const [name, setName] = useState(editingBadge?.name || '');
   const [season, setSeason] = useState(editingBadge?.season || '2025/2026');
   const [quantity, setQuantity] = useState<number | ''>(editingBadge?.quantity || '');
@@ -27,18 +29,13 @@ const EditBadgeModal: React.FC<Props> = ({ editingBadge, setEditingBadge, setBad
     if (!name.trim()) return alert('Badge name cannot be empty');
     if (quantity === '' || quantity < 0) return alert('Quantity must be 0 or greater');
 
-    setBadges((prev) =>
-      prev.map((b) =>
-        b.id === editingBadge?.id
-          ? {
-              ...b,
-              name: name.trim(),
-              season,
-              quantity: Number(quantity),
-            }
-          : b
-      )
-    );
+    if (!editingBadge) return;
+
+    updateBadge(editingBadge.id, {
+      name: name.trim(),
+      season,
+      quantity: Number(quantity),
+    });
     setEditingBadge(null);
   };
 

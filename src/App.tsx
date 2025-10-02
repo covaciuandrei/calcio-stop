@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { NavLink, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import './App.css';
 import BadgesPage from './components/badges/BadgesPage';
@@ -7,69 +7,8 @@ import NamesetsPage from './components/namesets/NamesetsPage';
 import ProductsPage from './components/products/ProductsPage';
 import SalesPage from './components/sales/SalesPage';
 import TeamsPage from './components/teams/TeamsPage';
-import { Badge, Nameset, Product, Sale, Team } from './types';
 
 const App: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [archivedProducts, setArchivedProducts] = useState<Product[]>([]);
-  const [sales, setSales] = useState<Sale[]>([]);
-  const [namesets, setNamesets] = useState<Nameset[]>([]);
-  const [archivedNamesets, setArchivedNamesets] = useState<Nameset[]>([]);
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [archivedTeams, setArchivedTeams] = useState<Team[]>([]);
-  const [badges, setBadges] = useState<Badge[]>([]);
-  const [archivedBadges, setArchivedBadges] = useState<Badge[]>([]);
-
-  // Load from localStorage
-  useEffect(() => {
-    setProducts(JSON.parse(localStorage.getItem('products') || '[]'));
-    setArchivedProducts(JSON.parse(localStorage.getItem('archivedProducts') || '[]'));
-    setSales(JSON.parse(localStorage.getItem('sales') || '[]'));
-    setNamesets(JSON.parse(localStorage.getItem('namesets') || '[]'));
-    setArchivedNamesets(JSON.parse(localStorage.getItem('archivedNamesets') || '[]'));
-    setTeams(JSON.parse(localStorage.getItem('teams') || '[]'));
-    setArchivedTeams(JSON.parse(localStorage.getItem('archivedTeams') || '[]'));
-    setBadges(JSON.parse(localStorage.getItem('badges') || '[]'));
-    setArchivedBadges(JSON.parse(localStorage.getItem('archivedBadges') || '[]'));
-  }, []);
-
-  // Save to localStorage
-  useEffect(() => {
-    localStorage.setItem('products', JSON.stringify(products));
-  }, [products]);
-
-  useEffect(() => {
-    localStorage.setItem('archivedProducts', JSON.stringify(archivedProducts));
-  }, [archivedProducts]);
-
-  useEffect(() => {
-    localStorage.setItem('sales', JSON.stringify(sales));
-  }, [sales]);
-
-  useEffect(() => {
-    localStorage.setItem('namesets', JSON.stringify(namesets));
-  }, [namesets]);
-
-  useEffect(() => {
-    localStorage.setItem('archivedNamesets', JSON.stringify(archivedNamesets));
-  }, [archivedNamesets]);
-
-  useEffect(() => {
-    localStorage.setItem('teams', JSON.stringify(teams));
-  }, [teams]);
-
-  useEffect(() => {
-    localStorage.setItem('archivedTeams', JSON.stringify(archivedTeams));
-  }, [archivedTeams]);
-
-  useEffect(() => {
-    localStorage.setItem('badges', JSON.stringify(badges));
-  }, [badges]);
-
-  useEffect(() => {
-    localStorage.setItem('archivedBadges', JSON.stringify(archivedBadges));
-  }, [archivedBadges]);
-
   return (
     <Router>
       <div className="app-container">
@@ -85,112 +24,12 @@ const App: React.FC = () => {
         </nav>
 
         <Routes>
-          <Route
-            path="/"
-            element={
-              <Dashboard
-                products={products}
-                setProducts={setProducts}
-                archivedProducts={archivedProducts}
-                setArchivedProducts={setArchivedProducts}
-                sales={sales}
-                setSales={setSales}
-                namesets={namesets}
-                setNamesets={setNamesets}
-                archivedNamesets={archivedNamesets}
-                setArchivedNamesets={setArchivedNamesets}
-                teams={teams}
-                setTeams={setTeams}
-                archivedTeams={archivedTeams}
-                setArchivedTeams={setArchivedTeams}
-                badges={badges}
-                setBadges={setBadges}
-                archivedBadges={archivedBadges}
-                setArchivedBadges={setArchivedBadges}
-              />
-            }
-          />
-
-          {/* Products */}
-          <Route
-            path="/products"
-            element={
-              <>
-                <ProductsPage
-                  products={products}
-                  setProducts={setProducts}
-                  archivedProducts={archivedProducts}
-                  setArchivedProducts={setArchivedProducts}
-                  namesets={namesets}
-                  setNamesets={setNamesets}
-                  archivedNamesets={archivedNamesets}
-                  setArchivedNamesets={setArchivedNamesets}
-                  teams={teams}
-                  setTeams={setTeams}
-                  archivedTeams={archivedTeams}
-                  setArchivedTeams={setArchivedTeams}
-                />
-              </>
-            }
-          />
-
-          {/* Sales */}
-          <Route
-            path="/sales"
-            element={
-              <>
-                <SalesPage
-                  products={products}
-                  setProducts={setProducts}
-                  sales={sales}
-                  setSales={setSales}
-                  namesets={namesets}
-                  archivedNamesets={archivedNamesets}
-                  teams={teams}
-                  archivedTeams={archivedTeams}
-                />
-              </>
-            }
-          />
-
-          {/* Namesets */}
-          <Route
-            path="/namesets"
-            element={
-              <NamesetsPage
-                namesets={namesets}
-                setNamesets={setNamesets}
-                archivedNamesets={archivedNamesets}
-                setArchivedNamesets={setArchivedNamesets}
-              />
-            }
-          />
-
-          {/* Teams */}
-          <Route
-            path="/teams"
-            element={
-              <TeamsPage
-                teams={teams}
-                setTeams={setTeams}
-                archivedTeams={archivedTeams}
-                setArchivedTeams={setArchivedTeams}
-              />
-            }
-          />
-
-          {/* Badges */}
-          <Route
-            path="/badges"
-            element={
-              <BadgesPage
-                badges={badges}
-                setBadges={setBadges}
-                archivedBadges={archivedBadges}
-                setArchivedBadges={setArchivedBadges}
-              />
-            }
-          />
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/products" element={<ProductsPage />} />
+          <Route path="/sales" element={<SalesPage />} />
+          <Route path="/namesets" element={<NamesetsPage />} />
+          <Route path="/teams" element={<TeamsPage />} />
+          <Route path="/badges" element={<BadgesPage />} />
         </Routes>
       </div>
     </Router>

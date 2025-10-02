@@ -1,16 +1,11 @@
 import React, { useState } from 'react';
-import { Nameset } from '../../types';
+import { useArchivedNamesets } from '../../stores';
 import styles from '../shared/TableListCard.module.css';
 import ArchivedNamesets from './ArchivedNamesets';
 
-interface Props {
-  namesets: Nameset[];
-  setNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
-  archivedNamesets: Nameset[];
-  setArchivedNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
-}
-
-const ArchivedNamesetsCard: React.FC<Props> = ({ namesets, setNamesets, archivedNamesets, setArchivedNamesets }) => {
+const ArchivedNamesetsCard: React.FC = () => {
+  // Get data from store
+  const archivedNamesets = useArchivedNamesets();
   const [isArchivedNamesetsExpanded, setIsArchivedNamesetsExpanded] = useState(false);
   const [archivedNamesetsSearchTerm, setArchivedNamesetsSearchTerm] = useState('');
 
@@ -45,12 +40,7 @@ const ArchivedNamesetsCard: React.FC<Props> = ({ namesets, setNamesets, archived
                 </div>
               )}
               <div className={styles.tableContainer}>
-                <ArchivedNamesets
-                  archivedNamesets={archivedNamesets}
-                  setArchivedNamesets={setArchivedNamesets}
-                  setNamesets={setNamesets}
-                  searchTerm={archivedNamesetsSearchTerm}
-                />
+                <ArchivedNamesets archivedNamesets={archivedNamesets} searchTerm={archivedNamesetsSearchTerm} />
               </div>
             </>
           )}

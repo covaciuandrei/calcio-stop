@@ -1,30 +1,20 @@
 import React from 'react';
-import { Nameset, Product, Sale, Team } from '../../types';
+import { useArchivedNamesets, useNamesetsList, useProductsList } from '../../stores';
+import { Sale } from '../../types';
 import { getNamesetInfo } from '../../utils/utils';
 
 interface Props {
   sales: Sale[];
-  products: Product[];
-  namesets: Nameset[];
-  archivedNamesets: Nameset[];
-  teams: Team[];
-  archivedTeams: Team[];
   onEdit: (sale: Sale) => void;
   onDelete: (id: string) => void;
   searchTerm?: string;
 }
 
-const SalesTableList: React.FC<Props> = ({
-  sales,
-  products,
-  namesets,
-  archivedNamesets,
-  teams,
-  archivedTeams,
-  onEdit,
-  onDelete,
-  searchTerm = '',
-}) => {
+const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, searchTerm = '' }) => {
+  // Get data from stores
+  const products = useProductsList();
+  const namesets = useNamesetsList();
+  const archivedNamesets = useArchivedNamesets();
   const getProductDetails = (productId: string) => {
     const product = products.find((p) => p.id === productId);
 

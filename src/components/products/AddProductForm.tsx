@@ -1,37 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { AdultSize, KidSize, Nameset, Product, ProductSizeQuantity, ProductType, Team } from '../../types';
+import { useNamesetsActions, useNamesetsList, useProductsActions } from '../../stores';
+import { AdultSize, KidSize, Product, ProductSizeQuantity, ProductType } from '../../types';
 import NamesetPicker from '../namesets/NamesetPicker';
 import styles from '../shared/Form.module.css';
 import TeamPicker from '../teams/TeamPicker';
 
-interface Props {
-  products: Product[];
-  setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
-  namesets: Nameset[];
-  setNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
-  archivedNamesets: Nameset[];
-  setArchivedNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
-  teams: Team[];
-  setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
-  archivedTeams: Team[];
-  setArchivedTeams: React.Dispatch<React.SetStateAction<Team[]>>;
-}
-
 const adultSizes: AdultSize[] = ['S', 'M', 'L', 'XL', 'XXL'];
 const kidSizes: KidSize[] = ['22', '24', '26', '28'];
 
-const AddProductForm: React.FC<Props> = ({
-  products,
-  setProducts,
-  namesets,
-  setNamesets,
-  archivedNamesets,
-  setArchivedNamesets,
-  teams,
-  setTeams,
-  archivedTeams,
-  setArchivedTeams,
-}) => {
+const AddProductForm: React.FC = () => {
+  // Get store data and actions
+  const { addProduct } = useProductsActions();
+  const namesets = useNamesetsList();
+  const { updateNameset } = useNamesetsActions();
   const [name, setName] = useState('');
   const [type, setType] = useState<ProductType>(ProductType.SHIRT);
   const [sizes, setSizes] = useState<ProductSizeQuantity[]>([]);
@@ -49,7 +30,7 @@ const AddProductForm: React.FC<Props> = ({
     setSizes((prev) => prev.map((p) => (p.size === size ? { ...p, quantity: value } : p)));
   };
 
-  const addProduct = () => {
+  const handleAddProduct = () => {
     // Product notes are optional if a team is selected
     if (!name.trim() && !selectedTeamId) {
       alert('Please enter product notes or select a team');
@@ -85,15 +66,16 @@ const AddProductForm: React.FC<Props> = ({
       price: Number(price) || 0,
     };
 
-    setProducts([...products, newProduct]);
+    addProduct(newProduct);
 
     // Decrement nameset quantity by the total product quantity if a nameset was selected
     if (selectedNamesetId) {
-      setNamesets((prevNamesets) =>
-        prevNamesets.map((n) =>
-          n.id === selectedNamesetId ? { ...n, quantity: Math.max(0, n.quantity - totalProductQuantity) } : n
-        )
-      );
+      const selectedNameset = namesets.find((n) => n.id === selectedNamesetId);
+      if (selectedNameset) {
+        updateNameset(selectedNamesetId, {
+          quantity: Math.max(0, selectedNameset.quantity - totalProductQuantity),
+        });
+      }
     }
 
     // reset
@@ -110,8 +92,6 @@ const AddProductForm: React.FC<Props> = ({
       <div className="form-group">
         <label>Select a team</label>
         <TeamPicker
-          teams={teams}
-          setTeams={setTeams}
           selectedTeamId={selectedTeamId}
           onTeamSelect={setSelectedTeamId}
           placeholder="Ex: Real Madrid"
@@ -159,8 +139,6 @@ const AddProductForm: React.FC<Props> = ({
       <div className="form-group">
         <label>Select a nameset</label>
         <NamesetPicker
-          namesets={namesets}
-          setNamesets={setNamesets}
           selectedNamesetId={selectedNamesetId}
           onNamesetSelect={setSelectedNamesetId}
           placeholder="Ex: Messi 10"
@@ -173,7 +151,7 @@ const AddProductForm: React.FC<Props> = ({
       </div>
 
       <div className="form-button-container">
-        <button onClick={addProduct} className="btn btn-success">
+        <button onClick={handleAddProduct} className="btn btn-success">
           Add Product
         </button>
       </div>

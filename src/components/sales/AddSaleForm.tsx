@@ -1,28 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { Nameset, Product, Sale, Team } from '../../types';
+import {
+  useArchivedNamesets,
+  useNamesetsList,
+  useProductsActions,
+  useProductsList,
+  useSalesActions,
+} from '../../stores';
+import { Sale } from '../../types';
 import { getNamesetInfo } from '../../utils/utils';
 
-interface Props {
-  products: Product[];
-  setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
-  sales: Sale[];
-  setSales: React.Dispatch<React.SetStateAction<Sale[]>>;
-  namesets: Nameset[];
-  archivedNamesets: Nameset[];
-  teams: Team[];
-  archivedTeams: Team[];
-}
-
-const AddSaleForm: React.FC<Props> = ({
-  products,
-  setProducts,
-  sales,
-  setSales,
-  namesets,
-  archivedNamesets,
-  teams,
-  archivedTeams,
-}) => {
+const AddSaleForm: React.FC = () => {
+  // Get data and actions from stores
+  const products = useProductsList();
+  const { updateProduct } = useProductsActions();
+  const { addSale } = useSalesActions();
+  const namesets = useNamesetsList();
+  const archivedNamesets = useArchivedNamesets();
   const [productId, setProductId] = useState('');
   const [size, setSize] = useState('');
   const [quantity, setQuantity] = useState<number>(1);
@@ -79,15 +72,11 @@ const AddSaleForm: React.FC<Props> = ({
     }
 
     // decrement size quantity
-    const updatedProducts = products.map((p) => {
-      if (p.id !== productId) return p;
-      return {
-        ...p,
-        sizes: p.sizes.map((sq) => (sq.size === size ? { ...sq, quantity: sq.quantity - quantity } : sq)),
-      };
-    });
+    const updatedSizes = product.sizes.map((sq) =>
+      sq.size === size ? { ...sq, quantity: sq.quantity - quantity } : sq
+    );
 
-    setProducts(updatedProducts);
+    updateProduct(productId, { sizes: updatedSizes });
 
     const newSale: Sale = {
       id: Date.now().toString(),
@@ -99,7 +88,7 @@ const AddSaleForm: React.FC<Props> = ({
       date: date ? new Date(date).toISOString() : new Date().toISOString(),
     };
 
-    setSales([...sales, newSale]);
+    addSale(newSale);
 
     // reset small fields
     setProductId('');

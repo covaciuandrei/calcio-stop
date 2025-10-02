@@ -1,28 +1,21 @@
 import React, { useState } from 'react';
+import { useBadgesActions, useBadgesList } from '../../stores';
 import { Badge } from '../../types';
 import styles from '../shared/TableListCard.module.css';
 import BadgeTableList from './BadgeTableList';
 import EditBadgeModal from './EditBadgeModal';
 
-interface Props {
-  badges: Badge[];
-  setBadges: React.Dispatch<React.SetStateAction<Badge[]>>;
-  archivedBadges: Badge[];
-  setArchivedBadges: React.Dispatch<React.SetStateAction<Badge[]>>;
-}
-
-const BadgeTableListCard: React.FC<Props> = ({ badges, setBadges, archivedBadges, setArchivedBadges }) => {
+const BadgeTableListCard: React.FC = () => {
+  // Get data and actions from stores
+  const badges = useBadgesList();
+  const { archiveBadge } = useBadgesActions();
   const [editingBadge, setEditingBadge] = useState<Badge | null>(null);
   const [isBadgesExpanded, setIsBadgesExpanded] = useState(true);
   const [badgesSearchTerm, setBadgesSearchTerm] = useState('');
 
   const handleArchive = (id: string) => {
     if (!window.confirm('Are you sure you want to archive this badge?')) return;
-    const badgeToArchive = badges.find((b) => b.id === id);
-    if (badgeToArchive) {
-      setArchivedBadges((prev) => [...prev, badgeToArchive]);
-      setBadges(badges.filter((b) => b.id !== id));
-    }
+    archiveBadge(id);
   };
 
   const handleEditClick = (b: Badge) => {
@@ -79,7 +72,7 @@ const BadgeTableListCard: React.FC<Props> = ({ badges, setBadges, archivedBadges
         )}
       </div>
 
-      <EditBadgeModal editingBadge={editingBadge} setEditingBadge={setEditingBadge} setBadges={setBadges} />
+      <EditBadgeModal editingBadge={editingBadge} setEditingBadge={setEditingBadge} />
     </>
   );
 };

@@ -1,16 +1,11 @@
 import React, { useState } from 'react';
-import { Badge } from '../../types';
+import { useArchivedBadges } from '../../stores';
 import styles from '../shared/TableListCard.module.css';
 import ArchivedBadges from './ArchivedBadges';
 
-interface Props {
-  badges: Badge[];
-  setBadges: React.Dispatch<React.SetStateAction<Badge[]>>;
-  archivedBadges: Badge[];
-  setArchivedBadges: React.Dispatch<React.SetStateAction<Badge[]>>;
-}
-
-const ArchivedBadgesCard: React.FC<Props> = ({ badges, setBadges, archivedBadges, setArchivedBadges }) => {
+const ArchivedBadgesCard: React.FC = () => {
+  // Get data from store
+  const archivedBadges = useArchivedBadges();
   const [isArchivedBadgesExpanded, setIsArchivedBadgesExpanded] = useState(false);
   const [archivedBadgesSearchTerm, setArchivedBadgesSearchTerm] = useState('');
 
@@ -45,12 +40,7 @@ const ArchivedBadgesCard: React.FC<Props> = ({ badges, setBadges, archivedBadges
                 </div>
               )}
               <div className={styles.tableContainer}>
-                <ArchivedBadges
-                  archivedBadges={archivedBadges}
-                  setArchivedBadges={setArchivedBadges}
-                  setBadges={setBadges}
-                  searchTerm={archivedBadgesSearchTerm}
-                />
+                <ArchivedBadges archivedBadges={archivedBadges} searchTerm={archivedBadgesSearchTerm} />
               </div>
             </>
           )}

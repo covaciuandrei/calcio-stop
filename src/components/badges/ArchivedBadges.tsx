@@ -1,14 +1,15 @@
 import React from 'react';
+import { useBadgesActions } from '../../stores';
 import { Badge } from '../../types';
 
 interface Props {
   archivedBadges: Badge[];
-  setArchivedBadges: React.Dispatch<React.SetStateAction<Badge[]>>;
-  setBadges: React.Dispatch<React.SetStateAction<Badge[]>>;
   searchTerm?: string;
 }
 
-const ArchivedBadges: React.FC<Props> = ({ archivedBadges, setArchivedBadges, setBadges, searchTerm = '' }) => {
+const ArchivedBadges: React.FC<Props> = ({ archivedBadges, searchTerm = '' }) => {
+  // Get store actions
+  const { restoreBadge, deleteBadge } = useBadgesActions();
   // Filter badges based on search term
   const filteredBadges = archivedBadges.filter(
     (badge) =>
@@ -17,16 +18,12 @@ const ArchivedBadges: React.FC<Props> = ({ archivedBadges, setArchivedBadges, se
   );
 
   const handleRestore = (id: string) => {
-    const badgeToRestore = archivedBadges.find((b) => b.id === id);
-    if (badgeToRestore) {
-      setBadges((prev) => [...prev, badgeToRestore]);
-      setArchivedBadges((prev) => prev.filter((b) => b.id !== id));
-    }
+    restoreBadge(id);
   };
 
   const handleDelete = (id: string) => {
     if (window.confirm('Are you sure you want to permanently delete this badge?')) {
-      setArchivedBadges((prev) => prev.filter((b) => b.id !== id));
+      deleteBadge(id);
     }
   };
 

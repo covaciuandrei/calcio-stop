@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
+import { useBadgesActions } from '../../stores';
 import { Badge } from '../../types';
 import { generateSeasons } from '../../utils/utils';
 
 interface Props {
-  badges: Badge[];
-  setBadges: React.Dispatch<React.SetStateAction<Badge[]>>;
   onAdd?: (newBadge: Badge) => void;
 }
 
-const AddBadgeForm: React.FC<Props> = ({ badges, setBadges, onAdd }) => {
+const AddBadgeForm: React.FC<Props> = ({ onAdd }) => {
+  // Get store actions
+  const { addBadge } = useBadgesActions();
   const [name, setName] = useState('');
   const [season, setSeason] = useState('2025/2026');
   const [quantity, setQuantity] = useState<number | ''>('');
@@ -25,7 +26,7 @@ const AddBadgeForm: React.FC<Props> = ({ badges, setBadges, onAdd }) => {
       quantity: Number(quantity),
     };
 
-    setBadges([...badges, newBadge]);
+    addBadge(newBadge);
     if (onAdd) onAdd(newBadge);
     setName('');
     setSeason('2025/2026');

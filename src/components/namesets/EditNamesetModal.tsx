@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useNamesetsActions } from '../../stores';
 import { Nameset } from '../../types';
 import { generateSeasons } from '../../utils/utils';
 
 interface Props {
   editingNameset: Nameset | null;
   setEditingNameset: React.Dispatch<React.SetStateAction<Nameset | null>>;
-  setNamesets: React.Dispatch<React.SetStateAction<Nameset[]>>;
 }
 
-const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset, setNamesets }) => {
+const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }) => {
+  // Get store actions
+  const { updateNameset } = useNamesetsActions();
   const [playerName, setPlayerName] = useState(editingNameset?.playerName || '');
   const [number, setNumber] = useState<number | ''>(editingNameset?.number || '');
   const [season, setSeason] = useState(editingNameset?.season || '2025/2026');
@@ -30,19 +32,14 @@ const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset, 
     if (number === '' || number < 1) return alert('Number must be positive');
     if (quantity === '' || quantity < 0) return alert('Quantity must be 0 or greater');
 
-    setNamesets((prev) =>
-      prev.map((n) =>
-        n.id === editingNameset?.id
-          ? {
-              ...n,
-              playerName: playerName.trim(),
-              number: Number(number),
-              season,
-              quantity: Number(quantity),
-            }
-          : n
-      )
-    );
+    if (!editingNameset) return;
+
+    updateNameset(editingNameset.id, {
+      playerName: playerName.trim(),
+      number: Number(number),
+      season,
+      quantity: Number(quantity),
+    });
     setEditingNameset(null);
   };
 

@@ -1,28 +1,26 @@
 import React from 'react';
+import { useTeamsActions } from '../../stores';
 import { Team } from '../../types';
 
 interface Props {
   archivedTeams: Team[];
-  setArchivedTeams: React.Dispatch<React.SetStateAction<Team[]>>;
-  setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
   searchTerm?: string;
 }
 
-const ArchivedTeams: React.FC<Props> = ({ archivedTeams, setArchivedTeams, setTeams, searchTerm = '' }) => {
+const ArchivedTeams: React.FC<Props> = ({ archivedTeams, searchTerm = '' }) => {
+  // Get store actions
+  const { restoreTeam, deleteTeam } = useTeamsActions();
   // Filter teams based on search term
   const filteredTeams = archivedTeams.filter((team) => team.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   const handleRestore = (id: string) => {
-    const teamToRestore = archivedTeams.find((t) => t.id === id);
-    if (teamToRestore) {
-      setTeams((prev) => [...prev, teamToRestore]);
-      setArchivedTeams((prev) => prev.filter((t) => t.id !== id));
-    }
+    if (!window.confirm('Are you sure you want to restore this team?')) return;
+    restoreTeam(id);
   };
 
   const handleDelete = (id: string) => {
     if (window.confirm('Are you sure you want to permanently delete this team?')) {
-      setArchivedTeams((prev) => prev.filter((t) => t.id !== id));
+      deleteTeam(id);
     }
   };
 

@@ -1,24 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Badge } from '../../types';
+import { useBadgesList } from '../../stores';
 import styles from '../shared/Picker.module.css';
 import AddBadgeForm from './AddBadgeForm';
 
 interface Props {
-  badges: Badge[];
-  setBadges: React.Dispatch<React.SetStateAction<Badge[]>>;
   selectedBadgeId: string | null;
   onBadgeSelect: (id: string) => void;
   placeholder?: string;
 }
 
-const BadgePicker: React.FC<Props> = ({
-  badges,
-  setBadges,
-  selectedBadgeId,
-  onBadgeSelect,
-  placeholder = 'Select a badge',
-}) => {
+const BadgePicker: React.FC<Props> = ({ selectedBadgeId, onBadgeSelect, placeholder = 'Select a badge' }) => {
+  // Get badges from store
+  const badges = useBadgesList();
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [adding, setAdding] = useState(false);
@@ -134,8 +128,6 @@ const BadgePicker: React.FC<Props> = ({
           >
             <div className={styles.pickerFormContainer}>
               <AddBadgeForm
-                badges={badges}
-                setBadges={setBadges}
                 onAdd={(newBadge) => {
                   onBadgeSelect(newBadge.id);
                   setAdding(false);

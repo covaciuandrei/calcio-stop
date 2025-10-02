@@ -1,35 +1,21 @@
 import React, { useState } from 'react';
-import { Nameset, Product, Sale, Team } from '../../types';
+import { useSalesActions, useSalesList } from '../../stores';
+import { Sale } from '../../types';
 import styles from '../shared/TableListCard.module.css';
 import EditSaleModal from './EditSaleModal';
 import SalesTableList from './SalesTableList';
 
-interface Props {
-  sales: Sale[];
-  setSales: React.Dispatch<React.SetStateAction<Sale[]>>;
-  products: Product[];
-  namesets: Nameset[];
-  archivedNamesets: Nameset[];
-  teams: Team[];
-  archivedTeams: Team[];
-}
-
-const SalesTableListCard: React.FC<Props> = ({
-  sales,
-  setSales,
-  products,
-  namesets,
-  archivedNamesets,
-  teams,
-  archivedTeams,
-}) => {
+const SalesTableListCard: React.FC = () => {
+  // Get data and actions from stores
+  const sales = useSalesList();
+  const { deleteSale } = useSalesActions();
   const [editingSale, setEditingSale] = useState<Sale | null>(null);
   const [isSalesExpanded, setIsSalesExpanded] = useState(true);
   const [salesSearchTerm, setSalesSearchTerm] = useState('');
 
   const handleDelete = (id: string) => {
     if (!window.confirm('Are you sure you want to delete this sale?')) return;
-    setSales((prev) => prev.filter((s) => s.id !== id));
+    deleteSale(id);
   };
 
   const handleEditClick = (sale: Sale) => {
@@ -68,11 +54,6 @@ const SalesTableListCard: React.FC<Props> = ({
                 <div className={styles.tableContainer}>
                   <SalesTableList
                     sales={sales}
-                    products={products}
-                    namesets={namesets}
-                    archivedNamesets={archivedNamesets}
-                    teams={teams}
-                    archivedTeams={archivedTeams}
                     onEdit={handleEditClick}
                     onDelete={handleDelete}
                     searchTerm={salesSearchTerm}
@@ -91,7 +72,7 @@ const SalesTableListCard: React.FC<Props> = ({
         )}
       </div>
 
-      <EditSaleModal editingSale={editingSale} setEditingSale={setEditingSale} setSales={setSales} />
+      <EditSaleModal editingSale={editingSale} setEditingSale={setEditingSale} />
     </>
   );
 };

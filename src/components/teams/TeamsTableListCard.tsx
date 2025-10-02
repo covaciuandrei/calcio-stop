@@ -1,28 +1,21 @@
 import React, { useState } from 'react';
+import { useTeamsActions, useTeamsList } from '../../stores';
 import { Team } from '../../types';
 import styles from '../shared/TableListCard.module.css';
 import EditTeamModal from './EditTeamModal';
 import TeamTableList from './TeamTableList';
 
-interface Props {
-  teams: Team[];
-  setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
-  archivedTeams: Team[];
-  setArchivedTeams: React.Dispatch<React.SetStateAction<Team[]>>;
-}
-
-const TeamsTableListCard: React.FC<Props> = ({ teams, setTeams, archivedTeams, setArchivedTeams }) => {
+const TeamsTableListCard: React.FC = () => {
+  // Get data and actions from stores
+  const teams = useTeamsList();
+  const { archiveTeam } = useTeamsActions();
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
   const [isTeamsExpanded, setIsTeamsExpanded] = useState(true);
   const [teamsSearchTerm, setTeamsSearchTerm] = useState('');
 
   const handleArchive = (id: string) => {
     if (!window.confirm('Are you sure you want to archive this team?')) return;
-    const teamToArchive = teams.find((t) => t.id === id);
-    if (teamToArchive) {
-      setArchivedTeams((prev) => [...prev, teamToArchive]);
-      setTeams(teams.filter((t) => t.id !== id));
-    }
+    archiveTeam(id);
   };
 
   const handleEditClick = (t: Team) => {
@@ -79,7 +72,7 @@ const TeamsTableListCard: React.FC<Props> = ({ teams, setTeams, archivedTeams, s
         )}
       </div>
 
-      <EditTeamModal editingTeam={editingTeam} setEditingTeam={setEditingTeam} setTeams={setTeams} />
+      <EditTeamModal editingTeam={editingTeam} setEditingTeam={setEditingTeam} />
     </>
   );
 };
