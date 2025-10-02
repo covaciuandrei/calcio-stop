@@ -5,9 +5,10 @@ import { Team } from '../../types';
 interface Props {
   archivedTeams: Team[];
   searchTerm?: string;
+  onClearSearch?: () => void;
 }
 
-const ArchivedTeams: React.FC<Props> = ({ archivedTeams, searchTerm = '' }) => {
+const ArchivedTeams: React.FC<Props> = ({ archivedTeams, searchTerm = '', onClearSearch }) => {
   // Get store actions
   const { restoreTeam, deleteTeam } = useTeamsActions();
   // Filter teams based on search term
@@ -16,11 +17,13 @@ const ArchivedTeams: React.FC<Props> = ({ archivedTeams, searchTerm = '' }) => {
   const handleRestore = (id: string) => {
     if (!window.confirm('Are you sure you want to restore this team?')) return;
     restoreTeam(id);
+    onClearSearch?.(); // Clear search after action
   };
 
   const handleDelete = (id: string) => {
     if (window.confirm('Are you sure you want to permanently delete this team?')) {
       deleteTeam(id);
+      onClearSearch?.(); // Clear search after action
     }
   };
 

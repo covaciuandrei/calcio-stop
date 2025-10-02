@@ -53,6 +53,7 @@ export const useProductsStore = create<ProductsState>()(
         deleteProduct: (id: string) => {
           set((state) => ({
             products: state.products.filter((p) => p.id !== id),
+            archivedProducts: state.archivedProducts.filter((p) => p.id !== id),
           }));
         },
 

@@ -40,7 +40,11 @@ const ArchivedTeamsCard: React.FC = () => {
                 </div>
               )}
               <div className={styles.tableContainer}>
-                <ArchivedTeams archivedTeams={archivedTeams} searchTerm={archivedTeamsSearchTerm} />
+                <ArchivedTeams
+                  archivedTeams={archivedTeams}
+                  searchTerm={archivedTeamsSearchTerm}
+                  onClearSearch={() => setArchivedTeamsSearchTerm('')}
+                />
               </div>
             </>
           )}

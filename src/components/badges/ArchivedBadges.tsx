@@ -5,9 +5,10 @@ import { Badge } from '../../types';
 interface Props {
   archivedBadges: Badge[];
   searchTerm?: string;
+  onClearSearch?: () => void;
 }
 
-const ArchivedBadges: React.FC<Props> = ({ archivedBadges, searchTerm = '' }) => {
+const ArchivedBadges: React.FC<Props> = ({ archivedBadges, searchTerm = '', onClearSearch }) => {
   // Get store actions
   const { restoreBadge, deleteBadge } = useBadgesActions();
   // Filter badges based on search term
@@ -19,11 +20,13 @@ const ArchivedBadges: React.FC<Props> = ({ archivedBadges, searchTerm = '' }) =>
 
   const handleRestore = (id: string) => {
     restoreBadge(id);
+    onClearSearch?.(); // Clear search after action
   };
 
   const handleDelete = (id: string) => {
     if (window.confirm('Are you sure you want to permanently delete this badge?')) {
       deleteBadge(id);
+      onClearSearch?.(); // Clear search after action
     }
   };
 

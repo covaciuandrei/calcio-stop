@@ -40,7 +40,11 @@ const ArchivedNamesetsCard: React.FC = () => {
                 </div>
               )}
               <div className={styles.tableContainer}>
-                <ArchivedNamesets archivedNamesets={archivedNamesets} searchTerm={archivedNamesetsSearchTerm} />
+                <ArchivedNamesets
+                  archivedNamesets={archivedNamesets}
+                  searchTerm={archivedNamesetsSearchTerm}
+                  onClearSearch={() => setArchivedNamesetsSearchTerm('')}
+                />
               </div>
             </>
           )}

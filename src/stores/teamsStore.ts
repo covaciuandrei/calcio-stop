@@ -51,6 +51,7 @@ export const useTeamsStore = create<TeamsState>()(
         deleteTeam: (id: string) => {
           set((state) => ({
             teams: state.teams.filter((t) => t.id !== id),
+            archivedTeams: state.archivedTeams.filter((t) => t.id !== id),
           }));
         },
 

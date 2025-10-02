@@ -53,6 +53,7 @@ export const useBadgesStore = create<BadgesState>()(
         deleteBadge: (id: string) => {
           set((state) => ({
             badges: state.badges.filter((b) => b.id !== id),
+            archivedBadges: state.archivedBadges.filter((b) => b.id !== id),
           }));
         },
 

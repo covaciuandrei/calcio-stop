@@ -16,6 +16,7 @@ const SalesTableListCard: React.FC = () => {
   const handleDelete = (id: string) => {
     if (!window.confirm('Are you sure you want to delete this sale?')) return;
     deleteSale(id);
+    setSalesSearchTerm(''); // Clear search after action
   };
 
   const handleEditClick = (sale: Sale) => {

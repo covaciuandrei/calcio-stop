@@ -1,75 +1,111 @@
 import React from 'react';
-import { useArchivedNamesets, useArchivedTeams, useNamesetsList, useTeamsList } from '../../stores';
+import { useArchivedNamesets, useArchivedTeams, useNamesetsList, useProductsActions, useTeamsList } from '../../stores';
 import { Product } from '../../types';
 import { getNamesetInfo, getTeamInfo } from '../../utils/utils';
 
 interface Props {
   archivedProducts: Product[];
+  searchTerm?: string;
+  onClearSearch?: () => void;
 }
 
-const ArchivedProducts: React.FC<Props> = ({ archivedProducts }) => {
+const ArchivedProducts: React.FC<Props> = ({ archivedProducts, searchTerm = '', onClearSearch }) => {
   // Get data from stores
   const namesets = useNamesetsList();
   const archivedNamesets = useArchivedNamesets();
   const teams = useTeamsList();
   const archivedTeams = useArchivedTeams();
+  const { restoreProduct, deleteProduct } = useProductsActions();
+
+  const handleRestore = (id: string) => {
+    if (!window.confirm('Are you sure you want to restore this product?')) return;
+    restoreProduct(id);
+    onClearSearch?.(); // Clear search after action
+  };
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('Are you sure you want to permanently delete this product?')) {
+      deleteProduct(id);
+      onClearSearch?.(); // Clear search after action
+    }
+  };
+
+  // Filter products based on search term
+  const filteredProducts = archivedProducts.filter(
+    (product) =>
+      (product.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.type.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  if (archivedProducts.length === 0) {
+    return <p>No archived products.</p>;
+  }
+
+  if (filteredProducts.length === 0 && searchTerm) {
+    return <p>No archived products found matching "{searchTerm}".</p>;
+  }
+
   return (
     <div>
-      {archivedProducts.length === 0 ? (
-        <p>No archived products.</p>
-      ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Team</th>
-              <th>Notes</th>
-              <th>Type</th>
-              <th>Sizes & Quantities</th>
-              <th>Season</th>
-              <th>Player</th>
-              <th>Number</th>
-              <th>Price</th>
+      <table>
+        <thead>
+          <tr>
+            <th>Team</th>
+            <th>Notes</th>
+            <th>Type</th>
+            <th>Sizes & Quantities</th>
+            <th>Season</th>
+            <th>Player</th>
+            <th>Number</th>
+            <th>Price</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredProducts.map((p) => (
+            <tr key={p.id}>
+              <td>{getTeamInfo(p.teamId, teams, archivedTeams)}</td>
+              <td>{p.name || '-'}</td>
+              <td>{p.type}</td>
+              <td>
+                <div className="size-quantity-display">
+                  {p.sizes.map((sq) => (
+                    <div key={sq.size} className="size-quantity-item">
+                      {sq.size}: {sq.quantity}
+                    </div>
+                  ))}
+                </div>
+              </td>
+              <td>
+                {(() => {
+                  const namesetInfo = getNamesetInfo(p.namesetId, namesets, archivedNamesets);
+                  return namesetInfo.season;
+                })()}
+              </td>
+              <td>
+                {(() => {
+                  const namesetInfo = getNamesetInfo(p.namesetId, namesets, archivedNamesets);
+                  return namesetInfo.playerName;
+                })()}
+              </td>
+              <td>
+                {(() => {
+                  const namesetInfo = getNamesetInfo(p.namesetId, namesets, archivedNamesets);
+                  return namesetInfo.number > 0 ? namesetInfo.number : '-';
+                })()}
+              </td>
+              <td className="price-display">${p.price.toFixed ? p.price.toFixed(2) : p.price}</td>
+              <td>
+                <button onClick={() => handleRestore(p.id)} className="btn btn-success">
+                  Restore
+                </button>
+                <button onClick={() => handleDelete(p.id)} className="btn btn-danger">
+                  Delete Forever
+                </button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {archivedProducts.map((p) => (
-              <tr key={p.id}>
-                <td>{getTeamInfo(p.teamId, teams, archivedTeams)}</td>
-                <td>{p.name || '-'}</td>
-                <td>{p.type}</td>
-                <td>
-                  <div className="size-quantity-display">
-                    {p.sizes.map((sq) => (
-                      <div key={sq.size} className="size-quantity-item">
-                        {sq.size}: {sq.quantity}
-                      </div>
-                    ))}
-                  </div>
-                </td>
-                <td>
-                  {(() => {
-                    const namesetInfo = getNamesetInfo(p.namesetId, namesets, archivedNamesets);
-                    return namesetInfo.season;
-                  })()}
-                </td>
-                <td>
-                  {(() => {
-                    const namesetInfo = getNamesetInfo(p.namesetId, namesets, archivedNamesets);
-                    return namesetInfo.playerName;
-                  })()}
-                </td>
-                <td>
-                  {(() => {
-                    const namesetInfo = getNamesetInfo(p.namesetId, namesets, archivedNamesets);
-                    return namesetInfo.number > 0 ? namesetInfo.number : '-';
-                  })()}
-                </td>
-                <td className="price-display">${p.price.toFixed ? p.price.toFixed(2) : p.price}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };

@@ -16,6 +16,7 @@ const BadgeTableListCard: React.FC = () => {
   const handleArchive = (id: string) => {
     if (!window.confirm('Are you sure you want to archive this badge?')) return;
     archiveBadge(id);
+    setBadgesSearchTerm(''); // Clear search after action
   };
 
   const handleEditClick = (b: Badge) => {

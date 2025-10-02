@@ -5,19 +5,22 @@ import { Nameset } from '../../types';
 interface Props {
   archivedNamesets: Nameset[];
   searchTerm?: string;
+  onClearSearch?: () => void;
 }
 
-const ArchivedNamesets: React.FC<Props> = ({ archivedNamesets, searchTerm = '' }) => {
+const ArchivedNamesets: React.FC<Props> = ({ archivedNamesets, searchTerm = '', onClearSearch }) => {
   // Get store actions
   const { restoreNameset, deleteNameset } = useNamesetsActions();
   const handleRestore = (id: string) => {
     if (!window.confirm('Are you sure you want to restore this nameset?')) return;
     restoreNameset(id);
+    onClearSearch?.(); // Clear search after action
   };
 
   const handleDelete = (id: string) => {
     if (!window.confirm('Are you sure you want to permanently delete this nameset?')) return;
     deleteNameset(id);
+    onClearSearch?.(); // Clear search after action
   };
 
   // Filter namesets based on search term

@@ -54,6 +54,7 @@ export const useNamesetsStore = create<NamesetsState>()(
         deleteNameset: (id: string) => {
           set((state) => ({
             namesets: state.namesets.filter((n) => n.id !== id),
+            archivedNamesets: state.archivedNamesets.filter((n) => n.id !== id),
           }));
         },
 

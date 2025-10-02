@@ -40,7 +40,11 @@ const ArchivedProductsCard: React.FC = () => {
                 </div>
               )}
               <div className={styles.tableContainer}>
-                <ArchivedProducts archivedProducts={archivedProducts} />
+                <ArchivedProducts
+                  archivedProducts={archivedProducts}
+                  searchTerm={archivedProductsSearchTerm}
+                  onClearSearch={() => setArchivedProductsSearchTerm('')}
+                />
               </div>
             </>
           )}

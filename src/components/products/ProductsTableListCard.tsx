@@ -16,6 +16,7 @@ const ProductsTableListCard: React.FC = () => {
   const deleteProduct = (id: string) => {
     if (!window.confirm('Are you sure you want to delete this product?')) return;
     archiveProduct(id);
+    setProductsSearchTerm(''); // Clear search after action
   };
 
   const handleEditClick = (product: Product) => {

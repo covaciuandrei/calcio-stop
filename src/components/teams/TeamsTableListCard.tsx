@@ -16,6 +16,7 @@ const TeamsTableListCard: React.FC = () => {
   const handleArchive = (id: string) => {
     if (!window.confirm('Are you sure you want to archive this team?')) return;
     archiveTeam(id);
+    setTeamsSearchTerm(''); // Clear search after action
   };
 
   const handleEditClick = (t: Team) => {
