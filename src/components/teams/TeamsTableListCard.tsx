@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTeamsActions, useTeamsList } from '../../stores';
+import { useSearchActions, useTeamsActions, useTeamsList, useTeamsSearch } from '../../stores';
 import { Team } from '../../types';
 import styles from '../shared/TableListCard.module.css';
 import EditTeamModal from './EditTeamModal';
@@ -9,14 +9,15 @@ const TeamsTableListCard: React.FC = () => {
   // Get data and actions from stores
   const teams = useTeamsList();
   const { archiveTeam } = useTeamsActions();
+  const teamsSearchTerm = useTeamsSearch();
+  const { setSearchTerm, clearSearchTerm } = useSearchActions();
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
   const [isTeamsExpanded, setIsTeamsExpanded] = useState(true);
-  const [teamsSearchTerm, setTeamsSearchTerm] = useState('');
 
   const handleArchive = (id: string) => {
     if (!window.confirm('Are you sure you want to archive this team?')) return;
     archiveTeam(id);
-    setTeamsSearchTerm(''); // Clear search after action
+    clearSearchTerm('teams'); // Clear search after action
   };
 
   const handleEditClick = (t: Team) => {
@@ -47,7 +48,7 @@ const TeamsTableListCard: React.FC = () => {
                       type="text"
                       placeholder="Search teams..."
                       value={teamsSearchTerm}
-                      onChange={(e) => setTeamsSearchTerm(e.target.value)}
+                      onChange={(e) => setSearchTerm('teams', e.target.value)}
                       className={styles.searchInput}
                     />
                   </div>

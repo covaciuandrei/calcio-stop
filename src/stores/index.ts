@@ -28,7 +28,25 @@ export {
 } from './productsStore';
 export { useSales, useSalesActions, useSalesList, useSalesStore } from './salesStore';
 export { useArchivedTeams, useTeams, useTeamsActions, useTeamsList, useTeamsStore } from './teamsStore';
-export { useModal, useNotifications, useSidebar, useTheme, useUI, useUIStore } from './uiStore';
+export {
+  useArchivedBadgesSearch,
+  useArchivedNamesetsSearch,
+  useArchivedProductsSearch,
+  useArchivedTeamsSearch,
+  useBadgesSearch,
+  useModal,
+  useNamesetsSearch,
+  useNotifications,
+  useProductsSearch,
+  useSalesSearch,
+  useSearchActions,
+  useSearchTerms,
+  useSidebar,
+  useTeamsSearch,
+  useTheme,
+  useUI,
+  useUIStore,
+} from './uiStore';
 
 // Export selectors for advanced usage
 export { authSelectors } from './authStore';

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useBadgesActions, useBadgesList } from '../../stores';
+import { useBadgesActions, useBadgesList, useBadgesSearch, useSearchActions } from '../../stores';
 import { Badge } from '../../types';
 import styles from '../shared/TableListCard.module.css';
 import BadgeTableList from './BadgeTableList';
@@ -9,14 +9,15 @@ const BadgeTableListCard: React.FC = () => {
   // Get data and actions from stores
   const badges = useBadgesList();
   const { archiveBadge } = useBadgesActions();
+  const badgesSearchTerm = useBadgesSearch();
+  const { setSearchTerm, clearSearchTerm } = useSearchActions();
   const [editingBadge, setEditingBadge] = useState<Badge | null>(null);
   const [isBadgesExpanded, setIsBadgesExpanded] = useState(true);
-  const [badgesSearchTerm, setBadgesSearchTerm] = useState('');
 
   const handleArchive = (id: string) => {
     if (!window.confirm('Are you sure you want to archive this badge?')) return;
     archiveBadge(id);
-    setBadgesSearchTerm(''); // Clear search after action
+    clearSearchTerm('badges'); // Clear search after action
   };
 
   const handleEditClick = (b: Badge) => {
@@ -47,7 +48,7 @@ const BadgeTableListCard: React.FC = () => {
                       type="text"
                       placeholder="Search badges..."
                       value={badgesSearchTerm}
-                      onChange={(e) => setBadgesSearchTerm(e.target.value)}
+                      onChange={(e) => setSearchTerm('badges', e.target.value)}
                       className={styles.searchInput}
                     />
                   </div>

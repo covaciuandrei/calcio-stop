@@ -21,6 +21,18 @@ interface Notification {
   duration?: number;
 }
 
+interface SearchState {
+  products: string;
+  sales: string;
+  namesets: string;
+  teams: string;
+  badges: string;
+  archivedProducts: string;
+  archivedNamesets: string;
+  archivedTeams: string;
+  archivedBadges: string;
+}
+
 interface UIState {
   // State
   theme: Theme;
@@ -29,6 +41,7 @@ interface UIState {
   notifications: Notification[];
   isLoading: boolean;
   loadingMessage: string;
+  searchTerms: SearchState;
 
   // Actions
   setTheme: (theme: Partial<Theme>) => void;
@@ -40,6 +53,9 @@ interface UIState {
   removeNotification: (id: string) => void;
   clearNotifications: () => void;
   setLoading: (loading: boolean, message?: string) => void;
+  setSearchTerm: (category: keyof SearchState, term: string) => void;
+  clearSearchTerm: (category: keyof SearchState) => void;
+  clearAllSearchTerms: () => void;
 }
 
 // Selectors
@@ -69,6 +85,17 @@ export const useUIStore = create<UIState>()(
       notifications: [],
       isLoading: false,
       loadingMessage: '',
+      searchTerms: {
+        products: '',
+        sales: '',
+        namesets: '',
+        teams: '',
+        badges: '',
+        archivedProducts: '',
+        archivedNamesets: '',
+        archivedTeams: '',
+        archivedBadges: '',
+      },
 
       // Actions
       setTheme: (themeUpdate: Partial<Theme>) => {
@@ -142,6 +169,40 @@ export const useUIStore = create<UIState>()(
           loadingMessage: message,
         });
       },
+
+      setSearchTerm: (category: keyof SearchState, term: string) => {
+        set((state) => ({
+          searchTerms: {
+            ...state.searchTerms,
+            [category]: term,
+          },
+        }));
+      },
+
+      clearSearchTerm: (category: keyof SearchState) => {
+        set((state) => ({
+          searchTerms: {
+            ...state.searchTerms,
+            [category]: '',
+          },
+        }));
+      },
+
+      clearAllSearchTerms: () => {
+        set((state) => ({
+          searchTerms: {
+            products: '',
+            sales: '',
+            namesets: '',
+            teams: '',
+            badges: '',
+            archivedProducts: '',
+            archivedNamesets: '',
+            archivedTeams: '',
+            archivedBadges: '',
+          },
+        }));
+      },
     }),
     {
       name: 'ui-store',
@@ -160,3 +221,22 @@ export const useSidebar = () =>
     toggle: state.toggleSidebar,
     setCollapsed: state.setSidebarCollapsed,
   }));
+
+// Search selectors
+export const useSearchTerms = () => useUIStore((state) => state.searchTerms);
+export const useSearchActions = () => ({
+  setSearchTerm: useUIStore.getState().setSearchTerm,
+  clearSearchTerm: useUIStore.getState().clearSearchTerm,
+  clearAllSearchTerms: useUIStore.getState().clearAllSearchTerms,
+});
+
+// Individual search term selectors
+export const useProductsSearch = () => useUIStore((state) => state.searchTerms.products);
+export const useSalesSearch = () => useUIStore((state) => state.searchTerms.sales);
+export const useNamesetsSearch = () => useUIStore((state) => state.searchTerms.namesets);
+export const useTeamsSearch = () => useUIStore((state) => state.searchTerms.teams);
+export const useBadgesSearch = () => useUIStore((state) => state.searchTerms.badges);
+export const useArchivedProductsSearch = () => useUIStore((state) => state.searchTerms.archivedProducts);
+export const useArchivedNamesetsSearch = () => useUIStore((state) => state.searchTerms.archivedNamesets);
+export const useArchivedTeamsSearch = () => useUIStore((state) => state.searchTerms.archivedTeams);
+export const useArchivedBadgesSearch = () => useUIStore((state) => state.searchTerms.archivedBadges);
