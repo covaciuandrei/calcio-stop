@@ -400,6 +400,44 @@ button:active,
   background: linear-gradient(135deg, var(--accent-red-600), var(--accent-red-700));
 }
 
+/* Smaller button variant for table actions (10% smaller) */
+.btn-sm,
+table .btn {
+  padding: calc(var(--space-3) * 0.9) calc(var(--space-6) * 0.9);
+  font-size: calc(var(--font-size-sm) * 0.9);
+}
+
+/* Icon-only buttons for table actions */
+.btn-icon {
+  padding: var(--space-2) var(--space-3);
+  min-width: 36px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+  text-align: center;
+}
+
+/* Ensure icons are perfectly centered */
+.btn-icon::before {
+  display: none;
+}
+
+/* Override edit buttons to be green instead of orange */
+.btn-icon.btn-success {
+  background: linear-gradient(135deg, var(--accent-green-500), var(--accent-green-600));
+}
+
+.btn-icon.btn-success:hover {
+  background: linear-gradient(135deg, var(--accent-green-600), var(--accent-green-700));
+}
+
+.btn-icon:hover {
+  transform: translateY(-0.1px);
+}
+
 .navbar a {
   color: var(--gray-700);
   text-decoration: none;

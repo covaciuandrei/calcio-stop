@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
-import { useBadgesList, useNamesetsList, useProductsList, useSalesList, useTeamsList } from '../stores';
+import {
+  useBadgesList,
+  useKitTypesList,
+  useNamesetsList,
+  useProductsList,
+  useSalesList,
+  useTeamsList,
+} from '../stores';
 import BadgesPage from './badges/BadgesPage';
+import KitTypesPage from './kittypes/KitTypesPage';
 import NamesetsPage from './namesets/NamesetsPage';
 import ProductsPage from './products/ProductsPage';
 import SalesPage from './sales/SalesPage';
@@ -15,6 +23,7 @@ const Dashboard: React.FC = () => {
   const namesets = useNamesetsList();
   const teams = useTeamsList();
   const badges = useBadgesList();
+  const kitTypes = useKitTypesList();
   // State for managing collapsed/expanded state of each card
   const [collapsedCards, setCollapsedCards] = useState({
     products: false,
@@ -22,6 +31,7 @@ const Dashboard: React.FC = () => {
     namesets: false,
     teams: false,
     badges: false,
+    kitTypes: false,
   });
 
   const toggleCard = (cardName: keyof typeof collapsedCards) => {
@@ -106,6 +116,22 @@ const Dashboard: React.FC = () => {
         {collapsedCards.badges && <div className={styles.collapsedContent}>Create and manage badges for shirts</div>}
         <div className={`${styles.collapsibleContent} ${collapsedCards.badges ? styles.collapsed : ''}`}>
           <BadgesPage />
+        </div>
+      </div>
+
+      {/* Manage Kit Types */}
+      <div className="card">
+        <CollapsibleHeader
+          title="Manage Kit Types"
+          isExpanded={!collapsedCards.kitTypes}
+          onToggle={() => toggleCard('kitTypes')}
+          count={kitTypes.length}
+        />
+        {collapsedCards.kitTypes && (
+          <div className={styles.collapsedContent}>Define kit types like 1st Kit, 2nd Kit, etc.</div>
+        )}
+        <div className={`${styles.collapsibleContent} ${collapsedCards.kitTypes ? styles.collapsed : ''}`}>
+          <KitTypesPage />
         </div>
       </div>
     </div>

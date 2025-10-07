@@ -42,15 +42,15 @@ const BadgeTableList: React.FC<Props> = ({ badges, onEdit, onDelete, onArchive, 
             <td>{b.season}</td>
             <td className="price-display">{b.quantity}</td>
             <td>
-              <button onClick={() => onEdit(b)} className="btn btn-warning">
-                Edit
+              <button onClick={() => onEdit(b)} className="btn btn-icon btn-success" title="Edit">
+                ✏️
               </button>
-              <button onClick={() => onArchive(b.id)} className="btn btn-secondary">
-                Archive
+              <button onClick={() => onArchive(b.id)} className="btn btn-icon btn-secondary" title="Archive">
+                📦
               </button>
               {onDelete && (
-                <button onClick={() => onDelete(b.id)} className="btn btn-danger">
-                  Delete
+                <button onClick={() => onDelete(b.id)} className="btn btn-icon btn-danger" title="Delete">
+                  🗑️
                 </button>
               )}
             </td>

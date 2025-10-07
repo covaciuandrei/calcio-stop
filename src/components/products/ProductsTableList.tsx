@@ -1,7 +1,14 @@
 import React from 'react';
-import { useArchivedNamesets, useArchivedTeams, useNamesetsList, useTeamsList } from '../../stores';
+import {
+  useArchivedKitTypes,
+  useArchivedNamesets,
+  useArchivedTeams,
+  useKitTypesList,
+  useNamesetsList,
+  useTeamsList,
+} from '../../stores';
 import { Product } from '../../types';
-import { getNamesetInfo, getTeamInfo } from '../../utils/utils';
+import { getKitTypeInfo, getNamesetInfo, getTeamInfo } from '../../utils/utils';
 
 interface Props {
   products: Product[];
@@ -16,6 +23,8 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
   const archivedNamesets = useArchivedNamesets();
   const teams = useTeamsList();
   const archivedTeams = useArchivedTeams();
+  const kitTypes = useKitTypesList();
+  const archivedKitTypes = useArchivedKitTypes();
   // Filter products based on search term
   const filteredProducts = products.filter((product) => {
     const teamInfo = getTeamInfo(product.teamId, teams, archivedTeams);
@@ -45,6 +54,7 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
           <th>Team</th>
           <th>Notes</th>
           <th>Type</th>
+          <th>Kit Type</th>
           <th>Sizes & Quantities</th>
           <th>Season</th>
           <th>Player</th>
@@ -59,6 +69,7 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
             <td>{getTeamInfo(p.teamId, teams, archivedTeams)}</td>
             <td>{p.name || '-'}</td>
             <td>{p.type}</td>
+            <td>{getKitTypeInfo(p.kitTypeId, kitTypes, archivedKitTypes)}</td>
             <td>
               <div className="size-quantity-display">
                 {p.sizes.map((sq) => (
@@ -88,11 +99,11 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
             </td>
             <td className="price-display">${p.price.toFixed ? p.price.toFixed(2) : p.price}</td>
             <td>
-              <button onClick={() => onEdit(p)} className="btn btn-warning">
-                Edit
+              <button onClick={() => onEdit(p)} className="btn btn-icon btn-success" title="Edit">
+                ✏️
               </button>
-              <button onClick={() => onDelete(p.id)} className="btn btn-danger">
-                Delete
+              <button onClick={() => onDelete(p.id)} className="btn btn-icon btn-danger" title="Delete">
+                🗑️
               </button>
             </td>
           </tr>

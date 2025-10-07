@@ -15,7 +15,6 @@ const TeamsTableListCard: React.FC = () => {
   const [isTeamsExpanded, setIsTeamsExpanded] = useState(true);
 
   const handleArchive = (id: string) => {
-    if (!window.confirm('Are you sure you want to archive this team?')) return;
     archiveTeam(id);
     clearSearchTerm('teams'); // Clear search after action
   };

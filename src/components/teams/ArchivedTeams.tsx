@@ -15,7 +15,6 @@ const ArchivedTeams: React.FC<Props> = ({ archivedTeams, searchTerm = '', onClea
   const filteredTeams = archivedTeams.filter((team) => team.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   const handleRestore = (id: string) => {
-    if (!window.confirm('Are you sure you want to restore this team?')) return;
     restoreTeam(id);
     onClearSearch?.(); // Clear search after action
   };
@@ -48,8 +47,8 @@ const ArchivedTeams: React.FC<Props> = ({ archivedTeams, searchTerm = '', onClea
           <tr key={t.id}>
             <td>{t.name}</td>
             <td>
-              <button onClick={() => handleRestore(t.id)} className="btn btn-warning">
-                Restore
+              <button onClick={() => handleRestore(t.id)} className="btn btn-icon btn-success" title="Restore">
+                ↩️
               </button>
               <button onClick={() => handleDelete(t.id)} className="btn btn-danger">
                 Delete Forever

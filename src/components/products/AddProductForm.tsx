@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNamesetsActions, useNamesetsList, useProductsActions } from '../../stores';
 import { AdultSize, KidSize, Product, ProductSizeQuantity, ProductType } from '../../types';
+import KitTypePicker from '../kittypes/KitTypePicker';
 import NamesetPicker from '../namesets/NamesetPicker';
 import styles from '../shared/Form.module.css';
 import TeamPicker from '../teams/TeamPicker';
@@ -18,6 +19,7 @@ const AddProductForm: React.FC = () => {
   const [sizes, setSizes] = useState<ProductSizeQuantity[]>([]);
   const [selectedNamesetId, setSelectedNamesetId] = useState<string | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
+  const [selectedKitTypeId, setSelectedKitTypeId] = useState<string>('default-kit-type-1st');
   const [price, setPrice] = useState<number>(0);
 
   useEffect(() => {
@@ -63,6 +65,7 @@ const AddProductForm: React.FC = () => {
       sizes,
       namesetId: selectedNamesetId,
       teamId: selectedTeamId,
+      kitTypeId: selectedKitTypeId,
       price: Number(price) || 0,
     };
 
@@ -83,6 +86,7 @@ const AddProductForm: React.FC = () => {
     setType(ProductType.SHIRT);
     setSelectedNamesetId(null);
     setSelectedTeamId(null);
+    setSelectedKitTypeId('default-kit-type-1st');
     setPrice(0);
     // sizes will reset via effect when type resets
   };
@@ -134,6 +138,11 @@ const AddProductForm: React.FC = () => {
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="form-group">
+        <label>Select kit type</label>
+        <KitTypePicker selectedKitTypeId={selectedKitTypeId} onKitTypeSelect={setSelectedKitTypeId} />{' '}
       </div>
 
       <div className="form-group">

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useProductsActions } from '../../stores';
 import { AdultSize, KidSize, Product, ProductSizeQuantity, ProductType } from '../../types';
+import KitTypePicker from '../kittypes/KitTypePicker';
 import NamesetPicker from '../namesets/NamesetPicker';
 import styles from '../shared/Form.module.css';
 import TeamPicker from '../teams/TeamPicker';
@@ -22,6 +23,9 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
   const [sizes, setSizes] = useState<ProductSizeQuantity[]>(editingProduct?.sizes || []);
   const [selectedNamesetId, setSelectedNamesetId] = useState<string | null>(editingProduct?.namesetId || null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(editingProduct?.teamId || null);
+  const [selectedKitTypeId, setSelectedKitTypeId] = useState<string>(
+    editingProduct?.kitTypeId || 'default-kit-type-1st'
+  );
   const [price, setPrice] = useState<number>(editingProduct?.price || 0);
   const [hasLoaded, setHasLoaded] = useState(false);
 
@@ -33,6 +37,7 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
       setSizes(editingProduct.sizes);
       setSelectedNamesetId(editingProduct.namesetId);
       setSelectedTeamId(editingProduct.teamId);
+      setSelectedKitTypeId(editingProduct.kitTypeId);
       setPrice(editingProduct.price || 0);
       // Use setTimeout to ensure sizes are loaded before enabling type changes
       setTimeout(() => setHasLoaded(true), 0);
@@ -67,6 +72,7 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
       sizes,
       namesetId: selectedNamesetId,
       teamId: selectedTeamId,
+      kitTypeId: selectedKitTypeId,
       price: Number(price) || 0,
     });
     setEditingProduct(null);
@@ -111,6 +117,11 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
             onChange={(e) => setName(e.target.value)}
             placeholder={selectedTeamId ? 'e.g. Home, Away, Third (optional)' : 'e.g. Real Madrid Home'}
           />
+        </label>
+
+        <label>
+          Select kit type:
+          <KitTypePicker selectedKitTypeId={selectedKitTypeId} onKitTypeSelect={setSelectedKitTypeId} />
         </label>
 
         <label>

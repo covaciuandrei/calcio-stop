@@ -55,8 +55,8 @@ const ArchivedBadges: React.FC<Props> = ({ archivedBadges, searchTerm = '', onCl
             <td>{b.season}</td>
             <td className="price-display">{b.quantity}</td>
             <td>
-              <button onClick={() => handleRestore(b.id)} className="btn btn-warning">
-                Restore
+              <button onClick={() => handleRestore(b.id)} className="btn btn-icon btn-success" title="Restore">
+                ↩️
               </button>
               <button onClick={() => handleDelete(b.id)} className="btn btn-danger">
                 Delete Forever

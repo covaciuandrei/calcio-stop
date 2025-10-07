@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useNamesetsActions } from '../../stores';
 import { Nameset } from '../../types';
 import { generateSeasons } from '../../utils/utils';
+import KitTypePicker from '../kittypes/KitTypePicker';
 
 interface Props {
   editingNameset: Nameset | null;
@@ -16,6 +17,9 @@ const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }
   const [number, setNumber] = useState<number | ''>(editingNameset?.number || '');
   const [season, setSeason] = useState(editingNameset?.season || '2025/2026');
   const [quantity, setQuantity] = useState<number | ''>(editingNameset?.quantity || '');
+  const [selectedKitTypeId, setSelectedKitTypeId] = useState<string>(
+    editingNameset?.kitTypeId || 'default-kit-type-1st'
+  );
 
   // Update state when editingNameset changes
   React.useEffect(() => {
@@ -24,6 +28,7 @@ const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }
       setNumber(editingNameset.number);
       setSeason(editingNameset.season);
       setQuantity(editingNameset.quantity);
+      setSelectedKitTypeId(editingNameset.kitTypeId);
     }
   }, [editingNameset]);
 
@@ -39,6 +44,7 @@ const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }
       number: Number(number),
       season,
       quantity: Number(quantity),
+      kitTypeId: selectedKitTypeId,
     });
     setEditingNameset(null);
   };
@@ -52,6 +58,10 @@ const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }
         <label>
           Player Name:
           <input type="text" value={playerName} onChange={(e) => setPlayerName(e.target.value)} />
+        </label>
+        <label>
+          Kit Type:
+          <KitTypePicker selectedKitTypeId={selectedKitTypeId} onKitTypeSelect={setSelectedKitTypeId} />
         </label>
         <label>
           Number:

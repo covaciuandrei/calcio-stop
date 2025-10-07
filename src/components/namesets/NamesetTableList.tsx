@@ -1,5 +1,7 @@
 import React from 'react';
+import { useArchivedKitTypes, useKitTypesList } from '../../stores';
 import { Nameset } from '../../types';
+import { getKitTypeInfo } from '../../utils/utils';
 
 interface Props {
   namesets: Nameset[];
@@ -10,6 +12,10 @@ interface Props {
 }
 
 const NamesetTableList: React.FC<Props> = ({ namesets, onEdit, onDelete, onArchive, searchTerm = '' }) => {
+  // Get data from stores
+  const kitTypes = useKitTypesList();
+  const archivedKitTypes = useArchivedKitTypes();
+
   // Filter namesets based on search term
   const filteredNamesets = namesets.filter(
     (nameset) =>
@@ -33,6 +39,7 @@ const NamesetTableList: React.FC<Props> = ({ namesets, onEdit, onDelete, onArchi
           <th>Player</th>
           <th>Number</th>
           <th>Season</th>
+          <th>Kit Type</th>
           <th>Quantity</th>
           <th>Actions</th>
         </tr>
@@ -43,17 +50,18 @@ const NamesetTableList: React.FC<Props> = ({ namesets, onEdit, onDelete, onArchi
             <td>{n.playerName}</td>
             <td>{n.number}</td>
             <td>{n.season}</td>
+            <td>{getKitTypeInfo(n.kitTypeId, kitTypes, archivedKitTypes)}</td>
             <td className="price-display">{n.quantity}</td>
             <td>
-              <button onClick={() => onEdit(n)} className="btn btn-warning">
-                Edit
+              <button onClick={() => onEdit(n)} className="btn btn-icon btn-success" title="Edit">
+                ✏️
               </button>
-              <button onClick={() => onArchive(n.id)} className="btn btn-secondary">
-                Archive
+              <button onClick={() => onArchive(n.id)} className="btn btn-icon btn-secondary" title="Archive">
+                📦
               </button>
               {onDelete && (
-                <button onClick={() => onDelete(n.id)} className="btn btn-danger">
-                  Delete
+                <button onClick={() => onDelete(n.id)} className="btn btn-icon btn-danger" title="Delete">
+                  🗑️
                 </button>
               )}
             </td>

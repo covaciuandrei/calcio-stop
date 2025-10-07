@@ -1,7 +1,15 @@
 import React from 'react';
-import { useArchivedNamesets, useArchivedTeams, useNamesetsList, useProductsActions, useTeamsList } from '../../stores';
+import {
+  useArchivedKitTypes,
+  useArchivedNamesets,
+  useArchivedTeams,
+  useKitTypesList,
+  useNamesetsList,
+  useProductsActions,
+  useTeamsList,
+} from '../../stores';
 import { Product } from '../../types';
-import { getNamesetInfo, getTeamInfo } from '../../utils/utils';
+import { getKitTypeInfo, getNamesetInfo, getTeamInfo } from '../../utils/utils';
 
 interface Props {
   archivedProducts: Product[];
@@ -15,10 +23,11 @@ const ArchivedProducts: React.FC<Props> = ({ archivedProducts, searchTerm = '', 
   const archivedNamesets = useArchivedNamesets();
   const teams = useTeamsList();
   const archivedTeams = useArchivedTeams();
+  const kitTypes = useKitTypesList();
+  const archivedKitTypes = useArchivedKitTypes();
   const { restoreProduct, deleteProduct } = useProductsActions();
 
   const handleRestore = (id: string) => {
-    if (!window.confirm('Are you sure you want to restore this product?')) return;
     restoreProduct(id);
     onClearSearch?.(); // Clear search after action
   };
@@ -52,6 +61,7 @@ const ArchivedProducts: React.FC<Props> = ({ archivedProducts, searchTerm = '', 
             <th>Team</th>
             <th>Notes</th>
             <th>Type</th>
+            <th>Kit Type</th>
             <th>Sizes & Quantities</th>
             <th>Season</th>
             <th>Player</th>
@@ -66,6 +76,7 @@ const ArchivedProducts: React.FC<Props> = ({ archivedProducts, searchTerm = '', 
               <td>{getTeamInfo(p.teamId, teams, archivedTeams)}</td>
               <td>{p.name || '-'}</td>
               <td>{p.type}</td>
+              <td>{getKitTypeInfo(p.kitTypeId, kitTypes, archivedKitTypes)}</td>
               <td>
                 <div className="size-quantity-display">
                   {p.sizes.map((sq) => (
@@ -95,8 +106,8 @@ const ArchivedProducts: React.FC<Props> = ({ archivedProducts, searchTerm = '', 
               </td>
               <td className="price-display">${p.price.toFixed ? p.price.toFixed(2) : p.price}</td>
               <td>
-                <button onClick={() => handleRestore(p.id)} className="btn btn-success">
-                  Restore
+                <button onClick={() => handleRestore(p.id)} className="btn btn-icon btn-success" title="Restore">
+                  ↩️
                 </button>
                 <button onClick={() => handleDelete(p.id)} className="btn btn-danger">
                   Delete Forever

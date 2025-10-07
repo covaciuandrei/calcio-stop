@@ -68,11 +68,11 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, searchTerm =
             <td>{s.customerName || 'N/A'}</td>
             <td>{new Date(s.date).toLocaleString()}</td>
             <td>
-              <button onClick={() => onEdit(s)} className="btn btn-warning">
-                Edit
+              <button onClick={() => onEdit(s)} className="btn btn-icon btn-success" title="Edit">
+                ✏️
               </button>
-              <button onClick={() => onDelete(s.id)} className="btn btn-danger">
-                Delete
+              <button onClick={() => onDelete(s.id)} className="btn btn-icon btn-danger" title="Delete">
+                🗑️
               </button>
             </td>
           </tr>

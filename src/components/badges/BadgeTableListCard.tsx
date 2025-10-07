@@ -15,7 +15,6 @@ const BadgeTableListCard: React.FC = () => {
   const [isBadgesExpanded, setIsBadgesExpanded] = useState(true);
 
   const handleArchive = (id: string) => {
-    if (!window.confirm('Are you sure you want to archive this badge?')) return;
     archiveBadge(id);
     clearSearchTerm('badges'); // Clear search after action
   };

@@ -1,4 +1,4 @@
-import { Nameset, Team } from '../types';
+import { KitType, Nameset, Team } from '../types';
 
 export const generateSeasons = (start = 1990, end = 2030): string[] =>
   Array.from({ length: end - start + 1 }, (_, i) => {
@@ -52,4 +52,20 @@ export const getTeamInfo = (teamId: string | null, teams: Team[], archivedTeams:
   }
 
   return team.name;
+};
+
+export const getKitTypeInfo = (kitTypeId: string, kitTypes: KitType[], archivedKitTypes: KitType[] = []): string => {
+  // First check in active kit types
+  let kitType = kitTypes.find((kt) => kt.id === kitTypeId);
+
+  // If not found, check in archived kit types
+  if (!kitType) {
+    kitType = archivedKitTypes.find((kt) => kt.id === kitTypeId);
+  }
+
+  if (!kitType) {
+    return '-';
+  }
+
+  return kitType.name;
 };

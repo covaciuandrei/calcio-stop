@@ -14,7 +14,6 @@ const NamesetsTableListCard: React.FC = () => {
   const [namesetsSearchTerm, setNamesetsSearchTerm] = useState('');
 
   const handleArchive = (id: string) => {
-    if (!window.confirm('Are you sure you want to archive this nameset?')) return;
     archiveNameset(id);
     setNamesetsSearchTerm(''); // Clear search after action
   };

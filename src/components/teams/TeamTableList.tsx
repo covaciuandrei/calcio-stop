@@ -33,11 +33,11 @@ const TeamTableList: React.FC<Props> = ({ teams, onEdit, onArchive, searchTerm =
           <tr key={t.id}>
             <td>{t.name}</td>
             <td>
-              <button onClick={() => onEdit(t)} className="btn btn-warning">
-                Edit
+              <button onClick={() => onEdit(t)} className="btn btn-icon btn-success" title="Edit">
+                ✏️
               </button>
-              <button onClick={() => onArchive(t.id)} className="btn btn-secondary">
-                Archive
+              <button onClick={() => onArchive(t.id)} className="btn btn-icon btn-secondary" title="Archive">
+                📦
               </button>
             </td>
           </tr>

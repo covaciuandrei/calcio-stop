@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useNamesetsActions } from '../../stores';
 import { Nameset } from '../../types';
 import { generateSeasons } from '../../utils/utils';
+import KitTypePicker from '../kittypes/KitTypePicker';
 
 interface Props {
   onAdd?: (newNameset: Nameset) => void;
@@ -16,9 +17,9 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
   const [number, setNumber] = useState<number | ''>('');
   const [season, setSeason] = useState('2025/2026');
   const [quantity, setQuantity] = useState<number | ''>('');
+  const [selectedKitTypeId, setSelectedKitTypeId] = useState<string>('default-kit-type-1st');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = () => {
     if (!playerName.trim()) return alert('Player name cannot be empty');
     if (number === '' || number < 1) return alert('Number must be positive');
     if (quantity === '' || quantity < 0) return alert('Quantity must be 0 or greater');
@@ -29,6 +30,7 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
       number: Number(number),
       season,
       quantity: Number(quantity),
+      kitTypeId: selectedKitTypeId,
     };
 
     addNameset(newNameset);
@@ -37,10 +39,11 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
     setNumber('');
     setSeason('2025/2026');
     setQuantity('');
+    setSelectedKitTypeId('default-kit-type-1st');
   };
 
   return (
-    <form onSubmit={handleSubmit} className="form-inline">
+    <div className="form-inline">
       <div className="form-group">
         <label>Player Name</label>
         <input
@@ -138,9 +141,15 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
           }
         />
       </div>
+      {!isInDropdown && (
+        <div className="form-group">
+          <label>Kit Type</label>
+          <KitTypePicker selectedKitTypeId={selectedKitTypeId} onKitTypeSelect={setSelectedKitTypeId} />
+        </div>
+      )}
       <div className="form-button-container">
         <button
-          type="submit"
+          onClick={handleSubmit}
           className="btn btn-success"
           style={
             isInDropdown
@@ -159,7 +168,7 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
           Save
         </button>
       </div>
-    </form>
+    </div>
   );
 };
 

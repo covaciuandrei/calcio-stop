@@ -27,10 +27,12 @@ interface SearchState {
   namesets: string;
   teams: string;
   badges: string;
+  kitTypes: string;
   archivedProducts: string;
   archivedNamesets: string;
   archivedTeams: string;
   archivedBadges: string;
+  archivedKitTypes: string;
 }
 
 interface UIState {
@@ -91,10 +93,12 @@ export const useUIStore = create<UIState>()(
         namesets: '',
         teams: '',
         badges: '',
+        kitTypes: '',
         archivedProducts: '',
         archivedNamesets: '',
         archivedTeams: '',
         archivedBadges: '',
+        archivedKitTypes: '',
       },
 
       // Actions
@@ -196,10 +200,12 @@ export const useUIStore = create<UIState>()(
             namesets: '',
             teams: '',
             badges: '',
+            kitTypes: '',
             archivedProducts: '',
             archivedNamesets: '',
             archivedTeams: '',
             archivedBadges: '',
+            archivedKitTypes: '',
           },
         }));
       },
@@ -236,7 +242,9 @@ export const useSalesSearch = () => useUIStore((state) => state.searchTerms.sale
 export const useNamesetsSearch = () => useUIStore((state) => state.searchTerms.namesets);
 export const useTeamsSearch = () => useUIStore((state) => state.searchTerms.teams);
 export const useBadgesSearch = () => useUIStore((state) => state.searchTerms.badges);
+export const useKitTypesSearch = () => useUIStore((state) => state.searchTerms.kitTypes);
 export const useArchivedProductsSearch = () => useUIStore((state) => state.searchTerms.archivedProducts);
 export const useArchivedNamesetsSearch = () => useUIStore((state) => state.searchTerms.archivedNamesets);
 export const useArchivedTeamsSearch = () => useUIStore((state) => state.searchTerms.archivedTeams);
 export const useArchivedBadgesSearch = () => useUIStore((state) => state.searchTerms.archivedBadges);
+export const useArchivedKitTypesSearch = () => useUIStore((state) => state.searchTerms.archivedKitTypes);

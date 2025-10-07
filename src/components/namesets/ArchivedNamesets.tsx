@@ -1,6 +1,7 @@
 import React from 'react';
-import { useNamesetsActions } from '../../stores';
+import { useArchivedKitTypes, useKitTypesList, useNamesetsActions } from '../../stores';
 import { Nameset } from '../../types';
+import { getKitTypeInfo } from '../../utils/utils';
 
 interface Props {
   archivedNamesets: Nameset[];
@@ -11,8 +12,9 @@ interface Props {
 const ArchivedNamesets: React.FC<Props> = ({ archivedNamesets, searchTerm = '', onClearSearch }) => {
   // Get store actions
   const { restoreNameset, deleteNameset } = useNamesetsActions();
+  const kitTypes = useKitTypesList();
+  const archivedKitTypes = useArchivedKitTypes();
   const handleRestore = (id: string) => {
-    if (!window.confirm('Are you sure you want to restore this nameset?')) return;
     restoreNameset(id);
     onClearSearch?.(); // Clear search after action
   };
@@ -46,6 +48,7 @@ const ArchivedNamesets: React.FC<Props> = ({ archivedNamesets, searchTerm = '', 
           <th>Player</th>
           <th>Number</th>
           <th>Season</th>
+          <th>Kit Type</th>
           <th>Quantity</th>
           <th>Actions</th>
         </tr>
@@ -56,13 +59,14 @@ const ArchivedNamesets: React.FC<Props> = ({ archivedNamesets, searchTerm = '', 
             <td>{n.playerName}</td>
             <td>{n.number}</td>
             <td>{n.season}</td>
+            <td>{getKitTypeInfo(n.kitTypeId, kitTypes, archivedKitTypes)}</td>
             <td className="price-display">{n.quantity}</td>
             <td>
-              <button onClick={() => handleRestore(n.id)} className="btn btn-success">
-                Restore
+              <button onClick={() => handleRestore(n.id)} className="btn btn-icon btn-success" title="Restore">
+                ↩️
               </button>
               <button onClick={() => handleDelete(n.id)} className="btn btn-danger">
-                Delete
+                Delete Forever
               </button>
             </td>
           </tr>
