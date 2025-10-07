@@ -82,7 +82,7 @@ const TeamPicker: React.FC<Props> = ({ selectedTeamId, onTeamSelect, placeholder
             ref={dropdownRef}
             className={styles.pickerDropdown}
             style={{
-              width: 280,
+              width: 320,
               left: pickerRef.current?.getBoundingClientRect().left,
               top: pickerRef.current?.getBoundingClientRect().bottom,
             }}
@@ -120,7 +120,7 @@ const TeamPicker: React.FC<Props> = ({ selectedTeamId, onTeamSelect, placeholder
             ref={dropdownRef}
             className={styles.pickerDropdown}
             style={{
-              width: 280,
+              width: 320,
               left: pickerRef.current?.getBoundingClientRect().left,
               top: pickerRef.current?.getBoundingClientRect().bottom,
             }}

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNamesetsList } from '../../stores';
+import styles from '../shared/Picker.module.css';
 import AddNamesetForm from './AddNamesetForm';
 
 interface Props {
@@ -66,9 +67,9 @@ const NamesetPicker: React.FC<Props> = ({ selectedNamesetId, onNamesetSelect, pl
   const selectedNameset = namesets.find((n) => n.id === selectedNamesetId);
 
   return (
-    <div className="nameset-picker" ref={pickerRef} style={{ width: '200px' }}>
+    <div className={styles.picker} ref={pickerRef} style={{ width: '200px' }}>
       <div
-        className={`nameset-picker-trigger ${adding ? 'disabled' : ''}`}
+        className={`${styles.pickerTrigger} ${adding ? styles.disabled : ''}`}
         onClick={() => !adding && setIsOpen((prev) => !prev)}
       >
         {selectedNameset ? `${selectedNameset.playerName} (${selectedNameset.number})` : placeholder}
@@ -81,26 +82,26 @@ const NamesetPicker: React.FC<Props> = ({ selectedNamesetId, onNamesetSelect, pl
         createPortal(
           <div
             ref={dropdownRef}
-            className="nameset-picker-dropdown"
+            className={styles.pickerDropdown}
             style={{
-              width: 280,
+              width: 320,
               left: pickerRef.current?.getBoundingClientRect().left,
               top: pickerRef.current?.getBoundingClientRect().bottom,
             }}
             onMouseDown={(e) => e.stopPropagation()}
           >
-            <div className="nameset-picker-add-button" onClick={() => setAdding(true)}>
+            <div className={styles.pickerAddButton} onClick={() => setAdding(true)}>
               + Add Nameset
             </div>
-            <div className="nameset-picker-search">
+            <div className={styles.pickerSearch}>
               <input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
-            <div className="nameset-picker-list">
-              {filteredNamesets.length === 0 && <div className="nameset-picker-empty">No namesets found</div>}
+            <div className={styles.pickerList}>
+              {filteredNamesets.length === 0 && <div className={styles.pickerEmpty}>No namesets found</div>}
               {filteredNamesets.map((n) => (
                 <div
                   key={n.id}
-                  className={`nameset-picker-option ${n.id === selectedNamesetId ? 'selected' : ''}`}
+                  className={`${styles.pickerOption} ${n.id === selectedNamesetId ? styles.selected : ''}`}
                   onClick={() => {
                     onNamesetSelect(n.id);
                     setIsOpen(false);
@@ -114,21 +115,30 @@ const NamesetPicker: React.FC<Props> = ({ selectedNamesetId, onNamesetSelect, pl
           document.body
         )}
 
-      {/* Modal for adding a new nameset */}
+      {/* Add Nameset Form Modal */}
       {adding &&
         createPortal(
-          <div className="modal" onMouseDown={() => setAdding(false)}>
-            <div className="modal-content" onMouseDown={(e) => e.stopPropagation()}>
-              <h3>Add Nameset</h3>
+          <div
+            ref={dropdownRef}
+            className={styles.pickerDropdown}
+            style={{
+              width: 320,
+              left: pickerRef.current?.getBoundingClientRect().left,
+              top: pickerRef.current?.getBoundingClientRect().bottom,
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <div className={styles.pickerFormContainer}>
               <AddNamesetForm
                 onAdd={(newNameset) => {
                   onNamesetSelect(newNameset.id);
                   setAdding(false);
                 }}
+                isInDropdown={true}
               />
-              <div className="modal-buttons">
-                <button onClick={() => setAdding(false)}>Cancel</button>
-              </div>
+              <button className={styles.pickerCancelButton} onClick={() => setAdding(false)}>
+                Cancel
+              </button>
             </div>
           </div>,
           document.body

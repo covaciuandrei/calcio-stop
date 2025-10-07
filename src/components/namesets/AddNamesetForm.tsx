@@ -6,9 +6,10 @@ import { generateSeasons } from '../../utils/utils';
 
 interface Props {
   onAdd?: (newNameset: Nameset) => void;
+  isInDropdown?: boolean;
 }
 
-const AddNamesetForm: React.FC<Props> = ({ onAdd }) => {
+const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
   // Get store actions
   const { addNameset } = useNamesetsActions();
   const [playerName, setPlayerName] = useState('');
@@ -48,6 +49,19 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd }) => {
           value={playerName}
           onChange={(e) => setPlayerName(e.target.value)}
           required
+          style={
+            isInDropdown
+              ? {
+                  width: '100%',
+                  height: '32px',
+                  padding: '6px 8px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '4px',
+                  fontSize: '13px',
+                  boxSizing: 'border-box',
+                }
+              : {}
+          }
         />
       </div>
       <div className="form-group">
@@ -59,11 +73,40 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd }) => {
           value={number}
           onChange={(e) => setNumber(parseInt(e.target.value) || '')}
           required
+          style={
+            isInDropdown
+              ? {
+                  width: '100%',
+                  height: '32px',
+                  padding: '6px 8px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '4px',
+                  fontSize: '13px',
+                  boxSizing: 'border-box',
+                }
+              : {}
+          }
         />
       </div>
       <div className="form-group">
         <label>Season</label>
-        <select value={season} onChange={(e) => setSeason(e.target.value)}>
+        <select
+          value={season}
+          onChange={(e) => setSeason(e.target.value)}
+          style={
+            isInDropdown
+              ? {
+                  width: '100%',
+                  height: '32px',
+                  padding: '6px 8px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '4px',
+                  fontSize: '13px',
+                  boxSizing: 'border-box',
+                }
+              : {}
+          }
+        >
           {generateSeasons().map((s: string) => (
             <option key={s} value={s}>
               {s}
@@ -80,10 +123,39 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd }) => {
           value={quantity}
           onChange={(e) => setQuantity(parseInt(e.target.value) || '')}
           required
+          style={
+            isInDropdown
+              ? {
+                  width: '100%',
+                  height: '32px',
+                  padding: '6px 8px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '4px',
+                  fontSize: '13px',
+                  boxSizing: 'border-box',
+                }
+              : {}
+          }
         />
       </div>
       <div className="form-button-container">
-        <button type="submit" className="btn btn-success">
+        <button
+          type="submit"
+          className="btn btn-success"
+          style={
+            isInDropdown
+              ? {
+                  height: '32px',
+                  padding: '6px 12px',
+                  fontSize: '13px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  width: '100%',
+                  boxSizing: 'border-box',
+                }
+              : {}
+          }
+        >
           Save
         </button>
       </div>

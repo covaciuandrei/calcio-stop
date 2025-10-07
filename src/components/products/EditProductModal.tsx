@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useProductsActions } from '../../stores';
-import { Product, ProductSizeQuantity, ProductType } from '../../types';
+import { AdultSize, KidSize, Product, ProductSizeQuantity, ProductType } from '../../types';
 import NamesetPicker from '../namesets/NamesetPicker';
 import styles from '../shared/Form.module.css';
 import TeamPicker from '../teams/TeamPicker';
+
+const adultSizes: AdultSize[] = ['S', 'M', 'L', 'XL', 'XXL'];
+const kidSizes: KidSize[] = ['22', '24', '26', '28'];
 
 interface Props {
   editingProduct: Product | null;
@@ -20,6 +23,7 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
   const [selectedNamesetId, setSelectedNamesetId] = useState<string | null>(editingProduct?.namesetId || null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(editingProduct?.teamId || null);
   const [price, setPrice] = useState<number>(editingProduct?.price || 0);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   // Update state when editingProduct changes
   React.useEffect(() => {
@@ -30,8 +34,23 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
       setSelectedNamesetId(editingProduct.namesetId);
       setSelectedTeamId(editingProduct.teamId);
       setPrice(editingProduct.price || 0);
+      // Use setTimeout to ensure sizes are loaded before enabling type changes
+      setTimeout(() => setHasLoaded(true), 0);
     }
   }, [editingProduct]);
+
+  // Update sizes when type changes - but only after initial load
+  React.useEffect(() => {
+    if (hasLoaded) {
+      console.log('Type changed, updating sizes. Type:', type);
+      const availableSizes = type === ProductType.KID_KIT ? kidSizes : adultSizes;
+      console.log('New available sizes:', availableSizes);
+      // Reset all quantities to 0 when type changes (like AddProductForm)
+      const newSizes = availableSizes.map((s) => ({ size: s, quantity: 0 }));
+      console.log('Setting new sizes:', newSizes);
+      setSizes(newSizes);
+    }
+  }, [type, hasLoaded]);
 
   const handleSaveEdit = () => {
     if (!editingProduct) return;
@@ -95,6 +114,15 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
         </label>
 
         <label>
+          Select a nameset:
+          <NamesetPicker
+            selectedNamesetId={selectedNamesetId}
+            onNamesetSelect={setSelectedNamesetId}
+            placeholder="Select a nameset (optional)"
+          />
+        </label>
+
+        <label>
           Sizes & Quantities:
           <div className={`size-quantity-grid ${styles.sizeQuantityGrid}`}>
             {sizes.map((sq) => (
@@ -110,15 +138,6 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
               </div>
             ))}
           </div>
-        </label>
-
-        <label>
-          Select a nameset:
-          <NamesetPicker
-            selectedNamesetId={selectedNamesetId}
-            onNamesetSelect={setSelectedNamesetId}
-            placeholder="Select a nameset (optional)"
-          />
         </label>
 
         <label>

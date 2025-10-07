@@ -116,7 +116,7 @@ table button:last-of-type:hover {
 /* Nameset picker specific styles */
 .nameset-picker {
   position: relative;
-  z-index: var(--z-dropdown);
+  z-index: var(--z-popover);
 }
 
 .nameset-picker-trigger {
@@ -156,7 +156,7 @@ table button:last-of-type:hover {
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xl);
-  z-index: var(--z-dropdown);
+  z-index: var(--z-popover);
   overflow: hidden;
 }
 
