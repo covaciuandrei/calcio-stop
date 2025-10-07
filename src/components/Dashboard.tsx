@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   useBadgesList,
+  useDashboardOrder,
   useKitTypesList,
   useNamesetsList,
   useProductsList,
@@ -24,6 +25,8 @@ const Dashboard: React.FC = () => {
   const teams = useTeamsList();
   const badges = useBadgesList();
   const kitTypes = useKitTypesList();
+  const dashboardOrder = useDashboardOrder();
+
   // State for managing collapsed/expanded state of each card
   const [collapsedCards, setCollapsedCards] = useState({
     products: false,
@@ -41,99 +44,71 @@ const Dashboard: React.FC = () => {
     }));
   };
 
+  // Dashboard cards configuration
+  const dashboardCards = {
+    products: {
+      title: 'Manage Products',
+      description: 'Stock, prices, and inventory management',
+      count: products.length,
+      component: <ProductsPage />,
+    },
+    sales: {
+      title: 'Manage Sales',
+      description: 'Track and record your sales transactions',
+      count: sales.length,
+      component: <SalesPage />,
+    },
+    namesets: {
+      title: 'Manage Namesets',
+      description: 'Customize team and player name collections',
+      count: namesets.length,
+      component: <NamesetsPage />,
+    },
+    teams: {
+      title: 'Manage Teams',
+      description: 'Organize your teams and player rosters',
+      count: teams.length,
+      component: <TeamsPage />,
+    },
+    badges: {
+      title: 'Manage Badges',
+      description: 'Create and manage badges for shirts',
+      count: badges.length,
+      component: <BadgesPage />,
+    },
+    kitTypes: {
+      title: 'Manage Kit Types',
+      description: 'Define kit types like 1st Kit, 2nd Kit, etc.',
+      count: kitTypes.length,
+      component: <KitTypesPage />,
+    },
+  };
+
   return (
     <div>
-      {/* Manage Products */}
-      <div className="card">
-        <CollapsibleHeader
-          title="Manage Products"
-          isExpanded={!collapsedCards.products}
-          onToggle={() => toggleCard('products')}
-          count={products.length}
-        />
-        {collapsedCards.products && (
-          <div className={styles.collapsedContent}>Stock, prices, and inventory management</div>
-        )}
-        <div className={`${styles.collapsibleContent} ${collapsedCards.products ? styles.collapsed : ''}`}>
-          <ProductsPage />
-        </div>
-      </div>
+      {dashboardOrder.map((cardId) => {
+        const card = dashboardCards[cardId as keyof typeof dashboardCards];
+        if (!card) return null;
 
-      {/* Manage Sales */}
-      <div className="card">
-        <CollapsibleHeader
-          title="Manage Sales"
-          isExpanded={!collapsedCards.sales}
-          onToggle={() => toggleCard('sales')}
-          count={sales.length}
-        />
-        {collapsedCards.sales && (
-          <div className={styles.collapsedContent}>Track and record your sales transactions</div>
-        )}
-        <div className={`${styles.collapsibleContent} ${collapsedCards.sales ? styles.collapsed : ''}`}>
-          <SalesPage />
-        </div>
-      </div>
-
-      {/* Manage Namesets */}
-      <div className="card">
-        <CollapsibleHeader
-          title="Manage Namesets"
-          isExpanded={!collapsedCards.namesets}
-          onToggle={() => toggleCard('namesets')}
-          count={namesets.length}
-        />
-        {collapsedCards.namesets && (
-          <div className={styles.collapsedContent}>Customize team and player name collections</div>
-        )}
-        <div className={`${styles.collapsibleContent} ${collapsedCards.namesets ? styles.collapsed : ''}`}>
-          <NamesetsPage />
-        </div>
-      </div>
-
-      {/* Manage Teams */}
-      <div className="card">
-        <CollapsibleHeader
-          title="Manage Teams"
-          isExpanded={!collapsedCards.teams}
-          onToggle={() => toggleCard('teams')}
-          count={teams.length}
-        />
-        {collapsedCards.teams && <div className={styles.collapsedContent}>Organize your teams and player rosters</div>}
-        <div className={`${styles.collapsibleContent} ${collapsedCards.teams ? styles.collapsed : ''}`}>
-          <TeamsPage />
-        </div>
-      </div>
-
-      {/* Manage Badges */}
-      <div className="card">
-        <CollapsibleHeader
-          title="Manage Badges"
-          isExpanded={!collapsedCards.badges}
-          onToggle={() => toggleCard('badges')}
-          count={badges.length}
-        />
-        {collapsedCards.badges && <div className={styles.collapsedContent}>Create and manage badges for shirts</div>}
-        <div className={`${styles.collapsibleContent} ${collapsedCards.badges ? styles.collapsed : ''}`}>
-          <BadgesPage />
-        </div>
-      </div>
-
-      {/* Manage Kit Types */}
-      <div className="card">
-        <CollapsibleHeader
-          title="Manage Kit Types"
-          isExpanded={!collapsedCards.kitTypes}
-          onToggle={() => toggleCard('kitTypes')}
-          count={kitTypes.length}
-        />
-        {collapsedCards.kitTypes && (
-          <div className={styles.collapsedContent}>Define kit types like 1st Kit, 2nd Kit, etc.</div>
-        )}
-        <div className={`${styles.collapsibleContent} ${collapsedCards.kitTypes ? styles.collapsed : ''}`}>
-          <KitTypesPage />
-        </div>
-      </div>
+        return (
+          <div key={cardId} className="card">
+            <CollapsibleHeader
+              title={card.title}
+              isExpanded={!collapsedCards[cardId as keyof typeof collapsedCards]}
+              onToggle={() => toggleCard(cardId as keyof typeof collapsedCards)}
+              count={card.count}
+            />
+            {collapsedCards[cardId as keyof typeof collapsedCards] && (
+              <div className={styles.collapsedContent}>{card.description}</div>
+            )}
+            <div
+              className={`${styles.collapsibleContent} ${collapsedCards[cardId as keyof typeof collapsedCards] ? styles.collapsed : ''}`}
+            >
+              {card.component}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };

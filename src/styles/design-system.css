@@ -533,7 +533,7 @@ table .btn {
   color: var(--gray-600);
   text-decoration: none;
   font-weight: var(--font-weight-medium);
-  padding: var(--space-3) var(--space-5);
+  padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-lg);
   transition: all var(--transition-slow);
   position: relative;

@@ -1,0 +1,419 @@
+/* Settings Popup Styles */
+.settingsPopupOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: var(--z-modal, 1000);
+  padding: var(--space-4);
+  overflow-y: auto;
+}
+
+.settingsPopup {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  width: 100%;
+  max-width: 600px;
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+.settingsPopupHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-6) var(--space-6) var(--space-4);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.settingsPopupHeader h2 {
+  margin: 0;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--gray-800);
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  color: var(--gray-500);
+  transition: all var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeButton:hover {
+  background: var(--gray-100);
+  color: var(--gray-700);
+}
+
+.settingsPopupContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4);
+  padding-bottom: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-height: 100vh;
+}
+
+/* Custom scrollbar for settings content */
+.settingsPopupContent::-webkit-scrollbar {
+  width: 6px;
+}
+
+.settingsPopupContent::-webkit-scrollbar-track {
+  background: var(--gray-100);
+  border-radius: 3px;
+}
+
+.settingsPopupContent::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: 3px;
+}
+
+.settingsPopupContent::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-400);
+}
+
+.settingsSection {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  background: white;
+  overflow: hidden;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3);
+  cursor: pointer;
+  background: var(--gray-50);
+  border-bottom: 1px solid var(--gray-200);
+  transition: all var(--transition-normal);
+  min-height: 60px;
+}
+
+.sectionHeader:hover {
+  background: var(--gray-100);
+}
+
+.sectionTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sectionTitle h3 {
+  margin: 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--gray-800);
+  line-height: 1.2;
+}
+
+.sectionDescription {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--gray-600);
+  line-height: 1.2;
+}
+
+.sectionToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-500);
+  transition: all var(--transition-normal);
+  flex-shrink: 0;
+}
+
+.chevron {
+  transition: transform var(--transition-normal);
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.sectionContent {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+/* Custom scrollbar for section content */
+.sectionContent::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sectionContent::-webkit-scrollbar-track {
+  background: var(--gray-50);
+  border-radius: 2px;
+}
+
+.sectionContent::-webkit-scrollbar-thumb {
+  background: var(--gray-200);
+  border-radius: 2px;
+}
+
+.sectionContent::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-300);
+}
+
+.sortableList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+}
+
+.sortableItem {
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  transition: box-shadow var(--transition-normal);
+  cursor: grab;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.sortableItem:hover {
+  border-color: var(--primary-300);
+  box-shadow: 0 2px 4px rgba(14, 165, 233, 0.1);
+}
+
+.sortableItem:active {
+  cursor: grabbing;
+}
+
+/* Optimize dragging performance */
+.sortableItem[data-dragging='true'] {
+  transition: none;
+  z-index: 1000;
+}
+
+.sortableItemContent {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-1);
+}
+
+.dragHandle {
+  color: var(--gray-400);
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-normal);
+}
+
+.dragHandle:hover {
+  color: var(--gray-600);
+  background: var(--gray-100);
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.itemLabel {
+  font-weight: var(--font-weight-medium);
+  color: var(--gray-800);
+  font-size: var(--font-size-sm);
+}
+
+.itemDetails {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1;
+}
+
+.itemDescription {
+  font-size: var(--font-size-xs);
+  color: var(--gray-600);
+  line-height: 1.4;
+}
+
+.resetButton {
+  background: linear-gradient(135deg, var(--accent-orange-500), var(--accent-orange-600)) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  align-self: flex-start;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.resetButton:hover {
+  background: linear-gradient(135deg, var(--accent-orange-600), var(--accent-orange-700));
+  transform: translateY(-1px);
+}
+
+.resetAppBarButton {
+  background: linear-gradient(135deg, var(--accent-orange-500), var(--accent-orange-600)) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  align-self: flex-start;
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.resetAppBarButton:hover {
+  background: linear-gradient(135deg, var(--accent-orange-600), var(--accent-orange-700)) !important;
+  transform: translateY(-1px);
+}
+
+.settingsPopupFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--gray-200);
+  background: var(--gray-50);
+}
+
+.resetAllButton {
+  background: none;
+  border: 1px solid var(--gray-300);
+  color: var(--gray-700);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.resetAllButton:hover {
+  background: var(--gray-100);
+  border-color: var(--gray-400);
+}
+
+.actionButtons {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.cancelButton {
+  background: none;
+  border: 1px solid var(--gray-300);
+  color: var(--gray-700);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.cancelButton:hover {
+  background: var(--gray-100);
+  border-color: var(--gray-400);
+}
+
+.saveButton {
+  background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.saveButton:hover {
+  background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+  transform: translateY(-1px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .settingsPopup {
+    max-width: 95vw;
+    max-height: 90vh;
+  }
+
+  .settingsPopupHeader {
+    padding: var(--space-4) var(--space-4) var(--space-3);
+  }
+
+  .settingsPopupContent {
+    padding: var(--space-4);
+    gap: var(--space-3);
+    max-height: 60vh;
+  }
+
+  .sectionHeader {
+    padding: var(--space-3);
+  }
+
+  .sectionContent {
+    padding: var(--space-3);
+    max-height: 50vh;
+  }
+
+  .settingsPopupFooter {
+    padding: var(--space-3) var(--space-4);
+    flex-direction: column;
+    gap: var(--space-3);
+    align-items: stretch;
+  }
+
+  .actionButtons {
+    justify-content: stretch;
+  }
+
+  .cancelButton,
+  .saveButton {
+    flex: 1;
+  }
+}

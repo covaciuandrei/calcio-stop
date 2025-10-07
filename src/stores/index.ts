@@ -6,6 +6,7 @@ export * from './kitTypesStore';
 export * from './namesetsStore';
 export * from './productsStore';
 export * from './salesStore';
+export * from './settingsStore';
 export * from './teamsStore';
 export * from './uiStore';
 
@@ -35,6 +36,7 @@ export {
   useProductsStore,
 } from './productsStore';
 export { useSales, useSalesActions, useSalesList, useSalesStore } from './salesStore';
+export { useAppBarOrder, useDashboardOrder, useSettings, useSettingsActions } from './settingsStore';
 export { useArchivedTeams, useTeams, useTeamsActions, useTeamsList, useTeamsStore } from './teamsStore';
 export {
   useArchivedBadgesSearch,
@@ -66,5 +68,6 @@ export { kitTypesSelectors } from './kitTypesStore';
 export { namesetsSelectors } from './namesetsStore';
 export { productsSelectors } from './productsStore';
 export { salesSelectors } from './salesStore';
+export { settingsSelectors } from './settingsStore';
 export { teamsSelectors } from './teamsStore';
 export { uiSelectors } from './uiStore';
