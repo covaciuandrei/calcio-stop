@@ -1,4 +1,5 @@
 import React from 'react';
+import { isDefaultKitType } from '../../constants/kitTypes';
 import { useKitTypesActions } from '../../stores';
 import { KitType } from '../../types';
 
@@ -45,19 +46,25 @@ const ArchivedKitTypes: React.FC<Props> = ({ archivedKitTypes, searchTerm = '', 
         </tr>
       </thead>
       <tbody>
-        {filteredKitTypes.map((kt) => (
-          <tr key={kt.id}>
-            <td>{kt.name}</td>
-            <td>
-              <button onClick={() => handleRestore(kt.id)} className="btn btn-icon btn-success" title="Restore">
-                ↩️
-              </button>
-              <button onClick={() => handleDelete(kt.id)} className="btn btn-danger">
-                Delete Forever
-              </button>
-            </td>
-          </tr>
-        ))}
+        {filteredKitTypes.map((kt) => {
+          const isDefault = isDefaultKitType(kt.id);
+
+          return (
+            <tr key={kt.id}>
+              <td>{kt.name}</td>
+              <td>
+                <button onClick={() => handleRestore(kt.id)} className="btn btn-icon btn-success" title="Restore">
+                  ↩️
+                </button>
+                {!isDefault && (
+                  <button onClick={() => handleDelete(kt.id)} className="btn btn-danger">
+                    Delete Forever
+                  </button>
+                )}
+              </td>
+            </tr>
+          );
+        })}
       </tbody>
     </table>
   );

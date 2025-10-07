@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
+import { isDefaultKitType } from '../constants/kitTypes';
 import { KitType } from '../types';
 
 interface KitTypesState {
@@ -57,6 +58,12 @@ export const useKitTypesStore = create<KitTypesState>()(
         },
 
         deleteKitType: (id: string) => {
+          // Prevent deletion of default kit types
+          if (isDefaultKitType(id)) {
+            console.warn('Cannot delete default kit types');
+            return;
+          }
+
           set((state) => ({
             kitTypes: state.kitTypes.filter((kt) => kt.id !== id),
             archivedKitTypes: state.archivedKitTypes.filter((kt) => kt.id !== id),
@@ -64,6 +71,12 @@ export const useKitTypesStore = create<KitTypesState>()(
         },
 
         archiveKitType: (id: string) => {
+          // Prevent archiving of default kit types
+          if (isDefaultKitType(id)) {
+            console.warn('Cannot archive default kit types');
+            return;
+          }
+
           const kitType = get().kitTypes.find((kt) => kt.id === id);
           if (kitType) {
             set((state) => ({

@@ -1,4 +1,5 @@
 import React from 'react';
+import { isDefaultKitType } from '../../constants/kitTypes';
 import { KitType } from '../../types';
 
 interface Props {
@@ -29,19 +30,25 @@ const KitTypeTableList: React.FC<Props> = ({ kitTypes, onEdit, onArchive, search
         </tr>
       </thead>
       <tbody>
-        {filteredKitTypes.map((kt) => (
-          <tr key={kt.id}>
-            <td>{kt.name}</td>
-            <td>
-              <button onClick={() => onEdit(kt)} className="btn btn-icon btn-success" title="Edit">
-                ✏️
-              </button>
-              <button onClick={() => onArchive(kt.id)} className="btn btn-icon btn-secondary" title="Archive">
-                📦
-              </button>
-            </td>
-          </tr>
-        ))}
+        {filteredKitTypes.map((kt) => {
+          const isDefault = isDefaultKitType(kt.id);
+
+          return (
+            <tr key={kt.id}>
+              <td>{kt.name}</td>
+              <td>
+                <button onClick={() => onEdit(kt)} className="btn btn-icon btn-success" title="Edit">
+                  ✏️
+                </button>
+                {!isDefault && (
+                  <button onClick={() => onArchive(kt.id)} className="btn btn-icon btn-secondary" title="Archive">
+                    📦
+                  </button>
+                )}
+              </td>
+            </tr>
+          );
+        })}
       </tbody>
     </table>
   );
