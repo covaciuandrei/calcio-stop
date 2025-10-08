@@ -1,7 +1,7 @@
 import React from 'react';
-import { useArchivedNamesets, useNamesetsList, useProductsList } from '../../stores';
+import { useArchivedBadges, useArchivedNamesets, useBadgesList, useNamesetsList, useProductsList } from '../../stores';
 import { Sale } from '../../types';
-import { getNamesetInfo } from '../../utils/utils';
+import { getBadgeInfo, getNamesetInfo } from '../../utils/utils';
 
 interface Props {
   sales: Sale[];
@@ -15,14 +15,18 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, searchTerm =
   const products = useProductsList();
   const namesets = useNamesetsList();
   const archivedNamesets = useArchivedNamesets();
+  const badges = useBadgesList();
+  const archivedBadges = useArchivedBadges();
   const getProductDetails = (productId: string) => {
     const product = products.find((p) => p.id === productId);
 
     if (!product) return 'Unknown product';
     const namesetInfo = getNamesetInfo(product.namesetId, namesets, archivedNamesets);
+    const badgeInfo = getBadgeInfo(product.badgeId, badges, archivedBadges);
+    const badgeText = badgeInfo !== '-' ? ` (${badgeInfo})` : '';
     return `${product.name} - ${product.type} - ${namesetInfo.playerName} #${
       namesetInfo.number > 0 ? namesetInfo.number : '-'
-    }`;
+    }${badgeText}`;
   };
 
   // Filter sales based on search term

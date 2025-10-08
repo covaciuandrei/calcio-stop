@@ -1,4 +1,4 @@
-import { KitType, Nameset, Team } from '../types';
+import { Badge, KitType, Nameset, Team } from '../types';
 
 export const generateSeasons = (start = 1990, end = 2030): string[] =>
   Array.from({ length: end - start + 1 }, (_, i) => {
@@ -68,6 +68,26 @@ export const getKitTypeInfo = (kitTypeId: string, kitTypes: KitType[], archivedK
   }
 
   return kitType.name;
+};
+
+export const getBadgeInfo = (badgeId: string | null, badges: Badge[], archivedBadges: Badge[] = []): string => {
+  if (!badgeId) {
+    return '-';
+  }
+
+  // First check in active badges
+  let badge = badges.find((b) => b.id === badgeId);
+
+  // If not found, check in archived badges
+  if (!badge) {
+    badge = archivedBadges.find((b) => b.id === badgeId);
+  }
+
+  if (!badge) {
+    return '-';
+  }
+
+  return badge.name;
 };
 
 // Utility functions for sorting by creation date

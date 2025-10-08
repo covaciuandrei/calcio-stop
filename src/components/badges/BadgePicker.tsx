@@ -70,7 +70,9 @@ const BadgePicker: React.FC<Props> = ({ selectedBadgeId, onBadgeSelect, placehol
         className={`${styles.pickerTrigger} ${adding ? styles.disabled : ''}`}
         onClick={() => !adding && setIsOpen((prev) => !prev)}
       >
-        {selectedBadge ? selectedBadge.name : placeholder}
+        {selectedBadge
+          ? `${selectedBadge.name} - ${selectedBadge.season} (Qty: ${selectedBadge.quantity})`
+          : placeholder}
         <span style={{ marginLeft: 'auto' }}>▼</span>
       </div>
 
@@ -105,7 +107,7 @@ const BadgePicker: React.FC<Props> = ({ selectedBadgeId, onBadgeSelect, placehol
                     setIsOpen(false);
                   }}
                 >
-                  {b.name} - {b.season}
+                  {b.name} - {b.season} (Qty: {b.quantity})
                 </div>
               ))}
             </div>

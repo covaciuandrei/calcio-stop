@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useProductsActions } from '../../stores';
+import { useBadgesActions, useBadgesList, useProductsActions } from '../../stores';
 import { AdultSize, KidSize, Product, ProductSizeQuantity, ProductType } from '../../types';
+import BadgePicker from '../badges/BadgePicker';
 import KitTypePicker from '../kittypes/KitTypePicker';
 import NamesetPicker from '../namesets/NamesetPicker';
 import styles from '../shared/Form.module.css';
@@ -18,6 +19,8 @@ interface Props {
 const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }) => {
   // Get store actions
   const { updateProduct } = useProductsActions();
+  const badges = useBadgesList();
+  const { updateBadge } = useBadgesActions();
   const [name, setName] = useState(editingProduct?.name || '');
   const [type, setType] = useState<ProductType>(editingProduct?.type || ProductType.SHIRT);
   const [sizes, setSizes] = useState<ProductSizeQuantity[]>(editingProduct?.sizes || []);
@@ -26,6 +29,7 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
   const [selectedKitTypeId, setSelectedKitTypeId] = useState<string>(
     editingProduct?.kitTypeId || 'default-kit-type-1st'
   );
+  const [selectedBadgeId, setSelectedBadgeId] = useState<string | null>(editingProduct?.badgeId || null);
   const [price, setPrice] = useState<number>(editingProduct?.price || 0);
   const [hasLoaded, setHasLoaded] = useState(false);
 
@@ -38,6 +42,7 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
       setSelectedNamesetId(editingProduct.namesetId);
       setSelectedTeamId(editingProduct.teamId);
       setSelectedKitTypeId(editingProduct.kitTypeId);
+      setSelectedBadgeId(editingProduct.badgeId);
       setPrice(editingProduct.price || 0);
       // Use setTimeout to ensure sizes are loaded before enabling type changes
       setTimeout(() => setHasLoaded(true), 0);
@@ -66,6 +71,25 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
       return;
     }
 
+    // Calculate total quantity of all sizes in the product
+    const totalProductQuantity = sizes.reduce((total, sizeQty) => total + sizeQty.quantity, 0);
+
+    if (totalProductQuantity <= 0) {
+      alert('Please add at least one item to the product');
+      return;
+    }
+
+    // Check if badge has available quantity
+    if (selectedBadgeId) {
+      const selectedBadge = badges.find((b) => b.id === selectedBadgeId);
+      if (selectedBadge && selectedBadge.quantity < totalProductQuantity) {
+        alert(
+          `Selected badge only has ${selectedBadge.quantity} available, but you're trying to add ${totalProductQuantity} items`
+        );
+        return;
+      }
+    }
+
     updateProduct(editingProduct.id, {
       name: name.trim() || '',
       type,
@@ -73,8 +97,26 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
       namesetId: selectedNamesetId,
       teamId: selectedTeamId,
       kitTypeId: selectedKitTypeId,
+      badgeId: selectedBadgeId,
       price: Number(price) || 0,
     });
+
+    // Update badge quantity if a badge was selected
+    if (selectedBadgeId) {
+      const selectedBadge = badges.find((b) => b.id === selectedBadgeId);
+      if (selectedBadge) {
+        // Calculate the difference in quantity from the original product
+        const originalTotalQuantity = editingProduct.sizes.reduce((total, sizeQty) => total + sizeQty.quantity, 0);
+        const quantityDifference = totalProductQuantity - originalTotalQuantity;
+
+        if (quantityDifference !== 0) {
+          updateBadge(selectedBadgeId, {
+            quantity: Math.max(0, selectedBadge.quantity - quantityDifference),
+          });
+        }
+      }
+    }
+
     setEditingProduct(null);
   };
 
@@ -130,6 +172,15 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
             selectedNamesetId={selectedNamesetId}
             onNamesetSelect={setSelectedNamesetId}
             placeholder="Select a nameset (optional)"
+          />
+        </label>
+
+        <label>
+          Select a badge:
+          <BadgePicker
+            selectedBadgeId={selectedBadgeId}
+            onBadgeSelect={setSelectedBadgeId}
+            placeholder="Select a badge (optional)"
           />
         </label>
 

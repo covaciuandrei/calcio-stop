@@ -1,15 +1,17 @@
 import React from 'react';
 import {
+  useArchivedBadges,
   useArchivedKitTypes,
   useArchivedNamesets,
   useArchivedTeams,
+  useBadgesList,
   useKitTypesList,
   useNamesetsList,
   useProductsActions,
   useTeamsList,
 } from '../../stores';
 import { Product } from '../../types';
-import { getKitTypeInfo, getNamesetInfo, getTeamInfo } from '../../utils/utils';
+import { getBadgeInfo, getKitTypeInfo, getNamesetInfo, getTeamInfo } from '../../utils/utils';
 
 interface Props {
   archivedProducts: Product[];
@@ -25,6 +27,8 @@ const ArchivedProducts: React.FC<Props> = ({ archivedProducts, searchTerm = '', 
   const archivedTeams = useArchivedTeams();
   const kitTypes = useKitTypesList();
   const archivedKitTypes = useArchivedKitTypes();
+  const badges = useBadgesList();
+  const archivedBadges = useArchivedBadges();
   const { restoreProduct, deleteProduct } = useProductsActions();
 
   const handleRestore = (id: string) => {
@@ -66,6 +70,7 @@ const ArchivedProducts: React.FC<Props> = ({ archivedProducts, searchTerm = '', 
             <th>Season</th>
             <th>Player</th>
             <th>Number</th>
+            <th>Badge</th>
             <th>Price</th>
             <th>Actions</th>
           </tr>
@@ -104,6 +109,7 @@ const ArchivedProducts: React.FC<Props> = ({ archivedProducts, searchTerm = '', 
                   return namesetInfo.number > 0 ? namesetInfo.number : '-';
                 })()}
               </td>
+              <td>{getBadgeInfo(p.badgeId, badges, archivedBadges)}</td>
               <td className="price-display">${p.price.toFixed ? p.price.toFixed(2) : p.price}</td>
               <td>
                 <button onClick={() => handleRestore(p.id)} className="btn btn-icon btn-success" title="Restore">

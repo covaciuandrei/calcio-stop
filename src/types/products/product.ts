@@ -22,6 +22,7 @@ export interface Product {
   namesetId: string | null; // reference to nameset, null if no nameset
   teamId: string | null; // reference to team, null if no team
   kitTypeId: string; // reference to kit type (required, defaults to '1st Kit')
+  badgeId: string | null; // reference to badge, null if no badge
   price: number; // default price per unit
   createdAt: string; // ISO date string
 }

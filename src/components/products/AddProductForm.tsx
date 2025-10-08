@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useNamesetsActions, useNamesetsList, useProductsActions } from '../../stores';
+import { useBadgesActions, useBadgesList, useNamesetsActions, useNamesetsList, useProductsActions } from '../../stores';
 import { AdultSize, KidSize, Product, ProductSizeQuantity, ProductType } from '../../types';
+import BadgePicker from '../badges/BadgePicker';
 import KitTypePicker from '../kittypes/KitTypePicker';
 import NamesetPicker from '../namesets/NamesetPicker';
 import styles from '../shared/Form.module.css';
@@ -14,12 +15,15 @@ const AddProductForm: React.FC = () => {
   const { addProduct } = useProductsActions();
   const namesets = useNamesetsList();
   const { updateNameset } = useNamesetsActions();
+  const badges = useBadgesList();
+  const { updateBadge } = useBadgesActions();
   const [name, setName] = useState('');
   const [type, setType] = useState<ProductType>(ProductType.SHIRT);
   const [sizes, setSizes] = useState<ProductSizeQuantity[]>([]);
   const [selectedNamesetId, setSelectedNamesetId] = useState<string | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [selectedKitTypeId, setSelectedKitTypeId] = useState<string>('default-kit-type-1st');
+  const [selectedBadgeId, setSelectedBadgeId] = useState<string | null>(null);
   const [price, setPrice] = useState<number>(0);
 
   useEffect(() => {
@@ -58,6 +62,17 @@ const AddProductForm: React.FC = () => {
       }
     }
 
+    // Check if badge has available quantity
+    if (selectedBadgeId) {
+      const selectedBadge = badges.find((b) => b.id === selectedBadgeId);
+      if (selectedBadge && selectedBadge.quantity < totalProductQuantity) {
+        alert(
+          `Selected badge only has ${selectedBadge.quantity} available, but you're trying to add ${totalProductQuantity} items`
+        );
+        return;
+      }
+    }
+
     const newProduct: Product = {
       id: Date.now().toString(),
       name: name.trim() || '', // Allow empty notes if team is selected
@@ -66,6 +81,7 @@ const AddProductForm: React.FC = () => {
       namesetId: selectedNamesetId,
       teamId: selectedTeamId,
       kitTypeId: selectedKitTypeId,
+      badgeId: selectedBadgeId,
       price: Number(price) || 0,
       createdAt: new Date().toISOString(),
     };
@@ -82,12 +98,23 @@ const AddProductForm: React.FC = () => {
       }
     }
 
+    // Decrement badge quantity by the total product quantity if a badge was selected
+    if (selectedBadgeId) {
+      const selectedBadge = badges.find((b) => b.id === selectedBadgeId);
+      if (selectedBadge) {
+        updateBadge(selectedBadgeId, {
+          quantity: Math.max(0, selectedBadge.quantity - totalProductQuantity),
+        });
+      }
+    }
+
     // reset
     setName('');
     setType(ProductType.SHIRT);
     setSelectedNamesetId(null);
     setSelectedTeamId(null);
     setSelectedKitTypeId('default-kit-type-1st');
+    setSelectedBadgeId(null);
     setPrice(0);
     // sizes will reset via effect when type resets
   };
@@ -153,6 +180,11 @@ const AddProductForm: React.FC = () => {
           onNamesetSelect={setSelectedNamesetId}
           placeholder="Ex: Messi 10"
         />{' '}
+      </div>
+
+      <div className="form-group">
+        <label>Select a badge</label>
+        <BadgePicker selectedBadgeId={selectedBadgeId} onBadgeSelect={setSelectedBadgeId} placeholder="Ex: UCL" />{' '}
       </div>
 
       <div className="form-group">

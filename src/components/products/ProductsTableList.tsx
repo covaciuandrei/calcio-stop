@@ -1,14 +1,16 @@
 import React from 'react';
 import {
+  useArchivedBadges,
   useArchivedKitTypes,
   useArchivedNamesets,
   useArchivedTeams,
+  useBadgesList,
   useKitTypesList,
   useNamesetsList,
   useTeamsList,
 } from '../../stores';
 import { Product } from '../../types';
-import { getKitTypeInfo, getNamesetInfo, getTeamInfo } from '../../utils/utils';
+import { getBadgeInfo, getKitTypeInfo, getNamesetInfo, getTeamInfo } from '../../utils/utils';
 
 interface Props {
   products: Product[];
@@ -25,16 +27,20 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
   const archivedTeams = useArchivedTeams();
   const kitTypes = useKitTypesList();
   const archivedKitTypes = useArchivedKitTypes();
+  const badges = useBadgesList();
+  const archivedBadges = useArchivedBadges();
   // Filter products based on search term
   const filteredProducts = products.filter((product) => {
     const teamInfo = getTeamInfo(product.teamId, teams, archivedTeams);
     const namesetInfo = getNamesetInfo(product.namesetId, namesets, archivedNamesets);
+    const badgeInfo = getBadgeInfo(product.badgeId, badges, archivedBadges);
     return (
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
       teamInfo.toLowerCase().includes(searchTerm.toLowerCase()) ||
       namesetInfo.playerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       namesetInfo.season.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      badgeInfo.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.price.toString().includes(searchTerm)
     );
   });
@@ -59,6 +65,7 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
           <th>Season</th>
           <th>Player</th>
           <th>Number</th>
+          <th>Badge</th>
           <th>Price</th>
           <th>Actions</th>
         </tr>
@@ -97,6 +104,7 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
                 return namesetInfo.number > 0 ? namesetInfo.number : '-';
               })()}
             </td>
+            <td>{getBadgeInfo(p.badgeId, badges, archivedBadges)}</td>
             <td className="price-display">${p.price.toFixed ? p.price.toFixed(2) : p.price}</td>
             <td>
               <button onClick={() => onEdit(p)} className="btn btn-icon btn-success" title="Edit">
