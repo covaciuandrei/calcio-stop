@@ -25,9 +25,10 @@ const EditBadgeModal: React.FC<Props> = ({ editingBadge, setEditingBadge }) => {
     }
   }, [editingBadge]);
 
-  const handleSaveEdit = () => {
-    if (!name.trim()) return alert('Badge name cannot be empty');
-    if (quantity === '' || quantity < 0) return alert('Quantity must be 0 or greater');
+  const handleSaveEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+    if (quantity === '' || quantity < 0) return;
 
     if (!editingBadge) return;
 
@@ -45,33 +46,41 @@ const EditBadgeModal: React.FC<Props> = ({ editingBadge, setEditingBadge }) => {
     <div className="modal">
       <div className="modal-content" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
         <h3>Edit Badge</h3>
-        <label>
-          Badge Name:
-          <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
-        </label>
-        <label>
-          Season:
-          <select value={season} onChange={(e) => setSeason(e.target.value)}>
-            {generateSeasons().map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Quantity:
-          <input type="number" min={0} value={quantity} onChange={(e) => setQuantity(parseInt(e.target.value) || '')} />
-        </label>
+        <form onSubmit={handleSaveEdit}>
+          <label>
+            Badge Name:
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
+          </label>
+          <label>
+            Season:
+            <select value={season} onChange={(e) => setSeason(e.target.value)}>
+              {generateSeasons().map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Quantity:
+            <input
+              type="number"
+              min={0}
+              value={quantity}
+              onChange={(e) => setQuantity(parseInt(e.target.value) || '')}
+              required
+            />
+          </label>
 
-        <div className="modal-buttons">
-          <button onClick={handleSaveEdit} className="btn btn-success">
-            Save
-          </button>
-          <button onClick={() => setEditingBadge(null)} className="btn btn-secondary">
-            Cancel
-          </button>
-        </div>
+          <div className="modal-buttons">
+            <button type="submit" className="btn btn-success">
+              Save
+            </button>
+            <button type="button" onClick={() => setEditingBadge(null)} className="btn btn-secondary">
+              Cancel
+            </button>
+          </div>
+        </form>
       </div>
     </div>,
     document.body
