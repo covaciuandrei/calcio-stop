@@ -12,16 +12,30 @@ const EditTeamModal: React.FC<Props> = ({ editingTeam, setEditingTeam }) => {
   // Get store actions
   const { updateTeam } = useTeamsActions();
   const [name, setName] = useState(editingTeam?.name || '');
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // Update state when editingTeam changes
   React.useEffect(() => {
     if (editingTeam) {
       setName(editingTeam.name);
+      setErrors({});
     }
   }, [editingTeam]);
 
-  const handleSaveEdit = () => {
-    if (!name.trim()) return alert('Team name cannot be empty');
+  const handleSaveEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newErrors: { [key: string]: string } = {};
+
+    if (!name.trim()) {
+      newErrors.name = 'Team name cannot be empty';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
     if (!editingTeam) return;
 
     updateTeam(editingTeam.id, {
@@ -36,19 +50,33 @@ const EditTeamModal: React.FC<Props> = ({ editingTeam, setEditingTeam }) => {
     <div className="modal">
       <div className="modal-content" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
         <h3>Edit Team</h3>
-        <label>
-          Team Name:
-          <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
-        </label>
+        <form onSubmit={handleSaveEdit}>
+          <div className={`form-group ${errors.name ? 'has-error' : ''}`}>
+            <label>
+              Team Name:
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  if (errors.name) {
+                    setErrors((prev) => ({ ...prev, name: '' }));
+                  }
+                }}
+              />
+            </label>
+            {errors.name && <div className="error-message">{errors.name}</div>}
+          </div>
 
-        <div className="modal-buttons">
-          <button onClick={handleSaveEdit} className="btn btn-success">
-            Save
-          </button>
-          <button onClick={() => setEditingTeam(null)} className="btn btn-secondary">
-            Cancel
-          </button>
-        </div>
+          <div className="modal-buttons">
+            <button type="submit" className="btn btn-success">
+              Save
+            </button>
+            <button type="button" onClick={() => setEditingTeam(null)} className="btn btn-secondary">
+              Cancel
+            </button>
+          </div>
+        </form>
       </div>
     </div>,
     document.body

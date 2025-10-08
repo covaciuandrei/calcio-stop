@@ -13,11 +13,26 @@ const AddBadgeForm: React.FC<Props> = ({ onAdd }) => {
   const [name, setName] = useState('');
   const [season, setSeason] = useState('2025/2026');
   const [quantity, setQuantity] = useState<number | ''>('');
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return alert('Badge name cannot be empty');
-    if (quantity === '' || quantity < 0) return alert('Quantity must be 0 or greater');
+    e.stopPropagation();
+    const newErrors: { [key: string]: string } = {};
+
+    if (!name.trim()) {
+      newErrors.name = 'Badge name cannot be empty';
+    }
+    if (quantity === '' || quantity < 0) {
+      newErrors.quantity = 'Quantity must be 0 or greater';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
 
     const newBadge: Badge = {
       id: Date.now().toString(),
@@ -36,15 +51,20 @@ const AddBadgeForm: React.FC<Props> = ({ onAdd }) => {
 
   return (
     <form onSubmit={handleSubmit} className="form-inline">
-      <div className="form-group">
+      <div className={`form-group ${errors.name ? 'has-error' : ''}`}>
         <label>Badge Name</label>
         <input
           type="text"
           placeholder="e.g. Champions League"
           value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
+          onChange={(e) => {
+            setName(e.target.value);
+            if (errors.name) {
+              setErrors((prev) => ({ ...prev, name: '' }));
+            }
+          }}
         />
+        {errors.name && <div className="error-message">{errors.name}</div>}
       </div>
       <div className="form-group">
         <label>Season</label>
@@ -56,15 +76,20 @@ const AddBadgeForm: React.FC<Props> = ({ onAdd }) => {
           ))}
         </select>
       </div>
-      <div className="form-group">
+      <div className={`form-group ${errors.quantity ? 'has-error' : ''}`}>
         <label>Quantity</label>
         <input
           type="number"
           min={0}
           value={quantity}
-          onChange={(e) => setQuantity(parseInt(e.target.value) || '')}
-          required
+          onChange={(e) => {
+            setQuantity(parseInt(e.target.value) || '');
+            if (errors.quantity) {
+              setErrors((prev) => ({ ...prev, quantity: '' }));
+            }
+          }}
         />
+        {errors.quantity && <div className="error-message">{errors.quantity}</div>}
       </div>
       <div className="form-button-container">
         <button type="submit" className="btn btn-success">

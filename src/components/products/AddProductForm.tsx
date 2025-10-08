@@ -25,6 +25,7 @@ const AddProductForm: React.FC = () => {
   const [selectedKitTypeId, setSelectedKitTypeId] = useState<string>('default-kit-type-1st');
   const [selectedBadgeId, setSelectedBadgeId] = useState<string | null>(null);
   const [price, setPrice] = useState<number>(0);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     // initialize sizes depending on type
@@ -37,28 +38,25 @@ const AddProductForm: React.FC = () => {
   };
 
   const handleAddProduct = () => {
+    const newErrors: { [key: string]: string } = {};
+
     // Product notes are optional if a team is selected
     if (!name.trim() && !selectedTeamId) {
-      alert('Please enter product notes or select a team');
-      return;
+      newErrors.name = 'Please enter product notes or select a team';
     }
 
     // Calculate total quantity of all sizes in the product
     const totalProductQuantity = sizes.reduce((total, sizeQty) => total + sizeQty.quantity, 0);
 
     if (totalProductQuantity <= 0) {
-      alert('Please add at least one item to the product');
-      return;
+      newErrors.sizes = 'Please add at least one item to the product';
     }
 
     // Check if nameset has available quantity
     if (selectedNamesetId) {
       const selectedNameset = namesets.find((n) => n.id === selectedNamesetId);
       if (selectedNameset && selectedNameset.quantity < totalProductQuantity) {
-        alert(
-          `Selected nameset only has ${selectedNameset.quantity} available, but you're trying to add ${totalProductQuantity} items`
-        );
-        return;
+        newErrors.nameset = `Selected nameset only has ${selectedNameset.quantity} available, but you're trying to add ${totalProductQuantity} items`;
       }
     }
 
@@ -66,12 +64,16 @@ const AddProductForm: React.FC = () => {
     if (selectedBadgeId) {
       const selectedBadge = badges.find((b) => b.id === selectedBadgeId);
       if (selectedBadge && selectedBadge.quantity < totalProductQuantity) {
-        alert(
-          `Selected badge only has ${selectedBadge.quantity} available, but you're trying to add ${totalProductQuantity} items`
-        );
-        return;
+        newErrors.badge = `Selected badge only has ${selectedBadge.quantity} available, but you're trying to add ${totalProductQuantity} items`;
       }
     }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
 
     const newProduct: Product = {
       id: Date.now().toString(),
@@ -141,16 +143,22 @@ const AddProductForm: React.FC = () => {
         </select>
       </div>
 
-      <div className="form-group">
+      <div className={`form-group ${errors.name ? 'has-error' : ''}`}>
         <label>Product Notes {selectedTeamId ? '(optional)' : ''}</label>
         <input
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => {
+            setName(e.target.value);
+            if (errors.name) {
+              setErrors((prev) => ({ ...prev, name: '' }));
+            }
+          }}
           placeholder={selectedTeamId ? 'e.g. Home, Away, Third (optional)' : 'e.g. Real Madrid Home'}
         />
+        {errors.name && <div className="error-message">{errors.name}</div>}
       </div>
 
-      <div className={`form-group ${styles.fullWidthGroup}`}>
+      <div className={`form-group ${styles.fullWidthGroup} ${errors.sizes ? 'has-error' : ''}`}>
         <label>Sizes & Quantities</label>
         <div className="size-quantity-grid">
           {sizes.map((sq) => (
@@ -160,12 +168,18 @@ const AddProductForm: React.FC = () => {
                 type="number"
                 min={0}
                 value={sq.quantity}
-                onChange={(e) => handleQuantityChange(sq.size, Number(e.target.value || 0))}
+                onChange={(e) => {
+                  handleQuantityChange(sq.size, Number(e.target.value || 0));
+                  if (errors.sizes) {
+                    setErrors((prev) => ({ ...prev, sizes: '' }));
+                  }
+                }}
                 className="size-quantity-input"
               />
             </div>
           ))}
         </div>
+        {errors.sizes && <div className="error-message">{errors.sizes}</div>}
       </div>
 
       <div className="form-group">
@@ -173,18 +187,34 @@ const AddProductForm: React.FC = () => {
         <KitTypePicker selectedKitTypeId={selectedKitTypeId} onKitTypeSelect={setSelectedKitTypeId} />{' '}
       </div>
 
-      <div className="form-group">
+      <div className={`form-group ${errors.nameset ? 'has-error' : ''}`}>
         <label>Select a nameset</label>
         <NamesetPicker
           selectedNamesetId={selectedNamesetId}
-          onNamesetSelect={setSelectedNamesetId}
+          onNamesetSelect={(id) => {
+            setSelectedNamesetId(id);
+            if (errors.nameset) {
+              setErrors((prev) => ({ ...prev, nameset: '' }));
+            }
+          }}
           placeholder="Ex: Messi 10"
         />{' '}
+        {errors.nameset && <div className="error-message">{errors.nameset}</div>}
       </div>
 
-      <div className="form-group">
+      <div className={`form-group ${errors.badge ? 'has-error' : ''}`}>
         <label>Select a badge</label>
-        <BadgePicker selectedBadgeId={selectedBadgeId} onBadgeSelect={setSelectedBadgeId} placeholder="Ex: UCL" />{' '}
+        <BadgePicker
+          selectedBadgeId={selectedBadgeId}
+          onBadgeSelect={(id) => {
+            setSelectedBadgeId(id);
+            if (errors.badge) {
+              setErrors((prev) => ({ ...prev, badge: '' }));
+            }
+          }}
+          placeholder="Ex: UCL"
+        />{' '}
+        {errors.badge && <div className="error-message">{errors.badge}</div>}
       </div>
 
       <div className="form-group">

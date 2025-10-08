@@ -6,7 +6,7 @@ import AddTeamForm from './AddTeamForm';
 
 interface Props {
   selectedTeamId: string | null;
-  onTeamSelect: (id: string) => void;
+  onTeamSelect: (id: string | null) => void;
   placeholder?: string;
 }
 
@@ -70,7 +70,7 @@ const TeamPicker: React.FC<Props> = ({ selectedTeamId, onTeamSelect, placeholder
         className={`${styles.pickerTrigger} ${adding ? styles.disabled : ''}`}
         onClick={() => !adding && setIsOpen((prev) => !prev)}
       >
-        {selectedTeam ? selectedTeam.name : placeholder}
+        {selectedTeamId === null ? 'None' : selectedTeam ? selectedTeam.name : placeholder}
         <span style={{ marginLeft: 'auto' }}>▼</span>
       </div>
 
@@ -95,6 +95,16 @@ const TeamPicker: React.FC<Props> = ({ selectedTeamId, onTeamSelect, placeholder
               <input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
             <div className={styles.pickerList}>
+              {/* None option */}
+              <div
+                className={`${styles.pickerOption} ${selectedTeamId === null ? styles.selected : ''}`}
+                onClick={() => {
+                  onTeamSelect(null);
+                  setIsOpen(false);
+                }}
+              >
+                None
+              </div>
               {filteredTeams.length === 0 && <div className={styles.pickerEmpty}>No teams found</div>}
               {filteredTeams.map((t) => (
                 <div

@@ -14,7 +14,6 @@ const ProductsTableListCard: React.FC = () => {
   const [productsSearchTerm, setProductsSearchTerm] = useState('');
 
   const deleteProduct = (id: string) => {
-    if (!window.confirm('Are you sure you want to archive this product?')) return;
     archiveProduct(id);
     setProductsSearchTerm(''); // Clear search after action
   };

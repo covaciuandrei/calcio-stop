@@ -29,6 +29,12 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
   const archivedKitTypes = useArchivedKitTypes();
   const badges = useBadgesList();
   const archivedBadges = useArchivedBadges();
+
+  // Check if product is out of stock
+  const isOutOfStock = (product: Product) => {
+    return product.sizes.every((size) => size.quantity === 0);
+  };
+
   // Filter products based on search term
   const filteredProducts = products.filter((product) => {
     const teamInfo = getTeamInfo(product.teamId, teams, archivedTeams);
@@ -72,8 +78,26 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
       </thead>
       <tbody>
         {filteredProducts.map((p) => (
-          <tr key={p.id}>
-            <td>{getTeamInfo(p.teamId, teams, archivedTeams)}</td>
+          <tr key={p.id} className={isOutOfStock(p) ? 'out-of-stock-row' : ''}>
+            <td>
+              {getTeamInfo(p.teamId, teams, archivedTeams)}
+              {isOutOfStock(p) && (
+                <div
+                  style={{
+                    backgroundColor: '#ef4444',
+                    color: 'white',
+                    padding: '2px 8px',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    marginTop: '4px',
+                    display: 'inline-block',
+                  }}
+                >
+                  OUT OF STOCK
+                </div>
+              )}
+            </td>
             <td>{p.name || '-'}</td>
             <td>{p.type}</td>
             <td>{getKitTypeInfo(p.kitTypeId, kitTypes, archivedKitTypes)}</td>

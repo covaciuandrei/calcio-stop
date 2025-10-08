@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useBadgesActions, useBadgesList, useProductsActions } from '../../stores';
+import { useProductsActions } from '../../stores';
 import { AdultSize, KidSize, Product, ProductSizeQuantity, ProductType } from '../../types';
 import BadgePicker from '../badges/BadgePicker';
 import KitTypePicker from '../kittypes/KitTypePicker';
@@ -19,8 +19,6 @@ interface Props {
 const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }) => {
   // Get store actions
   const { updateProduct } = useProductsActions();
-  const badges = useBadgesList();
-  const { updateBadge } = useBadgesActions();
   const [name, setName] = useState(editingProduct?.name || '');
   const [type, setType] = useState<ProductType>(editingProduct?.type || ProductType.SHIRT);
   const [sizes, setSizes] = useState<ProductSizeQuantity[]>(editingProduct?.sizes || []);
@@ -32,6 +30,7 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
   const [selectedBadgeId, setSelectedBadgeId] = useState<string | null>(editingProduct?.badgeId || null);
   const [price, setPrice] = useState<number>(editingProduct?.price || 0);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // Update state when editingProduct changes
   React.useEffect(() => {
@@ -55,40 +54,39 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
       console.log('Type changed, updating sizes. Type:', type);
       const availableSizes = type === ProductType.KID_KIT ? kidSizes : adultSizes;
       console.log('New available sizes:', availableSizes);
-      // Reset all quantities to 0 when type changes (like AddProductForm)
-      const newSizes = availableSizes.map((s) => ({ size: s, quantity: 0 }));
+
+      // Preserve existing quantities when changing type
+      const newSizes = availableSizes.map((s) => {
+        const existingSize = sizes.find((existing) => existing.size === s);
+        return { size: s, quantity: existingSize ? existingSize.quantity : 0 };
+      });
       console.log('Setting new sizes:', newSizes);
       setSizes(newSizes);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type, hasLoaded]);
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = (e: React.FormEvent) => {
+    e.preventDefault();
     if (!editingProduct) return;
+
+    const newErrors: { [key: string]: string } = {};
 
     // Product notes are optional if a team is selected
     if (!name.trim() && !selectedTeamId) {
-      alert('Please enter product notes or select a team');
+      newErrors.name = 'Please enter product notes or select a team';
+    }
+
+    // Allow zero quantities (out of stock products)
+    // Note: Badge quantity validation is not needed when editing products
+    // Badge quantities are only checked when adding new products
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
-    // Calculate total quantity of all sizes in the product
-    const totalProductQuantity = sizes.reduce((total, sizeQty) => total + sizeQty.quantity, 0);
-
-    if (totalProductQuantity <= 0) {
-      alert('Please add at least one item to the product');
-      return;
-    }
-
-    // Check if badge has available quantity
-    if (selectedBadgeId) {
-      const selectedBadge = badges.find((b) => b.id === selectedBadgeId);
-      if (selectedBadge && selectedBadge.quantity < totalProductQuantity) {
-        alert(
-          `Selected badge only has ${selectedBadge.quantity} available, but you're trying to add ${totalProductQuantity} items`
-        );
-        return;
-      }
-    }
+    setErrors({});
 
     updateProduct(editingProduct.id, {
       name: name.trim() || '',
@@ -101,21 +99,8 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
       price: Number(price) || 0,
     });
 
-    // Update badge quantity if a badge was selected
-    if (selectedBadgeId) {
-      const selectedBadge = badges.find((b) => b.id === selectedBadgeId);
-      if (selectedBadge) {
-        // Calculate the difference in quantity from the original product
-        const originalTotalQuantity = editingProduct.sizes.reduce((total, sizeQty) => total + sizeQty.quantity, 0);
-        const quantityDifference = totalProductQuantity - originalTotalQuantity;
-
-        if (quantityDifference !== 0) {
-          updateBadge(selectedBadgeId, {
-            quantity: Math.max(0, selectedBadge.quantity - quantityDifference),
-          });
-        }
-      }
-    }
+    // Note: Badge and nameset quantities are not updated when editing products
+    // Only when adding new products do we modify badge/nameset quantities
 
     setEditingProduct(null);
   };
@@ -130,91 +115,116 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
     <div className="modal">
       <div className={`modal-content ${styles.modalContentScrollable}`}>
         <h3>Edit Product</h3>
+        <form onSubmit={handleSaveEdit}>
+          <label>
+            Select a team:
+            <TeamPicker
+              selectedTeamId={selectedTeamId}
+              onTeamSelect={setSelectedTeamId}
+              placeholder="Select a team (optional)"
+            />
+          </label>
 
-        <label>
-          Select a team:
-          <TeamPicker
-            selectedTeamId={selectedTeamId}
-            onTeamSelect={setSelectedTeamId}
-            placeholder="Select a team (optional)"
-          />
-        </label>
+          <label>
+            Type:
+            <select value={type} onChange={(e) => setType(e.target.value as ProductType)}>
+              {Object.values(ProductType).map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </label>
 
-        <label>
-          Type:
-          <select value={type} onChange={(e) => setType(e.target.value as ProductType)}>
-            {Object.values(ProductType).map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label>
-          Product Notes {selectedTeamId ? '(optional)' : ''}:
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder={selectedTeamId ? 'e.g. Home, Away, Third (optional)' : 'e.g. Real Madrid Home'}
-          />
-        </label>
-
-        <label>
-          Select kit type:
-          <KitTypePicker selectedKitTypeId={selectedKitTypeId} onKitTypeSelect={setSelectedKitTypeId} />
-        </label>
-
-        <label>
-          Select a nameset:
-          <NamesetPicker
-            selectedNamesetId={selectedNamesetId}
-            onNamesetSelect={setSelectedNamesetId}
-            placeholder="Select a nameset (optional)"
-          />
-        </label>
-
-        <label>
-          Select a badge:
-          <BadgePicker
-            selectedBadgeId={selectedBadgeId}
-            onBadgeSelect={setSelectedBadgeId}
-            placeholder="Select a badge (optional)"
-          />
-        </label>
-
-        <label>
-          Sizes & Quantities:
-          <div className={`size-quantity-grid ${styles.sizeQuantityGrid}`}>
-            {sizes.map((sq) => (
-              <div key={sq.size} className="size-quantity-item">
-                <div className="size-quantity-label">{sq.size}</div>
-                <input
-                  type="number"
-                  min={0}
-                  value={sq.quantity}
-                  onChange={(e) => handleSizeQuantityChange(sq.size, Number(e.target.value || 0))}
-                  className="size-quantity-input"
-                />
-              </div>
-            ))}
+          <div className={`form-group ${errors.name ? 'has-error' : ''}`}>
+            <label>
+              Product Notes {selectedTeamId ? '(optional)' : ''}:
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  if (errors.name) {
+                    setErrors((prev) => ({ ...prev, name: '' }));
+                  }
+                }}
+                placeholder={selectedTeamId ? 'e.g. Home, Away, Third (optional)' : 'e.g. Real Madrid Home'}
+              />
+            </label>
+            {errors.name && <div className="error-message">{errors.name}</div>}
           </div>
-        </label>
 
-        <label>
-          Price (per unit):
-          <input type="number" min={0} value={price} onChange={(e) => setPrice(Number(e.target.value || 0))} />
-        </label>
+          <label>
+            Select kit type:
+            <KitTypePicker selectedKitTypeId={selectedKitTypeId} onKitTypeSelect={setSelectedKitTypeId} />
+          </label>
 
-        <div className="modal-buttons">
-          <button onClick={handleSaveEdit} className="btn btn-success">
-            Save
-          </button>
-          <button onClick={() => setEditingProduct(null)} className="btn btn-secondary">
-            Cancel
-          </button>
-        </div>
+          <label>
+            Select a nameset:
+            <NamesetPicker
+              selectedNamesetId={selectedNamesetId}
+              onNamesetSelect={setSelectedNamesetId}
+              placeholder="Select a nameset (optional)"
+            />
+          </label>
+
+          <div className={`form-group ${errors.badge ? 'has-error' : ''}`}>
+            <label>
+              Select a badge:
+              <BadgePicker
+                selectedBadgeId={selectedBadgeId}
+                onBadgeSelect={(id) => {
+                  setSelectedBadgeId(id);
+                  if (errors.badge) {
+                    setErrors((prev) => ({ ...prev, badge: '' }));
+                  }
+                }}
+                placeholder="Select a badge (optional)"
+              />
+            </label>
+            {errors.badge && <div className="error-message">{errors.badge}</div>}
+          </div>
+
+          <div className={`form-group ${errors.sizes ? 'has-error' : ''}`}>
+            <label>
+              Sizes & Quantities:
+              <div className={`size-quantity-grid ${styles.sizeQuantityGrid}`}>
+                {sizes.map((sq) => (
+                  <div key={sq.size} className="size-quantity-item">
+                    <div className="size-quantity-label">{sq.size}</div>
+                    <input
+                      type="number"
+                      min={0}
+                      value={sq.quantity}
+                      onChange={(e) => {
+                        handleSizeQuantityChange(sq.size, Number(e.target.value || 0));
+                        if (errors.sizes) {
+                          setErrors((prev) => ({ ...prev, sizes: '' }));
+                        }
+                      }}
+                      className="size-quantity-input"
+                    />
+                  </div>
+                ))}
+              </div>
+            </label>
+            {errors.sizes && <div className="error-message">{errors.sizes}</div>}
+          </div>
+
+          <label>
+            Price (per unit):
+            <input type="number" min={0} value={price} onChange={(e) => setPrice(Number(e.target.value || 0))} />
+          </label>
+
+          <div className="modal-buttons">
+            <button type="submit" className="btn btn-success">
+              Save
+            </button>
+            <button type="button" onClick={() => setEditingProduct(null)} className="btn btn-secondary">
+              Cancel
+            </button>
+          </div>
+        </form>
       </div>
     </div>,
     document.body

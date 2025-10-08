@@ -169,7 +169,7 @@ body {
 
 /* Main container */
 .app-container {
-  max-width: 1200px;
+  max-width: 1250px;
   width: 100%;
   margin: 0 auto;
   padding: var(--space-6);
@@ -697,6 +697,31 @@ td button:hover {
   box-sizing: border-box;
 }
 
+/* Modal form validation styles */
+.modal-content .form-group.has-error input {
+  border-color: var(--error);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.modal-content .form-group.has-error input:focus {
+  border-color: var(--error);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+.modal-content .error-message {
+  display: block;
+  color: var(--error);
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-1);
+  padding-left: var(--space-2);
+  font-weight: var(--font-weight-medium);
+}
+
+.modal-content .error-message::before {
+  content: '⚠️ ';
+  margin-right: var(--space-1);
+}
+
 .modal-buttons {
   display: flex;
   justify-content: flex-end;
@@ -750,6 +775,12 @@ td button:hover {
 .status-out-of-stock {
   background: var(--accent-red-100);
   color: var(--accent-red-700);
+}
+
+/* Out of Stock Table Row */
+.out-of-stock-row {
+  border-left: 4px solid var(--accent-red-500);
+  background-color: var(--accent-red-50);
 }
 
 /* Price Display */
@@ -827,4 +858,112 @@ td button:hover {
 * {
   scrollbar-width: thin;
   scrollbar-color: rgba(14, 165, 233, 0.3) rgba(255, 255, 255, 0.1);
+}
+
+/* Form Validation Styles */
+.form-group {
+  position: relative;
+  margin-bottom: var(--space-4);
+}
+
+.form-group.has-error input,
+.form-group.has-error select,
+.form-group.has-error textarea {
+  border-color: var(--error);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.form-group.has-error input:focus,
+.form-group.has-error select:focus,
+.form-group.has-error textarea:focus {
+  border-color: var(--error);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+.error-message {
+  display: block;
+  color: var(--error);
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-1);
+  padding-left: var(--space-2);
+  font-weight: var(--font-weight-medium);
+}
+
+.error-message::before {
+  content: '⚠️ ';
+  margin-right: var(--space-1);
+}
+
+/* Disable browser validation tooltips */
+input:invalid,
+select:invalid,
+textarea:invalid {
+  box-shadow: none;
+}
+
+input:invalid:focus,
+select:invalid:focus,
+textarea:invalid:focus {
+  box-shadow: none;
+}
+
+/* Form validation states */
+.form-group.is-valid input,
+.form-group.is-valid select,
+.form-group.is-valid textarea {
+  border-color: var(--success);
+}
+
+.form-group.is-valid input:focus,
+.form-group.is-valid select:focus,
+.form-group.is-valid textarea:focus {
+  border-color: var(--success);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+
+/* Inline validation messages */
+.validation-message {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  margin-top: var(--space-2);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.validation-message.error {
+  background-color: var(--error-light);
+  color: var(--error-dark);
+  border: 1px solid var(--error);
+}
+
+.validation-message.warning {
+  background-color: var(--warning-light);
+  color: var(--warning-dark);
+  border: 1px solid var(--warning);
+}
+
+.validation-message.success {
+  background-color: var(--success-light);
+  color: var(--success-dark);
+  border: 1px solid var(--success);
+}
+
+.validation-message::before {
+  content: '⚠️';
+  font-size: var(--font-size-base);
+}
+
+.validation-message.success::before {
+  content: '✅';
+}
+
+.validation-message.warning::before {
+  content: '⚠️';
+}
+
+.validation-message.error::before {
+  content: '❌';
 }

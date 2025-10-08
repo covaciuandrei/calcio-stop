@@ -20,6 +20,7 @@ const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }
   const [selectedKitTypeId, setSelectedKitTypeId] = useState<string>(
     editingNameset?.kitTypeId || 'default-kit-type-1st'
   );
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // Update state when editingNameset changes
   React.useEffect(() => {
@@ -29,13 +30,30 @@ const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }
       setSeason(editingNameset.season);
       setQuantity(editingNameset.quantity);
       setSelectedKitTypeId(editingNameset.kitTypeId);
+      setErrors({});
     }
   }, [editingNameset]);
 
-  const handleSaveEdit = () => {
-    if (!playerName.trim()) return alert('Player name cannot be empty');
-    if (number === '' || number < 1) return alert('Number must be positive');
-    if (quantity === '' || quantity < 0) return alert('Quantity must be 0 or greater');
+  const handleSaveEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newErrors: { [key: string]: string } = {};
+
+    if (!playerName.trim()) {
+      newErrors.playerName = 'Player name cannot be empty';
+    }
+    if (number === '' || number < 1) {
+      newErrors.number = 'Number must be positive';
+    }
+    if (quantity === '' || quantity < 0) {
+      newErrors.quantity = 'Quantity must be 0 or greater';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
 
     if (!editingNameset) return;
 
@@ -55,41 +73,85 @@ const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }
     <div className="modal">
       <div className="modal-content" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
         <h3>Edit Nameset</h3>
-        <label>
-          Player Name:
-          <input type="text" value={playerName} onChange={(e) => setPlayerName(e.target.value)} />
-        </label>
-        <label>
-          Kit Type:
-          <KitTypePicker selectedKitTypeId={selectedKitTypeId} onKitTypeSelect={setSelectedKitTypeId} />
-        </label>
-        <label>
-          Number:
-          <input type="number" min={1} value={number} onChange={(e) => setNumber(parseInt(e.target.value) || '')} />
-        </label>
-        <label>
-          Season:
-          <select value={season} onChange={(e) => setSeason(e.target.value)}>
-            {generateSeasons().map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Quantity:
-          <input type="number" min={0} value={quantity} onChange={(e) => setQuantity(parseInt(e.target.value) || '')} />
-        </label>
+        <form onSubmit={handleSaveEdit}>
+          <div className={`form-group ${errors.playerName ? 'has-error' : ''}`}>
+            <label>
+              Player Name:
+              <input
+                type="text"
+                value={playerName}
+                onChange={(e) => {
+                  setPlayerName(e.target.value);
+                  if (errors.playerName) {
+                    setErrors((prev) => ({ ...prev, playerName: '' }));
+                  }
+                }}
+              />
+            </label>
+            {errors.playerName && <div className="error-message">{errors.playerName}</div>}
+          </div>
+          <div className="form-group">
+            <label>
+              Kit Type:
+              <KitTypePicker selectedKitTypeId={selectedKitTypeId} onKitTypeSelect={setSelectedKitTypeId} />
+            </label>
+          </div>
+          <div className={`form-group ${errors.number ? 'has-error' : ''}`}>
+            <label>
+              Number:
+              <input
+                type="number"
+                min={1}
+                value={number}
+                onChange={(e) => {
+                  setNumber(parseInt(e.target.value) || '');
+                  if (errors.number) {
+                    setErrors((prev) => ({ ...prev, number: '' }));
+                  }
+                }}
+              />
+            </label>
+            {errors.number && <div className="error-message">{errors.number}</div>}
+          </div>
+          <div className="form-group">
+            <label>
+              Season:
+              <select value={season} onChange={(e) => setSeason(e.target.value)}>
+                {generateSeasons().map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <div className={`form-group ${errors.quantity ? 'has-error' : ''}`}>
+            <label>
+              Quantity:
+              <input
+                type="number"
+                min={0}
+                value={quantity}
+                onChange={(e) => {
+                  setQuantity(parseInt(e.target.value) || '');
+                  if (errors.quantity) {
+                    setErrors((prev) => ({ ...prev, quantity: '' }));
+                  }
+                }}
+              />
+            </label>
+            {errors.quantity && <div className="error-message">{errors.quantity}</div>}
+          </div>
 
-        <div className="modal-buttons">
-          <button onClick={handleSaveEdit} className="btn btn-success">
-            Save
-          </button>
-          <button onClick={() => setEditingNameset(null)} className="btn btn-secondary">
-            Cancel
-          </button>
-        </div>
+          <div className="modal-buttons">
+            <button type="submit" className="btn btn-success">
+              Save
+            </button>
+            <button type="button" onClick={() => setEditingNameset(null)} className="btn btn-secondary">
+              Cancel
+            </button>
+          </div>
+        </form>
       </div>
     </div>,
     document.body

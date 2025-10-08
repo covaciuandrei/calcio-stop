@@ -6,7 +6,7 @@ import AddNamesetForm from './AddNamesetForm';
 
 interface Props {
   selectedNamesetId: string | null;
-  onNamesetSelect: (id: string) => void;
+  onNamesetSelect: (id: string | null) => void;
   placeholder?: string;
 }
 
@@ -72,7 +72,11 @@ const NamesetPicker: React.FC<Props> = ({ selectedNamesetId, onNamesetSelect, pl
         className={`${styles.pickerTrigger} ${adding ? styles.disabled : ''}`}
         onClick={() => !adding && setIsOpen((prev) => !prev)}
       >
-        {selectedNameset ? `${selectedNameset.playerName} (${selectedNameset.number})` : placeholder}
+        {selectedNamesetId === null
+          ? 'None'
+          : selectedNameset
+            ? `${selectedNameset.playerName} #${selectedNameset.number} - ${selectedNameset.season} (Qty: ${selectedNameset.quantity})`
+            : placeholder}
         <span style={{ marginLeft: 'auto' }}>▼</span>
       </div>
 
@@ -97,6 +101,16 @@ const NamesetPicker: React.FC<Props> = ({ selectedNamesetId, onNamesetSelect, pl
               <input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
             <div className={styles.pickerList}>
+              {/* None option */}
+              <div
+                className={`${styles.pickerOption} ${selectedNamesetId === null ? styles.selected : ''}`}
+                onClick={() => {
+                  onNamesetSelect(null);
+                  setIsOpen(false);
+                }}
+              >
+                None
+              </div>
               {filteredNamesets.length === 0 && <div className={styles.pickerEmpty}>No namesets found</div>}
               {filteredNamesets.map((n) => (
                 <div
@@ -107,7 +121,7 @@ const NamesetPicker: React.FC<Props> = ({ selectedNamesetId, onNamesetSelect, pl
                     setIsOpen(false);
                   }}
                 >
-                  {n.playerName} ({n.number})
+                  {n.playerName} #{n.number} - {n.season} (Qty: {n.quantity})
                 </div>
               ))}
             </div>

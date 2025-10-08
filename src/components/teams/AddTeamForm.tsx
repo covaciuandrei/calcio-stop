@@ -12,10 +12,23 @@ const AddTeamForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
   // Get store actions
   const { addTeam } = useTeamsActions();
   const [name, setName] = useState('');
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return alert('Team name cannot be empty');
+    e.stopPropagation();
+    const newErrors: { [key: string]: string } = {};
+
+    if (!name.trim()) {
+      newErrors.name = 'Team name cannot be empty';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
 
     const newTeam: Team = {
       id: uuidv4(),
@@ -30,14 +43,18 @@ const AddTeamForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
 
   return (
     <form onSubmit={handleSubmit} className="form-inline">
-      <div className="form-group">
+      <div className={`form-group ${errors.name ? 'has-error' : ''}`}>
         <label>Team Name</label>
         <input
           type="text"
           placeholder="Team Name"
           value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
+          onChange={(e) => {
+            setName(e.target.value);
+            if (errors.name) {
+              setErrors((prev) => ({ ...prev, name: '' }));
+            }
+          }}
           style={
             isInDropdown
               ? {
@@ -52,6 +69,7 @@ const AddTeamForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
               : {}
           }
         />
+        {errors.name && <div className="error-message">{errors.name}</div>}
       </div>
       <div className="form-button-container">
         <button

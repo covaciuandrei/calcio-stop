@@ -22,6 +22,7 @@ const AddSaleForm: React.FC = () => {
   const [priceSold, setPriceSold] = useState<number>(0);
   const [customerName, setCustomerName] = useState('');
   const [date, setDate] = useState('');
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // when product changes, default size selection to first available size
   useEffect(() => {
@@ -41,38 +42,45 @@ const AddSaleForm: React.FC = () => {
   }, [productId, products]);
 
   const handleSale = () => {
+    const newErrors: { [key: string]: string } = {};
+
     if (!productId) {
-      alert('Select product');
-      return;
+      newErrors.productId = 'Select product';
     }
     if (!size) {
-      alert('Select size');
-      return;
+      newErrors.size = 'Select size';
     }
     if (quantity <= 0) {
-      alert('Quantity must be > 0');
-      return;
+      newErrors.quantity = 'Quantity must be > 0';
     }
     if (priceSold <= 0) {
-      alert('Enter price');
-      return;
+      newErrors.priceSold = 'Enter price';
     }
 
     const product = products.find((p) => p.id === productId);
-    if (!product) return;
+    if (!product && productId) {
+      newErrors.productId = 'Product not found';
+    }
 
-    const sizeObj = product.sizes.find((sq) => sq.size === size);
-    if (!sizeObj) {
-      alert('Selected size not found');
+    if (product) {
+      const sizeObj = product.sizes.find((sq) => sq.size === size);
+      if (!sizeObj && size) {
+        newErrors.size = 'Selected size not found';
+      }
+      if (sizeObj && sizeObj.quantity < quantity) {
+        newErrors.quantity = 'Not enough stock for that size';
+      }
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
-    if (sizeObj.quantity < quantity) {
-      alert('Not enough stock for that size');
-      return;
-    }
+
+    setErrors({});
 
     // decrement size quantity
-    const updatedSizes = product.sizes.map((sq) =>
+    const updatedSizes = product!.sizes.map((sq) =>
       sq.size === size ? { ...sq, quantity: sq.quantity - quantity } : sq
     );
 
@@ -102,9 +110,17 @@ const AddSaleForm: React.FC = () => {
 
   return (
     <div className="form-inline">
-      <div className="form-group">
+      <div className={`form-group ${errors.productId ? 'has-error' : ''}`}>
         <label>Product</label>
-        <select value={productId} onChange={(e) => setProductId(e.target.value)}>
+        <select
+          value={productId}
+          onChange={(e) => {
+            setProductId(e.target.value);
+            if (errors.productId) {
+              setErrors((prev) => ({ ...prev, productId: '' }));
+            }
+          }}
+        >
           <option value="">Select product</option>
           {products.map((p) => {
             const namesetInfo = getNamesetInfo(p.namesetId, namesets, archivedNamesets);
@@ -115,11 +131,20 @@ const AddSaleForm: React.FC = () => {
             );
           })}
         </select>
+        {errors.productId && <div className="error-message">{errors.productId}</div>}
       </div>
 
-      <div className="form-group">
+      <div className={`form-group ${errors.size ? 'has-error' : ''}`}>
         <label>Size</label>
-        <select value={size} onChange={(e) => setSize(e.target.value)}>
+        <select
+          value={size}
+          onChange={(e) => {
+            setSize(e.target.value);
+            if (errors.size) {
+              setErrors((prev) => ({ ...prev, size: '' }));
+            }
+          }}
+        >
           <option value="">Select size</option>
           {products
             .find((p) => p.id === productId)
@@ -129,16 +154,39 @@ const AddSaleForm: React.FC = () => {
               </option>
             ))}
         </select>
+        {errors.size && <div className="error-message">{errors.size}</div>}
       </div>
 
-      <div className="form-group">
+      <div className={`form-group ${errors.quantity ? 'has-error' : ''}`}>
         <label>Quantity</label>
-        <input type="number" min={1} value={quantity} onChange={(e) => setQuantity(Number(e.target.value || 1))} />
+        <input
+          type="number"
+          min={1}
+          value={quantity}
+          onChange={(e) => {
+            setQuantity(Number(e.target.value || 1));
+            if (errors.quantity) {
+              setErrors((prev) => ({ ...prev, quantity: '' }));
+            }
+          }}
+        />
+        {errors.quantity && <div className="error-message">{errors.quantity}</div>}
       </div>
 
-      <div className="form-group">
+      <div className={`form-group ${errors.priceSold ? 'has-error' : ''}`}>
         <label>Price Sold</label>
-        <input type="number" min={0} value={priceSold} onChange={(e) => setPriceSold(Number(e.target.value || 0))} />
+        <input
+          type="number"
+          min={0}
+          value={priceSold}
+          onChange={(e) => {
+            setPriceSold(Number(e.target.value || 0));
+            if (errors.priceSold) {
+              setErrors((prev) => ({ ...prev, priceSold: '' }));
+            }
+          }}
+        />
+        {errors.priceSold && <div className="error-message">{errors.priceSold}</div>}
       </div>
 
       <div className="form-group">

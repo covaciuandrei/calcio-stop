@@ -12,10 +12,23 @@ const AddKitTypeForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
   // Get store actions
   const { addKitType } = useKitTypesActions();
   const [name, setName] = useState('');
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return alert('Kit type name cannot be empty');
+    e.stopPropagation();
+    const newErrors: { [key: string]: string } = {};
+
+    if (!name.trim()) {
+      newErrors.name = 'Kit type name cannot be empty';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
 
     const newKitType: KitType = {
       id: uuidv4(),
@@ -30,14 +43,18 @@ const AddKitTypeForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
 
   return (
     <form onSubmit={handleSubmit} className="form-inline">
-      <div className="form-group">
+      <div className={`form-group ${errors.name ? 'has-error' : ''}`}>
         <label>Kit Type Name</label>
         <input
           type="text"
           placeholder="Kit Type Name"
           value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
+          onChange={(e) => {
+            setName(e.target.value);
+            if (errors.name) {
+              setErrors((prev) => ({ ...prev, name: '' }));
+            }
+          }}
           style={
             isInDropdown
               ? {
@@ -52,6 +69,7 @@ const AddKitTypeForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
               : {}
           }
         />
+        {errors.name && <div className="error-message">{errors.name}</div>}
       </div>
       <div className="form-button-container">
         <button

@@ -6,7 +6,7 @@ import AddBadgeForm from './AddBadgeForm';
 
 interface Props {
   selectedBadgeId: string | null;
-  onBadgeSelect: (id: string) => void;
+  onBadgeSelect: (id: string | null) => void;
   placeholder?: string;
 }
 
@@ -70,9 +70,11 @@ const BadgePicker: React.FC<Props> = ({ selectedBadgeId, onBadgeSelect, placehol
         className={`${styles.pickerTrigger} ${adding ? styles.disabled : ''}`}
         onClick={() => !adding && setIsOpen((prev) => !prev)}
       >
-        {selectedBadge
-          ? `${selectedBadge.name} - ${selectedBadge.season} (Qty: ${selectedBadge.quantity})`
-          : placeholder}
+        {selectedBadgeId === null
+          ? 'None'
+          : selectedBadge
+            ? `${selectedBadge.name} - ${selectedBadge.season} (Qty: ${selectedBadge.quantity})`
+            : placeholder}
         <span style={{ marginLeft: 'auto' }}>▼</span>
       </div>
 
@@ -97,6 +99,16 @@ const BadgePicker: React.FC<Props> = ({ selectedBadgeId, onBadgeSelect, placehol
               <input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
             <div className={styles.pickerList}>
+              {/* None option */}
+              <div
+                className={`${styles.pickerOption} ${selectedBadgeId === null ? styles.selected : ''}`}
+                onClick={() => {
+                  onBadgeSelect(null);
+                  setIsOpen(false);
+                }}
+              >
+                None
+              </div>
               {filteredBadges.length === 0 && <div className={styles.pickerEmpty}>No badges found</div>}
               {filteredBadges.map((b) => (
                 <div

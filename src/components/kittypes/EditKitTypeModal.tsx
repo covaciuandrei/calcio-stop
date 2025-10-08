@@ -12,17 +12,30 @@ const EditKitTypeModal: React.FC<Props> = ({ editingKitType, setEditingKitType }
   // Get store actions
   const { updateKitType } = useKitTypesActions();
   const [name, setName] = useState(editingKitType?.name || '');
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // Update state when editingKitType changes
   React.useEffect(() => {
     if (editingKitType) {
       setName(editingKitType.name);
+      setErrors({});
     }
   }, [editingKitType]);
 
   const handleSaveEdit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    const newErrors: { [key: string]: string } = {};
+
+    if (!name.trim()) {
+      newErrors.name = 'Kit type name cannot be empty';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
     if (!editingKitType) return;
 
     updateKitType(editingKitType.id, {
@@ -38,10 +51,22 @@ const EditKitTypeModal: React.FC<Props> = ({ editingKitType, setEditingKitType }
       <div className="modal-content" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
         <h3>Edit Kit Type</h3>
         <form onSubmit={handleSaveEdit}>
-          <label>
-            Kit Type Name:
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
-          </label>
+          <div className={`form-group ${errors.name ? 'has-error' : ''}`}>
+            <label>
+              Kit Type Name:
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  if (errors.name) {
+                    setErrors((prev) => ({ ...prev, name: '' }));
+                  }
+                }}
+              />
+            </label>
+            {errors.name && <div className="error-message">{errors.name}</div>}
+          </div>
 
           <div className="modal-buttons">
             <button type="submit" className="btn btn-success">

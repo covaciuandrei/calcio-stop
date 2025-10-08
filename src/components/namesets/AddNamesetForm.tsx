@@ -18,11 +18,31 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
   const [season, setSeason] = useState('2025/2026');
   const [quantity, setQuantity] = useState<number | ''>('');
   const [selectedKitTypeId, setSelectedKitTypeId] = useState<string>('default-kit-type-1st');
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-  const handleSubmit = () => {
-    if (!playerName.trim()) return alert('Player name cannot be empty');
-    if (number === '' || number < 1) return alert('Number must be positive');
-    if (quantity === '' || quantity < 0) return alert('Quantity must be 0 or greater');
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const newErrors: { [key: string]: string } = {};
+
+    if (!playerName.trim()) {
+      newErrors.playerName = 'Player name cannot be empty';
+    }
+    if (number === '' || number < 1) {
+      newErrors.number = 'Number must be positive';
+    }
+    if (quantity === '' || quantity < 0) {
+      newErrors.quantity = 'Quantity must be 0 or greater';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
 
     const newNameset: Nameset = {
       id: uuidv4(),
@@ -44,15 +64,19 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
   };
 
   return (
-    <div className="form-inline">
-      <div className="form-group">
+    <form onSubmit={handleSubmit} className="form-inline">
+      <div className={`form-group ${errors.playerName ? 'has-error' : ''}`}>
         <label>Player Name</label>
         <input
           type="text"
           placeholder="Player Name"
           value={playerName}
-          onChange={(e) => setPlayerName(e.target.value)}
-          required
+          onChange={(e) => {
+            setPlayerName(e.target.value);
+            if (errors.playerName) {
+              setErrors((prev) => ({ ...prev, playerName: '' }));
+            }
+          }}
           style={
             isInDropdown
               ? {
@@ -67,16 +91,21 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
               : {}
           }
         />
+        {errors.playerName && <div className="error-message">{errors.playerName}</div>}
       </div>
-      <div className="form-group">
+      <div className={`form-group ${errors.number ? 'has-error' : ''}`}>
         <label>Number</label>
         <input
           type="number"
           placeholder="Number (positive)"
           min={1}
           value={number}
-          onChange={(e) => setNumber(parseInt(e.target.value) || '')}
-          required
+          onChange={(e) => {
+            setNumber(parseInt(e.target.value) || '');
+            if (errors.number) {
+              setErrors((prev) => ({ ...prev, number: '' }));
+            }
+          }}
           style={
             isInDropdown
               ? {
@@ -91,6 +120,7 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
               : {}
           }
         />
+        {errors.number && <div className="error-message">{errors.number}</div>}
       </div>
       <div className="form-group">
         <label>Season</label>
@@ -118,15 +148,19 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
           ))}
         </select>
       </div>
-      <div className="form-group">
+      <div className={`form-group ${errors.quantity ? 'has-error' : ''}`}>
         <label>Quantity</label>
         <input
           type="number"
           placeholder="Available quantity"
           min={0}
           value={quantity}
-          onChange={(e) => setQuantity(parseInt(e.target.value) || '')}
-          required
+          onChange={(e) => {
+            setQuantity(parseInt(e.target.value) || '');
+            if (errors.quantity) {
+              setErrors((prev) => ({ ...prev, quantity: '' }));
+            }
+          }}
           style={
             isInDropdown
               ? {
@@ -141,6 +175,7 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
               : {}
           }
         />
+        {errors.quantity && <div className="error-message">{errors.quantity}</div>}
       </div>
       <div className="form-group">
         <label>Kit Type</label>
@@ -148,7 +183,7 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
       </div>
       <div className="form-button-container">
         <button
-          onClick={handleSubmit}
+          type="submit"
           className="btn btn-success"
           style={
             isInDropdown
@@ -167,7 +202,7 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
           Save
         </button>
       </div>
-    </div>
+    </form>
   );
 };
 
