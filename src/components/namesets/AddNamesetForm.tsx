@@ -31,6 +31,7 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
       season,
       quantity: Number(quantity),
       kitTypeId: selectedKitTypeId,
+      createdAt: new Date().toISOString(),
     };
 
     addNameset(newNameset);
@@ -141,12 +142,10 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
           }
         />
       </div>
-      {!isInDropdown && (
-        <div className="form-group">
-          <label>Kit Type</label>
-          <KitTypePicker selectedKitTypeId={selectedKitTypeId} onKitTypeSelect={setSelectedKitTypeId} />
-        </div>
-      )}
+      <div className="form-group">
+        <label>Kit Type</label>
+        <KitTypePicker selectedKitTypeId={selectedKitTypeId} onKitTypeSelect={setSelectedKitTypeId} />
+      </div>
       <div className="form-button-container">
         <button
           onClick={handleSubmit}

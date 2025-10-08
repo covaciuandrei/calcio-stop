@@ -37,9 +37,11 @@ const KitTypeTableList: React.FC<Props> = ({ kitTypes, onEdit, onArchive, search
             <tr key={kt.id}>
               <td>{kt.name}</td>
               <td>
-                <button onClick={() => onEdit(kt)} className="btn btn-icon btn-success" title="Edit">
-                  ✏️
-                </button>
+                {!isDefault && (
+                  <button onClick={() => onEdit(kt)} className="btn btn-icon btn-success" title="Edit">
+                    ✏️
+                  </button>
+                )}
                 {!isDefault && (
                   <button onClick={() => onArchive(kt.id)} className="btn btn-icon btn-secondary" title="Archive">
                     📦

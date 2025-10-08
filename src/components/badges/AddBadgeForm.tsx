@@ -24,6 +24,7 @@ const AddBadgeForm: React.FC<Props> = ({ onAdd }) => {
       name: name.trim(),
       season,
       quantity: Number(quantity),
+      createdAt: new Date().toISOString(),
     };
 
     addBadge(newBadge);

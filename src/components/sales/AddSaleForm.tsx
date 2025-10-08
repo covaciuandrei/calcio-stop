@@ -86,6 +86,7 @@ const AddSaleForm: React.FC = () => {
       priceSold,
       customerName: customerName || 'N/A',
       date: date ? new Date(date).toISOString() : new Date().toISOString(),
+      createdAt: new Date().toISOString(),
     };
 
     addSale(newSale);

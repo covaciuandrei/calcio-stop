@@ -6,4 +6,5 @@ export interface Sale {
   priceSold: number;
   customerName: string;
   date: string;
+  createdAt: string; // ISO date string
 }

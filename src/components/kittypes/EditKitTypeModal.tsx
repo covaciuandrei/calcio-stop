@@ -20,8 +20,9 @@ const EditKitTypeModal: React.FC<Props> = ({ editingKitType, setEditingKitType }
     }
   }, [editingKitType]);
 
-  const handleSaveEdit = () => {
-    if (!name.trim()) return alert('Kit type name cannot be empty');
+  const handleSaveEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) return;
     if (!editingKitType) return;
 
     updateKitType(editingKitType.id, {
@@ -36,19 +37,21 @@ const EditKitTypeModal: React.FC<Props> = ({ editingKitType, setEditingKitType }
     <div className="modal">
       <div className="modal-content" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
         <h3>Edit Kit Type</h3>
-        <label>
-          Kit Type Name:
-          <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
-        </label>
+        <form onSubmit={handleSaveEdit}>
+          <label>
+            Kit Type Name:
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
+          </label>
 
-        <div className="modal-buttons">
-          <button onClick={handleSaveEdit} className="btn btn-success">
-            Save
-          </button>
-          <button onClick={() => setEditingKitType(null)} className="btn btn-secondary">
-            Cancel
-          </button>
-        </div>
+          <div className="modal-buttons">
+            <button type="submit" className="btn btn-success">
+              Save
+            </button>
+            <button type="button" onClick={() => setEditingKitType(null)} className="btn btn-secondary">
+              Cancel
+            </button>
+          </div>
+        </form>
       </div>
     </div>,
     document.body

@@ -27,12 +27,14 @@ export const kitTypesSelectors = {
   getTotalArchivedKitTypes: (state: KitTypesState) => state.archivedKitTypes.length,
 };
 
-// Default kit types with fixed IDs
+// Default kit types with fixed IDs - all have the same creation date
+const defaultCreationDate = new Date('2024-01-01T00:00:00.000Z').toISOString();
+
 const defaultKitTypes: KitType[] = [
-  { id: 'default-kit-type-1st', name: '1st Kit' },
-  { id: 'default-kit-type-2nd', name: '2nd Kit' },
-  { id: 'default-kit-type-3rd', name: '3rd Kit' },
-  { id: 'default-kit-type-none', name: 'None' },
+  { id: 'default-kit-type-1st', name: '1st Kit', createdAt: defaultCreationDate },
+  { id: 'default-kit-type-2nd', name: '2nd Kit', createdAt: defaultCreationDate },
+  { id: 'default-kit-type-3rd', name: '3rd Kit', createdAt: defaultCreationDate },
+  { id: 'default-kit-type-none', name: 'None', createdAt: defaultCreationDate },
 ];
 
 // Store
@@ -52,6 +54,12 @@ export const useKitTypesStore = create<KitTypesState>()(
         },
 
         updateKitType: (id: string, updates: Partial<KitType>) => {
+          // Prevent editing of default kit types
+          if (isDefaultKitType(id)) {
+            console.warn('Cannot edit default kit types');
+            return;
+          }
+
           set((state) => ({
             kitTypes: state.kitTypes.map((kt) => (kt.id === id ? { ...kt, ...updates } : kt)),
           }));

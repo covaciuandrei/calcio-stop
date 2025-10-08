@@ -102,8 +102,8 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
               <button onClick={() => onEdit(p)} className="btn btn-icon btn-success" title="Edit">
                 ✏️
               </button>
-              <button onClick={() => onDelete(p.id)} className="btn btn-icon btn-danger" title="Delete">
-                🗑️
+              <button onClick={() => onDelete(p.id)} className="btn btn-icon btn-secondary" title="Archive">
+                📦
               </button>
             </td>
           </tr>

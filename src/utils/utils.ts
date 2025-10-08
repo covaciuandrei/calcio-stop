@@ -69,3 +69,23 @@ export const getKitTypeInfo = (kitTypeId: string, kitTypes: KitType[], archivedK
 
   return kitType.name;
 };
+
+// Utility functions for sorting by creation date
+// Usage examples:
+// const sortedProducts = sortByCreatedAtDesc(products); // Newest first
+// const sortedTeams = sortByCreatedAtAsc(teams); // Oldest first
+export const sortByCreatedAt = <T extends { createdAt: string }>(items: T[], ascending: boolean = true): T[] => {
+  return [...items].sort((a, b) => {
+    const dateA = new Date(a.createdAt).getTime();
+    const dateB = new Date(b.createdAt).getTime();
+    return ascending ? dateA - dateB : dateB - dateA;
+  });
+};
+
+export const sortByCreatedAtDesc = <T extends { createdAt: string }>(items: T[]): T[] => {
+  return sortByCreatedAt(items, false);
+};
+
+export const sortByCreatedAtAsc = <T extends { createdAt: string }>(items: T[]): T[] => {
+  return sortByCreatedAt(items, true);
+};

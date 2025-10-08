@@ -20,6 +20,7 @@ const AddKitTypeForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
     const newKitType: KitType = {
       id: uuidv4(),
       name: name.trim(),
+      createdAt: new Date().toISOString(),
     };
 
     addKitType(newKitType);

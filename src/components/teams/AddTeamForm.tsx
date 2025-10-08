@@ -20,6 +20,7 @@ const AddTeamForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
     const newTeam: Team = {
       id: uuidv4(),
       name: name.trim(),
+      createdAt: new Date().toISOString(),
     };
 
     addTeam(newTeam);

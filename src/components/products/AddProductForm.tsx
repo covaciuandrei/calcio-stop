@@ -67,6 +67,7 @@ const AddProductForm: React.FC = () => {
       teamId: selectedTeamId,
       kitTypeId: selectedKitTypeId,
       price: Number(price) || 0,
+      createdAt: new Date().toISOString(),
     };
 
     addProduct(newProduct);

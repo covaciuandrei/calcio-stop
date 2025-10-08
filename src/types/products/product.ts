@@ -23,4 +23,5 @@ export interface Product {
   teamId: string | null; // reference to team, null if no team
   kitTypeId: string; // reference to kit type (required, defaults to '1st Kit')
   price: number; // default price per unit
+  createdAt: string; // ISO date string
 }
