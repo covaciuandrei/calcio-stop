@@ -1,5 +1,13 @@
 /* Component-specific styles not covered by design system */
 
+/* Navbar Actions */
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
 /* Settings Button */
 .settings-button {
   background: white;
@@ -12,7 +20,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: auto;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   min-height: 44px;
   min-width: 44px;
@@ -61,7 +68,7 @@
 }
 
 .form-button-container button {
-  height: 38px;
+  height: calc(38px * 1.2); /* Match picker height */
   padding: var(--space-2) var(--space-4);
   box-sizing: border-box;
   width: auto;
@@ -97,6 +104,9 @@
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(10px);
   transition: all var(--transition-normal);
+  height: calc(38px * 1.2); /* Match picker height */
+  min-height: calc(38px * 1.2); /* Match picker height */
+  box-sizing: border-box;
 }
 
 .size-quantity-input:focus {
@@ -158,8 +168,8 @@ table button:last-of-type:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  min-height: 38px;
-  height: 38px;
+  min-height: calc(38px * 1.2); /* Match picker height */
+  height: calc(38px * 1.2); /* Match picker height */
   box-sizing: border-box;
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(10px);
@@ -219,7 +229,7 @@ table button:last-of-type:hover {
 
 .nameset-picker-search input {
   width: 100%;
-  padding: var(--space-2) var(--space-2);
+  padding: calc(var(--space-2) * 1.2) var(--space-2); /* Match picker height */
   border: 1px solid var(--gray-300);
   border-radius: var(--radius-md);
   font-size: var(--font-size-xs);
@@ -228,6 +238,8 @@ table button:last-of-type:hover {
   backdrop-filter: blur(10px);
   transition: all var(--transition-normal);
   box-sizing: border-box;
+  height: calc(38px * 1.2); /* Match picker height */
+  min-height: calc(38px * 1.2); /* Match picker height */
 }
 
 .nameset-picker-search input:focus {
@@ -312,7 +324,7 @@ body.nameset-dropdown-open .add-product-card {
 /* Ensure consistent form element heights */
 .form-inline input,
 .form-inline select {
-  height: 38px;
+  height: calc(38px * 1.2); /* Match picker height */
   box-sizing: border-box;
 }
 

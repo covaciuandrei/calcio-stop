@@ -1,20 +1,25 @@
 import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
+import { devtools } from 'zustand/middleware';
+import * as db from '../lib/db';
 import { Nameset } from '../types';
 
 interface NamesetsState {
   // State
   namesets: Nameset[];
   archivedNamesets: Nameset[];
+  isLoading: boolean;
+  error: string | null;
 
   // Actions
-  addNameset: (nameset: Nameset) => void;
-  updateNameset: (id: string, updates: Partial<Nameset>) => void;
-  deleteNameset: (id: string) => void;
-  archiveNameset: (id: string) => void;
-  restoreNameset: (id: string) => void;
+  addNameset: (nameset: Omit<Nameset, 'id' | 'createdAt'>) => Promise<void>;
+  updateNameset: (id: string, updates: Partial<Nameset>) => Promise<void>;
+  deleteNameset: (id: string) => Promise<void>;
+  archiveNameset: (id: string) => Promise<void>;
+  restoreNameset: (id: string) => Promise<void>;
   setNamesets: (namesets: Nameset[]) => void;
   setArchivedNamesets: (namesets: Nameset[]) => void;
+  loadNamesets: () => Promise<void>;
+  loadArchivedNamesets: () => Promise<void>;
 }
 
 // Selectors
@@ -32,68 +37,135 @@ export const namesetsSelectors = {
 // Store
 export const useNamesetsStore = create<NamesetsState>()(
   devtools(
-    persist(
-      (set, get) => ({
-        // Initial state
-        namesets: [],
-        archivedNamesets: [],
+    (set, get) => ({
+      // Initial state
+      namesets: [],
+      archivedNamesets: [],
+      isLoading: false,
+      error: null,
 
-        // Actions
-        addNameset: (nameset: Nameset) => {
+      // Actions
+      addNameset: async (namesetData: Omit<Nameset, 'id' | 'createdAt'>) => {
+        set({ isLoading: true, error: null });
+        try {
+          const newNameset = await db.createNameset({
+            ...namesetData,
+            id: crypto.randomUUID(),
+            createdAt: new Date().toISOString(),
+          });
           set((state) => ({
-            namesets: [...state.namesets, nameset],
+            namesets: [...state.namesets, newNameset],
+            isLoading: false,
           }));
-        },
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to add nameset',
+            isLoading: false,
+          });
+        }
+      },
 
-        updateNameset: (id: string, updates: Partial<Nameset>) => {
+      updateNameset: async (id: string, updates: Partial<Nameset>) => {
+        set({ isLoading: true, error: null });
+        try {
+          const updatedNameset = await db.updateNameset(id, updates);
           set((state) => ({
-            namesets: state.namesets.map((n) => (n.id === id ? { ...n, ...updates } : n)),
+            namesets: state.namesets.map((n) => (n.id === id ? updatedNameset : n)),
+            isLoading: false,
           }));
-        },
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to update nameset',
+            isLoading: false,
+          });
+        }
+      },
 
-        deleteNameset: (id: string) => {
+      deleteNameset: async (id: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          await db.deleteNameset(id);
           set((state) => ({
             namesets: state.namesets.filter((n) => n.id !== id),
             archivedNamesets: state.archivedNamesets.filter((n) => n.id !== id),
+            isLoading: false,
           }));
-        },
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to delete nameset',
+            isLoading: false,
+          });
+        }
+      },
 
-        archiveNameset: (id: string) => {
-          const nameset = get().namesets.find((n) => n.id === id);
-          if (nameset) {
-            set((state) => ({
-              namesets: state.namesets.filter((n) => n.id !== id),
-              archivedNamesets: [...state.archivedNamesets, nameset],
-            }));
-          }
-        },
+      archiveNameset: async (id: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          const archivedNameset = await db.archiveNameset(id);
+          set((state) => ({
+            namesets: state.namesets.filter((n) => n.id !== id),
+            archivedNamesets: [...state.archivedNamesets, archivedNameset],
+            isLoading: false,
+          }));
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to archive nameset',
+            isLoading: false,
+          });
+        }
+      },
 
-        restoreNameset: (id: string) => {
-          const nameset = get().archivedNamesets.find((n) => n.id === id);
-          if (nameset) {
-            set((state) => ({
-              archivedNamesets: state.archivedNamesets.filter((n) => n.id !== id),
-              namesets: [...state.namesets, nameset],
-            }));
-          }
-        },
+      restoreNameset: async (id: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          const restoredNameset = await db.restoreNameset(id);
+          set((state) => ({
+            archivedNamesets: state.archivedNamesets.filter((n) => n.id !== id),
+            namesets: [...state.namesets, restoredNameset],
+            isLoading: false,
+          }));
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to restore nameset',
+            isLoading: false,
+          });
+        }
+      },
 
-        setNamesets: (namesets: Nameset[]) => {
-          set({ namesets });
-        },
+      setNamesets: (namesets: Nameset[]) => {
+        set({ namesets });
+      },
 
-        setArchivedNamesets: (archivedNamesets: Nameset[]) => {
-          set({ archivedNamesets });
-        },
-      }),
-      {
-        name: 'namesets-store',
-        partialize: (state) => ({
-          namesets: state.namesets,
-          archivedNamesets: state.archivedNamesets,
-        }),
-      }
-    ),
+      setArchivedNamesets: (archivedNamesets: Nameset[]) => {
+        set({ archivedNamesets });
+      },
+
+      loadNamesets: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const namesets = await db.getNamesets();
+          set({ namesets, isLoading: false });
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to load namesets',
+            isLoading: false,
+          });
+        }
+      },
+
+      loadArchivedNamesets: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const archivedNamesets = await db.getArchivedNamesets();
+          set({ archivedNamesets, isLoading: false });
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to load archived namesets',
+            isLoading: false,
+          });
+        }
+      },
+    }),
     {
       name: 'namesets-store',
     }
@@ -112,4 +184,6 @@ export const useNamesetsActions = () => ({
   restoreNameset: useNamesetsStore.getState().restoreNameset,
   setNamesets: useNamesetsStore.getState().setNamesets,
   setArchivedNamesets: useNamesetsStore.getState().setArchivedNamesets,
+  loadNamesets: useNamesetsStore.getState().loadNamesets,
+  loadArchivedNamesets: useNamesetsStore.getState().loadArchivedNamesets,
 });

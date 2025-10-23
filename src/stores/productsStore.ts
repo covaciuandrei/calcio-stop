@@ -1,20 +1,25 @@
 import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
+import { devtools } from 'zustand/middleware';
+import * as db from '../lib/db';
 import { Product } from '../types';
 
 interface ProductsState {
   // State
   products: Product[];
   archivedProducts: Product[];
+  isLoading: boolean;
+  error: string | null;
 
   // Actions
-  addProduct: (product: Product) => void;
-  updateProduct: (id: string, updates: Partial<Product>) => void;
-  deleteProduct: (id: string) => void;
-  archiveProduct: (id: string) => void;
-  restoreProduct: (id: string) => void;
+  addProduct: (product: Omit<Product, 'id' | 'createdAt'>) => Promise<void>;
+  updateProduct: (id: string, updates: Partial<Product>) => Promise<void>;
+  deleteProduct: (id: string) => Promise<void>;
+  archiveProduct: (id: string) => Promise<void>;
+  restoreProduct: (id: string) => Promise<void>;
   setProducts: (products: Product[]) => void;
   setArchivedProducts: (products: Product[]) => void;
+  loadProducts: () => Promise<void>;
+  loadArchivedProducts: () => Promise<void>;
 }
 
 // Selectors
@@ -31,68 +36,135 @@ export const productsSelectors = {
 // Store
 export const useProductsStore = create<ProductsState>()(
   devtools(
-    persist(
-      (set, get) => ({
-        // Initial state
-        products: [],
-        archivedProducts: [],
+    (set, get) => ({
+      // Initial state
+      products: [],
+      archivedProducts: [],
+      isLoading: false,
+      error: null,
 
-        // Actions
-        addProduct: (product: Product) => {
+      // Actions
+      addProduct: async (productData: Omit<Product, 'id' | 'createdAt'>) => {
+        set({ isLoading: true, error: null });
+        try {
+          const newProduct = await db.createProduct({
+            ...productData,
+            id: crypto.randomUUID(),
+            createdAt: new Date().toISOString(),
+          });
           set((state) => ({
-            products: [...state.products, product],
+            products: [...state.products, newProduct],
+            isLoading: false,
           }));
-        },
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to add product',
+            isLoading: false,
+          });
+        }
+      },
 
-        updateProduct: (id: string, updates: Partial<Product>) => {
+      updateProduct: async (id: string, updates: Partial<Product>) => {
+        set({ isLoading: true, error: null });
+        try {
+          const updatedProduct = await db.updateProduct(id, updates);
           set((state) => ({
-            products: state.products.map((p) => (p.id === id ? { ...p, ...updates } : p)),
+            products: state.products.map((p) => (p.id === id ? updatedProduct : p)),
+            isLoading: false,
           }));
-        },
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to update product',
+            isLoading: false,
+          });
+        }
+      },
 
-        deleteProduct: (id: string) => {
+      deleteProduct: async (id: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          await db.deleteProduct(id);
           set((state) => ({
             products: state.products.filter((p) => p.id !== id),
             archivedProducts: state.archivedProducts.filter((p) => p.id !== id),
+            isLoading: false,
           }));
-        },
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to delete product',
+            isLoading: false,
+          });
+        }
+      },
 
-        archiveProduct: (id: string) => {
-          const product = get().products.find((p) => p.id === id);
-          if (product) {
-            set((state) => ({
-              products: state.products.filter((p) => p.id !== id),
-              archivedProducts: [...state.archivedProducts, product],
-            }));
-          }
-        },
+      archiveProduct: async (id: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          const archivedProduct = await db.archiveProduct(id);
+          set((state) => ({
+            products: state.products.filter((p) => p.id !== id),
+            archivedProducts: [...state.archivedProducts, archivedProduct],
+            isLoading: false,
+          }));
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to archive product',
+            isLoading: false,
+          });
+        }
+      },
 
-        restoreProduct: (id: string) => {
-          const product = get().archivedProducts.find((p) => p.id === id);
-          if (product) {
-            set((state) => ({
-              archivedProducts: state.archivedProducts.filter((p) => p.id !== id),
-              products: [...state.products, product],
-            }));
-          }
-        },
+      restoreProduct: async (id: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          const restoredProduct = await db.restoreProduct(id);
+          set((state) => ({
+            archivedProducts: state.archivedProducts.filter((p) => p.id !== id),
+            products: [...state.products, restoredProduct],
+            isLoading: false,
+          }));
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to restore product',
+            isLoading: false,
+          });
+        }
+      },
 
-        setProducts: (products: Product[]) => {
-          set({ products });
-        },
+      setProducts: (products: Product[]) => {
+        set({ products });
+      },
 
-        setArchivedProducts: (archivedProducts: Product[]) => {
-          set({ archivedProducts });
-        },
-      }),
-      {
-        name: 'products-store',
-        partialize: (state) => ({
-          products: state.products,
-          archivedProducts: state.archivedProducts,
-        }),
-      }
-    ),
+      setArchivedProducts: (archivedProducts: Product[]) => {
+        set({ archivedProducts });
+      },
+
+      loadProducts: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const products = await db.getProducts();
+          set({ products, isLoading: false });
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to load products',
+            isLoading: false,
+          });
+        }
+      },
+
+      loadArchivedProducts: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const archivedProducts = await db.getArchivedProducts();
+          set({ archivedProducts, isLoading: false });
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to load archived products',
+            isLoading: false,
+          });
+        }
+      },
+    }),
     {
       name: 'products-store',
     }
@@ -121,4 +193,6 @@ export const useProductsActions = () => ({
   restoreProduct: useProductsStore.getState().restoreProduct,
   setProducts: useProductsStore.getState().setProducts,
   setArchivedProducts: useProductsStore.getState().setArchivedProducts,
+  loadProducts: useProductsStore.getState().loadProducts,
+  loadArchivedProducts: useProductsStore.getState().loadArchivedProducts,
 });

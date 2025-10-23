@@ -61,7 +61,8 @@ const NamesetPicker: React.FC<Props> = ({ selectedNamesetId, onNamesetSelect, pl
   }, [isOpen]);
 
   const filteredNamesets = namesets.filter(
-    (n) => n.playerName.toLowerCase().includes(search.toLowerCase()) || n.number.toString().includes(search)
+    (n) =>
+      (n.playerName || '').toLowerCase().includes(search.toLowerCase()) || (n.number || '').toString().includes(search)
   );
 
   const selectedNameset = namesets.find((n) => n.id === selectedNamesetId);

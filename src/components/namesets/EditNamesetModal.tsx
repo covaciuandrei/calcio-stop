@@ -13,23 +13,29 @@ interface Props {
 const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }) => {
   // Get store actions
   const { updateNameset } = useNamesetsActions();
-  const [playerName, setPlayerName] = useState(editingNameset?.playerName || '');
-  const [number, setNumber] = useState<number | ''>(editingNameset?.number || '');
-  const [season, setSeason] = useState(editingNameset?.season || '2025/2026');
-  const [quantity, setQuantity] = useState<number | ''>(editingNameset?.quantity || '');
-  const [selectedKitTypeId, setSelectedKitTypeId] = useState<string>(
-    editingNameset?.kitTypeId || 'default-kit-type-1st'
-  );
+  const [playerName, setPlayerName] = useState('');
+  const [number, setNumber] = useState<number | ''>('');
+  const [season, setSeason] = useState('2025/2026');
+  const [quantity, setQuantity] = useState<number | ''>('');
+  const [selectedKitTypeId, setSelectedKitTypeId] = useState<string>('default-kit-type-1st');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // Update state when editingNameset changes
   React.useEffect(() => {
     if (editingNameset) {
-      setPlayerName(editingNameset.playerName);
-      setNumber(editingNameset.number);
-      setSeason(editingNameset.season);
-      setQuantity(editingNameset.quantity);
-      setSelectedKitTypeId(editingNameset.kitTypeId);
+      setPlayerName(editingNameset.playerName || '');
+      setNumber(editingNameset.number || '');
+      setSeason(editingNameset.season || '2025/2026');
+      setQuantity(editingNameset.quantity || '');
+      setSelectedKitTypeId(editingNameset.kitTypeId || 'default-kit-type-1st');
+      setErrors({});
+    } else {
+      // Reset form when modal is closed
+      setPlayerName('');
+      setNumber('');
+      setSeason('2025/2026');
+      setQuantity('');
+      setSelectedKitTypeId('default-kit-type-1st');
       setErrors({});
     }
   }, [editingNameset]);
@@ -38,7 +44,7 @@ const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }
     e.preventDefault();
     const newErrors: { [key: string]: string } = {};
 
-    if (!playerName.trim()) {
+    if (!playerName || !playerName.trim()) {
       newErrors.playerName = 'Player name cannot be empty';
     }
     if (number === '' || number < 1) {
@@ -58,9 +64,9 @@ const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }
     if (!editingNameset) return;
 
     updateNameset(editingNameset.id, {
-      playerName: playerName.trim(),
+      playerName: (playerName || '').trim(),
       number: Number(number),
-      season,
+      season: season || '2025/2026',
       quantity: Number(quantity),
       kitTypeId: selectedKitTypeId,
     });

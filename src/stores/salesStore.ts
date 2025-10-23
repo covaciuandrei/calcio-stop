@@ -1,16 +1,20 @@
 import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
+import { devtools } from 'zustand/middleware';
+import * as db from '../lib/db';
 import { Sale } from '../types';
 
 interface SalesState {
   // State
   sales: Sale[];
+  isLoading: boolean;
+  error: string | null;
 
   // Actions
-  addSale: (sale: Sale) => void;
-  updateSale: (id: string, updates: Partial<Sale>) => void;
-  deleteSale: (id: string) => void;
+  addSale: (sale: Omit<Sale, 'id' | 'createdAt'>) => Promise<void>;
+  updateSale: (id: string, updates: Partial<Sale>) => Promise<void>;
+  deleteSale: (id: string) => Promise<void>;
   setSales: (sales: Sale[]) => void;
+  loadSales: () => Promise<void>;
 }
 
 // Selectors
@@ -29,41 +33,82 @@ export const salesSelectors = {
 // Store
 export const useSalesStore = create<SalesState>()(
   devtools(
-    persist(
-      (set, get) => ({
-        // Initial state
-        sales: [],
+    (set, get) => ({
+      // Initial state
+      sales: [],
+      isLoading: false,
+      error: null,
 
-        // Actions
-        addSale: (sale: Sale) => {
+      // Actions
+      addSale: async (saleData: Omit<Sale, 'id' | 'createdAt'>) => {
+        set({ isLoading: true, error: null });
+        try {
+          const newSale = await db.createSale({
+            ...saleData,
+            id: crypto.randomUUID(),
+            createdAt: new Date().toISOString(),
+          });
           set((state) => ({
-            sales: [...state.sales, sale],
+            sales: [...state.sales, newSale],
+            isLoading: false,
           }));
-        },
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to add sale',
+            isLoading: false,
+          });
+        }
+      },
 
-        updateSale: (id: string, updates: Partial<Sale>) => {
+      updateSale: async (id: string, updates: Partial<Sale>) => {
+        set({ isLoading: true, error: null });
+        try {
+          const updatedSale = await db.updateSale(id, updates);
           set((state) => ({
-            sales: state.sales.map((s) => (s.id === id ? { ...s, ...updates } : s)),
+            sales: state.sales.map((s) => (s.id === id ? updatedSale : s)),
+            isLoading: false,
           }));
-        },
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to update sale',
+            isLoading: false,
+          });
+        }
+      },
 
-        deleteSale: (id: string) => {
+      deleteSale: async (id: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          await db.deleteSale(id);
           set((state) => ({
             sales: state.sales.filter((s) => s.id !== id),
+            isLoading: false,
           }));
-        },
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to delete sale',
+            isLoading: false,
+          });
+        }
+      },
 
-        setSales: (sales: Sale[]) => {
-          set({ sales });
-        },
-      }),
-      {
-        name: 'sales-store',
-        partialize: (state) => ({
-          sales: state.sales,
-        }),
-      }
-    ),
+      setSales: (sales: Sale[]) => {
+        set({ sales });
+      },
+
+      loadSales: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const sales = await db.getSales();
+          set({ sales, isLoading: false });
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to load sales',
+            isLoading: false,
+          });
+        }
+      },
+    }),
     {
       name: 'sales-store',
     }
@@ -79,4 +124,5 @@ export const useSalesActions = () => ({
   updateSale: useSalesStore.getState().updateSale,
   deleteSale: useSalesStore.getState().deleteSale,
   setSales: useSalesStore.getState().setSales,
+  loadSales: useSalesStore.getState().loadSales,
 });

@@ -59,8 +59,8 @@ const AddKitTypeForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
             isInDropdown
               ? {
                   width: '100%',
-                  height: '32px',
-                  padding: '6px 8px',
+                  height: 'calc(38px * 1.2)' /* Match picker height */,
+                  padding: 'calc(6px * 1.2) 8px' /* 20% taller padding */,
                   border: '1px solid #d1d5db',
                   borderRadius: '4px',
                   fontSize: '13px',
@@ -78,7 +78,7 @@ const AddKitTypeForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
           style={
             isInDropdown
               ? {
-                  height: '32px',
+                  height: 'calc(38px * 1.2)' /* Match picker height */,
                   padding: '6px 12px',
                   fontSize: '13px',
                   borderRadius: '4px',

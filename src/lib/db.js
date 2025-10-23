@@ -1,0 +1,721 @@
+import { supabase } from './supabaseClient';
+
+// ============================================================================
+// TEAMS CRUD OPERATIONS
+// ============================================================================
+
+export async function createTeam(data) {
+  // Map frontend data to database schema
+  const dbData = {
+    name: data.name,
+    created_at: data.createdAt || new Date().toISOString(),
+    archived_at: null,
+  };
+
+  const { data: result, error } = await supabase.from('teams').insert([dbData]).select().single();
+
+  if (error) throw error;
+
+  // Map database response back to frontend format
+  return {
+    id: result.id,
+    name: result.name,
+    createdAt: result.created_at,
+  };
+}
+
+export async function getTeams() {
+  const { data, error } = await supabase
+    .from('teams')
+    .select('*')
+    .is('archived_at', null)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return (data || []).map((item) => ({
+    id: item.id,
+    name: item.name,
+    createdAt: item.created_at,
+  }));
+}
+
+export async function getArchivedTeams() {
+  const { data, error } = await supabase
+    .from('teams')
+    .select('*')
+    .not('archived_at', 'is', null)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return (data || []).map((item) => ({
+    id: item.id,
+    name: item.name,
+    createdAt: item.created_at,
+  }));
+}
+
+export async function updateTeam(id, updates) {
+  // Map frontend updates to database schema
+  const dbUpdates = {};
+  if (updates.name !== undefined) dbUpdates.name = updates.name;
+  if (updates.createdAt !== undefined) dbUpdates.created_at = updates.createdAt;
+
+  const { data, error } = await supabase.from('teams').update(dbUpdates).eq('id', id).select().single();
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return {
+    id: data.id,
+    name: data.name,
+    createdAt: data.created_at,
+  };
+}
+
+export async function deleteTeam(id) {
+  const { error } = await supabase.from('teams').delete().eq('id', id);
+
+  if (error) throw error;
+}
+
+export async function archiveTeam(id) {
+  const { data, error } = await supabase
+    .from('teams')
+    .update({ archived_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function restoreTeam(id) {
+  const { data, error } = await supabase.from('teams').update({ archived_at: null }).eq('id', id).select().single();
+
+  if (error) throw error;
+  return data;
+}
+
+// ============================================================================
+// KIT TYPES CRUD OPERATIONS
+// ============================================================================
+
+export async function createKitType(data) {
+  // Map frontend data to database schema
+  const dbData = {
+    name: data.name,
+    created_at: data.createdAt || new Date().toISOString(),
+    archived_at: null,
+  };
+
+  const { data: result, error } = await supabase.from('kit_types').insert([dbData]).select().single();
+
+  if (error) throw error;
+
+  // Map database response back to frontend format
+  return {
+    id: result.id,
+    name: result.name,
+    createdAt: result.created_at,
+  };
+}
+
+export async function getKitTypes() {
+  const { data, error } = await supabase
+    .from('kit_types')
+    .select('*')
+    .is('archived_at', null)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return (data || []).map((item) => ({
+    id: item.id,
+    name: item.name,
+    createdAt: item.created_at,
+  }));
+}
+
+export async function getArchivedKitTypes() {
+  const { data, error } = await supabase
+    .from('kit_types')
+    .select('*')
+    .not('archived_at', 'is', null)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return (data || []).map((item) => ({
+    id: item.id,
+    name: item.name,
+    createdAt: item.created_at,
+  }));
+}
+
+export async function updateKitType(id, updates) {
+  // Map frontend updates to database schema
+  const dbUpdates = {};
+  if (updates.name !== undefined) dbUpdates.name = updates.name;
+  if (updates.createdAt !== undefined) dbUpdates.created_at = updates.createdAt;
+
+  const { data, error } = await supabase.from('kit_types').update(dbUpdates).eq('id', id).select().single();
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return {
+    id: data.id,
+    name: data.name,
+    createdAt: data.created_at,
+  };
+}
+
+export async function deleteKitType(id) {
+  // First check if there are any references to this kit type
+  const { data: namesets, error: namesetsError } = await supabase
+    .from('namesets')
+    .select('id')
+    .eq('kit_type_id', id)
+    .limit(1);
+
+  if (namesetsError) throw namesetsError;
+
+  const { data: products, error: productsError } = await supabase
+    .from('products')
+    .select('id')
+    .eq('kit_type_id', id)
+    .limit(1);
+
+  if (productsError) throw productsError;
+
+  // If there are references, throw an error
+  if (namesets && namesets.length > 0) {
+    throw new Error('Cannot delete kit type: it is referenced by namesets');
+  }
+
+  if (products && products.length > 0) {
+    throw new Error('Cannot delete kit type: it is referenced by products');
+  }
+
+  // If no references, proceed with deletion
+  const { error } = await supabase.from('kit_types').delete().eq('id', id);
+
+  if (error) throw error;
+}
+
+export async function archiveKitType(id) {
+  const { data, error } = await supabase
+    .from('kit_types')
+    .update({ archived_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return {
+    id: data.id,
+    name: data.name,
+    createdAt: data.created_at,
+  };
+}
+
+export async function restoreKitType(id) {
+  const { data, error } = await supabase.from('kit_types').update({ archived_at: null }).eq('id', id).select().single();
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return {
+    id: data.id,
+    name: data.name,
+    createdAt: data.created_at,
+  };
+}
+
+// ============================================================================
+// BADGES CRUD OPERATIONS
+// ============================================================================
+
+export async function createBadge(data) {
+  // Map frontend data to database schema
+  const dbData = {
+    name: data.name,
+    season: data.season,
+    quantity: data.quantity,
+    created_at: data.createdAt || new Date().toISOString(),
+    archived_at: null,
+  };
+
+  const { data: result, error } = await supabase.from('badges').insert([dbData]).select().single();
+
+  if (error) throw error;
+
+  // Map database response back to frontend format
+  return {
+    id: result.id,
+    name: result.name,
+    season: result.season,
+    quantity: result.quantity,
+    createdAt: result.created_at,
+  };
+}
+
+export async function getBadges() {
+  const { data, error } = await supabase
+    .from('badges')
+    .select('*')
+    .is('archived_at', null)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return (data || []).map((item) => ({
+    id: item.id,
+    name: item.name,
+    season: item.season,
+    quantity: item.quantity,
+    createdAt: item.created_at,
+  }));
+}
+
+export async function getArchivedBadges() {
+  const { data, error } = await supabase
+    .from('badges')
+    .select('*')
+    .not('archived_at', 'is', null)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return (data || []).map((item) => ({
+    id: item.id,
+    name: item.name,
+    season: item.season,
+    quantity: item.quantity,
+    createdAt: item.created_at,
+  }));
+}
+
+export async function updateBadge(id, updates) {
+  // Map frontend updates to database schema
+  const dbUpdates = {};
+  if (updates.name !== undefined) dbUpdates.name = updates.name;
+  if (updates.season !== undefined) dbUpdates.season = updates.season;
+  if (updates.quantity !== undefined) dbUpdates.quantity = updates.quantity;
+  if (updates.createdAt !== undefined) dbUpdates.created_at = updates.createdAt;
+
+  const { data, error } = await supabase.from('badges').update(dbUpdates).eq('id', id).select().single();
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return {
+    id: data.id,
+    name: data.name,
+    season: data.season,
+    quantity: data.quantity,
+    createdAt: data.created_at,
+  };
+}
+
+export async function deleteBadge(id) {
+  const { error } = await supabase.from('badges').delete().eq('id', id);
+
+  if (error) throw error;
+}
+
+export async function archiveBadge(id) {
+  const { data, error } = await supabase
+    .from('badges')
+    .update({ archived_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function restoreBadge(id) {
+  const { data, error } = await supabase.from('badges').update({ archived_at: null }).eq('id', id).select().single();
+
+  if (error) throw error;
+  return data;
+}
+
+// ============================================================================
+// NAMESETS CRUD OPERATIONS
+// ============================================================================
+
+export async function createNameset(data) {
+  // Map frontend data to database schema
+  const dbData = {
+    player_name: data.playerName,
+    number: data.number,
+    season: data.season,
+    quantity: data.quantity,
+    kit_type_id: data.kitTypeId,
+    created_at: data.createdAt || new Date().toISOString(),
+    archived_at: null,
+  };
+
+  const { data: result, error } = await supabase.from('namesets').insert([dbData]).select().single();
+
+  if (error) throw error;
+
+  // Map database response back to frontend format
+  return {
+    id: result.id,
+    playerName: result.player_name,
+    number: result.number,
+    season: result.season,
+    quantity: result.quantity,
+    kitTypeId: result.kit_type_id,
+    createdAt: result.created_at,
+  };
+}
+
+export async function getNamesets() {
+  const { data, error } = await supabase
+    .from('namesets')
+    .select('*')
+    .is('archived_at', null)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return (data || []).map((item) => ({
+    id: item.id,
+    playerName: item.player_name,
+    number: item.number,
+    season: item.season,
+    quantity: item.quantity,
+    kitTypeId: item.kit_type_id,
+    createdAt: item.created_at,
+  }));
+}
+
+export async function getArchivedNamesets() {
+  const { data, error } = await supabase
+    .from('namesets')
+    .select('*')
+    .not('archived_at', 'is', null)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return (data || []).map((item) => ({
+    id: item.id,
+    playerName: item.player_name,
+    number: item.number,
+    season: item.season,
+    quantity: item.quantity,
+    kitTypeId: item.kit_type_id,
+    createdAt: item.created_at,
+  }));
+}
+
+export async function updateNameset(id, updates) {
+  const { data, error } = await supabase.from('namesets').update(updates).eq('id', id).select().single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteNameset(id) {
+  const { error } = await supabase.from('namesets').delete().eq('id', id);
+
+  if (error) throw error;
+}
+
+export async function archiveNameset(id) {
+  const { data, error } = await supabase
+    .from('namesets')
+    .update({ archived_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function restoreNameset(id) {
+  const { data, error } = await supabase.from('namesets').update({ archived_at: null }).eq('id', id).select().single();
+
+  if (error) throw error;
+  return data;
+}
+
+// ============================================================================
+// PRODUCTS CRUD OPERATIONS
+// ============================================================================
+
+export async function createProduct(data) {
+  // Map frontend data to database schema
+  const dbData = {
+    name: data.name,
+    type: data.type,
+    sizes: data.sizes,
+    nameset_id: data.namesetId,
+    team_id: data.teamId,
+    kit_type_id: data.kitTypeId,
+    badge_id: data.badgeId,
+    price: data.price,
+    created_at: data.createdAt || new Date().toISOString(),
+    archived_at: null,
+  };
+
+  const { data: result, error } = await supabase.from('products').insert([dbData]).select().single();
+
+  if (error) throw error;
+
+  // Map database response back to frontend format
+  return {
+    id: result.id,
+    name: result.name,
+    type: result.type,
+    sizes: result.sizes,
+    namesetId: result.nameset_id,
+    teamId: result.team_id,
+    kitTypeId: result.kit_type_id,
+    badgeId: result.badge_id,
+    price: result.price,
+    createdAt: result.created_at,
+  };
+}
+
+export async function getProducts() {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .is('archived_at', null)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return (data || []).map((item) => ({
+    id: item.id,
+    name: item.name,
+    type: item.type,
+    sizes: item.sizes,
+    namesetId: item.nameset_id,
+    teamId: item.team_id,
+    kitTypeId: item.kit_type_id,
+    badgeId: item.badge_id,
+    price: item.price,
+    createdAt: item.created_at,
+  }));
+}
+
+export async function getArchivedProducts() {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .not('archived_at', 'is', null)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+}
+
+export async function updateProduct(id, updates) {
+  const { data, error } = await supabase.from('products').update(updates).eq('id', id).select().single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteProduct(id) {
+  const { error } = await supabase.from('products').delete().eq('id', id);
+
+  if (error) throw error;
+}
+
+export async function archiveProduct(id) {
+  const { data, error } = await supabase
+    .from('products')
+    .update({ archived_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function restoreProduct(id) {
+  const { data, error } = await supabase.from('products').update({ archived_at: null }).eq('id', id).select().single();
+
+  if (error) throw error;
+  return data;
+}
+
+// ============================================================================
+// SALES CRUD OPERATIONS
+// ============================================================================
+
+export async function createSale(data) {
+  // Map frontend data to database schema
+  const dbData = {
+    product_id: data.productId,
+    size: data.size,
+    quantity: data.quantity,
+    price_sold: data.priceSold,
+    customer_name: data.customerName,
+    date: data.date,
+    created_at: data.createdAt || new Date().toISOString(),
+  };
+
+  const { data: result, error } = await supabase.from('sales').insert([dbData]).select().single();
+
+  if (error) throw error;
+
+  // Map database response back to frontend format
+  return {
+    id: result.id,
+    productId: result.product_id,
+    size: result.size,
+    quantity: result.quantity,
+    priceSold: result.price_sold,
+    customerName: result.customer_name,
+    date: result.date,
+    createdAt: result.created_at,
+  };
+}
+
+export async function getSales() {
+  const { data, error } = await supabase.from('sales').select('*').order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+}
+
+export async function updateSale(id, updates) {
+  const { data, error } = await supabase.from('sales').update(updates).eq('id', id).select().single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteSale(id) {
+  const { error } = await supabase.from('sales').delete().eq('id', id);
+
+  if (error) throw error;
+}
+
+// ============================================================================
+// SETTINGS CRUD OPERATIONS
+// ============================================================================
+
+export async function getSetting(key) {
+  const { data, error } = await supabase.from('settings').select('value').eq('key', key).single();
+
+  if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows found
+  return data?.value || null;
+}
+
+export async function setSetting(key, value) {
+  const { data, error } = await supabase
+    .from('settings')
+    .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: 'key' })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getAppBarOrder() {
+  const result = await getSetting('app_bar_order');
+  return result || ['dashboard', 'products', 'sales', 'namesets', 'teams', 'badges', 'kittypes'];
+}
+
+export async function setAppBarOrder(order) {
+  return await setSetting('app_bar_order', order);
+}
+
+export async function getDashboardOrder() {
+  const result = await getSetting('dashboard_order');
+  return result || ['products', 'sales', 'namesets', 'teams', 'badges', 'kitTypes'];
+}
+
+export async function setDashboardOrder(order) {
+  return await setSetting('dashboard_order', order);
+}
+
+// ============================================================================
+// USERS CRUD OPERATIONS (for authentication)
+// ============================================================================
+
+export async function createUser(data) {
+  const { data: result, error } = await supabase.from('users').insert([data]).select().single();
+
+  if (error) throw error;
+  return result;
+}
+
+export async function getUserByEmail(email) {
+  const { data, error } = await supabase.from('users').select('*').eq('email', email).single();
+
+  if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows found
+  return data;
+}
+
+export async function updateUser(id, updates) {
+  const { data, error } = await supabase.from('users').update(updates).eq('id', id).select().single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteUser(id) {
+  const { error } = await supabase.from('users').delete().eq('id', id);
+
+  if (error) throw error;
+}
+
+// ============================================================================
+// SYSTEM SETTINGS OPERATIONS
+// ============================================================================
+
+export async function getSystemSetting(key) {
+  const { data, error } = await supabase.from('settings').select('value').eq('key', key).single();
+
+  if (error) throw error;
+  return data?.value;
+}
+
+export async function setSystemSetting(key, value) {
+  const { data, error } = await supabase
+    .from('settings')
+    .upsert({ key, value }, { onConflict: 'key' })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function isRegistrationEnabled() {
+  const value = await getSystemSetting('registration_enabled');
+  return value === true || value === 'true';
+}
+
+export async function setRegistrationEnabled(enabled) {
+  return await setSystemSetting('registration_enabled', enabled);
+}

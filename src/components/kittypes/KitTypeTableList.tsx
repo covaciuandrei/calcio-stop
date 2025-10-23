@@ -31,7 +31,7 @@ const KitTypeTableList: React.FC<Props> = ({ kitTypes, onEdit, onArchive, search
       </thead>
       <tbody>
         {filteredKitTypes.map((kt) => {
-          const isDefault = isDefaultKitType(kt.id);
+          const isDefault = isDefaultKitType(kt);
 
           return (
             <tr key={kt.id}>

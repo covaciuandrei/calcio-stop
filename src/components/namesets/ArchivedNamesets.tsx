@@ -28,9 +28,9 @@ const ArchivedNamesets: React.FC<Props> = ({ archivedNamesets, searchTerm = '', 
   // Filter namesets based on search term
   const filteredNamesets = archivedNamesets.filter(
     (nameset) =>
-      nameset.playerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      nameset.season.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      nameset.number.toString().includes(searchTerm)
+      (nameset.playerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (nameset.season || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (nameset.number || '').toString().includes(searchTerm)
   );
 
   if (archivedNamesets.length === 0) {

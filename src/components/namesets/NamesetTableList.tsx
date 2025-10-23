@@ -19,9 +19,9 @@ const NamesetTableList: React.FC<Props> = ({ namesets, onEdit, onDelete, onArchi
   // Filter namesets based on search term
   const filteredNamesets = namesets.filter(
     (nameset) =>
-      nameset.playerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      nameset.season.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      nameset.number.toString().includes(searchTerm)
+      (nameset.playerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (nameset.season || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (nameset.number || '').toString().includes(searchTerm)
   );
 
   if (namesets.length === 0) {

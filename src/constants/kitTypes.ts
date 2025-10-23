@@ -1,12 +1,12 @@
-// Default kit type IDs that should not be archivable or deletable
-export const DEFAULT_KIT_TYPE_IDS = [
-  'default-kit-type-1st',
-  'default-kit-type-2nd',
-  'default-kit-type-3rd',
-  'default-kit-type-none',
-] as const;
+// Default kit type names that should not be archivable or deletable
+export const DEFAULT_KIT_TYPE_NAMES = ['1st Kit', '2nd Kit', '3rd Kit', 'None'] as const;
 
-// Helper function to check if a kit type ID is a default one
-export const isDefaultKitType = (id: string): boolean => {
-  return DEFAULT_KIT_TYPE_IDS.includes(id as any);
+// Helper function to check if a kit type is a default one (by name)
+export const isDefaultKitType = (kitType: { id: string; name: string } | string): boolean => {
+  // If it's a string, assume it's an ID and we can't check by name
+  if (typeof kitType === 'string') {
+    return false;
+  }
+
+  return DEFAULT_KIT_TYPE_NAMES.includes(kitType.name as any);
 };

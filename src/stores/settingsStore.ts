@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
+import { devtools } from 'zustand/middleware';
+import * as db from '../lib/db';
 
 // Types
 export interface AppBarButton {
@@ -17,18 +18,22 @@ export interface DashboardCard {
 interface SettingsState {
   // AppBar order
   appBarOrder: string[];
-  setAppBarOrder: (order: string[]) => void;
-  getAppBarOrder: () => string[];
+  setAppBarOrder: (order: string[]) => Promise<void>;
+  getAppBarOrder: () => Promise<string[]>;
 
   // Dashboard order
   dashboardOrder: string[];
-  setDashboardOrder: (order: string[]) => void;
-  getDashboardOrder: () => string[];
+  setDashboardOrder: (order: string[]) => Promise<void>;
+  getDashboardOrder: () => Promise<string[]>;
 
   // Reset functions
-  resetAppBarOrder: () => void;
-  resetDashboardOrder: () => void;
-  resetAllSettings: () => void;
+  resetAppBarOrder: () => Promise<void>;
+  resetDashboardOrder: () => Promise<void>;
+  resetAllSettings: () => Promise<void>;
+
+  // Loading and error states
+  isLoading: boolean;
+  error: string | null;
 }
 
 // Default orders
@@ -39,55 +44,116 @@ const DEFAULT_DASHBOARD_ORDER = ['products', 'sales', 'namesets', 'teams', 'badg
 // Store
 export const useSettingsStore = create<SettingsState>()(
   devtools(
-    persist(
-      (set, get) => ({
-        // Initial state
-        appBarOrder: DEFAULT_APPBAR_ORDER,
-        dashboardOrder: DEFAULT_DASHBOARD_ORDER,
+    (set, get) => ({
+      // Initial state
+      appBarOrder: DEFAULT_APPBAR_ORDER,
+      dashboardOrder: DEFAULT_DASHBOARD_ORDER,
+      isLoading: false,
+      error: null,
 
-        // AppBar actions
-        setAppBarOrder: (order: string[]) => {
-          set({ appBarOrder: order });
-        },
+      // AppBar actions
+      setAppBarOrder: async (order: string[]) => {
+        set({ isLoading: true, error: null });
+        try {
+          await db.setAppBarOrder(order);
+          set({ appBarOrder: order, isLoading: false });
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to set app bar order',
+            isLoading: false,
+          });
+        }
+      },
 
-        getAppBarOrder: () => {
-          return get().appBarOrder;
-        },
+      getAppBarOrder: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const order = await db.getAppBarOrder();
+          set({ appBarOrder: order, isLoading: false });
+          return order;
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to get app bar order',
+            isLoading: false,
+          });
+          return DEFAULT_APPBAR_ORDER;
+        }
+      },
 
-        // Dashboard actions
-        setDashboardOrder: (order: string[]) => {
-          set({ dashboardOrder: order });
-        },
+      // Dashboard actions
+      setDashboardOrder: async (order: string[]) => {
+        set({ isLoading: true, error: null });
+        try {
+          await db.setDashboardOrder(order);
+          set({ dashboardOrder: order, isLoading: false });
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to set dashboard order',
+            isLoading: false,
+          });
+        }
+      },
 
-        getDashboardOrder: () => {
-          return get().dashboardOrder;
-        },
+      getDashboardOrder: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const order = await db.getDashboardOrder();
+          set({ dashboardOrder: order, isLoading: false });
+          return order;
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to get dashboard order',
+            isLoading: false,
+          });
+          return DEFAULT_DASHBOARD_ORDER;
+        }
+      },
 
-        // Reset actions
-        resetAppBarOrder: () => {
-          set({ appBarOrder: DEFAULT_APPBAR_ORDER });
-        },
+      // Reset actions
+      resetAppBarOrder: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          await db.setAppBarOrder(DEFAULT_APPBAR_ORDER);
+          set({ appBarOrder: DEFAULT_APPBAR_ORDER, isLoading: false });
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to reset app bar order',
+            isLoading: false,
+          });
+        }
+      },
 
-        resetDashboardOrder: () => {
-          set({ dashboardOrder: DEFAULT_DASHBOARD_ORDER });
-        },
+      resetDashboardOrder: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          await db.setDashboardOrder(DEFAULT_DASHBOARD_ORDER);
+          set({ dashboardOrder: DEFAULT_DASHBOARD_ORDER, isLoading: false });
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to reset dashboard order',
+            isLoading: false,
+          });
+        }
+      },
 
-        resetAllSettings: () => {
+      resetAllSettings: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          await db.setAppBarOrder(DEFAULT_APPBAR_ORDER);
+          await db.setDashboardOrder(DEFAULT_DASHBOARD_ORDER);
           set({
             appBarOrder: DEFAULT_APPBAR_ORDER,
             dashboardOrder: DEFAULT_DASHBOARD_ORDER,
+            isLoading: false,
           });
-        },
-      }),
-      {
-        name: 'calcio-stop-settings',
-        // Only persist the order arrays
-        partialize: (state) => ({
-          appBarOrder: state.appBarOrder,
-          dashboardOrder: state.dashboardOrder,
-        }),
-      }
-    ),
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to reset all settings',
+            isLoading: false,
+          });
+        }
+      },
+    }),
     {
       name: 'settings-store',
     }

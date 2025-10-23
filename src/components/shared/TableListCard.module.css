@@ -62,7 +62,7 @@
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(10px);
   transition: all var(--transition-normal);
-  min-height: 38px;
+  min-height: calc(38px * 1.2); /* 20% taller */
   box-sizing: border-box;
 }
 

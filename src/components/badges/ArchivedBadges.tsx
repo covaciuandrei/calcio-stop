@@ -14,8 +14,8 @@ const ArchivedBadges: React.FC<Props> = ({ archivedBadges, searchTerm = '', onCl
   // Filter badges based on search term
   const filteredBadges = archivedBadges.filter(
     (badge) =>
-      badge.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      badge.season.toLowerCase().includes(searchTerm.toLowerCase())
+      (badge.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (badge.season || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleRestore = (id: string) => {

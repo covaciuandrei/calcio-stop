@@ -63,13 +63,20 @@ const KitTypePicker: React.FC<Props> = ({ selectedKitTypeId, onKitTypeSelect }) 
 
   const selectedKitType = kitTypes.find((kt) => kt.id === selectedKitTypeId);
 
+  // If selected kit type is not found, default to the first available kit type
+  const displayName = selectedKitType
+    ? selectedKitType.name
+    : kitTypes.length > 0
+      ? kitTypes[0].name
+      : 'Select Kit Type';
+
   return (
     <div className={styles.picker} ref={pickerRef} style={{ width: '200px' }}>
       <div
         className={`${styles.pickerTrigger} ${adding ? styles.disabled : ''}`}
         onClick={() => !adding && setIsOpen((prev) => !prev)}
       >
-        {selectedKitType ? selectedKitType.name : '1st Kit'}
+        {displayName}
         <span style={{ marginLeft: 'auto' }}>▼</span>
       </div>
 

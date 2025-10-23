@@ -13,8 +13,8 @@ const BadgeTableList: React.FC<Props> = ({ badges, onEdit, onDelete, onArchive, 
   // Filter badges based on search term
   const filteredBadges = badges.filter(
     (badge) =>
-      badge.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      badge.season.toLowerCase().includes(searchTerm.toLowerCase())
+      (badge.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (badge.season || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (badges.length === 0) {
