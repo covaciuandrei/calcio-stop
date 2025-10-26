@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   useArchivedBadges,
   useArchivedKitTypes,
@@ -21,6 +22,12 @@ interface Props {
 }
 
 const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, searchTerm = '', isReadOnly = false }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Check if this is a public route
+  const isPublicRoute = location.pathname.startsWith('/public');
+
   // Get data from stores
   const namesets = useNamesetsList();
   const archivedNamesets = useArchivedNamesets();
@@ -34,6 +41,13 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
   // Check if product is out of stock
   const isOutOfStock = (product: Product) => {
     return product.sizes.every((size) => size.quantity === 0);
+  };
+
+  // Get stock status for a given quantity
+  const getStockStatus = (quantity: number) => {
+    if (quantity === 0) return 'NO STOCK';
+    if (quantity <= 2) return 'LOW STOCK';
+    return 'IN STOCK';
   };
 
   // Filter products based on search term
@@ -51,6 +65,12 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
       product.price.toString().includes(searchTerm)
     );
   });
+
+  // Handle product row click
+  const handleProductClick = (productId: string) => {
+    const isPublicRoute = location.pathname.startsWith('/public');
+    navigate(isPublicRoute ? `/public/products/${productId}` : `/products/${productId}`);
+  };
 
   if (products.length === 0) {
     return <p>No products available.</p>;
@@ -79,7 +99,12 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
       </thead>
       <tbody>
         {filteredProducts.map((p) => (
-          <tr key={p.id} className={isOutOfStock(p) ? 'out-of-stock-row' : ''}>
+          <tr
+            key={p.id}
+            className={`product-row ${isOutOfStock(p) ? 'out-of-stock-row' : ''}`}
+            onClick={() => handleProductClick(p.id)}
+            style={{ cursor: 'pointer' }}
+          >
             <td>
               {getTeamInfo(p.teamId, teams, archivedTeams)}
               {isOutOfStock(p) && (
@@ -104,11 +129,20 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
             <td>{getKitTypeInfo(p.kitTypeId, kitTypes, archivedKitTypes)}</td>
             <td>
               <div className="size-quantity-display">
-                {p.sizes.map((sq) => (
-                  <div key={sq.size} className="size-quantity-item">
-                    {sq.size}: {sq.quantity}
-                  </div>
-                ))}
+                {p.sizes.map((sq) => {
+                  const stockStatus = getStockStatus(sq.quantity);
+                  const isOutOfStock = sq.quantity === 0;
+                  const isLowStock = sq.quantity > 0 && sq.quantity <= 2;
+
+                  return (
+                    <div
+                      key={sq.size}
+                      className={`size-quantity-item ${isOutOfStock ? 'out-of-stock' : isLowStock ? 'low-stock' : 'in-stock'}`}
+                    >
+                      {sq.size}: {isPublicRoute ? stockStatus : sq.quantity}
+                    </div>
+                  );
+                })}
               </div>
             </td>
             <td>
@@ -132,7 +166,7 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
             <td>{getBadgeInfo(p.badgeId, badges, archivedBadges)}</td>
             <td className="price-display">${p.price.toFixed ? p.price.toFixed(2) : p.price}</td>
             {!isReadOnly && (
-              <td>
+              <td onClick={(e) => e.stopPropagation()}>
                 <button onClick={() => onEdit(p)} className="btn btn-icon btn-success" title="Edit">
                   ✏️
                 </button>

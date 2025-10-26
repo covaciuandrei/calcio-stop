@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   useArchivedBadges,
   useArchivedKitTypes,
@@ -21,6 +22,12 @@ interface Props {
 }
 
 const ArchivedProducts: React.FC<Props> = ({ archivedProducts, searchTerm = '', onClearSearch }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Check if this is a public route
+  const isPublicRoute = location.pathname.startsWith('/public');
+
   // Get data from stores
   const namesets = useNamesetsList();
   const archivedNamesets = useArchivedNamesets();
@@ -43,6 +50,19 @@ const ArchivedProducts: React.FC<Props> = ({ archivedProducts, searchTerm = '', 
       deleteProduct(id);
       onClearSearch?.(); // Clear search after action
     }
+  };
+
+  // Get stock status for a given quantity
+  const getStockStatus = (quantity: number) => {
+    if (quantity === 0) return 'NO STOCK';
+    if (quantity <= 2) return 'LOW STOCK';
+    return 'IN STOCK';
+  };
+
+  // Handle product row click
+  const handleProductClick = (productId: string) => {
+    const isPublicRoute = location.pathname.startsWith('/public');
+    navigate(isPublicRoute ? `/public/products/${productId}` : `/products/${productId}`);
   };
 
   // Filter products based on search term
@@ -100,18 +120,32 @@ const ArchivedProducts: React.FC<Props> = ({ archivedProducts, searchTerm = '', 
         </thead>
         <tbody>
           {filteredProducts.map((p) => (
-            <tr key={p.id}>
+            <tr
+              key={p.id}
+              className="product-row"
+              onClick={() => handleProductClick(p.id)}
+              style={{ cursor: 'pointer' }}
+            >
               <td>{getTeamInfo(p.teamId, teams, archivedTeams)}</td>
               <td>{p.name || '-'}</td>
               <td>{p.type}</td>
               <td>{getKitTypeInfo(p.kitTypeId, kitTypes, archivedKitTypes)}</td>
               <td>
                 <div className="size-quantity-display">
-                  {p.sizes.map((sq) => (
-                    <div key={sq.size} className="size-quantity-item">
-                      {sq.size}: {sq.quantity}
-                    </div>
-                  ))}
+                  {p.sizes.map((sq) => {
+                    const stockStatus = getStockStatus(sq.quantity);
+                    const isOutOfStock = sq.quantity === 0;
+                    const isLowStock = sq.quantity > 0 && sq.quantity <= 2;
+
+                    return (
+                      <div
+                        key={sq.size}
+                        className={`size-quantity-item ${isOutOfStock ? 'out-of-stock' : isLowStock ? 'low-stock' : 'in-stock'}`}
+                      >
+                        {sq.size}: {isPublicRoute ? stockStatus : sq.quantity}
+                      </div>
+                    );
+                  })}
                 </div>
               </td>
               <td>
@@ -134,7 +168,7 @@ const ArchivedProducts: React.FC<Props> = ({ archivedProducts, searchTerm = '', 
               </td>
               <td>{getBadgeInfo(p.badgeId, badges, archivedBadges)}</td>
               <td className="price-display">${p.price.toFixed ? p.price.toFixed(2) : p.price}</td>
-              <td>
+              <td onClick={(e) => e.stopPropagation()}>
                 <button onClick={() => handleRestore(p.id)} className="btn btn-icon btn-success" title="Restore">
                   ↩️
                 </button>

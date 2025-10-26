@@ -57,6 +57,17 @@ CREATE TABLE IF NOT EXISTS products (
     archived_at TIMESTAMP WITH TIME ZONE NULL
 );
 
+-- Product Images table
+CREATE TABLE IF NOT EXISTS product_images (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    image_url TEXT NOT NULL,
+    alt_text VARCHAR(255),
+    is_primary BOOLEAN DEFAULT FALSE,
+    display_order INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Sales table
 CREATE TABLE IF NOT EXISTS sales (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -117,6 +128,8 @@ CREATE INDEX IF NOT EXISTS idx_products_nameset_id ON products(nameset_id);
 CREATE INDEX IF NOT EXISTS idx_products_kit_type_id ON products(kit_type_id);
 CREATE INDEX IF NOT EXISTS idx_products_badge_id ON products(badge_id);
 CREATE INDEX IF NOT EXISTS idx_namesets_kit_type_id ON namesets(kit_type_id);
+CREATE INDEX IF NOT EXISTS idx_product_images_product_id ON product_images(product_id);
+CREATE INDEX IF NOT EXISTS idx_product_images_display_order ON product_images(display_order);
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE teams ENABLE ROW LEVEL SECURITY;
@@ -124,6 +137,7 @@ ALTER TABLE kit_types ENABLE ROW LEVEL SECURITY;
 ALTER TABLE badges ENABLE ROW LEVEL SECURITY;
 ALTER TABLE namesets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE product_images ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sales ENABLE ROW LEVEL SECURITY;
 ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
@@ -134,6 +148,7 @@ CREATE POLICY "Allow all operations for authenticated users" ON kit_types FOR AL
 CREATE POLICY "Allow all operations for authenticated users" ON badges FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON namesets FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON products FOR ALL USING (true);
+CREATE POLICY "Allow all operations for authenticated users" ON product_images FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON sales FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON settings FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON users FOR ALL USING (true);

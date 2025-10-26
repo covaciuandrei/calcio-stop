@@ -8,6 +8,7 @@ import BadgesPage from './components/badges/BadgesPage';
 import Dashboard from './components/Dashboard';
 import KitTypesPage from './components/kittypes/KitTypesPage';
 import NamesetsPage from './components/namesets/NamesetsPage';
+import ProductDetailPage from './components/products/ProductDetailPage';
 import ProductsPage from './components/products/ProductsPage';
 import PublicBadgesPage from './components/public/PublicBadgesPage';
 import PublicDashboard from './components/public/PublicDashboard';
@@ -43,32 +44,40 @@ const App: React.FC = () => {
 
   return (
     <Router>
-        <Routes>
-          {/* Public routes - no authentication required (only products and badges) */}
-          <Route
-            path="/public"
-            element={
-              <PublicLayout>
-                <PublicDashboard />
-              </PublicLayout>
-            }
-          />
-          <Route
-            path="/public/products"
-            element={
-              <PublicLayout>
-                <PublicProductsPage />
-              </PublicLayout>
-            }
-          />
-          <Route
-            path="/public/badges"
-            element={
-              <PublicLayout>
-                <PublicBadgesPage />
-              </PublicLayout>
-            }
-          />
+      <Routes>
+        {/* Public routes - no authentication required (only products and badges) */}
+        <Route
+          path="/public"
+          element={
+            <PublicLayout>
+              <PublicDashboard />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/public/products"
+          element={
+            <PublicLayout>
+              <PublicProductsPage />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/public/products/:id"
+          element={
+            <PublicLayout>
+              <ProductDetailPage />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/public/badges"
+          element={
+            <PublicLayout>
+              <PublicBadgesPage />
+            </PublicLayout>
+          }
+        />
 
         {/* Protected routes - authentication required */}
         <Route
@@ -118,6 +127,7 @@ const App: React.FC = () => {
                 <Routes>
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/products" element={<ProductsPage />} />
+                  <Route path="/products/:id" element={<ProductDetailPage />} />
                   <Route path="/sales" element={<SalesPage />} />
                   <Route path="/namesets" element={<NamesetsPage />} />
                   <Route path="/teams" element={<TeamsPage />} />

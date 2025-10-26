@@ -1,5 +1,18 @@
 /* Component-specific styles not covered by design system */
 
+/* Product Row Styles */
+.product-row {
+  transition: background-color 0.2s ease;
+}
+
+.product-row:hover {
+  background-color: var(--gray-50);
+}
+
+.product-row:active {
+  background-color: var(--gray-100);
+}
+
 /* Public View Styles */
 .navbar-brand h2 {
   margin: 0;
@@ -175,6 +188,53 @@
   background: var(--gray-100);
   border-radius: var(--radius-md);
   border: 1px solid var(--gray-200);
+}
+
+/* Stock status styling for table items */
+.size-quantity-item.out-of-stock {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+
+.size-quantity-item.low-stock {
+  background-color: #fef3c7;
+  border-color: #fbbf24;
+  color: #d97706;
+}
+
+.size-quantity-item.in-stock {
+  background-color: #d1fae5;
+  border-color: #6ee7b7;
+  color: #059669;
+}
+
+/* Public mode stock status styling */
+.public-mode .size-quantity-item {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-size: 0.75rem;
+  text-align: center;
+  min-width: 80px;
+}
+
+.public-mode .size-quantity-item.out-of-stock {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+.public-mode .size-quantity-item.low-stock {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+  border-color: #fbbf24;
+}
+
+.public-mode .size-quantity-item.in-stock {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border-color: #6ee7b7;
 }
 
 /* Table action buttons */

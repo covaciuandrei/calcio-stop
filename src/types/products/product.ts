@@ -14,6 +14,16 @@ export interface ProductSizeQuantity {
   quantity: number;
 }
 
+export interface ProductImage {
+  id: string;
+  productId: string;
+  imageUrl: string;
+  altText?: string;
+  isPrimary: boolean;
+  displayOrder: number;
+  createdAt: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -25,4 +35,5 @@ export interface Product {
   badgeId: string | null; // reference to badge, null if no badge
   price: number; // default price per unit
   createdAt: string; // ISO date string
+  images?: ProductImage[]; // product images
 }
