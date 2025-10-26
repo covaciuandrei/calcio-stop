@@ -77,6 +77,21 @@ export async function updateTeam(id, updates) {
 }
 
 export async function deleteTeam(id) {
+  // First check if there are any references to this team
+  const { data: products, error: productsError } = await supabase
+    .from('products')
+    .select('id')
+    .eq('team_id', id)
+    .limit(1);
+
+  if (productsError) throw productsError;
+
+  // If there are references, throw an error
+  if (products && products.length > 0) {
+    throw new Error('Cannot delete team: it is referenced by products');
+  }
+
+  // If no references, proceed with deletion
   const { error } = await supabase.from('teams').delete().eq('id', id);
 
   if (error) throw error;
@@ -330,6 +345,21 @@ export async function updateBadge(id, updates) {
 }
 
 export async function deleteBadge(id) {
+  // First check if there are any references to this badge
+  const { data: products, error: productsError } = await supabase
+    .from('products')
+    .select('id')
+    .eq('badge_id', id)
+    .limit(1);
+
+  if (productsError) throw productsError;
+
+  // If there are references, throw an error
+  if (products && products.length > 0) {
+    throw new Error('Cannot delete badge: it is referenced by products');
+  }
+
+  // If no references, proceed with deletion
   const { error } = await supabase.from('badges').delete().eq('id', id);
 
   if (error) throw error;
@@ -359,12 +389,26 @@ export async function restoreBadge(id) {
 // ============================================================================
 
 export async function createNameset(data) {
+  // Validate required fields
+  if (!data.playerName) {
+    throw new Error('Player name is required');
+  }
+  if (!data.number) {
+    throw new Error('Number is required');
+  }
+  if (!data.season) {
+    throw new Error('Season is required');
+  }
+  if (!data.kitTypeId) {
+    throw new Error('Kit type is required');
+  }
+
   // Map frontend data to database schema
   const dbData = {
     player_name: data.playerName,
-    number: data.number,
+    number: parseInt(data.number), // Ensure it's an integer
     season: data.season,
-    quantity: data.quantity,
+    quantity: parseInt(data.quantity) || 0, // Ensure it's an integer
     kit_type_id: data.kitTypeId,
     created_at: data.createdAt || new Date().toISOString(),
     archived_at: null,
@@ -372,7 +416,9 @@ export async function createNameset(data) {
 
   const { data: result, error } = await supabase.from('namesets').insert([dbData]).select().single();
 
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
 
   // Map database response back to frontend format
   return {
@@ -429,13 +475,57 @@ export async function getArchivedNamesets() {
 }
 
 export async function updateNameset(id, updates) {
-  const { data, error } = await supabase.from('namesets').update(updates).eq('id', id).select().single();
+  // Map frontend data to database schema
+  const dbUpdates = {};
+
+  if (updates.playerName !== undefined) {
+    dbUpdates.player_name = updates.playerName;
+  }
+  if (updates.number !== undefined) {
+    dbUpdates.number = parseInt(updates.number);
+  }
+  if (updates.season !== undefined) {
+    dbUpdates.season = updates.season;
+  }
+  if (updates.quantity !== undefined) {
+    dbUpdates.quantity = parseInt(updates.quantity);
+  }
+  if (updates.kitTypeId !== undefined) {
+    dbUpdates.kit_type_id = updates.kitTypeId;
+  }
+
+  const { data, error } = await supabase.from('namesets').update(dbUpdates).eq('id', id).select().single();
 
   if (error) throw error;
-  return data;
+
+  // Map database response back to frontend format
+  return {
+    id: data.id,
+    playerName: data.player_name,
+    number: data.number,
+    season: data.season,
+    quantity: data.quantity,
+    kitTypeId: data.kit_type_id,
+    createdAt: data.created_at,
+  };
 }
 
 export async function deleteNameset(id) {
+  // First check if there are any references to this nameset
+  const { data: products, error: productsError } = await supabase
+    .from('products')
+    .select('id')
+    .eq('nameset_id', id)
+    .limit(1);
+
+  if (productsError) throw productsError;
+
+  // If there are references, throw an error
+  if (products && products.length > 0) {
+    throw new Error('Cannot delete nameset: it is referenced by products');
+  }
+
+  // If no references, proceed with deletion
   const { error } = await supabase.from('namesets').delete().eq('id', id);
 
   if (error) throw error;
@@ -465,23 +555,36 @@ export async function restoreNameset(id) {
 // ============================================================================
 
 export async function createProduct(data) {
+  // Validate required fields
+  if (!data.name && !data.teamId) {
+    throw new Error('Product name or team is required');
+  }
+  if (!data.type) {
+    throw new Error('Product type is required');
+  }
+  if (!data.kitTypeId) {
+    throw new Error('Kit type is required');
+  }
+
   // Map frontend data to database schema
   const dbData = {
     name: data.name,
     type: data.type,
-    sizes: data.sizes,
-    nameset_id: data.namesetId,
+    sizes: data.sizes || [],
+    nameset_id: data.namesetId || null,
     team_id: data.teamId,
     kit_type_id: data.kitTypeId,
-    badge_id: data.badgeId,
-    price: data.price,
+    badge_id: data.badgeId || null,
+    price: parseFloat(data.price) || 0.0,
     created_at: data.createdAt || new Date().toISOString(),
     archived_at: null,
   };
 
   const { data: result, error } = await supabase.from('products').insert([dbData]).select().single();
 
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
 
   // Map database response back to frontend format
   return {
@@ -534,13 +637,65 @@ export async function getArchivedProducts() {
 }
 
 export async function updateProduct(id, updates) {
-  const { data, error } = await supabase.from('products').update(updates).eq('id', id).select().single();
+  // Map frontend data to database schema
+  const dbUpdates = {};
+
+  if (updates.name !== undefined) {
+    dbUpdates.name = updates.name;
+  }
+  if (updates.type !== undefined) {
+    dbUpdates.type = updates.type;
+  }
+  if (updates.sizes !== undefined) {
+    dbUpdates.sizes = updates.sizes;
+  }
+  if (updates.namesetId !== undefined) {
+    dbUpdates.nameset_id = updates.namesetId;
+  }
+  if (updates.teamId !== undefined) {
+    dbUpdates.team_id = updates.teamId;
+  }
+  if (updates.kitTypeId !== undefined) {
+    dbUpdates.kit_type_id = updates.kitTypeId;
+  }
+  if (updates.badgeId !== undefined) {
+    dbUpdates.badge_id = updates.badgeId;
+  }
+  if (updates.price !== undefined) {
+    dbUpdates.price = parseFloat(updates.price);
+  }
+
+  const { data, error } = await supabase.from('products').update(dbUpdates).eq('id', id).select().single();
 
   if (error) throw error;
-  return data;
+
+  // Map database response back to frontend format
+  return {
+    id: data.id,
+    name: data.name,
+    type: data.type,
+    sizes: data.sizes,
+    namesetId: data.nameset_id,
+    teamId: data.team_id,
+    kitTypeId: data.kit_type_id,
+    badgeId: data.badge_id,
+    price: data.price,
+    createdAt: data.created_at,
+  };
 }
 
 export async function deleteProduct(id) {
+  // First check if there are any references to this product
+  const { data: sales, error: salesError } = await supabase.from('sales').select('id').eq('product_id', id).limit(1);
+
+  if (salesError) throw salesError;
+
+  // If there are references, throw an error
+  if (sales && sales.length > 0) {
+    throw new Error('Cannot delete product: it is referenced by sales');
+  }
+
+  // If no references, proceed with deletion
   const { error } = await supabase.from('products').delete().eq('id', id);
 
   if (error) throw error;
@@ -577,7 +732,7 @@ export async function createSale(data) {
     quantity: data.quantity,
     price_sold: data.priceSold,
     customer_name: data.customerName,
-    date: data.date,
+    date: data.date, // This will now store the full timestamp
     created_at: data.createdAt || new Date().toISOString(),
   };
 
@@ -602,14 +757,58 @@ export async function getSales() {
   const { data, error } = await supabase.from('sales').select('*').order('created_at', { ascending: false });
 
   if (error) throw error;
-  return data || [];
+
+  // Map database fields to frontend format
+  return (data || []).map((sale) => ({
+    id: sale.id,
+    productId: sale.product_id,
+    size: sale.size,
+    quantity: sale.quantity,
+    priceSold: sale.price_sold,
+    customerName: sale.customer_name,
+    date: sale.date,
+    createdAt: sale.created_at,
+  }));
 }
 
 export async function updateSale(id, updates) {
-  const { data, error } = await supabase.from('sales').update(updates).eq('id', id).select().single();
+  // Map frontend data to database schema
+  const dbUpdates = {};
+
+  if (updates.productId !== undefined) {
+    dbUpdates.product_id = updates.productId;
+  }
+  if (updates.size !== undefined) {
+    dbUpdates.size = updates.size;
+  }
+  if (updates.quantity !== undefined) {
+    dbUpdates.quantity = parseInt(updates.quantity);
+  }
+  if (updates.priceSold !== undefined) {
+    dbUpdates.price_sold = parseFloat(updates.priceSold);
+  }
+  if (updates.customerName !== undefined) {
+    dbUpdates.customer_name = updates.customerName;
+  }
+  if (updates.date !== undefined) {
+    dbUpdates.date = updates.date;
+  }
+
+  const { data, error } = await supabase.from('sales').update(dbUpdates).eq('id', id).select().single();
 
   if (error) throw error;
-  return data;
+
+  // Map database response back to frontend format
+  return {
+    id: data.id,
+    productId: data.product_id,
+    size: data.size,
+    quantity: data.quantity,
+    priceSold: data.price_sold,
+    customerName: data.customer_name,
+    date: data.date,
+    createdAt: data.created_at,
+  };
 }
 
 export async function deleteSale(id) {
@@ -677,10 +876,34 @@ export async function getUserByEmail(email) {
 }
 
 export async function updateUser(id, updates) {
-  const { data, error } = await supabase.from('users').update(updates).eq('id', id).select().single();
+  // Map frontend data to database schema
+  const dbUpdates = {};
+
+  if (updates.name !== undefined) {
+    dbUpdates.name = updates.name;
+  }
+  if (updates.email !== undefined) {
+    dbUpdates.email = updates.email;
+  }
+  if (updates.role !== undefined) {
+    dbUpdates.role = updates.role;
+  }
+  if (updates.createdAt !== undefined) {
+    dbUpdates.created_at = updates.createdAt;
+  }
+
+  const { data, error } = await supabase.from('users').update(dbUpdates).eq('id', id).select().single();
 
   if (error) throw error;
-  return data;
+
+  // Map database response back to frontend format
+  return {
+    id: data.id,
+    name: data.name,
+    email: data.email,
+    role: data.role,
+    createdAt: data.created_at,
+  };
 }
 
 export async function deleteUser(id) {

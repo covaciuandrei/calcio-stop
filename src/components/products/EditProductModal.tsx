@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useProductsActions } from '../../stores';
+import { useKitTypesList, useProductsActions } from '../../stores';
 import { AdultSize, KidSize, Product, ProductSizeQuantity, ProductType } from '../../types';
 import BadgePicker from '../badges/BadgePicker';
 import KitTypePicker from '../kittypes/KitTypePicker';
@@ -17,15 +17,16 @@ interface Props {
 }
 
 const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }) => {
-  // Get store actions
+  // Get store actions and data
   const { updateProduct } = useProductsActions();
+  const kitTypes = useKitTypesList();
   const [name, setName] = useState(editingProduct?.name || '');
   const [type, setType] = useState<ProductType>(editingProduct?.type || ProductType.SHIRT);
   const [sizes, setSizes] = useState<ProductSizeQuantity[]>(editingProduct?.sizes || []);
   const [selectedNamesetId, setSelectedNamesetId] = useState<string | null>(editingProduct?.namesetId || null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(editingProduct?.teamId || null);
   const [selectedKitTypeId, setSelectedKitTypeId] = useState<string>(
-    editingProduct?.kitTypeId || 'default-kit-type-1st'
+    editingProduct?.kitTypeId || (kitTypes.length > 0 ? kitTypes[0].id : '')
   );
   const [selectedBadgeId, setSelectedBadgeId] = useState<string | null>(editingProduct?.badgeId || null);
   const [price, setPrice] = useState<number>(editingProduct?.price || 0);

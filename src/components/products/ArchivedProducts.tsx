@@ -8,6 +8,7 @@ import {
   useKitTypesList,
   useNamesetsList,
   useProductsActions,
+  useProductsStore,
   useTeamsList,
 } from '../../stores';
 import { Product } from '../../types';
@@ -30,6 +31,7 @@ const ArchivedProducts: React.FC<Props> = ({ archivedProducts, searchTerm = '', 
   const badges = useBadgesList();
   const archivedBadges = useArchivedBadges();
   const { restoreProduct, deleteProduct } = useProductsActions();
+  const { error, clearError } = useProductsStore();
 
   const handleRestore = (id: string) => {
     restoreProduct(id);
@@ -59,6 +61,27 @@ const ArchivedProducts: React.FC<Props> = ({ archivedProducts, searchTerm = '', 
 
   return (
     <div>
+      {error && (
+        <div
+          className="error-message"
+          style={{
+            marginBottom: '1rem',
+            padding: '0.5rem',
+            backgroundColor: '#fee',
+            border: '1px solid #fcc',
+            borderRadius: '4px',
+          }}
+        >
+          {error}
+          <button
+            onClick={clearError}
+            style={{ marginLeft: '0.5rem', background: 'none', border: 'none', fontSize: '1.2em', cursor: 'pointer' }}
+            title="Clear error"
+          >
+            ×
+          </button>
+        </div>
+      )}
       <table>
         <thead>
           <tr>
@@ -115,8 +138,8 @@ const ArchivedProducts: React.FC<Props> = ({ archivedProducts, searchTerm = '', 
                 <button onClick={() => handleRestore(p.id)} className="btn btn-icon btn-success" title="Restore">
                   ↩️
                 </button>
-                <button onClick={() => handleDelete(p.id)} className="btn btn-danger">
-                  Delete Forever
+                <button onClick={() => handleDelete(p.id)} className="btn btn-icon btn-danger" title="Delete Forever">
+                  🗑️
                 </button>
               </td>
             </tr>

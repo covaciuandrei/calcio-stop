@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import * as db from '../lib/db';
 import { Team } from '../types';
+import { getErrorMessage, isForeignKeyConstraintError } from '../utils/errorHandler';
 
 interface TeamsState {
   // State
@@ -20,6 +21,7 @@ interface TeamsState {
   setArchivedTeams: (teams: Team[]) => void;
   loadTeams: () => Promise<void>;
   loadArchivedTeams: () => Promise<void>;
+  clearError: () => void;
 }
 
 // Selectors
@@ -47,7 +49,6 @@ export const useTeamsStore = create<TeamsState>()(
         try {
           const newTeam = await db.createTeam({
             ...teamData,
-            id: crypto.randomUUID(),
             createdAt: new Date().toISOString(),
           });
           set((state) => ({
@@ -88,10 +89,16 @@ export const useTeamsStore = create<TeamsState>()(
             isLoading: false,
           }));
         } catch (error) {
+          const errorMessage = getErrorMessage(error as Error, 'delete', 'team');
           set({
-            error: error instanceof Error ? error.message : 'Failed to delete team',
+            error: errorMessage,
             isLoading: false,
           });
+
+          // If it's a foreign key constraint, suggest archiving instead
+          if (isForeignKeyConstraintError(error as Error)) {
+            console.warn('Foreign key constraint detected. Consider archiving instead of deleting.');
+          }
         }
       },
 
@@ -161,6 +168,10 @@ export const useTeamsStore = create<TeamsState>()(
             isLoading: false,
           });
         }
+      },
+
+      clearError: () => {
+        set({ error: null });
       },
     }),
     {

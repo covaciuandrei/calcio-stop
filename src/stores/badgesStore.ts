@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import * as db from '../lib/db';
 import { Badge } from '../types';
+import { getErrorMessage, isForeignKeyConstraintError } from '../utils/errorHandler';
 
 interface BadgesState {
   // State
@@ -20,6 +21,7 @@ interface BadgesState {
   setArchivedBadges: (badges: Badge[]) => void;
   loadBadges: () => Promise<void>;
   loadArchivedBadges: () => Promise<void>;
+  clearError: () => void;
 }
 
 // Selectors
@@ -49,7 +51,6 @@ export const useBadgesStore = create<BadgesState>()(
         try {
           const newBadge = await db.createBadge({
             ...badgeData,
-            id: crypto.randomUUID(),
             createdAt: new Date().toISOString(),
           });
           set((state) => ({
@@ -90,10 +91,16 @@ export const useBadgesStore = create<BadgesState>()(
             isLoading: false,
           }));
         } catch (error) {
+          const errorMessage = getErrorMessage(error as Error, 'delete', 'badge');
           set({
-            error: error instanceof Error ? error.message : 'Failed to delete badge',
+            error: errorMessage,
             isLoading: false,
           });
+
+          // If it's a foreign key constraint, suggest archiving instead
+          if (isForeignKeyConstraintError(error as Error)) {
+            console.warn('Foreign key constraint detected. Consider archiving instead of deleting.');
+          }
         }
       },
 
@@ -163,6 +170,10 @@ export const useBadgesStore = create<BadgesState>()(
             isLoading: false,
           });
         }
+      },
+
+      clearError: () => {
+        set({ error: null });
       },
     }),
     {

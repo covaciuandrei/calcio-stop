@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { isDefaultKitType } from '../../constants/kitTypes';
 import { KitType } from '../../types';
 
@@ -10,8 +10,15 @@ interface Props {
 }
 
 const KitTypeTableList: React.FC<Props> = ({ kitTypes, onEdit, onArchive, searchTerm = '' }) => {
-  // Filter kit types based on search term
-  const filteredKitTypes = kitTypes.filter((kitType) => kitType.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  // Sort kit types by creation date and filter based on search term
+  const sortedKitTypes = useMemo(
+    () => [...kitTypes].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
+    [kitTypes]
+  );
+
+  const filteredKitTypes = sortedKitTypes.filter((kitType) =>
+    kitType.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (kitTypes.length === 0) {
     return <p>No kit types available.</p>;

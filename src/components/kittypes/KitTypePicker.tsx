@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useKitTypesList } from '../../stores';
 import styles from '../shared/Picker.module.css';
@@ -10,8 +10,12 @@ interface Props {
 }
 
 const KitTypePicker: React.FC<Props> = ({ selectedKitTypeId, onKitTypeSelect }) => {
-  // Get kit types from store
-  const kitTypes = useKitTypesList();
+  // Get kit types from store and sort by creation date
+  const allKitTypes = useKitTypesList();
+  const kitTypes = useMemo(
+    () => [...allKitTypes].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
+    [allKitTypes]
+  );
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [adding, setAdding] = useState(false);

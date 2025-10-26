@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { useNamesetsActions } from '../../stores';
+import { useKitTypesList, useNamesetsActions } from '../../stores';
 import { Nameset } from '../../types';
 import { generateSeasons } from '../../utils/utils';
 import KitTypePicker from '../kittypes/KitTypePicker';
@@ -11,14 +11,22 @@ interface Props {
 }
 
 const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
-  // Get store actions
+  // Get store actions and data
   const { addNameset } = useNamesetsActions();
+  const kitTypes = useKitTypesList();
   const [playerName, setPlayerName] = useState('');
   const [number, setNumber] = useState<number | ''>('');
   const [season, setSeason] = useState('2025/2026');
   const [quantity, setQuantity] = useState<number | ''>('');
-  const [selectedKitTypeId, setSelectedKitTypeId] = useState<string>('default-kit-type-1st');
+  const [selectedKitTypeId, setSelectedKitTypeId] = useState<string>('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  // Set default kit type when kit types are loaded
+  useEffect(() => {
+    if (kitTypes.length > 0 && !selectedKitTypeId) {
+      setSelectedKitTypeId(kitTypes[0].id);
+    }
+  }, [kitTypes, selectedKitTypeId]);
 
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) {
@@ -35,6 +43,9 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
     }
     if (quantity === '' || quantity < 0) {
       newErrors.quantity = 'Quantity must be 0 or greater';
+    }
+    if (!selectedKitTypeId) {
+      newErrors.kitType = 'Please select a kit type';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -60,7 +71,7 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
     setNumber('');
     setSeason('2025/2026');
     setQuantity('');
-    setSelectedKitTypeId('default-kit-type-1st');
+    setSelectedKitTypeId(kitTypes.length > 0 ? kitTypes[0].id : '');
   };
 
   return (
@@ -177,9 +188,10 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
         />
         {errors.quantity && <div className="error-message">{errors.quantity}</div>}
       </div>
-      <div className="form-group">
+      <div className={`form-group ${errors.kitType ? 'has-error' : ''}`}>
         <label>Kit Type</label>
         <KitTypePicker selectedKitTypeId={selectedKitTypeId} onKitTypeSelect={setSelectedKitTypeId} />
+        {errors.kitType && <div className="error-message">{errors.kitType}</div>}
       </div>
       <div className="form-button-container">
         <button

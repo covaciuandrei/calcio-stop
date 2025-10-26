@@ -1,5 +1,5 @@
 import React from 'react';
-import { useArchivedKitTypes, useKitTypesList, useNamesetsActions } from '../../stores';
+import { useArchivedKitTypes, useKitTypesList, useNamesetsActions, useNamesetsStore } from '../../stores';
 import { Nameset } from '../../types';
 import { getKitTypeInfo } from '../../utils/utils';
 
@@ -10,8 +10,9 @@ interface Props {
 }
 
 const ArchivedNamesets: React.FC<Props> = ({ archivedNamesets, searchTerm = '', onClearSearch }) => {
-  // Get store actions
+  // Get store actions and state
   const { restoreNameset, deleteNameset } = useNamesetsActions();
+  const { error, clearError } = useNamesetsStore();
   const kitTypes = useKitTypesList();
   const archivedKitTypes = useArchivedKitTypes();
   const handleRestore = (id: string) => {
@@ -42,37 +43,60 @@ const ArchivedNamesets: React.FC<Props> = ({ archivedNamesets, searchTerm = '', 
   }
 
   return (
-    <table>
-      <thead>
-        <tr>
-          <th>Player</th>
-          <th>Number</th>
-          <th>Season</th>
-          <th>Kit Type</th>
-          <th>Quantity</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {filteredNamesets.map((n) => (
-          <tr key={n.id}>
-            <td>{n.playerName}</td>
-            <td>{n.number}</td>
-            <td>{n.season}</td>
-            <td>{getKitTypeInfo(n.kitTypeId, kitTypes, archivedKitTypes)}</td>
-            <td className="price-display">{n.quantity}</td>
-            <td>
-              <button onClick={() => handleRestore(n.id)} className="btn btn-icon btn-success" title="Restore">
-                ↩️
-              </button>
-              <button onClick={() => handleDelete(n.id)} className="btn btn-danger">
-                Delete Forever
-              </button>
-            </td>
+    <div>
+      {error && (
+        <div
+          className="error-message"
+          style={{
+            marginBottom: '1rem',
+            padding: '0.5rem',
+            backgroundColor: '#fee',
+            border: '1px solid #fcc',
+            borderRadius: '4px',
+          }}
+        >
+          {error}
+          <button
+            onClick={clearError}
+            style={{ marginLeft: '0.5rem', background: 'none', border: 'none', fontSize: '1.2em', cursor: 'pointer' }}
+            title="Clear error"
+          >
+            ×
+          </button>
+        </div>
+      )}
+      <table>
+        <thead>
+          <tr>
+            <th>Player</th>
+            <th>Number</th>
+            <th>Season</th>
+            <th>Kit Type</th>
+            <th>Quantity</th>
+            <th>Actions</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {filteredNamesets.map((n) => (
+            <tr key={n.id}>
+              <td>{n.playerName}</td>
+              <td>{n.number}</td>
+              <td>{n.season}</td>
+              <td>{getKitTypeInfo(n.kitTypeId, kitTypes, archivedKitTypes)}</td>
+              <td className="price-display">{n.quantity}</td>
+              <td>
+                <button onClick={() => handleRestore(n.id)} className="btn btn-icon btn-success" title="Restore">
+                  ↩️
+                </button>
+                <button onClick={() => handleDelete(n.id)} className="btn btn-icon btn-danger" title="Delete Forever">
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
 

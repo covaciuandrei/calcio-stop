@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useNamesetsActions } from '../../stores';
+import { useKitTypesList, useNamesetsActions } from '../../stores';
 import { Nameset } from '../../types';
 import { generateSeasons } from '../../utils/utils';
 import KitTypePicker from '../kittypes/KitTypePicker';
@@ -11,13 +11,14 @@ interface Props {
 }
 
 const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }) => {
-  // Get store actions
+  // Get store actions and data
   const { updateNameset } = useNamesetsActions();
+  const kitTypes = useKitTypesList();
   const [playerName, setPlayerName] = useState('');
   const [number, setNumber] = useState<number | ''>('');
   const [season, setSeason] = useState('2025/2026');
   const [quantity, setQuantity] = useState<number | ''>('');
-  const [selectedKitTypeId, setSelectedKitTypeId] = useState<string>('default-kit-type-1st');
+  const [selectedKitTypeId, setSelectedKitTypeId] = useState<string>('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // Update state when editingNameset changes
@@ -27,7 +28,7 @@ const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }
       setNumber(editingNameset.number || '');
       setSeason(editingNameset.season || '2025/2026');
       setQuantity(editingNameset.quantity || '');
-      setSelectedKitTypeId(editingNameset.kitTypeId || 'default-kit-type-1st');
+      setSelectedKitTypeId(editingNameset.kitTypeId || (kitTypes.length > 0 ? kitTypes[0].id : ''));
       setErrors({});
     } else {
       // Reset form when modal is closed
@@ -35,10 +36,10 @@ const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }
       setNumber('');
       setSeason('2025/2026');
       setQuantity('');
-      setSelectedKitTypeId('default-kit-type-1st');
+      setSelectedKitTypeId(kitTypes.length > 0 ? kitTypes[0].id : '');
       setErrors({});
     }
-  }, [editingNameset]);
+  }, [editingNameset, kitTypes]);
 
   const handleSaveEdit = (e: React.FormEvent) => {
     e.preventDefault();

@@ -45,7 +45,6 @@ export const useSalesStore = create<SalesState>()(
         try {
           const newSale = await db.createSale({
             ...saleData,
-            id: crypto.randomUUID(),
             createdAt: new Date().toISOString(),
           });
           set((state) => ({

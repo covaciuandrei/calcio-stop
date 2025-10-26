@@ -20,6 +20,7 @@ interface ProductsState {
   setArchivedProducts: (products: Product[]) => void;
   loadProducts: () => Promise<void>;
   loadArchivedProducts: () => Promise<void>;
+  clearError: () => void;
 }
 
 // Selectors
@@ -49,9 +50,50 @@ export const useProductsStore = create<ProductsState>()(
         try {
           const newProduct = await db.createProduct({
             ...productData,
-            id: crypto.randomUUID(),
             createdAt: new Date().toISOString(),
           });
+
+          // Calculate total quantity of all sizes in the product
+          const totalProductQuantity = productData.sizes.reduce((total, sizeQty) => total + sizeQty.quantity, 0);
+
+          // Update nameset quantity if a nameset was selected
+          if (productData.namesetId && totalProductQuantity > 0) {
+            try {
+              // Get current nameset from the namesets store
+              const { useNamesetsStore } = await import('./namesetsStore');
+              const namesetsState = useNamesetsStore.getState();
+              const selectedNameset = namesetsState.namesets.find((n) => n.id === productData.namesetId);
+
+              if (selectedNameset) {
+                await namesetsState.updateNameset(productData.namesetId, {
+                  quantity: Math.max(0, selectedNameset.quantity - totalProductQuantity),
+                });
+              }
+            } catch (namesetError) {
+              console.error('Error updating nameset quantity:', namesetError);
+              // Don't fail the product creation if nameset update fails
+            }
+          }
+
+          // Update badge quantity if a badge was selected
+          if (productData.badgeId && totalProductQuantity > 0) {
+            try {
+              // Get current badge from the badges store
+              const { useBadgesStore } = await import('./badgesStore');
+              const badgesState = useBadgesStore.getState();
+              const selectedBadge = badgesState.badges.find((b) => b.id === productData.badgeId);
+
+              if (selectedBadge) {
+                await badgesState.updateBadge(productData.badgeId, {
+                  quantity: Math.max(0, selectedBadge.quantity - totalProductQuantity),
+                });
+              }
+            } catch (badgeError) {
+              console.error('Error updating badge quantity:', badgeError);
+              // Don't fail the product creation if badge update fails
+            }
+          }
+
           set((state) => ({
             products: [...state.products, newProduct],
             isLoading: false,
@@ -163,6 +205,10 @@ export const useProductsStore = create<ProductsState>()(
             isLoading: false,
           });
         }
+      },
+
+      clearError: () => {
+        set({ error: null });
       },
     }),
     {

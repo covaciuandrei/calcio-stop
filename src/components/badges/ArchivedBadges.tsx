@@ -1,5 +1,5 @@
 import React from 'react';
-import { useBadgesActions } from '../../stores';
+import { useBadgesActions, useBadgesStore } from '../../stores';
 import { Badge } from '../../types';
 
 interface Props {
@@ -9,8 +9,9 @@ interface Props {
 }
 
 const ArchivedBadges: React.FC<Props> = ({ archivedBadges, searchTerm = '', onClearSearch }) => {
-  // Get store actions
+  // Get store actions and state
   const { restoreBadge, deleteBadge } = useBadgesActions();
+  const { error, clearError } = useBadgesStore();
   // Filter badges based on search term
   const filteredBadges = archivedBadges.filter(
     (badge) =>
@@ -23,10 +24,15 @@ const ArchivedBadges: React.FC<Props> = ({ archivedBadges, searchTerm = '', onCl
     onClearSearch?.(); // Clear search after action
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to permanently delete this badge?')) {
-      deleteBadge(id);
-      onClearSearch?.(); // Clear search after action
+      try {
+        await deleteBadge(id);
+        onClearSearch?.(); // Clear search after action
+      } catch (error) {
+        // Error will be handled by the store and shown via error toast
+        console.error('Delete failed:', error);
+      }
     }
   };
 
@@ -39,33 +45,56 @@ const ArchivedBadges: React.FC<Props> = ({ archivedBadges, searchTerm = '', onCl
   }
 
   return (
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Season</th>
-          <th>Quantity</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {filteredBadges.map((b) => (
-          <tr key={b.id}>
-            <td>{b.name}</td>
-            <td>{b.season}</td>
-            <td className="price-display">{b.quantity}</td>
-            <td>
-              <button onClick={() => handleRestore(b.id)} className="btn btn-icon btn-success" title="Restore">
-                ↩️
-              </button>
-              <button onClick={() => handleDelete(b.id)} className="btn btn-danger">
-                Delete Forever
-              </button>
-            </td>
+    <div>
+      {error && (
+        <div
+          className="error-message"
+          style={{
+            marginBottom: '1rem',
+            padding: '0.5rem',
+            backgroundColor: '#fee',
+            border: '1px solid #fcc',
+            borderRadius: '4px',
+          }}
+        >
+          {error}
+          <button
+            onClick={clearError}
+            style={{ marginLeft: '0.5rem', background: 'none', border: 'none', fontSize: '1.2em', cursor: 'pointer' }}
+            title="Clear error"
+          >
+            ×
+          </button>
+        </div>
+      )}
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Season</th>
+            <th>Quantity</th>
+            <th>Actions</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {filteredBadges.map((b) => (
+            <tr key={b.id}>
+              <td>{b.name}</td>
+              <td>{b.season}</td>
+              <td className="price-display">{b.quantity}</td>
+              <td>
+                <button onClick={() => handleRestore(b.id)} className="btn btn-icon btn-success" title="Restore">
+                  ↩️
+                </button>
+                <button onClick={() => handleDelete(b.id)} className="btn btn-icon btn-danger" title="Delete Forever">
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
 

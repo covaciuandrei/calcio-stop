@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import * as db from '../lib/db';
 import { Nameset } from '../types';
+import { getErrorMessage, isForeignKeyConstraintError } from '../utils/errorHandler';
 
 interface NamesetsState {
   // State
@@ -20,6 +21,7 @@ interface NamesetsState {
   setArchivedNamesets: (namesets: Nameset[]) => void;
   loadNamesets: () => Promise<void>;
   loadArchivedNamesets: () => Promise<void>;
+  clearError: () => void;
 }
 
 // Selectors
@@ -50,7 +52,6 @@ export const useNamesetsStore = create<NamesetsState>()(
         try {
           const newNameset = await db.createNameset({
             ...namesetData,
-            id: crypto.randomUUID(),
             createdAt: new Date().toISOString(),
           });
           set((state) => ({
@@ -91,10 +92,16 @@ export const useNamesetsStore = create<NamesetsState>()(
             isLoading: false,
           }));
         } catch (error) {
+          const errorMessage = getErrorMessage(error as Error, 'delete', 'nameset');
           set({
-            error: error instanceof Error ? error.message : 'Failed to delete nameset',
+            error: errorMessage,
             isLoading: false,
           });
+
+          // If it's a foreign key constraint, suggest archiving instead
+          if (isForeignKeyConstraintError(error as Error)) {
+            console.warn('Foreign key constraint detected. Consider archiving instead of deleting.');
+          }
         }
       },
 
@@ -164,6 +171,10 @@ export const useNamesetsStore = create<NamesetsState>()(
             isLoading: false,
           });
         }
+      },
+
+      clearError: () => {
+        set({ error: null });
       },
     }),
     {

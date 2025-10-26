@@ -1,7 +1,14 @@
 import React from 'react';
-import { useArchivedBadges, useArchivedNamesets, useBadgesList, useNamesetsList, useProductsList } from '../../stores';
+import {
+  useArchivedBadges,
+  useArchivedNamesets,
+  useArchivedProducts,
+  useBadgesList,
+  useNamesetsList,
+  useProductsList,
+} from '../../stores';
 import { Sale } from '../../types';
-import { getBadgeInfo, getNamesetInfo } from '../../utils/utils';
+import { getBadgeInfo, getNamesetInfo, getProductInfo } from '../../utils/utils';
 
 interface Props {
   sales: Sale[];
@@ -13,12 +20,13 @@ interface Props {
 const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, searchTerm = '' }) => {
   // Get data from stores
   const products = useProductsList();
+  const archivedProducts = useArchivedProducts();
   const namesets = useNamesetsList();
   const archivedNamesets = useArchivedNamesets();
   const badges = useBadgesList();
   const archivedBadges = useArchivedBadges();
   const getProductDetails = (productId: string) => {
-    const product = products.find((p) => p.id === productId);
+    const product = getProductInfo(productId, products, archivedProducts);
 
     if (!product) return 'Unknown product';
     const namesetInfo = getNamesetInfo(product.namesetId, namesets, archivedNamesets);
@@ -68,7 +76,7 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, searchTerm =
             <td>{getProductDetails(s.productId)}</td>
             <td>{s.size}</td>
             <td>{s.quantity}</td>
-            <td className="price-display">${s.priceSold.toFixed ? s.priceSold.toFixed(2) : s.priceSold}</td>
+            <td className="price-display">${s.priceSold ? s.priceSold.toFixed(2) : '0.00'}</td>
             <td>{s.customerName || 'N/A'}</td>
             <td>{new Date(s.date).toLocaleString()}</td>
             <td>

@@ -1,13 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import {
+  useArchivedBadges,
+  useArchivedKitTypes,
   useArchivedNamesets,
+  useArchivedTeams,
+  useBadgesList,
+  useKitTypesList,
   useNamesetsList,
   useProductsActions,
   useProductsList,
   useSalesActions,
+  useTeamsList,
 } from '../../stores';
 import { Sale } from '../../types';
-import { getNamesetInfo } from '../../utils/utils';
+import { getProductDisplayText } from '../../utils/utils';
 
 const AddSaleForm: React.FC = () => {
   // Get data and actions from stores
@@ -16,6 +22,12 @@ const AddSaleForm: React.FC = () => {
   const { addSale } = useSalesActions();
   const namesets = useNamesetsList();
   const archivedNamesets = useArchivedNamesets();
+  const teams = useTeamsList();
+  const archivedTeams = useArchivedTeams();
+  const badges = useBadgesList();
+  const archivedBadges = useArchivedBadges();
+  const kitTypes = useKitTypesList();
+  const archivedKitTypes = useArchivedKitTypes();
   const [productId, setProductId] = useState('');
   const [size, setSize] = useState('');
   const [quantity, setQuantity] = useState<number>(1);
@@ -93,7 +105,25 @@ const AddSaleForm: React.FC = () => {
       quantity,
       priceSold,
       customerName: customerName || 'N/A',
-      date: date ? new Date(date).toISOString() : new Date().toISOString(),
+      date: (() => {
+        if (date && date.trim()) {
+          // Get current time components from browser
+          const now = new Date();
+          const hours = now.getHours();
+          const minutes = now.getMinutes();
+          const seconds = now.getSeconds();
+
+          // Create date string with current time
+          const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+          const dateTimeString = `${date}T${timeString}`;
+
+          // Create date object and convert to ISO
+          const finalDate = new Date(dateTimeString);
+          return finalDate.toISOString();
+        } else {
+          return new Date().toISOString();
+        }
+      })(),
       createdAt: new Date().toISOString(),
     };
 
@@ -123,10 +153,20 @@ const AddSaleForm: React.FC = () => {
         >
           <option value="">Select product</option>
           {products.map((p) => {
-            const namesetInfo = getNamesetInfo(p.namesetId, namesets, archivedNamesets);
+            const displayText = getProductDisplayText(
+              p,
+              namesets,
+              archivedNamesets,
+              teams,
+              archivedTeams,
+              badges,
+              archivedBadges,
+              kitTypes,
+              archivedKitTypes
+            );
             return (
               <option key={p.id} value={p.id}>
-                {p.name} - {namesetInfo.playerName} #{namesetInfo.number > 0 ? namesetInfo.number : '-'}
+                {displayText}
               </option>
             );
           })}

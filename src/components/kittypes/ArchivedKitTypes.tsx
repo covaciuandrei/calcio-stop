@@ -80,8 +80,12 @@ const ArchivedKitTypes: React.FC<Props> = ({ archivedKitTypes, searchTerm = '', 
                     ↩️
                   </button>
                   {!isDefault && (
-                    <button onClick={() => handleDelete(kt.id)} className="btn btn-danger">
-                      Delete Forever
+                    <button
+                      onClick={() => handleDelete(kt.id)}
+                      className="btn btn-icon btn-danger"
+                      title="Delete Forever"
+                    >
+                      🗑️
                     </button>
                   )}
                 </td>

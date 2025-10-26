@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useBadgesActions, useBadgesList, useNamesetsActions, useNamesetsList, useProductsActions } from '../../stores';
+import { useBadgesList, useKitTypesList, useNamesetsList, useProductsActions } from '../../stores';
 import { AdultSize, KidSize, Product, ProductSizeQuantity, ProductType } from '../../types';
 import BadgePicker from '../badges/BadgePicker';
 import KitTypePicker from '../kittypes/KitTypePicker';
@@ -14,15 +14,14 @@ const AddProductForm: React.FC = () => {
   // Get store data and actions
   const { addProduct } = useProductsActions();
   const namesets = useNamesetsList();
-  const { updateNameset } = useNamesetsActions();
   const badges = useBadgesList();
-  const { updateBadge } = useBadgesActions();
+  const kitTypes = useKitTypesList();
   const [name, setName] = useState('');
   const [type, setType] = useState<ProductType>(ProductType.SHIRT);
   const [sizes, setSizes] = useState<ProductSizeQuantity[]>([]);
   const [selectedNamesetId, setSelectedNamesetId] = useState<string | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
-  const [selectedKitTypeId, setSelectedKitTypeId] = useState<string>('default-kit-type-1st');
+  const [selectedKitTypeId, setSelectedKitTypeId] = useState<string>('');
   const [selectedBadgeId, setSelectedBadgeId] = useState<string | null>(null);
   const [price, setPrice] = useState<number>(0);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -33,16 +32,28 @@ const AddProductForm: React.FC = () => {
     setSizes(initial);
   }, [type]);
 
+  // Set default kit type when kit types are loaded
+  useEffect(() => {
+    if (kitTypes.length > 0 && !selectedKitTypeId) {
+      setSelectedKitTypeId(kitTypes[0].id);
+    }
+  }, [kitTypes, selectedKitTypeId]);
+
   const handleQuantityChange = (size: string, value: number) => {
     setSizes((prev) => prev.map((p) => (p.size === size ? { ...p, quantity: value } : p)));
   };
 
-  const handleAddProduct = () => {
+  const handleAddProduct = async () => {
     const newErrors: { [key: string]: string } = {};
 
-    // Product notes are optional if a team is selected
+    // Either product notes OR team must be provided (not both required)
     if (!name.trim() && !selectedTeamId) {
       newErrors.name = 'Please enter product notes or select a team';
+    }
+
+    // Validate that a kit type is selected
+    if (!selectedKitTypeId) {
+      newErrors.kitType = 'Please select a kit type';
     }
 
     // Calculate total quantity of all sizes in the product
@@ -88,48 +99,42 @@ const AddProductForm: React.FC = () => {
       createdAt: new Date().toISOString(),
     };
 
-    addProduct(newProduct);
+    console.log('Adding product:', newProduct);
 
-    // Decrement nameset quantity by the total product quantity if a nameset was selected
-    if (selectedNamesetId) {
-      const selectedNameset = namesets.find((n) => n.id === selectedNamesetId);
-      if (selectedNameset) {
-        updateNameset(selectedNamesetId, {
-          quantity: Math.max(0, selectedNameset.quantity - totalProductQuantity),
-        });
-      }
+    try {
+      await addProduct(newProduct);
+      console.log('Product added successfully');
+    } catch (error) {
+      console.error('Error adding product:', error);
+      setErrors({ submit: 'Failed to add product. Please try again.' });
+      return;
     }
 
-    // Decrement badge quantity by the total product quantity if a badge was selected
-    if (selectedBadgeId) {
-      const selectedBadge = badges.find((b) => b.id === selectedBadgeId);
-      if (selectedBadge) {
-        updateBadge(selectedBadgeId, {
-          quantity: Math.max(0, selectedBadge.quantity - totalProductQuantity),
-        });
-      }
-    }
-
-    // reset
+    // Reset form after successful addition
     setName('');
     setType(ProductType.SHIRT);
+    // Explicitly reset sizes to default adult sizes with 0 quantities
+    setSizes(adultSizes.map((s) => ({ size: s, quantity: 0 })));
     setSelectedNamesetId(null);
     setSelectedTeamId(null);
-    setSelectedKitTypeId('default-kit-type-1st');
+    setSelectedKitTypeId(''); // Reset to empty first
     setSelectedBadgeId(null);
     setPrice(0);
-    // sizes will reset via effect when type resets
+    setErrors({}); // Clear any errors
+
+    // Set default kit type after a brief delay to ensure state is reset
+    setTimeout(() => {
+      if (kitTypes.length > 0) {
+        setSelectedKitTypeId(kitTypes[0].id);
+      }
+    }, 0);
   };
 
   return (
     <div className="form-inline">
       <div className="form-group">
         <label>Select a team</label>
-        <TeamPicker
-          selectedTeamId={selectedTeamId}
-          onTeamSelect={setSelectedTeamId}
-          placeholder="Ex: Real Madrid"
-        />{' '}
+        <TeamPicker selectedTeamId={selectedTeamId} onTeamSelect={setSelectedTeamId} placeholder="Ex: Real Madrid" />
       </div>
 
       <div className="form-group">
@@ -144,7 +149,7 @@ const AddProductForm: React.FC = () => {
       </div>
 
       <div className={`form-group ${errors.name ? 'has-error' : ''}`}>
-        <label>Product Notes {selectedTeamId ? '(optional)' : ''}</label>
+        <label>Product Notes {selectedTeamId ? '(optional)' : '(required if no team selected)'}</label>
         <input
           value={name}
           onChange={(e) => {
@@ -153,7 +158,11 @@ const AddProductForm: React.FC = () => {
               setErrors((prev) => ({ ...prev, name: '' }));
             }
           }}
-          placeholder={selectedTeamId ? 'e.g. Home, Away, Third (optional)' : 'e.g. Real Madrid Home'}
+          placeholder={
+            selectedTeamId
+              ? 'e.g. Home, Away, Third (optional)'
+              : 'e.g. Real Madrid Home (required if no team selected)'
+          }
         />
         {errors.name && <div className="error-message">{errors.name}</div>}
       </div>
@@ -182,9 +191,18 @@ const AddProductForm: React.FC = () => {
         {errors.sizes && <div className="error-message">{errors.sizes}</div>}
       </div>
 
-      <div className="form-group">
+      <div className={`form-group ${errors.kitType ? 'has-error' : ''}`}>
         <label>Select kit type</label>
-        <KitTypePicker selectedKitTypeId={selectedKitTypeId} onKitTypeSelect={setSelectedKitTypeId} />{' '}
+        <KitTypePicker
+          selectedKitTypeId={selectedKitTypeId}
+          onKitTypeSelect={(id) => {
+            setSelectedKitTypeId(id);
+            if (errors.kitType) {
+              setErrors((prev) => ({ ...prev, kitType: '' }));
+            }
+          }}
+        />
+        {errors.kitType && <div className="error-message">{errors.kitType}</div>}
       </div>
 
       <div className={`form-group ${errors.nameset ? 'has-error' : ''}`}>
@@ -226,6 +244,7 @@ const AddProductForm: React.FC = () => {
         <button onClick={handleAddProduct} className="btn btn-success">
           Add Product
         </button>
+        {errors.submit && <div className="error-message">{errors.submit}</div>}
       </div>
     </div>
   );

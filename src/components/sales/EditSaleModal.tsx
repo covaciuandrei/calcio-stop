@@ -52,7 +52,7 @@ const EditSaleModal: React.FC<Props> = ({ editingSale, setEditingSale }) => {
       quantity,
       priceSold,
       customerName,
-      date: date ? new Date(date).toISOString() : new Date().toISOString(),
+      date: date && date.trim() ? new Date(date).toISOString() : new Date().toISOString(),
     });
     setEditingSale(null);
   };

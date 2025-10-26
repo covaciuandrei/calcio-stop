@@ -1,4 +1,4 @@
-import { Badge, KitType, Nameset, Team } from '../types';
+import { Badge, KitType, Nameset, Product, Team } from '../types';
 
 export const generateSeasons = (start = 1990, end = 2030): string[] =>
   Array.from({ length: end - start + 1 }, (_, i) => {
@@ -88,6 +88,97 @@ export const getBadgeInfo = (badgeId: string | null, badges: Badge[], archivedBa
   }
 
   return badge.name;
+};
+
+export const getProductInfo = (
+  productId: string,
+  products: Product[],
+  archivedProducts: Product[] = []
+): Product | null => {
+  // First check in active products
+  let product = products.find((p) => p.id === productId);
+
+  // If not found, check in archived products
+  if (!product) {
+    product = archivedProducts.find((p) => p.id === productId);
+  }
+
+  return product || null;
+};
+
+export const getProductDisplayText = (
+  product: {
+    name: string;
+    teamId: string | null;
+    namesetId: string | null;
+    badgeId: string | null;
+    kitTypeId?: string;
+  },
+  namesets: Nameset[],
+  archivedNamesets: Nameset[],
+  teams: Team[],
+  archivedTeams: Team[],
+  badges: Badge[],
+  archivedBadges: Badge[],
+  kitTypes?: KitType[],
+  archivedKitTypes?: KitType[]
+): string => {
+  const parts: string[] = [];
+
+  // Team (if exists)
+  if (product.teamId) {
+    const teamName = getTeamInfo(product.teamId, teams, archivedTeams);
+    if (teamName !== '-') {
+      parts.push(teamName);
+    }
+  }
+
+  // Product notes (if exists)
+  if (product.name && product.name.trim()) {
+    parts.push(product.name.trim());
+  }
+
+  // Kit Type (if exists)
+  if (product.kitTypeId && kitTypes && archivedKitTypes) {
+    const kitTypeName = getKitTypeInfo(product.kitTypeId, kitTypes, archivedKitTypes);
+    if (kitTypeName !== '-') {
+      parts.push(kitTypeName);
+    }
+  }
+
+  // Nameset info (season, player, number)
+  if (product.namesetId) {
+    const namesetInfo = getNamesetInfo(product.namesetId, namesets, archivedNamesets);
+    if (namesetInfo.playerName !== '-' || namesetInfo.season !== '-' || namesetInfo.number > 0) {
+      const namesetParts: string[] = [];
+
+      // Season (if exists)
+      if (namesetInfo.season !== '-') {
+        namesetParts.push(namesetInfo.season);
+      }
+
+      // Player and number (if exists)
+      if (namesetInfo.playerName !== '-') {
+        const playerPart =
+          namesetInfo.number > 0 ? `${namesetInfo.playerName} #${namesetInfo.number}` : namesetInfo.playerName;
+        namesetParts.push(playerPart);
+      }
+
+      if (namesetParts.length > 0) {
+        parts.push(`(${namesetParts.join(' - ')})`);
+      }
+    }
+  }
+
+  // Badge (if exists)
+  if (product.badgeId) {
+    const badgeName = getBadgeInfo(product.badgeId, badges, archivedBadges);
+    if (badgeName !== '-') {
+      parts.push(badgeName);
+    }
+  }
+
+  return parts.join(' - ');
 };
 
 // Utility functions for sorting by creation date

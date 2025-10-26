@@ -33,22 +33,14 @@ export const kitTypesSelectors = {
   getTotalArchivedKitTypes: (state: KitTypesState) => state.archivedKitTypes.length,
 };
 
-// Default kit types with fixed IDs - all have the same creation date
-const defaultCreationDate = new Date('2024-01-01T00:00:00.000Z').toISOString();
-
-const defaultKitTypes: KitType[] = [
-  { id: 'default-kit-type-1st', name: '1st Kit', createdAt: defaultCreationDate },
-  { id: 'default-kit-type-2nd', name: '2nd Kit', createdAt: defaultCreationDate },
-  { id: 'default-kit-type-3rd', name: '3rd Kit', createdAt: defaultCreationDate },
-  { id: 'default-kit-type-none', name: 'None', createdAt: defaultCreationDate },
-];
+// No default kit types - they should come from the database
 
 // Store
 export const useKitTypesStore = create<KitTypesState>()(
   devtools(
     (set, get) => ({
-      // Initial state with default kit types
-      kitTypes: defaultKitTypes,
+      // Initial state - empty, will be loaded from database
+      kitTypes: [],
       archivedKitTypes: [],
       isLoading: false,
       error: null,
@@ -59,7 +51,6 @@ export const useKitTypesStore = create<KitTypesState>()(
         try {
           const newKitType = await db.createKitType({
             ...kitTypeData,
-            id: crypto.randomUUID(),
             createdAt: new Date().toISOString(),
           });
           set((state) => ({
