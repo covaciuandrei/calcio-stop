@@ -9,6 +9,10 @@ import Dashboard from './components/Dashboard';
 import KitTypesPage from './components/kittypes/KitTypesPage';
 import NamesetsPage from './components/namesets/NamesetsPage';
 import ProductsPage from './components/products/ProductsPage';
+import PublicBadgesPage from './components/public/PublicBadgesPage';
+import PublicDashboard from './components/public/PublicDashboard';
+import { PublicLayout } from './components/public/PublicLayout';
+import PublicProductsPage from './components/public/PublicProductsPage';
 import SalesPage from './components/sales/SalesPage';
 import SettingsPopup from './components/shared/SettingsPopup';
 import TeamsPage from './components/teams/TeamsPage';
@@ -39,61 +43,95 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      <AuthGuard>
-        <div className="app-container">
-          <nav className="navbar">
-            {appBarOrder.map((itemId) => {
-              const item = NAVIGATION_ITEMS[itemId as keyof typeof NAVIGATION_ITEMS];
-              if (!item) return null;
+        <Routes>
+          {/* Public routes - no authentication required (only products and badges) */}
+          <Route
+            path="/public"
+            element={
+              <PublicLayout>
+                <PublicDashboard />
+              </PublicLayout>
+            }
+          />
+          <Route
+            path="/public/products"
+            element={
+              <PublicLayout>
+                <PublicProductsPage />
+              </PublicLayout>
+            }
+          />
+          <Route
+            path="/public/badges"
+            element={
+              <PublicLayout>
+                <PublicBadgesPage />
+              </PublicLayout>
+            }
+          />
 
-              return (
-                <NavLink key={itemId} to={item.path} end={item.end}>
-                  {item.label}
-                </NavLink>
-              );
-            })}
-            <div className="navbar-actions">
-              <button
-                className="settings-button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  openSettings();
-                }}
-                title="Customize Layout"
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="12" cy="12" r="3" />
-                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                </svg>
-              </button>
-              <UserMenu />
-            </div>
-          </nav>
+        {/* Protected routes - authentication required */}
+        <Route
+          path="/*"
+          element={
+            <AuthGuard>
+              <div className="app-container">
+                <nav className="navbar">
+                  {appBarOrder.map((itemId) => {
+                    const item = NAVIGATION_ITEMS[itemId as keyof typeof NAVIGATION_ITEMS];
+                    if (!item) return null;
 
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/products" element={<ProductsPage />} />
-            <Route path="/sales" element={<SalesPage />} />
-            <Route path="/namesets" element={<NamesetsPage />} />
-            <Route path="/teams" element={<TeamsPage />} />
-            <Route path="/badges" element={<BadgesPage />} />
-            <Route path="/kittypes" element={<KitTypesPage />} />
-            <Route path="/settings" element={<SystemSettings />} />
-          </Routes>
+                    return (
+                      <NavLink key={itemId} to={item.path} end={item.end}>
+                        {item.label}
+                      </NavLink>
+                    );
+                  })}
+                  <div className="navbar-actions">
+                    <button
+                      className="settings-button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        openSettings();
+                      }}
+                      title="Customize Layout"
+                    >
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <circle cx="12" cy="12" r="3" />
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                      </svg>
+                    </button>
+                    <UserMenu />
+                  </div>
+                </nav>
 
-          <SettingsPopup isOpen={isSettingsOpen} onClose={closeSettings} />
-        </div>
-      </AuthGuard>
+                <Routes>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/products" element={<ProductsPage />} />
+                  <Route path="/sales" element={<SalesPage />} />
+                  <Route path="/namesets" element={<NamesetsPage />} />
+                  <Route path="/teams" element={<TeamsPage />} />
+                  <Route path="/badges" element={<BadgesPage />} />
+                  <Route path="/kittypes" element={<KitTypesPage />} />
+                  <Route path="/settings" element={<SystemSettings />} />
+                </Routes>
+
+                <SettingsPopup isOpen={isSettingsOpen} onClose={closeSettings} />
+              </div>
+            </AuthGuard>
+          }
+        />
+      </Routes>
     </Router>
   );
 };

@@ -9,9 +9,17 @@ interface Props {
   onDelete?: (id: string) => void;
   onArchive: (id: string) => void;
   searchTerm?: string;
+  isReadOnly?: boolean;
 }
 
-const NamesetTableList: React.FC<Props> = ({ namesets, onEdit, onDelete, onArchive, searchTerm = '' }) => {
+const NamesetTableList: React.FC<Props> = ({
+  namesets,
+  onEdit,
+  onDelete,
+  onArchive,
+  searchTerm = '',
+  isReadOnly = false,
+}) => {
   // Get data from stores
   const kitTypes = useKitTypesList();
   const archivedKitTypes = useArchivedKitTypes();
@@ -41,7 +49,7 @@ const NamesetTableList: React.FC<Props> = ({ namesets, onEdit, onDelete, onArchi
           <th>Season</th>
           <th>Kit Type</th>
           <th>Quantity</th>
-          <th>Actions</th>
+          {!isReadOnly && <th>Actions</th>}
         </tr>
       </thead>
       <tbody>
@@ -52,19 +60,21 @@ const NamesetTableList: React.FC<Props> = ({ namesets, onEdit, onDelete, onArchi
             <td>{n.season}</td>
             <td>{getKitTypeInfo(n.kitTypeId, kitTypes, archivedKitTypes)}</td>
             <td className="price-display">{n.quantity}</td>
-            <td>
-              <button onClick={() => onEdit(n)} className="btn btn-icon btn-success" title="Edit">
-                ✏️
-              </button>
-              <button onClick={() => onArchive(n.id)} className="btn btn-icon btn-secondary" title="Archive">
-                📦
-              </button>
-              {onDelete && (
-                <button onClick={() => onDelete(n.id)} className="btn btn-icon btn-danger" title="Delete">
-                  🗑️
+            {!isReadOnly && (
+              <td>
+                <button onClick={() => onEdit(n)} className="btn btn-icon btn-success" title="Edit">
+                  ✏️
                 </button>
-              )}
-            </td>
+                <button onClick={() => onArchive(n.id)} className="btn btn-icon btn-secondary" title="Archive">
+                  📦
+                </button>
+                {onDelete && (
+                  <button onClick={() => onDelete(n.id)} className="btn btn-icon btn-danger" title="Delete">
+                    🗑️
+                  </button>
+                )}
+              </td>
+            )}
           </tr>
         ))}
       </tbody>

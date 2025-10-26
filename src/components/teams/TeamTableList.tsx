@@ -6,9 +6,10 @@ interface Props {
   onEdit: (team: Team) => void;
   onArchive: (id: string) => void;
   searchTerm?: string;
+  isReadOnly?: boolean;
 }
 
-const TeamTableList: React.FC<Props> = ({ teams, onEdit, onArchive, searchTerm = '' }) => {
+const TeamTableList: React.FC<Props> = ({ teams, onEdit, onArchive, searchTerm = '', isReadOnly = false }) => {
   // Filter teams based on search term
   const filteredTeams = teams.filter((team) => team.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
@@ -25,21 +26,23 @@ const TeamTableList: React.FC<Props> = ({ teams, onEdit, onArchive, searchTerm =
       <thead>
         <tr>
           <th>Team Name</th>
-          <th>Actions</th>
+          {!isReadOnly && <th>Actions</th>}
         </tr>
       </thead>
       <tbody>
         {filteredTeams.map((t) => (
           <tr key={t.id}>
             <td>{t.name}</td>
-            <td>
-              <button onClick={() => onEdit(t)} className="btn btn-icon btn-success" title="Edit">
-                ✏️
-              </button>
-              <button onClick={() => onArchive(t.id)} className="btn btn-icon btn-secondary" title="Archive">
-                📦
-              </button>
-            </td>
+            {!isReadOnly && (
+              <td>
+                <button onClick={() => onEdit(t)} className="btn btn-icon btn-success" title="Edit">
+                  ✏️
+                </button>
+                <button onClick={() => onArchive(t.id)} className="btn btn-icon btn-secondary" title="Archive">
+                  📦
+                </button>
+              </td>
+            )}
           </tr>
         ))}
       </tbody>

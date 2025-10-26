@@ -5,43 +5,70 @@ import styles from '../shared/TableListCard.module.css';
 import EditTeamModal from './EditTeamModal';
 import TeamTableList from './TeamTableList';
 
-const TeamsTableListCard: React.FC = () => {
+interface TeamsTableListCardProps {
+  teams?: Team[];
+  isReadOnly?: boolean;
+  showActions?: boolean;
+  limit?: number;
+}
+
+const TeamsTableListCard: React.FC<TeamsTableListCardProps> = ({
+  teams: propTeams,
+  isReadOnly = false,
+  showActions = true,
+  limit,
+}) => {
   // Get data and actions from stores
-  const teams = useTeamsList();
+  const storeTeams = useTeamsList();
   const { archiveTeam } = useTeamsActions();
   const teamsSearchTerm = useTeamsSearch();
   const { setSearchTerm, clearSearchTerm } = useSearchActions();
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
   const [isTeamsExpanded, setIsTeamsExpanded] = useState(true);
 
+  // Use prop teams if provided, otherwise use store teams
+  const teams = propTeams || storeTeams;
+  const displayTeams = limit ? teams.slice(0, limit) : teams;
+
   const handleArchive = (id: string) => {
-    archiveTeam(id);
-    clearSearchTerm('teams'); // Clear search after action
+    if (!isReadOnly) {
+      archiveTeam(id);
+      clearSearchTerm('teams'); // Clear search after action
+    }
   };
 
   const handleEditClick = (t: Team) => {
-    setEditingTeam(t);
+    if (!isReadOnly) {
+      setEditingTeam(t);
+    }
   };
 
   return (
     <>
       <div className="card">
-        {teams.length > 0 ? (
+        {displayTeams.length > 0 ? (
           <>
             <div
-              className={`card-header mini-header mini-header-orange ${styles.expandableHeader}`}
-              onClick={() => setIsTeamsExpanded(!isTeamsExpanded)}
+              className={`card-header mini-header mini-header-orange ${!isReadOnly ? styles.expandableHeader : ''}`}
+              onClick={!isReadOnly ? () => setIsTeamsExpanded(!isTeamsExpanded) : undefined}
             >
-              <span>Active Teams ({teams.length})</span>
-              <span className={`${styles.expandIcon} ${isTeamsExpanded ? styles.expanded : styles.collapsed}`}>▼</span>
+              <span>
+                Active Teams ({displayTeams.length}
+                {limit ? ` (showing ${limit})` : ''})
+              </span>
+              {!isReadOnly && (
+                <span className={`${styles.expandIcon} ${isTeamsExpanded ? styles.expanded : styles.collapsed}`}>
+                  ▼
+                </span>
+              )}
             </div>
-            {!isTeamsExpanded && (
-              <div className={styles.collapsedContent}>There are {teams.length} teams available.</div>
+            {!isReadOnly && !isTeamsExpanded && (
+              <div className={styles.collapsedContent}>There are {displayTeams.length} teams available.</div>
             )}
-            {isTeamsExpanded && (
+            {(isReadOnly || isTeamsExpanded) && (
               <>
                 <h3 className="card-section-header">Active Teams List</h3>
-                {teams.length >= 2 && (
+                {displayTeams.length >= 2 && !isReadOnly && (
                   <div className={styles.searchContainer}>
                     <input
                       type="text"
@@ -54,10 +81,11 @@ const TeamsTableListCard: React.FC = () => {
                 )}
                 <div className={styles.tableContainer}>
                   <TeamTableList
-                    teams={teams}
+                    teams={displayTeams}
                     onEdit={handleEditClick}
                     onArchive={handleArchive}
                     searchTerm={teamsSearchTerm}
+                    isReadOnly={isReadOnly}
                   />
                 </div>
               </>

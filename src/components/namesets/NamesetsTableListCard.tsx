@@ -5,44 +5,69 @@ import styles from '../shared/TableListCard.module.css';
 import EditNamesetModal from './EditNamesetModal';
 import NamesetTableList from './NamesetTableList';
 
-const NamesetsTableListCard: React.FC = () => {
+interface NamesetsTableListCardProps {
+  namesets?: Nameset[];
+  isReadOnly?: boolean;
+  showActions?: boolean;
+  limit?: number;
+}
+
+const NamesetsTableListCard: React.FC<NamesetsTableListCardProps> = ({
+  namesets: propNamesets,
+  isReadOnly = false,
+  showActions = true,
+  limit,
+}) => {
   // Get data and actions from stores
-  const namesets = useNamesetsList();
+  const storeNamesets = useNamesetsList();
   const { archiveNameset } = useNamesetsActions();
   const [editingNameset, setEditingNameset] = useState<Nameset | null>(null);
   const [isNamesetsExpanded, setIsNamesetsExpanded] = useState(true);
   const [namesetsSearchTerm, setNamesetsSearchTerm] = useState('');
 
+  // Use prop namesets if provided, otherwise use store namesets
+  const namesets = propNamesets || storeNamesets;
+  const displayNamesets = limit ? namesets.slice(0, limit) : namesets;
+
   const handleArchive = (id: string) => {
-    archiveNameset(id);
-    setNamesetsSearchTerm(''); // Clear search after action
+    if (!isReadOnly) {
+      archiveNameset(id);
+      setNamesetsSearchTerm(''); // Clear search after action
+    }
   };
 
   const handleEditClick = (n: Nameset) => {
-    setEditingNameset(n);
+    if (!isReadOnly) {
+      setEditingNameset(n);
+    }
   };
 
   return (
     <>
       <div className="card">
-        {namesets.length > 0 ? (
+        {displayNamesets.length > 0 ? (
           <>
             <div
-              className={`card-header mini-header mini-header-orange ${styles.expandableHeader}`}
-              onClick={() => setIsNamesetsExpanded(!isNamesetsExpanded)}
+              className={`card-header mini-header mini-header-orange ${!isReadOnly ? styles.expandableHeader : ''}`}
+              onClick={!isReadOnly ? () => setIsNamesetsExpanded(!isNamesetsExpanded) : undefined}
             >
-              <span>Active Namesets ({namesets.length})</span>
-              <span className={`${styles.expandIcon} ${isNamesetsExpanded ? styles.expanded : styles.collapsed}`}>
-                ▼
+              <span>
+                Active Namesets ({displayNamesets.length}
+                {limit ? ` (showing ${limit})` : ''})
               </span>
+              {!isReadOnly && (
+                <span className={`${styles.expandIcon} ${isNamesetsExpanded ? styles.expanded : styles.collapsed}`}>
+                  ▼
+                </span>
+              )}
             </div>
-            {!isNamesetsExpanded && (
-              <div className={styles.collapsedContent}>There are {namesets.length} namesets available.</div>
+            {!isReadOnly && !isNamesetsExpanded && (
+              <div className={styles.collapsedContent}>There are {displayNamesets.length} namesets available.</div>
             )}
-            {isNamesetsExpanded && (
+            {(isReadOnly || isNamesetsExpanded) && (
               <>
                 <h3 className="card-section-header">Active Namesets List</h3>
-                {namesets.length >= 2 && (
+                {displayNamesets.length >= 2 && !isReadOnly && (
                   <div className={styles.searchContainer}>
                     <input
                       type="text"
@@ -55,10 +80,11 @@ const NamesetsTableListCard: React.FC = () => {
                 )}
                 <div className={styles.tableContainer}>
                   <NamesetTableList
-                    namesets={namesets}
+                    namesets={displayNamesets}
                     onEdit={handleEditClick}
                     onArchive={handleArchive}
                     searchTerm={namesetsSearchTerm}
+                    isReadOnly={isReadOnly}
                   />
                 </div>
               </>

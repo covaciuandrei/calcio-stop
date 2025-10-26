@@ -7,9 +7,10 @@ interface Props {
   onEdit: (kitType: KitType) => void;
   onArchive: (id: string) => void;
   searchTerm?: string;
+  isReadOnly?: boolean;
 }
 
-const KitTypeTableList: React.FC<Props> = ({ kitTypes, onEdit, onArchive, searchTerm = '' }) => {
+const KitTypeTableList: React.FC<Props> = ({ kitTypes, onEdit, onArchive, searchTerm = '', isReadOnly = false }) => {
   // Sort kit types by creation date and filter based on search term
   const sortedKitTypes = useMemo(
     () => [...kitTypes].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
@@ -33,7 +34,7 @@ const KitTypeTableList: React.FC<Props> = ({ kitTypes, onEdit, onArchive, search
       <thead>
         <tr>
           <th>Kit Type Name</th>
-          <th>Actions</th>
+          {!isReadOnly && <th>Actions</th>}
         </tr>
       </thead>
       <tbody>
@@ -43,18 +44,20 @@ const KitTypeTableList: React.FC<Props> = ({ kitTypes, onEdit, onArchive, search
           return (
             <tr key={kt.id}>
               <td>{kt.name}</td>
-              <td>
-                {!isDefault && (
-                  <button onClick={() => onEdit(kt)} className="btn btn-icon btn-success" title="Edit">
-                    ✏️
-                  </button>
-                )}
-                {!isDefault && (
-                  <button onClick={() => onArchive(kt.id)} className="btn btn-icon btn-secondary" title="Archive">
-                    📦
-                  </button>
-                )}
-              </td>
+              {!isReadOnly && (
+                <td>
+                  {!isDefault && (
+                    <button onClick={() => onEdit(kt)} className="btn btn-icon btn-success" title="Edit">
+                      ✏️
+                    </button>
+                  )}
+                  {!isDefault && (
+                    <button onClick={() => onArchive(kt.id)} className="btn btn-icon btn-secondary" title="Archive">
+                      📦
+                    </button>
+                  )}
+                </td>
+              )}
             </tr>
           );
         })}

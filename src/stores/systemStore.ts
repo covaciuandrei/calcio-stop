@@ -18,7 +18,7 @@ export const useSystemStore = create<SystemState>()(
   devtools(
     (set, get) => ({
       // Initial state
-      registrationEnabled: true,
+      registrationEnabled: false, // Changed to false to disable registration by default
       isLoading: false,
       error: null,
 

@@ -5,43 +5,70 @@ import styles from '../shared/TableListCard.module.css';
 import BadgeTableList from './BadgeTableList';
 import EditBadgeModal from './EditBadgeModal';
 
-const BadgeTableListCard: React.FC = () => {
+interface BadgeTableListCardProps {
+  badges?: Badge[];
+  isReadOnly?: boolean;
+  showActions?: boolean;
+  limit?: number;
+}
+
+const BadgeTableListCard: React.FC<BadgeTableListCardProps> = ({
+  badges: propBadges,
+  isReadOnly = false,
+  showActions = true,
+  limit,
+}) => {
   // Get data and actions from stores
-  const badges = useBadgesList();
+  const storeBadges = useBadgesList();
   const { archiveBadge } = useBadgesActions();
   const badgesSearchTerm = useBadgesSearch();
   const { setSearchTerm, clearSearchTerm } = useSearchActions();
   const [editingBadge, setEditingBadge] = useState<Badge | null>(null);
   const [isBadgesExpanded, setIsBadgesExpanded] = useState(true);
 
+  // Use prop badges if provided, otherwise use store badges
+  const badges = propBadges || storeBadges;
+  const displayBadges = limit ? badges.slice(0, limit) : badges;
+
   const handleArchive = (id: string) => {
-    archiveBadge(id);
-    clearSearchTerm('badges'); // Clear search after action
+    if (!isReadOnly) {
+      archiveBadge(id);
+      clearSearchTerm('badges'); // Clear search after action
+    }
   };
 
   const handleEditClick = (b: Badge) => {
-    setEditingBadge(b);
+    if (!isReadOnly) {
+      setEditingBadge(b);
+    }
   };
 
   return (
     <>
       <div className="card">
-        {badges.length > 0 ? (
+        {displayBadges.length > 0 ? (
           <>
             <div
-              className={`card-header mini-header mini-header-orange ${styles.expandableHeader}`}
-              onClick={() => setIsBadgesExpanded(!isBadgesExpanded)}
+              className={`card-header mini-header mini-header-orange ${!isReadOnly ? styles.expandableHeader : ''}`}
+              onClick={!isReadOnly ? () => setIsBadgesExpanded(!isBadgesExpanded) : undefined}
             >
-              <span>Active Badges ({badges.length})</span>
-              <span className={`${styles.expandIcon} ${isBadgesExpanded ? styles.expanded : styles.collapsed}`}>▼</span>
+              <span>
+                Active Badges ({displayBadges.length}
+                {limit && badges.length > limit ? ` (showing ${limit})` : ''})
+              </span>
+              {!isReadOnly && (
+                <span className={`${styles.expandIcon} ${isBadgesExpanded ? styles.expanded : styles.collapsed}`}>
+                  ▼
+                </span>
+              )}
             </div>
-            {!isBadgesExpanded && (
-              <div className={styles.collapsedContent}>There are {badges.length} badges available.</div>
+            {!isReadOnly && !isBadgesExpanded && (
+              <div className={styles.collapsedContent}>There are {displayBadges.length} badges available.</div>
             )}
-            {isBadgesExpanded && (
+            {(isReadOnly || isBadgesExpanded) && (
               <>
                 <h3 className="card-section-header">Active Badges List</h3>
-                {badges.length >= 2 && (
+                {displayBadges.length >= 2 && !isReadOnly && (
                   <div className={styles.searchContainer}>
                     <input
                       type="text"
@@ -54,10 +81,11 @@ const BadgeTableListCard: React.FC = () => {
                 )}
                 <div className={styles.tableContainer}>
                   <BadgeTableList
-                    badges={badges}
+                    badges={displayBadges}
                     onEdit={handleEditClick}
                     onArchive={handleArchive}
                     searchTerm={badgesSearchTerm}
+                    isReadOnly={isReadOnly}
                   />
                 </div>
               </>

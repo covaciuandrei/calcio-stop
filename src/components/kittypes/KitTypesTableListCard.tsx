@@ -5,45 +5,70 @@ import styles from '../shared/TableListCard.module.css';
 import EditKitTypeModal from './EditKitTypeModal';
 import KitTypeTableList from './KitTypeTableList';
 
-const KitTypesTableListCard: React.FC = () => {
+interface KitTypesTableListCardProps {
+  kitTypes?: KitType[];
+  isReadOnly?: boolean;
+  showActions?: boolean;
+  limit?: number;
+}
+
+const KitTypesTableListCard: React.FC<KitTypesTableListCardProps> = ({
+  kitTypes: propKitTypes,
+  isReadOnly = false,
+  showActions = true,
+  limit,
+}) => {
   // Get data and actions from stores
-  const kitTypes = useKitTypesList();
+  const storeKitTypes = useKitTypesList();
   const { archiveKitType } = useKitTypesActions();
   const kitTypesSearchTerm = useKitTypesSearch();
   const { setSearchTerm, clearSearchTerm } = useSearchActions();
   const [editingKitType, setEditingKitType] = useState<KitType | null>(null);
   const [isKitTypesExpanded, setIsKitTypesExpanded] = useState(true);
 
+  // Use prop kitTypes if provided, otherwise use store kitTypes
+  const kitTypes = propKitTypes || storeKitTypes;
+  const displayKitTypes = limit ? kitTypes.slice(0, limit) : kitTypes;
+
   const handleArchive = (id: string) => {
-    archiveKitType(id);
-    clearSearchTerm('kitTypes'); // Clear search after action
+    if (!isReadOnly) {
+      archiveKitType(id);
+      clearSearchTerm('kitTypes'); // Clear search after action
+    }
   };
 
   const handleEditClick = (kt: KitType) => {
-    setEditingKitType(kt);
+    if (!isReadOnly) {
+      setEditingKitType(kt);
+    }
   };
 
   return (
     <>
       <div className="card">
-        {kitTypes.length > 0 ? (
+        {displayKitTypes.length > 0 ? (
           <>
             <div
-              className={`card-header mini-header mini-header-orange ${styles.expandableHeader}`}
-              onClick={() => setIsKitTypesExpanded(!isKitTypesExpanded)}
+              className={`card-header mini-header mini-header-orange ${!isReadOnly ? styles.expandableHeader : ''}`}
+              onClick={!isReadOnly ? () => setIsKitTypesExpanded(!isKitTypesExpanded) : undefined}
             >
-              <span>Active Kit Types ({kitTypes.length})</span>
-              <span className={`${styles.expandIcon} ${isKitTypesExpanded ? styles.expanded : styles.collapsed}`}>
-                ▼
+              <span>
+                Active Kit Types ({displayKitTypes.length}
+                {limit ? ` (showing ${limit})` : ''})
               </span>
+              {!isReadOnly && (
+                <span className={`${styles.expandIcon} ${isKitTypesExpanded ? styles.expanded : styles.collapsed}`}>
+                  ▼
+                </span>
+              )}
             </div>
-            {!isKitTypesExpanded && (
-              <div className={styles.collapsedContent}>There are {kitTypes.length} kit types available.</div>
+            {!isReadOnly && !isKitTypesExpanded && (
+              <div className={styles.collapsedContent}>There are {displayKitTypes.length} kit types available.</div>
             )}
-            {isKitTypesExpanded && (
+            {(isReadOnly || isKitTypesExpanded) && (
               <>
                 <h3 className="card-section-header">Active Kit Types List</h3>
-                {kitTypes.length >= 2 && (
+                {displayKitTypes.length >= 2 && !isReadOnly && (
                   <div className={styles.searchContainer}>
                     <input
                       type="text"
@@ -56,10 +81,11 @@ const KitTypesTableListCard: React.FC = () => {
                 )}
                 <div className={styles.tableContainer}>
                   <KitTypeTableList
-                    kitTypes={kitTypes}
+                    kitTypes={displayKitTypes}
                     onEdit={handleEditClick}
                     onArchive={handleArchive}
                     searchTerm={kitTypesSearchTerm}
+                    isReadOnly={isReadOnly}
                   />
                 </div>
               </>

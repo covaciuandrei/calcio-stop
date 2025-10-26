@@ -1,5 +1,52 @@
 /* Component-specific styles not covered by design system */
 
+/* Public View Styles */
+.navbar-brand h2 {
+  margin: 0;
+  color: var(--primary-600);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.navbar-nav {
+  display: flex;
+  gap: var(--space-4);
+  margin-left: var(--space-6);
+}
+
+.public-badge {
+  background: var(--success-100);
+  color: var(--success-700);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid var(--success-200);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: var(--space-6);
+  margin-top: var(--space-6);
+}
+
+.dashboard-section h2 {
+  color: var(--gray-700);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: var(--space-4);
+  border-bottom: 2px solid var(--primary-200);
+  padding-bottom: var(--space-2);
+}
+
+.page-description {
+  color: var(--gray-600);
+  font-size: 1rem;
+  margin-bottom: var(--space-6);
+  line-height: 1.5;
+}
+
 /* Navbar Actions */
 .navbar-actions {
   display: flex;

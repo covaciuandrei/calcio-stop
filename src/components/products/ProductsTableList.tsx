@@ -17,9 +17,10 @@ interface Props {
   onEdit: (product: Product) => void;
   onDelete: (id: string) => void;
   searchTerm?: string;
+  isReadOnly?: boolean;
 }
 
-const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, searchTerm = '' }) => {
+const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, searchTerm = '', isReadOnly = false }) => {
   // Get data from stores
   const namesets = useNamesetsList();
   const archivedNamesets = useArchivedNamesets();
@@ -73,7 +74,7 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
           <th>Number</th>
           <th>Badge</th>
           <th>Price</th>
-          <th>Actions</th>
+          {!isReadOnly && <th>Actions</th>}
         </tr>
       </thead>
       <tbody>
@@ -130,14 +131,16 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
             </td>
             <td>{getBadgeInfo(p.badgeId, badges, archivedBadges)}</td>
             <td className="price-display">${p.price.toFixed ? p.price.toFixed(2) : p.price}</td>
-            <td>
-              <button onClick={() => onEdit(p)} className="btn btn-icon btn-success" title="Edit">
-                ✏️
-              </button>
-              <button onClick={() => onDelete(p.id)} className="btn btn-icon btn-secondary" title="Archive">
-                📦
-              </button>
-            </td>
+            {!isReadOnly && (
+              <td>
+                <button onClick={() => onEdit(p)} className="btn btn-icon btn-success" title="Edit">
+                  ✏️
+                </button>
+                <button onClick={() => onDelete(p.id)} className="btn btn-icon btn-secondary" title="Archive">
+                  📦
+                </button>
+              </td>
+            )}
           </tr>
         ))}
       </tbody>

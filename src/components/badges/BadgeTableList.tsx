@@ -7,9 +7,17 @@ interface Props {
   onDelete?: (id: string) => void;
   onArchive: (id: string) => void;
   searchTerm?: string;
+  isReadOnly?: boolean;
 }
 
-const BadgeTableList: React.FC<Props> = ({ badges, onEdit, onDelete, onArchive, searchTerm = '' }) => {
+const BadgeTableList: React.FC<Props> = ({
+  badges,
+  onEdit,
+  onDelete,
+  onArchive,
+  searchTerm = '',
+  isReadOnly = false,
+}) => {
   // Filter badges based on search term
   const filteredBadges = badges.filter(
     (badge) =>
@@ -32,7 +40,7 @@ const BadgeTableList: React.FC<Props> = ({ badges, onEdit, onDelete, onArchive, 
           <th>Name</th>
           <th>Season</th>
           <th>Quantity</th>
-          <th>Actions</th>
+          {!isReadOnly && <th>Actions</th>}
         </tr>
       </thead>
       <tbody>
@@ -41,19 +49,21 @@ const BadgeTableList: React.FC<Props> = ({ badges, onEdit, onDelete, onArchive, 
             <td>{b.name}</td>
             <td>{b.season}</td>
             <td className="price-display">{b.quantity}</td>
-            <td>
-              <button onClick={() => onEdit(b)} className="btn btn-icon btn-success" title="Edit">
-                ✏️
-              </button>
-              <button onClick={() => onArchive(b.id)} className="btn btn-icon btn-secondary" title="Archive">
-                📦
-              </button>
-              {onDelete && (
-                <button onClick={() => onDelete(b.id)} className="btn btn-icon btn-danger" title="Delete">
-                  🗑️
+            {!isReadOnly && (
+              <td>
+                <button onClick={() => onEdit(b)} className="btn btn-icon btn-success" title="Edit">
+                  ✏️
                 </button>
-              )}
-            </td>
+                <button onClick={() => onArchive(b.id)} className="btn btn-icon btn-secondary" title="Archive">
+                  📦
+                </button>
+                {onDelete && (
+                  <button onClick={() => onDelete(b.id)} className="btn btn-icon btn-danger" title="Delete">
+                    🗑️
+                  </button>
+                )}
+              </td>
+            )}
           </tr>
         ))}
       </tbody>
