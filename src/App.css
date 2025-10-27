@@ -237,6 +237,45 @@
   border-color: #6ee7b7;
 }
 
+/* Product Image Preview in Tables */
+.product-image-preview {
+  text-align: center;
+  padding: var(--space-2);
+  width: 80px;
+}
+
+.product-thumbnail {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--gray-200);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.product-image-preview {
+  cursor: pointer;
+}
+
+.product-thumbnail:hover {
+  border-color: var(--color-primary);
+  transform: scale(1.05);
+}
+
+.no-image-placeholder {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--gray-100);
+  border: 2px dashed var(--gray-300);
+  border-radius: var(--radius-md);
+  font-size: 1.5rem;
+  color: var(--gray-400);
+}
+
 /* Table action buttons */
 table button {
   padding: var(--space-1) var(--space-2);

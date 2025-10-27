@@ -604,7 +604,20 @@ export async function createProduct(data) {
 export async function getProducts() {
   const { data, error } = await supabase
     .from('products')
-    .select('*')
+    .select(
+      `
+      *,
+      product_images (
+        id,
+        product_id,
+        image_url,
+        alt_text,
+        is_primary,
+        display_order,
+        created_at
+      )
+    `
+    )
     .is('archived_at', null)
     .order('created_at', { ascending: false });
 
@@ -622,18 +635,62 @@ export async function getProducts() {
     badgeId: item.badge_id,
     price: item.price,
     createdAt: item.created_at,
+    images: (item.product_images || []).map((img) => ({
+      id: img.id,
+      productId: img.product_id,
+      imageUrl: img.image_url,
+      altText: img.alt_text,
+      isPrimary: img.is_primary,
+      displayOrder: img.display_order,
+      createdAt: img.created_at,
+    })),
   }));
 }
 
 export async function getArchivedProducts() {
   const { data, error } = await supabase
     .from('products')
-    .select('*')
+    .select(
+      `
+      *,
+      product_images (
+        id,
+        product_id,
+        image_url,
+        alt_text,
+        is_primary,
+        display_order,
+        created_at
+      )
+    `
+    )
     .not('archived_at', 'is', null)
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return data || [];
+
+  // Map database response to frontend format
+  return (data || []).map((item) => ({
+    id: item.id,
+    name: item.name,
+    type: item.type,
+    sizes: item.sizes,
+    namesetId: item.nameset_id,
+    teamId: item.team_id,
+    kitTypeId: item.kit_type_id,
+    badgeId: item.badge_id,
+    price: item.price,
+    createdAt: item.created_at,
+    images: (item.product_images || []).map((img) => ({
+      id: img.id,
+      productId: img.product_id,
+      imageUrl: img.image_url,
+      altText: img.alt_text,
+      isPrimary: img.is_primary,
+      displayOrder: img.display_order,
+      createdAt: img.created_at,
+    })),
+  }));
 }
 
 export async function updateProduct(id, updates) {
@@ -665,7 +722,25 @@ export async function updateProduct(id, updates) {
     dbUpdates.price = parseFloat(updates.price);
   }
 
-  const { data, error } = await supabase.from('products').update(dbUpdates).eq('id', id).select().single();
+  const { data, error } = await supabase
+    .from('products')
+    .update(dbUpdates)
+    .eq('id', id)
+    .select(
+      `
+    *,
+    product_images (
+      id,
+      product_id,
+      image_url,
+      alt_text,
+      is_primary,
+      display_order,
+      created_at
+    )
+  `
+    )
+    .single();
 
   if (error) throw error;
 
@@ -681,6 +756,15 @@ export async function updateProduct(id, updates) {
     badgeId: data.badge_id,
     price: data.price,
     createdAt: data.created_at,
+    images: (data.product_images || []).map((img) => ({
+      id: img.id,
+      productId: img.product_id,
+      imageUrl: img.image_url,
+      altText: img.alt_text,
+      isPrimary: img.is_primary,
+      displayOrder: img.display_order,
+      createdAt: img.created_at,
+    })),
   };
 }
 

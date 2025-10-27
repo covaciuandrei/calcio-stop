@@ -84,6 +84,7 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
     <table>
       <thead>
         <tr>
+          <th>Image</th>
           <th>Team</th>
           <th>Notes</th>
           <th>Type</th>
@@ -105,6 +106,24 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
             onClick={() => handleProductClick(p.id)}
             style={{ cursor: 'pointer' }}
           >
+            <td
+              className="product-image-preview"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleProductClick(p.id);
+              }}
+              title="Click to view product details"
+            >
+              {p.images && p.images.length > 0 ? (
+                <img
+                  src={p.images.find((img) => img.isPrimary)?.imageUrl || p.images[0].imageUrl}
+                  alt={p.name || 'Product image'}
+                  className="product-thumbnail"
+                />
+              ) : (
+                <div className="no-image-placeholder">📷</div>
+              )}
+            </td>
             <td>
               {getTeamInfo(p.teamId, teams, archivedTeams)}
               {isOutOfStock(p) && (

@@ -93,6 +93,15 @@ const ProductDetailPage: React.FC = () => {
     }
   };
 
+  const handleEditClose = () => {
+    setIsEditing(false);
+    // Refresh the product data after editing
+    if (id) {
+      const foundProduct = activeProducts.find((p) => p.id === id) || archivedProducts.find((p) => p.id === id);
+      setProduct(foundProduct || null);
+    }
+  };
+
   return (
     <div className={`product-detail-page ${isPublicRoute ? 'public-mode' : ''}`}>
       {/* Header */}
@@ -199,7 +208,7 @@ const ProductDetailPage: React.FC = () => {
       </div>
 
       {/* Edit Modal */}
-      {isEditing && <EditProductModal editingProduct={product} setEditingProduct={() => setIsEditing(false)} />}
+      {isEditing && <EditProductModal editingProduct={product} setEditingProduct={handleEditClose} />}
     </div>
   );
 };
