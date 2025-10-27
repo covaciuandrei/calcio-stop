@@ -1,4 +1,6 @@
 import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useBadgeImagesMap } from '../../hooks/useBadgeImages';
 import { Badge } from '../../types';
 
 interface Props {
@@ -18,9 +20,24 @@ const BadgeTableList: React.FC<Props> = ({
   searchTerm = '',
   isReadOnly = false,
 }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Check if we're in public context
+  const isPublicRoute = location.pathname.startsWith('/public');
+
+  // Get badge images for all badges
+  const badgeIds = badges.map((badge) => badge.id);
+  const { imagesMap } = useBadgeImagesMap(badgeIds);
+
   // Check if badge is out of stock
   const isOutOfStock = (badge: { quantity: number }) => {
     return badge.quantity === 0;
+  };
+
+  // Handle badge row click
+  const handleBadgeClick = (badgeId: string) => {
+    navigate(isPublicRoute ? `/public/badges/${badgeId}` : `/badges/${badgeId}`);
   };
 
   // Filter badges based on search term
@@ -42,38 +59,65 @@ const BadgeTableList: React.FC<Props> = ({
     <table>
       <thead>
         <tr>
+          <th>Image</th>
           <th>Name</th>
           <th>Season</th>
           <th>Quantity</th>
+          <th>Price</th>
           {!isReadOnly && <th>Actions</th>}
         </tr>
       </thead>
       <tbody>
-        {filteredBadges.map((b) => (
-          <tr key={b.id} className={isOutOfStock(b) ? 'out-of-stock-row' : ''}>
-            <td>
-              {b.name}
-              {isOutOfStock(b) && <div className="out-of-stock-badge">OUT OF STOCK</div>}
-            </td>
-            <td>{b.season}</td>
-            <td className="price-display">{b.quantity}</td>
-            {!isReadOnly && (
-              <td>
-                <button onClick={() => onEdit(b)} className="btn btn-icon btn-success" title="Edit">
-                  ✏️
-                </button>
-                <button onClick={() => onArchive(b.id)} className="btn btn-icon btn-secondary" title="Archive">
-                  📦
-                </button>
-                {onDelete && (
-                  <button onClick={() => onDelete(b.id)} className="btn btn-icon btn-danger" title="Delete">
-                    🗑️
-                  </button>
+        {filteredBadges.map((b) => {
+          const badgeImages = imagesMap[b.id] || [];
+          const primaryImage = badgeImages.find((img) => img.isPrimary) || badgeImages[0];
+
+          return (
+            <tr
+              key={b.id}
+              className={`badge-row ${isOutOfStock(b) ? 'out-of-stock-row' : ''}`}
+              onClick={() => handleBadgeClick(b.id)}
+              style={{ cursor: 'pointer' }}
+            >
+              <td
+                className="badge-image-preview"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleBadgeClick(b.id);
+                }}
+                title="Click to view badge details"
+              >
+                {primaryImage ? (
+                  <img src={primaryImage.imageUrl} alt={b.name || 'Badge image'} className="badge-thumbnail" />
+                ) : (
+                  <div className="no-image-placeholder">📷</div>
                 )}
               </td>
-            )}
-          </tr>
-        ))}
+              <td>
+                {b.name}
+                {isOutOfStock(b) && <div className="out-of-stock-badge">OUT OF STOCK</div>}
+              </td>
+              <td>{b.season}</td>
+              <td className="price-display">{b.quantity}</td>
+              <td className="price-display">${b.price.toFixed(2)}</td>
+              {!isReadOnly && (
+                <td onClick={(e) => e.stopPropagation()}>
+                  <button onClick={() => onEdit(b)} className="btn btn-icon btn-success" title="Edit">
+                    ✏️
+                  </button>
+                  <button onClick={() => onArchive(b.id)} className="btn btn-icon btn-secondary" title="Archive">
+                    📦
+                  </button>
+                  {onDelete && (
+                    <button onClick={() => onDelete(b.id)} className="btn btn-icon btn-danger" title="Delete">
+                      🗑️
+                    </button>
+                  )}
+                </td>
+              )}
+            </tr>
+          );
+        })}
       </tbody>
     </table>
   );

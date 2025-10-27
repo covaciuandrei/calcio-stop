@@ -4,6 +4,7 @@ import './App.css';
 import { SystemSettings } from './components/admin/SystemSettings';
 import { AuthGuard } from './components/auth/AuthGuard';
 import { UserMenu } from './components/auth/UserMenu';
+import BadgeDetailPage from './components/badges/BadgeDetailPage';
 import BadgesPage from './components/badges/BadgesPage';
 import Dashboard from './components/Dashboard';
 import KitTypesPage from './components/kittypes/KitTypesPage';
@@ -78,6 +79,14 @@ const App: React.FC = () => {
             </PublicLayout>
           }
         />
+        <Route
+          path="/public/badges/:id"
+          element={
+            <PublicLayout>
+              <BadgeDetailPage />
+            </PublicLayout>
+          }
+        />
 
         {/* Protected routes - authentication required */}
         <Route
@@ -132,6 +141,7 @@ const App: React.FC = () => {
                   <Route path="/namesets" element={<NamesetsPage />} />
                   <Route path="/teams" element={<TeamsPage />} />
                   <Route path="/badges" element={<BadgesPage />} />
+                  <Route path="/badges/:id" element={<BadgeDetailPage />} />
                   <Route path="/kittypes" element={<KitTypesPage />} />
                   <Route path="/settings" element={<SystemSettings />} />
                 </Routes>

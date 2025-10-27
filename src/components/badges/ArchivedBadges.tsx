@@ -1,4 +1,6 @@
 import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useBadgeImagesMap } from '../../hooks/useBadgeImages';
 import { useBadgesActions, useBadgesStore } from '../../stores';
 import { Badge } from '../../types';
 
@@ -12,6 +14,20 @@ const ArchivedBadges: React.FC<Props> = ({ archivedBadges, searchTerm = '', onCl
   // Get store actions and state
   const { restoreBadge, deleteBadge } = useBadgesActions();
   const { error, clearError } = useBadgesStore();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Check if we're in public context
+  const isPublicRoute = location.pathname.startsWith('/public');
+
+  // Get badge images for all archived badges
+  const badgeIds = archivedBadges.map((badge) => badge.id);
+  const { imagesMap } = useBadgeImagesMap(badgeIds);
+
+  // Handle badge row click
+  const handleBadgeClick = (badgeId: string) => {
+    navigate(isPublicRoute ? `/public/badges/${badgeId}` : `/badges/${badgeId}`);
+  };
   // Filter badges based on search term
   const filteredBadges = archivedBadges.filter(
     (badge) =>
@@ -70,28 +86,50 @@ const ArchivedBadges: React.FC<Props> = ({ archivedBadges, searchTerm = '', onCl
       <table>
         <thead>
           <tr>
+            <th>Image</th>
             <th>Name</th>
             <th>Season</th>
             <th>Quantity</th>
+            <th>Price</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {filteredBadges.map((b) => (
-            <tr key={b.id}>
-              <td>{b.name}</td>
-              <td>{b.season}</td>
-              <td className="price-display">{b.quantity}</td>
-              <td>
-                <button onClick={() => handleRestore(b.id)} className="btn btn-icon btn-success" title="Restore">
-                  ↩️
-                </button>
-                <button onClick={() => handleDelete(b.id)} className="btn btn-icon btn-danger" title="Delete Forever">
-                  🗑️
-                </button>
-              </td>
-            </tr>
-          ))}
+          {filteredBadges.map((b) => {
+            const badgeImages = imagesMap[b.id] || [];
+            const primaryImage = badgeImages.find((img) => img.isPrimary) || badgeImages[0];
+
+            return (
+              <tr key={b.id} className="badge-row" onClick={() => handleBadgeClick(b.id)} style={{ cursor: 'pointer' }}>
+                <td
+                  className="badge-image-preview"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleBadgeClick(b.id);
+                  }}
+                  title="Click to view badge details"
+                >
+                  {primaryImage ? (
+                    <img src={primaryImage.imageUrl} alt={b.name || 'Badge image'} className="badge-thumbnail" />
+                  ) : (
+                    <div className="no-image-placeholder">📷</div>
+                  )}
+                </td>
+                <td>{b.name}</td>
+                <td>{b.season}</td>
+                <td className="price-display">{b.quantity}</td>
+                <td className="price-display">${b.price.toFixed(2)}</td>
+                <td onClick={(e) => e.stopPropagation()}>
+                  <button onClick={() => handleRestore(b.id)} className="btn btn-icon btn-success" title="Restore">
+                    ↩️
+                  </button>
+                  <button onClick={() => handleDelete(b.id)} className="btn btn-icon btn-danger" title="Delete Forever">
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

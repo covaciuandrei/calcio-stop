@@ -15,6 +15,7 @@ const EditBadgeModal: React.FC<Props> = ({ editingBadge, setEditingBadge }) => {
   const [name, setName] = useState(editingBadge?.name || '');
   const [season, setSeason] = useState(editingBadge?.season || '2025/2026');
   const [quantity, setQuantity] = useState<number | ''>(editingBadge?.quantity || '');
+  const [price, setPrice] = useState<number | ''>(editingBadge?.price || '');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // Update state when editingBadge changes
@@ -23,6 +24,7 @@ const EditBadgeModal: React.FC<Props> = ({ editingBadge, setEditingBadge }) => {
       setName(editingBadge.name);
       setSeason(editingBadge.season);
       setQuantity(editingBadge.quantity);
+      setPrice(editingBadge.price);
       setErrors({});
     }
   }, [editingBadge]);
@@ -36,6 +38,9 @@ const EditBadgeModal: React.FC<Props> = ({ editingBadge, setEditingBadge }) => {
     }
     if (quantity === '' || quantity < 0) {
       newErrors.quantity = 'Quantity must be 0 or greater';
+    }
+    if (price === '' || price < 0) {
+      newErrors.price = 'Price must be 0 or greater';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -51,6 +56,7 @@ const EditBadgeModal: React.FC<Props> = ({ editingBadge, setEditingBadge }) => {
       name: name.trim(),
       season,
       quantity: Number(quantity),
+      price: Number(price),
     });
     setEditingBadge(null);
   };
@@ -108,6 +114,25 @@ const EditBadgeModal: React.FC<Props> = ({ editingBadge, setEditingBadge }) => {
               />
             </label>
             {errors.quantity && <div className="error-message">{errors.quantity}</div>}
+          </div>
+          <div className={`form-group ${errors.price ? 'has-error' : ''}`}>
+            <label>
+              Price:
+              <input
+                type="number"
+                min={0}
+                step={0.01}
+                value={price}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setPrice(val === '' ? '' : parseFloat(val));
+                  if (errors.price) {
+                    setErrors((prev) => ({ ...prev, price: '' }));
+                  }
+                }}
+              />
+            </label>
+            {errors.price && <div className="error-message">{errors.price}</div>}
           </div>
 
           <div className="modal-buttons">

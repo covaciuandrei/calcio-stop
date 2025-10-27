@@ -439,6 +439,31 @@ table .btn {
   transform: translateY(-0.1px);
 }
 
+/* Badge Name Link */
+.badge-name-link {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  text-decoration: none;
+  cursor: pointer;
+  font-size: inherit;
+  font-weight: inherit;
+  padding: 0;
+  text-align: left;
+  transition: color 0.2s ease;
+}
+
+.badge-name-link:hover {
+  color: var(--color-primary-dark);
+  text-decoration: underline;
+}
+
+.badge-name-link:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--border-radius-sm);
+}
+
 .navbar a {
   color: var(--gray-700);
   text-decoration: none;
@@ -984,4 +1009,55 @@ textarea:invalid:focus {
 
 .validation-message.error::before {
   content: '❌';
+}
+
+/* Badge Image Styles (matching product image styles) */
+.badge-image-preview {
+  width: 60px;
+  height: 60px;
+  padding: var(--space-1);
+  text-align: center;
+  vertical-align: middle;
+}
+
+.badge-thumbnail {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-border);
+  transition: transform 0.2s ease;
+}
+
+.badge-thumbnail:hover {
+  transform: scale(1.05);
+}
+
+.no-image-placeholder {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-background-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  font-size: 1.5rem;
+  color: var(--color-text-secondary);
+}
+
+.badge-row {
+  transition: background-color 0.2s ease;
+}
+
+.badge-row:hover {
+  background-color: var(--color-background-secondary);
+}
+
+.badge-row.out-of-stock-row {
+  opacity: 0.6;
+}
+
+.badge-row.out-of-stock-row:hover {
+  background-color: rgba(239, 68, 68, 0.05);
 }

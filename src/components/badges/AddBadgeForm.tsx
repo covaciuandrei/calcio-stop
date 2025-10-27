@@ -13,6 +13,7 @@ const AddBadgeForm: React.FC<Props> = ({ onAdd }) => {
   const [name, setName] = useState('');
   const [season, setSeason] = useState('2025/2026');
   const [quantity, setQuantity] = useState<number | ''>('');
+  const [price, setPrice] = useState<number | ''>('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -25,6 +26,9 @@ const AddBadgeForm: React.FC<Props> = ({ onAdd }) => {
     }
     if (quantity === '' || quantity < 0) {
       newErrors.quantity = 'Quantity must be 0 or greater';
+    }
+    if (price === '' || price < 0) {
+      newErrors.price = 'Price must be 0 or greater';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -39,6 +43,7 @@ const AddBadgeForm: React.FC<Props> = ({ onAdd }) => {
       name: name.trim(),
       season,
       quantity: Number(quantity),
+      price: Number(price),
       createdAt: new Date().toISOString(),
     };
 
@@ -47,6 +52,7 @@ const AddBadgeForm: React.FC<Props> = ({ onAdd }) => {
     setName('');
     setSeason('2025/2026');
     setQuantity('');
+    setPrice('');
   };
 
   return (
@@ -92,6 +98,23 @@ const AddBadgeForm: React.FC<Props> = ({ onAdd }) => {
           }}
         />
         {errors.quantity && <div className="error-message">{errors.quantity}</div>}
+      </div>
+      <div className={`form-group ${errors.price ? 'has-error' : ''}`}>
+        <label>Price</label>
+        <input
+          type="number"
+          min={0}
+          step={0.01}
+          value={price}
+          onChange={(e) => {
+            const val = e.target.value;
+            setPrice(val === '' ? '' : parseFloat(val));
+            if (errors.price) {
+              setErrors((prev) => ({ ...prev, price: '' }));
+            }
+          }}
+        />
+        {errors.price && <div className="error-message">{errors.price}</div>}
       </div>
       <div className="form-button-container">
         <button type="submit" className="btn btn-success">

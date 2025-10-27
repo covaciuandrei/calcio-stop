@@ -67,7 +67,7 @@ const BadgeTableListCard: React.FC<BadgeTableListCardProps> = ({
             )}
             {(isReadOnly || isBadgesExpanded) && (
               <>
-                <h3 className="card-section-header">Active Badges List</h3>
+                <h3 className="card-section-header">Badges List</h3>
                 {displayBadges.length >= 2 && !isReadOnly && (
                   <div className={styles.searchContainer}>
                     <input

@@ -266,6 +266,7 @@ export async function createBadge(data) {
     name: data.name,
     season: data.season,
     quantity: data.quantity,
+    price: data.price || 0,
     created_at: data.createdAt || new Date().toISOString(),
     archived_at: null,
   };
@@ -280,6 +281,7 @@ export async function createBadge(data) {
     name: result.name,
     season: result.season,
     quantity: result.quantity,
+    price: result.price,
     createdAt: result.created_at,
   };
 }
@@ -299,6 +301,7 @@ export async function getBadges() {
     name: item.name,
     season: item.season,
     quantity: item.quantity,
+    price: item.price,
     createdAt: item.created_at,
   }));
 }
@@ -318,6 +321,7 @@ export async function getArchivedBadges() {
     name: item.name,
     season: item.season,
     quantity: item.quantity,
+    price: item.price,
     createdAt: item.created_at,
   }));
 }
@@ -328,6 +332,7 @@ export async function updateBadge(id, updates) {
   if (updates.name !== undefined) dbUpdates.name = updates.name;
   if (updates.season !== undefined) dbUpdates.season = updates.season;
   if (updates.quantity !== undefined) dbUpdates.quantity = updates.quantity;
+  if (updates.price !== undefined) dbUpdates.price = updates.price;
   if (updates.createdAt !== undefined) dbUpdates.created_at = updates.createdAt;
 
   const { data, error } = await supabase.from('badges').update(dbUpdates).eq('id', id).select().single();
@@ -340,6 +345,7 @@ export async function updateBadge(id, updates) {
     name: data.name,
     season: data.season,
     quantity: data.quantity,
+    price: data.price,
     createdAt: data.created_at,
   };
 }
@@ -382,6 +388,88 @@ export async function restoreBadge(id) {
 
   if (error) throw error;
   return data;
+}
+
+// ============================================================================
+// BADGE IMAGES CRUD OPERATIONS
+// ============================================================================
+
+export async function createBadgeImage(data) {
+  // Map frontend data to database schema
+  const dbData = {
+    badge_id: data.badgeId,
+    image_url: data.imageUrl,
+    alt_text: data.altText,
+    is_primary: data.isPrimary || false,
+    display_order: data.displayOrder || 0,
+    created_at: data.createdAt || new Date().toISOString(),
+  };
+
+  const { data: result, error } = await supabase.from('badge_images').insert([dbData]).select().single();
+
+  if (error) throw error;
+
+  // Map database response back to frontend format
+  return {
+    id: result.id,
+    badgeId: result.badge_id,
+    imageUrl: result.image_url,
+    altText: result.alt_text,
+    isPrimary: result.is_primary,
+    displayOrder: result.display_order,
+    createdAt: result.created_at,
+  };
+}
+
+export async function getBadgeImages(badgeId) {
+  const { data, error } = await supabase
+    .from('badge_images')
+    .select('*')
+    .eq('badge_id', badgeId)
+    .order('display_order', { ascending: true });
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return (data || []).map((item) => ({
+    id: item.id,
+    badgeId: item.badge_id,
+    imageUrl: item.image_url,
+    altText: item.alt_text,
+    isPrimary: item.is_primary,
+    displayOrder: item.display_order,
+    createdAt: item.created_at,
+  }));
+}
+
+export async function updateBadgeImage(id, updates) {
+  // Map frontend updates to database schema
+  const dbUpdates = {};
+  if (updates.imageUrl !== undefined) dbUpdates.image_url = updates.imageUrl;
+  if (updates.altText !== undefined) dbUpdates.alt_text = updates.altText;
+  if (updates.isPrimary !== undefined) dbUpdates.is_primary = updates.isPrimary;
+  if (updates.displayOrder !== undefined) dbUpdates.display_order = updates.displayOrder;
+
+  const { data, error } = await supabase.from('badge_images').update(dbUpdates).eq('id', id).select().single();
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return {
+    id: data.id,
+    badgeId: data.badge_id,
+    imageUrl: data.image_url,
+    altText: data.alt_text,
+    isPrimary: data.is_primary,
+    displayOrder: data.display_order,
+    createdAt: data.created_at,
+  };
+}
+
+export async function deleteBadgeImage(id) {
+  const { error } = await supabase.from('badge_images').delete().eq('id', id);
+
+  if (error) throw error;
 }
 
 // ============================================================================
