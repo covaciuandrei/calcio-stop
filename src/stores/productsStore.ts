@@ -30,6 +30,7 @@ export const productsSelectors = {
   getProductsByNameset: (state: ProductsState, namesetId: string) =>
     state.products.filter((p) => p.namesetId === namesetId),
   getAvailableProducts: (state: ProductsState) => state.products.filter((p) => p.sizes.some((s) => s.quantity > 0)),
+  getSoldOutProducts: (state: ProductsState) => state.products.filter((p) => p.sizes.every((s) => s.quantity === 0)),
   getTotalProducts: (state: ProductsState) => state.products.length,
   getTotalArchivedProducts: (state: ProductsState) => state.archivedProducts.length,
 };
@@ -221,6 +222,7 @@ export const useProductsStore = create<ProductsState>()(
 export const useProducts = () => useProductsStore();
 export const useProductsList = () => useProductsStore((state) => state.products);
 export const useArchivedProducts = () => useProductsStore((state) => state.archivedProducts);
+export const useSoldOutProducts = () => useProductsStore((state) => state.products);
 // Individual action hooks to avoid object recreation
 export const useAddProduct = () => useProductsStore((state) => state.addProduct);
 export const useUpdateProduct = () => useProductsStore((state) => state.updateProduct);

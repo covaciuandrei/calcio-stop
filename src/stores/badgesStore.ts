@@ -31,6 +31,7 @@ export const badgesSelectors = {
     state.badges.filter((b) => b.name.toLowerCase().includes(name.toLowerCase())),
   getBadgesBySeason: (state: BadgesState, season: string) => state.badges.filter((b) => b.season === season),
   getAvailableBadges: (state: BadgesState) => state.badges.filter((b) => b.quantity > 0),
+  getSoldOutBadges: (state: BadgesState) => state.badges.filter((b) => b.quantity === 0),
   getTotalBadges: (state: BadgesState) => state.badges.length,
   getTotalArchivedBadges: (state: BadgesState) => state.archivedBadges.length,
 };
@@ -186,6 +187,7 @@ export const useBadgesStore = create<BadgesState>()(
 export const useBadges = () => useBadgesStore();
 export const useBadgesList = () => useBadgesStore((state) => state.badges);
 export const useArchivedBadges = () => useBadgesStore((state) => state.archivedBadges);
+export const useSoldOutBadges = () => useBadgesStore((state) => state.badges);
 export const useBadgesActions = () => ({
   addBadge: useBadgesStore.getState().addBadge,
   updateBadge: useBadgesStore.getState().updateBadge,

@@ -126,22 +126,7 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
             </td>
             <td>
               {getTeamInfo(p.teamId, teams, archivedTeams)}
-              {isOutOfStock(p) && (
-                <div
-                  style={{
-                    backgroundColor: '#ef4444',
-                    color: 'white',
-                    padding: '2px 8px',
-                    borderRadius: '12px',
-                    fontSize: '12px',
-                    fontWeight: 'bold',
-                    marginTop: '4px',
-                    display: 'inline-block',
-                  }}
-                >
-                  OUT OF STOCK
-                </div>
-              )}
+              {isOutOfStock(p) && <div className="out-of-stock-badge">OUT OF STOCK</div>}
             </td>
             <td>{p.name || '-'}</td>
             <td>{p.type}</td>

@@ -18,6 +18,11 @@ const BadgeTableList: React.FC<Props> = ({
   searchTerm = '',
   isReadOnly = false,
 }) => {
+  // Check if badge is out of stock
+  const isOutOfStock = (badge: { quantity: number }) => {
+    return badge.quantity === 0;
+  };
+
   // Filter badges based on search term
   const filteredBadges = badges.filter(
     (badge) =>
@@ -45,8 +50,11 @@ const BadgeTableList: React.FC<Props> = ({
       </thead>
       <tbody>
         {filteredBadges.map((b) => (
-          <tr key={b.id}>
-            <td>{b.name}</td>
+          <tr key={b.id} className={isOutOfStock(b) ? 'out-of-stock-row' : ''}>
+            <td>
+              {b.name}
+              {isOutOfStock(b) && <div className="out-of-stock-badge">OUT OF STOCK</div>}
+            </td>
             <td>{b.season}</td>
             <td className="price-display">{b.quantity}</td>
             {!isReadOnly && (

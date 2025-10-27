@@ -23,31 +23,35 @@ const ArchivedProductsCard: React.FC = () => {
             </span>
           </div>
           {!isArchivedProductsExpanded && (
-            <div className={styles.collapsedContent}>There are {archivedProducts.length} products available.</div>
+            <div className={styles.collapsedContent}>
+              There are {archivedProducts.length} archived products available.
+            </div>
           )}
-          {isArchivedProductsExpanded && (
-            <>
-              <h3 className="card-section-header">Archived Products List</h3>
-              {archivedProducts.length >= 2 && (
-                <div className={styles.searchContainer}>
-                  <input
-                    type="text"
-                    placeholder="Search archived products..."
-                    value={archivedProductsSearchTerm}
-                    onChange={(e) => setArchivedProductsSearchTerm(e.target.value)}
-                    className={styles.searchInput}
+          <div className={`${styles.collapsibleContent} ${!isArchivedProductsExpanded ? styles.collapsed : ''}`}>
+            {isArchivedProductsExpanded && (
+              <>
+                <h3 className="card-section-header">Archived Products List</h3>
+                {archivedProducts.length >= 2 && (
+                  <div className={styles.searchContainer}>
+                    <input
+                      type="text"
+                      placeholder="Search archived products..."
+                      value={archivedProductsSearchTerm}
+                      onChange={(e) => setArchivedProductsSearchTerm(e.target.value)}
+                      className={styles.searchInput}
+                    />
+                  </div>
+                )}
+                <div className={styles.tableContainer}>
+                  <ArchivedProducts
+                    archivedProducts={archivedProducts}
+                    searchTerm={archivedProductsSearchTerm}
+                    onClearSearch={() => setArchivedProductsSearchTerm('')}
                   />
                 </div>
-              )}
-              <div className={styles.tableContainer}>
-                <ArchivedProducts
-                  archivedProducts={archivedProducts}
-                  searchTerm={archivedProductsSearchTerm}
-                  onClearSearch={() => setArchivedProductsSearchTerm('')}
-                />
-              </div>
-            </>
-          )}
+              </>
+            )}
+          </div>
         </>
       ) : (
         <>

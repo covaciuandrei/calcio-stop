@@ -96,9 +96,11 @@ const EditBadgeModal: React.FC<Props> = ({ editingBadge, setEditingBadge }) => {
               <input
                 type="number"
                 min={0}
+                step={1}
                 value={quantity}
                 onChange={(e) => {
-                  setQuantity(parseInt(e.target.value) || '');
+                  const val = e.target.value;
+                  setQuantity(val === '' ? '' : parseInt(val, 10));
                   if (errors.quantity) {
                     setErrors((prev) => ({ ...prev, quantity: '' }));
                   }

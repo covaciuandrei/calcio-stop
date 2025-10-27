@@ -32,6 +32,7 @@ export const namesetsSelectors = {
   getNamesetsByNumber: (state: NamesetsState, number: number) => state.namesets.filter((n) => n.number === number),
   getNamesetsBySeason: (state: NamesetsState, season: string) => state.namesets.filter((n) => n.season === season),
   getAvailableNamesets: (state: NamesetsState) => state.namesets.filter((n) => n.quantity > 0),
+  getSoldOutNamesets: (state: NamesetsState) => state.namesets.filter((n) => n.quantity === 0),
   getTotalNamesets: (state: NamesetsState) => state.namesets.length,
   getTotalArchivedNamesets: (state: NamesetsState) => state.archivedNamesets.length,
 };
@@ -187,6 +188,7 @@ export const useNamesetsStore = create<NamesetsState>()(
 export const useNamesets = () => useNamesetsStore();
 export const useNamesetsList = () => useNamesetsStore((state) => state.namesets);
 export const useArchivedNamesets = () => useNamesetsStore((state) => state.archivedNamesets);
+export const useSoldOutNamesets = () => useNamesetsStore((state) => state.namesets);
 export const useNamesetsActions = () => ({
   addNameset: useNamesetsStore.getState().addNameset,
   updateNameset: useNamesetsStore.getState().updateNameset,

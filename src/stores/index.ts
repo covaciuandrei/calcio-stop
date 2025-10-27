@@ -13,7 +13,14 @@ export * from './uiStore';
 
 // Re-export commonly used hooks for convenience
 export { useAuth, useAuthStatus, useAuthStore, useAuthUser } from './authStore';
-export { useArchivedBadges, useBadges, useBadgesActions, useBadgesList, useBadgesStore } from './badgesStore';
+export {
+  useArchivedBadges,
+  useBadges,
+  useBadgesActions,
+  useBadgesList,
+  useBadgesStore,
+  useSoldOutBadges,
+} from './badgesStore';
 export { useCounter, useCounterActions, useCounterConfig, useCounterStore, useCounterValue } from './counterStore';
 export {
   useArchivedKitTypes,
@@ -28,6 +35,7 @@ export {
   useNamesetsActions,
   useNamesetsList,
   useNamesetsStore,
+  useSoldOutNamesets,
 } from './namesetsStore';
 export {
   useArchivedProducts,
@@ -35,6 +43,7 @@ export {
   useProductsActions,
   useProductsList,
   useProductsStore,
+  useSoldOutProducts,
 } from './productsStore';
 export { useSales, useSalesActions, useSalesList, useSalesStore } from './salesStore';
 export { useAppBarOrder, useDashboardOrder, useSettings, useSettingsActions } from './settingsStore';

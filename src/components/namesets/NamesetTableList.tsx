@@ -24,6 +24,11 @@ const NamesetTableList: React.FC<Props> = ({
   const kitTypes = useKitTypesList();
   const archivedKitTypes = useArchivedKitTypes();
 
+  // Check if nameset is out of stock
+  const isOutOfStock = (nameset: { quantity: number }) => {
+    return nameset.quantity === 0;
+  };
+
   // Filter namesets based on search term
   const filteredNamesets = namesets.filter(
     (nameset) =>
@@ -54,8 +59,11 @@ const NamesetTableList: React.FC<Props> = ({
       </thead>
       <tbody>
         {filteredNamesets.map((n) => (
-          <tr key={n.id}>
-            <td>{n.playerName}</td>
+          <tr key={n.id} className={isOutOfStock(n) ? 'out-of-stock-row' : ''}>
+            <td>
+              {n.playerName}
+              {isOutOfStock(n) && <div className="out-of-stock-badge">OUT OF STOCK</div>}
+            </td>
             <td>{n.number}</td>
             <td>{n.season}</td>
             <td>{getKitTypeInfo(n.kitTypeId, kitTypes, archivedKitTypes)}</td>

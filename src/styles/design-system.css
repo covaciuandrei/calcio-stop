@@ -178,6 +178,7 @@ body {
   min-height: 100vh;
   background: rgba(255, 255, 255, 0.02);
   backdrop-filter: blur(1px);
+  overflow-x: hidden;
 }
 
 /* Modern Typography */
@@ -773,7 +774,7 @@ td button:hover {
 }
 
 .status-out-of-stock {
-  background: var(--accent-red-100);
+  background: var(--accent-red-700);
   color: var(--accent-red-700);
 }
 
@@ -781,6 +782,23 @@ td button:hover {
 .out-of-stock-row {
   border-left: 4px solid var(--accent-red-500);
   background-color: var(--accent-red-50);
+}
+
+/* Out of Stock Badge */
+.out-of-stock-badge {
+  background-color: #ef4444 !important;
+  color: white !important;
+  padding: 6px 12px;
+  border-radius: 20px !important;
+  font-size: 11px;
+  font-weight: bold;
+  margin-top: 4px;
+  margin-left: 8px !important;
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.4);
+  border: 1px solid #dc2626;
 }
 
 /* Price Display */
