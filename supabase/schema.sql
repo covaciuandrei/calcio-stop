@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS products (
     kit_type_id UUID NOT NULL REFERENCES kit_types(id),
     badge_id UUID NULL REFERENCES badges(id),
     price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    olx_link TEXT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     archived_at TIMESTAMP WITH TIME ZONE NULL
 );

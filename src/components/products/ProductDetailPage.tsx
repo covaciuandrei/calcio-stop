@@ -157,6 +157,20 @@ const ProductDetailPage: React.FC = () => {
                   <label>Price:</label>
                   <span className="price-display">{product.price.toFixed(2)} RON</span>
                 </div>
+                {product.olxLink && (
+                  <div className="detail-item">
+                    <label>OLX Link:</label>
+                    <a
+                      href={product.olxLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-primary"
+                      style={{ display: 'inline-block', marginTop: '4px' }}
+                    >
+                      View on OLX
+                    </a>
+                  </div>
+                )}
                 <div className="detail-item">
                   <label>Season:</label>
                   <span>{namesetInfo.season}</span>

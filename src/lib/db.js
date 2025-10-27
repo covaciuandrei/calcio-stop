@@ -576,6 +576,7 @@ export async function createProduct(data) {
     kit_type_id: data.kitTypeId,
     badge_id: data.badgeId || null,
     price: parseFloat(data.price) || 0.0,
+    olx_link: data.olxLink || null,
     created_at: data.createdAt || new Date().toISOString(),
     archived_at: null,
   };
@@ -597,6 +598,7 @@ export async function createProduct(data) {
     kitTypeId: result.kit_type_id,
     badgeId: result.badge_id,
     price: result.price,
+    olxLink: result.olx_link,
     createdAt: result.created_at,
   };
 }
@@ -634,6 +636,7 @@ export async function getProducts() {
     kitTypeId: item.kit_type_id,
     badgeId: item.badge_id,
     price: item.price,
+    olxLink: item.olx_link,
     createdAt: item.created_at,
     images: (item.product_images || []).map((img) => ({
       id: img.id,
@@ -680,6 +683,7 @@ export async function getArchivedProducts() {
     kitTypeId: item.kit_type_id,
     badgeId: item.badge_id,
     price: item.price,
+    olxLink: item.olx_link,
     createdAt: item.created_at,
     images: (item.product_images || []).map((img) => ({
       id: img.id,
@@ -721,6 +725,9 @@ export async function updateProduct(id, updates) {
   if (updates.price !== undefined) {
     dbUpdates.price = parseFloat(updates.price);
   }
+  if (updates.olxLink !== undefined) {
+    dbUpdates.olx_link = updates.olxLink;
+  }
 
   const { data, error } = await supabase
     .from('products')
@@ -755,6 +762,7 @@ export async function updateProduct(id, updates) {
     kitTypeId: data.kit_type_id,
     badgeId: data.badge_id,
     price: data.price,
+    olxLink: data.olx_link,
     createdAt: data.created_at,
     images: (data.product_images || []).map((img) => ({
       id: img.id,

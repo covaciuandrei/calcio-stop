@@ -209,3 +209,13 @@
 .public-mode .product-detail-header .btn:not(.btn-secondary) {
   display: none;
 }
+
+/* Ensure OLX Link button is visible in public mode */
+.public-mode .detail-item .btn {
+  display: inline-block !important;
+}
+
+/* Remove underline from OLX Link button */
+.detail-item .btn {
+  text-decoration: none !important;
+}

@@ -24,6 +24,7 @@ const AddProductForm: React.FC = () => {
   const [selectedKitTypeId, setSelectedKitTypeId] = useState<string>('');
   const [selectedBadgeId, setSelectedBadgeId] = useState<string | null>(null);
   const [price, setPrice] = useState<number>(0);
+  const [olxLink, setOlxLink] = useState<string>('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
@@ -96,6 +97,7 @@ const AddProductForm: React.FC = () => {
       kitTypeId: selectedKitTypeId,
       badgeId: selectedBadgeId,
       price: Number(price) || 0,
+      olxLink: olxLink.trim() || undefined,
       createdAt: new Date().toISOString(),
     };
 
@@ -120,6 +122,7 @@ const AddProductForm: React.FC = () => {
     setSelectedKitTypeId(''); // Reset to empty first
     setSelectedBadgeId(null);
     setPrice(0);
+    setOlxLink('');
     setErrors({}); // Clear any errors
 
     // Set default kit type after a brief delay to ensure state is reset
@@ -238,6 +241,16 @@ const AddProductForm: React.FC = () => {
       <div className="form-group">
         <label>Price (per unit in RON)</label>
         <input type="number" min={0} value={price} onChange={(e) => setPrice(Number(e.target.value || 0))} />
+      </div>
+
+      <div className="form-group">
+        <label>OLX Link (optional)</label>
+        <input
+          type="url"
+          placeholder="https://www.olx.ro/..."
+          value={olxLink}
+          onChange={(e) => setOlxLink(e.target.value)}
+        />
       </div>
 
       <div className="form-button-container">

@@ -34,6 +34,7 @@ export interface Product {
   kitTypeId: string; // reference to kit type (required, defaults to '1st Kit')
   badgeId: string | null; // reference to badge, null if no badge
   price: number; // default price per unit
+  olxLink?: string; // OLX listing URL
   createdAt: string; // ISO date string
   images?: ProductImage[]; // product images
 }
