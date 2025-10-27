@@ -497,6 +497,7 @@ export async function createNameset(data) {
     number: parseInt(data.number), // Ensure it's an integer
     season: data.season,
     quantity: parseInt(data.quantity) || 0, // Ensure it's an integer
+    price: parseFloat(data.price) || 0.0, // Ensure it's a float
     kit_type_id: data.kitTypeId,
     created_at: data.createdAt || new Date().toISOString(),
     archived_at: null,
@@ -515,6 +516,7 @@ export async function createNameset(data) {
     number: result.number,
     season: result.season,
     quantity: result.quantity,
+    price: result.price,
     kitTypeId: result.kit_type_id,
     createdAt: result.created_at,
   };
@@ -536,6 +538,7 @@ export async function getNamesets() {
     number: item.number,
     season: item.season,
     quantity: item.quantity,
+    price: item.price,
     kitTypeId: item.kit_type_id,
     createdAt: item.created_at,
   }));
@@ -557,6 +560,7 @@ export async function getArchivedNamesets() {
     number: item.number,
     season: item.season,
     quantity: item.quantity,
+    price: item.price,
     kitTypeId: item.kit_type_id,
     createdAt: item.created_at,
   }));
@@ -578,6 +582,9 @@ export async function updateNameset(id, updates) {
   if (updates.quantity !== undefined) {
     dbUpdates.quantity = parseInt(updates.quantity);
   }
+  if (updates.price !== undefined) {
+    dbUpdates.price = parseFloat(updates.price);
+  }
   if (updates.kitTypeId !== undefined) {
     dbUpdates.kit_type_id = updates.kitTypeId;
   }
@@ -593,6 +600,7 @@ export async function updateNameset(id, updates) {
     number: data.number,
     season: data.season,
     quantity: data.quantity,
+    price: data.price,
     kitTypeId: data.kit_type_id,
     createdAt: data.created_at,
   };

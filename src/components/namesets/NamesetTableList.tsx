@@ -54,6 +54,7 @@ const NamesetTableList: React.FC<Props> = ({
           <th>Season</th>
           <th>Kit Type</th>
           <th>Quantity</th>
+          <th>Price</th>
           {!isReadOnly && <th>Actions</th>}
         </tr>
       </thead>
@@ -67,7 +68,8 @@ const NamesetTableList: React.FC<Props> = ({
             <td>{n.number}</td>
             <td>{n.season}</td>
             <td>{getKitTypeInfo(n.kitTypeId, kitTypes, archivedKitTypes)}</td>
-            <td className="price-display">{n.quantity}</td>
+            <td className="quantity-display">{n.quantity}</td>
+            <td className="price-display">{n.price.toFixed(2)} RON</td>
             {!isReadOnly && (
               <td>
                 <button onClick={() => onEdit(n)} className="btn btn-icon btn-success" title="Edit">

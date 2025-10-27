@@ -18,6 +18,7 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
   const [number, setNumber] = useState<number | ''>('');
   const [season, setSeason] = useState('2025/2026');
   const [quantity, setQuantity] = useState<number | ''>('');
+  const [price, setPrice] = useState<number | ''>('');
   const [selectedKitTypeId, setSelectedKitTypeId] = useState<string>('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -44,6 +45,9 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
     if (quantity === '' || quantity < 0) {
       newErrors.quantity = 'Quantity must be 0 or greater';
     }
+    if (price === '' || price < 0) {
+      newErrors.price = 'Price must be 0 or greater';
+    }
     if (!selectedKitTypeId) {
       newErrors.kitType = 'Please select a kit type';
     }
@@ -61,6 +65,7 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
       number: Number(number),
       season,
       quantity: Number(quantity),
+      price: Number(price),
       kitTypeId: selectedKitTypeId,
       createdAt: new Date().toISOString(),
     };
@@ -71,6 +76,7 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
     setNumber('');
     setSeason('2025/2026');
     setQuantity('');
+    setPrice('');
     setSelectedKitTypeId(kitTypes.length > 0 ? kitTypes[0].id : '');
   };
 
@@ -189,6 +195,37 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
           }
         />
         {errors.quantity && <div className="error-message">{errors.quantity}</div>}
+      </div>
+      <div className={`form-group ${errors.price ? 'has-error' : ''}`}>
+        <label>Price (RON)</label>
+        <input
+          type="number"
+          placeholder="Price in RON"
+          min={0}
+          step={0.01}
+          value={price}
+          onChange={(e) => {
+            const val = e.target.value;
+            setPrice(val === '' ? '' : parseFloat(val));
+            if (errors.price) {
+              setErrors((prev) => ({ ...prev, price: '' }));
+            }
+          }}
+          style={
+            isInDropdown
+              ? {
+                  width: '100%',
+                  height: 'calc(38px * 1.2)' /* Match picker height */,
+                  padding: 'calc(6px * 1.2) 8px' /* 20% taller padding */,
+                  border: '1px solid #d1d5db',
+                  borderRadius: '4px',
+                  fontSize: '13px',
+                  boxSizing: 'border-box',
+                }
+              : {}
+          }
+        />
+        {errors.price && <div className="error-message">{errors.price}</div>}
       </div>
       <div className={`form-group ${errors.kitType ? 'has-error' : ''}`}>
         <label>Kit Type</label>

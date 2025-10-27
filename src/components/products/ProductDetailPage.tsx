@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   useArchivedBadges,
@@ -24,6 +24,8 @@ const ProductDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isAuthenticated } = useAuth();
+  const badgeDropdownRef = useRef<HTMLDivElement>(null);
+  const namesetDropdownRef = useRef<HTMLDivElement>(null);
 
   // Check if this is a public route or user is not authenticated/admin
   const isPublicRoute = location.pathname.startsWith('/public');
@@ -44,14 +46,70 @@ const ProductDetailPage: React.FC = () => {
 
   const [product, setProduct] = useState<Product | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [selectedBadgeId, setSelectedBadgeId] = useState<string | null>(null);
+  const [isBadgeDropdownOpen, setIsBadgeDropdownOpen] = useState(false);
+  const [selectedNamesetId, setSelectedNamesetId] = useState<string | null>(null);
+  const [isNamesetDropdownOpen, setIsNamesetDropdownOpen] = useState(false);
 
   // Find the product (check both active and archived)
   useEffect(() => {
     if (id) {
       const foundProduct = activeProducts.find((p) => p.id === id) || archivedProducts.find((p) => p.id === id);
       setProduct(foundProduct || null);
+      // Initialize selected badge and nameset from product if they exist
+      if (foundProduct?.badgeId) {
+        setSelectedBadgeId(foundProduct.badgeId);
+      }
+      if (foundProduct?.namesetId) {
+        setSelectedNamesetId(foundProduct.namesetId);
+      }
     }
   }, [id, activeProducts, archivedProducts]);
+
+  // Close badge dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (badgeDropdownRef.current && !badgeDropdownRef.current.contains(event.target as Node)) {
+        setIsBadgeDropdownOpen(false);
+      }
+    };
+
+    if (isBadgeDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isBadgeDropdownOpen]);
+
+  // Close nameset dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (namesetDropdownRef.current && !namesetDropdownRef.current.contains(event.target as Node)) {
+        setIsNamesetDropdownOpen(false);
+      }
+    };
+
+    if (isNamesetDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isNamesetDropdownOpen]);
+
+  // Calculate total price
+  const selectedBadge = badges.find((b) => b.id === selectedBadgeId);
+  const selectedNameset = namesets.find((n) => n.id === selectedNamesetId);
+
+  // Only add prices for badges/namesets that are selected but not already assigned to the product
+  const badgePrice =
+    selectedBadge && selectedBadge.price && selectedBadgeId !== product?.badgeId ? selectedBadge.price : 0;
+  const namesetPrice =
+    selectedNameset && selectedNameset.price && selectedNamesetId !== product?.namesetId ? selectedNameset.price : 0;
+  const totalPrice = product ? product.price + badgePrice + namesetPrice : 0;
 
   if (!product) {
     return (
@@ -171,28 +229,228 @@ const ProductDetailPage: React.FC = () => {
                     </a>
                   </div>
                 )}
-                <div className="detail-item">
-                  <label>Season:</label>
-                  <span>{namesetInfo.season}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Player:</label>
-                  <span>{namesetInfo.playerName}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Number:</label>
-                  <span>{namesetInfo.number > 0 ? namesetInfo.number : '-'}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Badge:</label>
-                  <span>{badgeInfo}</span>
-                </div>
+                {product.namesetId && (
+                  <>
+                    <div className="detail-item">
+                      <label>Season:</label>
+                      <span>{namesetInfo.season}</span>
+                    </div>
+                    <div className="detail-item">
+                      <label>Player:</label>
+                      <span>{namesetInfo.playerName}</span>
+                    </div>
+                    <div className="detail-item">
+                      <label>Number:</label>
+                      <span>{namesetInfo.number > 0 ? namesetInfo.number : '-'}</span>
+                    </div>
+                  </>
+                )}
+                {product.badgeId && (
+                  <div className="detail-item">
+                    <label>Badge:</label>
+                    <span>{badgeInfo}</span>
+                  </div>
+                )}
                 {!isPublicRoute && (
                   <div className="detail-item">
                     <label>Created:</label>
                     <span>{new Date(product.createdAt).toLocaleDateString()}</span>
                   </div>
                 )}
+              </div>
+
+              {/* Add Badge Section - always show to allow additional badges */}
+              <div className="add-badge-section">
+                <div className={`add-badge-label-row ${!product.badgeId ? 'short-text' : ''}`}>
+                  <span className="add-badge-label">
+                    {product.badgeId
+                      ? 'See other badges available (ask if its possible to have this shirt with another badge):'
+                      : 'Add Badge:'}
+                  </span>
+                  {!product.badgeId && (
+                    <div className="badge-dropdown-container" ref={badgeDropdownRef}>
+                      <div
+                        className="badge-dropdown-trigger"
+                        onClick={() => setIsBadgeDropdownOpen(!isBadgeDropdownOpen)}
+                      >
+                        {selectedBadgeId && selectedBadge
+                          ? `${selectedBadge.name} (${selectedBadge.price || 0} RON)`
+                          : 'Select a badge'}
+                        <span className="badge-dropdown-arrow">▼</span>
+                      </div>
+                      {isBadgeDropdownOpen && (
+                        <div className="badge-dropdown">
+                          {badges.length === 0 ? (
+                            <div className="badge-dropdown-empty">No badges available</div>
+                          ) : (
+                            <>
+                              <div
+                                className={`badge-dropdown-option ${selectedBadgeId === null ? 'selected' : ''}`}
+                                onClick={() => {
+                                  setSelectedBadgeId(null);
+                                  setIsBadgeDropdownOpen(false);
+                                }}
+                              >
+                                <div className="badge-option-name">None</div>
+                                <div className="badge-option-details">No badge selected</div>
+                              </div>
+                              {badges.map((badge) => (
+                                <div
+                                  key={badge.id}
+                                  className={`badge-dropdown-option ${selectedBadgeId === badge.id ? 'selected' : ''}`}
+                                  onClick={() => {
+                                    setSelectedBadgeId(badge.id);
+                                    setIsBadgeDropdownOpen(false);
+                                  }}
+                                >
+                                  <div className="badge-option-name">{badge.name}</div>
+                                  <div className="badge-option-details">
+                                    Season: {badge.season} | Price: {badge.price || 0} RON | Qty: {badge.quantity}
+                                  </div>
+                                </div>
+                              ))}
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                {product.badgeId && (
+                  <div className="add-badge-picker-row">
+                    <div className="badge-dropdown-container" ref={badgeDropdownRef}>
+                      <div
+                        className="badge-dropdown-trigger"
+                        onClick={() => setIsBadgeDropdownOpen(!isBadgeDropdownOpen)}
+                      >
+                        {selectedBadgeId && selectedBadge
+                          ? `${selectedBadge.name} (${selectedBadge.price || 0} RON)`
+                          : product.badgeId && !selectedBadgeId
+                            ? 'Select additional badge'
+                            : 'Select a badge'}
+                        <span className="badge-dropdown-arrow">▼</span>
+                      </div>
+                      {isBadgeDropdownOpen && (
+                        <div className="badge-dropdown">
+                          {badges.length === 0 ? (
+                            <div className="badge-dropdown-empty">No badges available</div>
+                          ) : (
+                            <>
+                              <div
+                                className={`badge-dropdown-option ${selectedBadgeId === null ? 'selected' : ''}`}
+                                onClick={() => {
+                                  setSelectedBadgeId(null);
+                                  setIsBadgeDropdownOpen(false);
+                                }}
+                              >
+                                <div className="badge-option-name">None</div>
+                                <div className="badge-option-details">No badge selected</div>
+                              </div>
+                              {badges.map((badge) => (
+                                <div
+                                  key={badge.id}
+                                  className={`badge-dropdown-option ${selectedBadgeId === badge.id ? 'selected' : ''}`}
+                                  onClick={() => {
+                                    setSelectedBadgeId(badge.id);
+                                    setIsBadgeDropdownOpen(false);
+                                  }}
+                                >
+                                  <div className="badge-option-name">{badge.name}</div>
+                                  <div className="badge-option-details">
+                                    Season: {badge.season} | Price: {badge.price || 0} RON | Qty: {badge.quantity}
+                                  </div>
+                                </div>
+                              ))}
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Add Nameset Section - only show if product doesn't already have a nameset */}
+              {!product.namesetId && (
+                <div className="add-nameset-section">
+                  <div className="add-nameset-row">
+                    <span className="add-nameset-label">Add Nameset:</span>
+                    <div className="nameset-dropdown-container" ref={namesetDropdownRef}>
+                      <div
+                        className="nameset-dropdown-trigger"
+                        onClick={() => setIsNamesetDropdownOpen(!isNamesetDropdownOpen)}
+                      >
+                        {selectedNamesetId && selectedNameset
+                          ? `${selectedNameset.playerName} #${selectedNameset.number} (${selectedNameset.price || 0} RON)`
+                          : 'Select a nameset'}
+                        <span className="nameset-dropdown-arrow">▼</span>
+                      </div>
+                      {isNamesetDropdownOpen && (
+                        <div className="nameset-dropdown">
+                          {namesets.length === 0 ? (
+                            <div className="nameset-dropdown-empty">No namesets available</div>
+                          ) : (
+                            <>
+                              <div
+                                className={`nameset-dropdown-option ${selectedNamesetId === null ? 'selected' : ''}`}
+                                onClick={() => {
+                                  setSelectedNamesetId(null);
+                                  setIsNamesetDropdownOpen(false);
+                                }}
+                              >
+                                <div className="nameset-option-name">None</div>
+                                <div className="nameset-option-details">No nameset selected</div>
+                              </div>
+                              {namesets.map((nameset) => (
+                                <div
+                                  key={nameset.id}
+                                  className={`nameset-dropdown-option ${selectedNamesetId === nameset.id ? 'selected' : ''}`}
+                                  onClick={() => {
+                                    setSelectedNamesetId(nameset.id);
+                                    setIsNamesetDropdownOpen(false);
+                                  }}
+                                >
+                                  <div className="nameset-option-name">
+                                    {nameset.playerName} #{nameset.number}
+                                  </div>
+                                  <div className="nameset-option-details">
+                                    Season: {nameset.season} | Price: {nameset.price || 0} RON | Qty: {nameset.quantity}
+                                  </div>
+                                </div>
+                              ))}
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Total Price Display */}
+              <div className="total-price-section">
+                <div className="total-price-row">
+                  <span className="total-price-label">Base Price:</span>
+                  <span className="total-price-value">{product.price.toFixed(2)} RON</span>
+                </div>
+                {selectedBadge && selectedBadgeId !== product.badgeId && (
+                  <div className="total-price-row">
+                    <span className="total-price-label">Badge ({selectedBadge.name}):</span>
+                    <span className="total-price-value">+{(badgePrice || 0).toFixed(2)} RON</span>
+                  </div>
+                )}
+                {selectedNameset && selectedNamesetId !== product.namesetId && (
+                  <div className="total-price-row">
+                    <span className="total-price-label">
+                      Nameset ({selectedNameset.playerName} #{selectedNameset.number}):
+                    </span>
+                    <span className="total-price-value">+{(namesetPrice || 0).toFixed(2)} RON</span>
+                  </div>
+                )}
+                <div className="total-price-row total-price-final">
+                  <span className="total-price-label">Total:</span>
+                  <span className="total-price-value">{totalPrice.toFixed(2)} RON</span>
+                </div>
               </div>
 
               {/* Sizes and Quantities */}

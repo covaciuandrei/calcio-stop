@@ -175,6 +175,284 @@
   color: #059669;
 }
 
+/* Add Badge Section */
+.add-badge-section {
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.add-badge-label-row {
+  margin-bottom: var(--space-2);
+}
+
+.add-badge-label-row.short-text {
+  margin-bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.add-badge-picker-row {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.add-badge-picker-row.hidden {
+  display: none;
+}
+
+.add-badge-label {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.badge-dropdown-container {
+  position: relative;
+  flex: 1;
+  max-width: 300px;
+}
+
+.badge-dropdown-trigger {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  background-color: var(--color-background);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  font-size: 0.9rem;
+  min-height: 38px;
+}
+
+.badge-dropdown-trigger:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.badge-dropdown-arrow {
+  margin-left: var(--space-2);
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.badge-dropdown {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.badge-dropdown-option {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.badge-dropdown-option:hover {
+  background-color: var(--color-background-secondary);
+}
+
+.badge-dropdown-option.selected {
+  background-color: rgba(14, 165, 233, 0.1);
+  border-left: 3px solid var(--color-primary);
+}
+
+.badge-dropdown-option:last-child {
+  border-bottom: none;
+}
+
+.badge-option-name {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.badge-option-details {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.badge-dropdown-empty {
+  padding: var(--space-4) var(--space-3);
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+/* Add Nameset Section */
+.add-nameset-section {
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.add-nameset-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.add-nameset-label {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.nameset-dropdown-container {
+  position: relative;
+  flex: 1;
+  max-width: 300px;
+}
+
+.nameset-dropdown-trigger {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  background-color: var(--color-background);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  font-size: 0.9rem;
+  min-height: 38px;
+}
+
+.nameset-dropdown-trigger:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.nameset-dropdown-arrow {
+  margin-left: var(--space-2);
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.nameset-dropdown {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.nameset-dropdown-option {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.nameset-dropdown-option:hover {
+  background-color: var(--color-background-secondary);
+}
+
+.nameset-dropdown-option.selected {
+  background-color: rgba(14, 165, 233, 0.1);
+  border-left: 3px solid var(--color-primary);
+}
+
+.nameset-dropdown-option:last-child {
+  border-bottom: none;
+}
+
+.nameset-option-name {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.nameset-option-details {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.nameset-dropdown-empty {
+  padding: var(--space-4) var(--space-3);
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+/* Total Price Section */
+.total-price-section {
+  margin-top: var(--space-4);
+  padding: var(--space-3);
+  background-color: var(--color-background-secondary);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--color-border);
+}
+
+.total-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-1) 0;
+}
+
+.total-price-row:not(.total-price-final) {
+  border-bottom: 1px dashed var(--color-border);
+  margin-bottom: var(--space-2);
+  padding-bottom: var(--space-2);
+}
+
+.total-price-row.total-price-final {
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 2px solid var(--color-primary);
+}
+
+.total-price-label {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.total-price-row.total-price-final .total-price-label {
+  font-size: 1rem;
+  color: var(--color-text-primary);
+}
+
+.total-price-value {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+}
+
+.total-price-row.total-price-final .total-price-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-success);
+}
+
 /* Loading States */
 .loading {
   display: flex;

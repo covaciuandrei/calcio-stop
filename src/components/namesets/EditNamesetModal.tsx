@@ -18,6 +18,7 @@ const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }
   const [number, setNumber] = useState<number | ''>('');
   const [season, setSeason] = useState('2025/2026');
   const [quantity, setQuantity] = useState<number | ''>('');
+  const [price, setPrice] = useState<number | ''>('');
   const [selectedKitTypeId, setSelectedKitTypeId] = useState<string>('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -28,6 +29,7 @@ const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }
       setNumber(editingNameset.number || '');
       setSeason(editingNameset.season || '2025/2026');
       setQuantity(editingNameset.quantity || '');
+      setPrice(editingNameset.price || '');
       setSelectedKitTypeId(editingNameset.kitTypeId || (kitTypes.length > 0 ? kitTypes[0].id : ''));
       setErrors({});
     } else {
@@ -36,6 +38,7 @@ const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }
       setNumber('');
       setSeason('2025/2026');
       setQuantity('');
+      setPrice('');
       setSelectedKitTypeId(kitTypes.length > 0 ? kitTypes[0].id : '');
       setErrors({});
     }
@@ -54,6 +57,9 @@ const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }
     if (quantity === '' || quantity < 0) {
       newErrors.quantity = 'Quantity must be 0 or greater';
     }
+    if (price === '' || price < 0) {
+      newErrors.price = 'Price must be 0 or greater';
+    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -69,6 +75,7 @@ const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }
       number: Number(number),
       season: season || '2025/2026',
       quantity: Number(quantity),
+      price: Number(price),
       kitTypeId: selectedKitTypeId,
     });
     setEditingNameset(null);
@@ -150,6 +157,25 @@ const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }
               />
             </label>
             {errors.quantity && <div className="error-message">{errors.quantity}</div>}
+          </div>
+          <div className={`form-group ${errors.price ? 'has-error' : ''}`}>
+            <label>
+              Price (RON):
+              <input
+                type="number"
+                min={0}
+                step={0.01}
+                value={price}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setPrice(val === '' ? '' : parseFloat(val));
+                  if (errors.price) {
+                    setErrors((prev) => ({ ...prev, price: '' }));
+                  }
+                }}
+              />
+            </label>
+            {errors.price && <div className="error-message">{errors.price}</div>}
           </div>
 
           <div className="modal-buttons">
