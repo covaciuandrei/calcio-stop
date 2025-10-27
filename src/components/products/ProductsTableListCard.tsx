@@ -152,10 +152,8 @@ const ProductsTableListCard: React.FC<ProductsTableListCardProps> = ({
         {(isReadOnly || isProductsExpanded) && (
           <>
             <h3 className="card-section-header">Product List</h3>
-            {!isReadOnly && (
-              <ProductFilters products={products} onFiltersChange={handleFiltersChange} onReset={handleResetFilters} />
-            )}
-            {displayProducts.length >= 2 && !isReadOnly && (
+            <ProductFilters products={products} onFiltersChange={handleFiltersChange} onReset={handleResetFilters} />
+            {displayProducts.length >= 2 && (
               <div className={styles.searchContainer}>
                 <input
                   type="text"

@@ -83,7 +83,7 @@ const EditSaleModal: React.FC<Props> = ({ editingSale, setEditingSale }) => {
           </div>
           <div className={`form-group ${errors.priceSold ? 'has-error' : ''}`}>
             <label>
-              Price Sold:
+              Price Sold (RON):
               <input
                 type="number"
                 min={0}

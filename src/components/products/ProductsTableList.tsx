@@ -183,7 +183,7 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
               })()}
             </td>
             <td>{getBadgeInfo(p.badgeId, badges, archivedBadges)}</td>
-            <td className="price-display">${p.price.toFixed ? p.price.toFixed(2) : p.price}</td>
+            <td className="price-display">{p.price.toFixed ? p.price.toFixed(2) : p.price} RON</td>
             {!isReadOnly && (
               <td onClick={(e) => e.stopPropagation()}>
                 <button onClick={() => onEdit(p)} className="btn btn-icon btn-success" title="Edit">

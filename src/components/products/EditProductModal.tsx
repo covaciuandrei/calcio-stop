@@ -213,7 +213,7 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
           </div>
 
           <label>
-            Price (per unit):
+            Price (per unit in RON):
             <input type="number" min={0} value={price} onChange={(e) => setPrice(Number(e.target.value || 0))} />
           </label>
 

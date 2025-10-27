@@ -236,7 +236,7 @@ const AddProductForm: React.FC = () => {
       </div>
 
       <div className="form-group">
-        <label>Price (per unit)</label>
+        <label>Price (per unit in RON)</label>
         <input type="number" min={0} value={price} onChange={(e) => setPrice(Number(e.target.value || 0))} />
       </div>
 

@@ -64,7 +64,7 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, searchTerm =
           <th>Product</th>
           <th>Size</th>
           <th>Quantity</th>
-          <th>Price Sold</th>
+          <th>Price Sold (RON)</th>
           <th>Customer</th>
           <th>Date</th>
           <th>Actions</th>
@@ -76,7 +76,7 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, searchTerm =
             <td>{getProductDetails(s.productId)}</td>
             <td>{s.size}</td>
             <td>{s.quantity}</td>
-            <td className="price-display">${s.priceSold ? s.priceSold.toFixed(2) : '0.00'}</td>
+            <td className="price-display">{s.priceSold ? s.priceSold.toFixed(2) : '0.00'} RON</td>
             <td>{s.customerName || 'N/A'}</td>
             <td>{new Date(s.date).toLocaleString()}</td>
             <td>

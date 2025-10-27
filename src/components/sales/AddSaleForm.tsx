@@ -214,7 +214,7 @@ const AddSaleForm: React.FC = () => {
       </div>
 
       <div className={`form-group ${errors.priceSold ? 'has-error' : ''}`}>
-        <label>Price Sold</label>
+        <label>Price Sold (RON)</label>
         <input
           type="number"
           min={0}

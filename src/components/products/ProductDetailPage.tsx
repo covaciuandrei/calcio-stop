@@ -155,7 +155,7 @@ const ProductDetailPage: React.FC = () => {
                 </div>
                 <div className="detail-item">
                   <label>Price:</label>
-                  <span className="price-display">${product.price.toFixed(2)}</span>
+                  <span className="price-display">{product.price.toFixed(2)} RON</span>
                 </div>
                 <div className="detail-item">
                   <label>Season:</label>
