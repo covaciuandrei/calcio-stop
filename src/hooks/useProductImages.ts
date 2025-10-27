@@ -1,16 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
-import * as db from '../lib/db';
-import { BadgeImage } from '../types';
+import { supabase } from '../lib/supabaseClient';
+import { ProductImage } from '../types';
 
 // Global cache to prevent duplicate requests
-const imageCache = new Map<string, BadgeImage[]>();
-const pendingRequests = new Map<string, Promise<BadgeImage[]>>();
+const imageCache = new Map<string, ProductImage[]>();
+const pendingRequests = new Map<string, Promise<ProductImage[]>>();
 
 // Cache invalidation function
-export const invalidateBadgeImageCache = (badgeId?: string) => {
-  if (badgeId) {
-    imageCache.delete(badgeId);
-    pendingRequests.delete(badgeId);
+export const invalidateProductImageCache = (productId?: string) => {
+  if (productId) {
+    imageCache.delete(productId);
+    pendingRequests.delete(productId);
   } else {
     imageCache.clear();
     pendingRequests.clear();
@@ -18,46 +18,66 @@ export const invalidateBadgeImageCache = (badgeId?: string) => {
 };
 
 // Helper function to get images with caching and deduplication
-const getBadgeImagesCached = async (badgeId: string): Promise<BadgeImage[]> => {
+const getProductImagesCached = async (productId: string): Promise<ProductImage[]> => {
   // Check cache first
-  if (imageCache.has(badgeId)) {
-    return imageCache.get(badgeId)!;
+  if (imageCache.has(productId)) {
+    return imageCache.get(productId)!;
   }
 
   // Check if request is already pending
-  if (pendingRequests.has(badgeId)) {
-    return pendingRequests.get(badgeId)!;
+  if (pendingRequests.has(productId)) {
+    return pendingRequests.get(productId)!;
   }
 
   // Create new request
-  const request = db
-    .getBadgeImages(badgeId)
-    .then((images) => {
+  const request = (async () => {
+    try {
+      const { data, error } = await supabase
+        .from('product_images')
+        .select('*')
+        .eq('product_id', productId)
+        .order('display_order', { ascending: true });
+
+      if (error) {
+        throw error;
+      }
+
+      // Map database response to frontend format
+      const mappedImages = (data || []).map((item) => ({
+        id: item.id,
+        productId: item.product_id,
+        imageUrl: item.image_url,
+        altText: item.alt_text,
+        isPrimary: item.is_primary,
+        displayOrder: item.display_order,
+        createdAt: item.created_at,
+      }));
+
       // Cache the result
-      imageCache.set(badgeId, images);
+      imageCache.set(productId, mappedImages);
       // Remove from pending
-      pendingRequests.delete(badgeId);
-      return images;
-    })
-    .catch((err) => {
+      pendingRequests.delete(productId);
+      return mappedImages;
+    } catch (err) {
       // Remove from pending on error
-      pendingRequests.delete(badgeId);
+      pendingRequests.delete(productId);
       throw err;
-    });
+    }
+  })();
 
   // Store pending request
-  pendingRequests.set(badgeId, request);
+  pendingRequests.set(productId, request);
   return request;
 };
 
-export const useBadgeImages = (badgeId: string) => {
-  const [images, setImages] = useState<BadgeImage[]>([]);
+export const useProductImages = (productId: string) => {
+  const [images, setImages] = useState<ProductImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadImages = async () => {
-      if (!badgeId) {
+      if (!productId) {
         setImages([]);
         setLoading(false);
         return;
@@ -65,11 +85,11 @@ export const useBadgeImages = (badgeId: string) => {
 
       try {
         setLoading(true);
-        const badgeImages = await getBadgeImagesCached(badgeId);
-        setImages(badgeImages);
+        const productImages = await getProductImagesCached(productId);
+        setImages(productImages);
         setError(null);
       } catch (err) {
-        console.error('Error loading badge images:', err);
+        console.error('Error loading product images:', err);
         setError(err instanceof Error ? err.message : 'Failed to load images');
         setImages([]);
       } finally {
@@ -78,23 +98,23 @@ export const useBadgeImages = (badgeId: string) => {
     };
 
     loadImages();
-  }, [badgeId]);
+  }, [productId]);
 
   return { images, loading, error };
 };
 
-export const useBadgeImagesMap = (badgeIds: string[]) => {
-  const [imagesMap, setImagesMap] = useState<Record<string, BadgeImage[]>>({});
+export const useProductImagesMap = (productIds: string[]) => {
+  const [imagesMap, setImagesMap] = useState<Record<string, ProductImage[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Create a stable dependency by joining badge IDs
-  const badgeIdsKey = badgeIds.join(',');
+  // Create a stable dependency by joining product IDs
+  const productIdsKey = productIds.join(',');
 
   useEffect(() => {
     const loadAllImages = async () => {
-      if (badgeIds.length === 0) {
+      if (productIds.length === 0) {
         setImagesMap({});
         setLoading(false);
         return;
@@ -112,23 +132,23 @@ export const useBadgeImagesMap = (badgeIds: string[]) => {
         setLoading(true);
 
         // Use cached requests to prevent duplicates
-        const promises = badgeIds.map(async (badgeId) => {
+        const promises = productIds.map(async (productId) => {
           try {
-            const images = await getBadgeImagesCached(badgeId);
-            return { badgeId, images };
+            const images = await getProductImagesCached(productId);
+            return { productId, images };
           } catch (err) {
             // Only log error if not aborted
             if (!abortControllerRef.current?.signal.aborted) {
-              console.error(`Error loading images for badge ${badgeId}:`, err);
+              console.error(`Error loading images for product ${productId}:`, err);
             }
-            return { badgeId, images: [] };
+            return { productId, images: [] };
           }
         });
 
         const results = await Promise.all(promises);
-        const map: Record<string, BadgeImage[]> = {};
-        results.forEach(({ badgeId, images }) => {
-          map[badgeId] = images;
+        const map: Record<string, ProductImage[]> = {};
+        results.forEach(({ productId, images }) => {
+          map[productId] = images;
         });
 
         // Only update state if request wasn't aborted
@@ -139,7 +159,7 @@ export const useBadgeImagesMap = (badgeIds: string[]) => {
       } catch (err) {
         // Only log error if not aborted
         if (!abortControllerRef.current?.signal.aborted) {
-          console.error('Error loading badge images:', err);
+          console.error('Error loading product images:', err);
           setError(err instanceof Error ? err.message : 'Failed to load images');
           setImagesMap({});
         }
@@ -158,21 +178,21 @@ export const useBadgeImagesMap = (badgeIds: string[]) => {
         abortControllerRef.current.abort();
       }
     };
-  }, [badgeIdsKey, badgeIds]); // Include both the stable key and the original array
+  }, [productIdsKey, productIds]); // Include both the stable key and the original array
 
   return { imagesMap, loading, error };
 };
 
 // Debounced version to reduce rapid re-renders
-export const useBadgeImagesMapDebounced = (badgeIds: string[], delay: number = 300) => {
-  const [imagesMap, setImagesMap] = useState<Record<string, BadgeImage[]>>({});
+export const useProductImagesMapDebounced = (productIds: string[], delay: number = 300) => {
+  const [imagesMap, setImagesMap] = useState<Record<string, ProductImage[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Create a stable dependency by joining badge IDs
-  const badgeIdsKey = badgeIds.join(',');
+  // Create a stable dependency by joining product IDs
+  const productIdsKey = productIds.join(',');
 
   useEffect(() => {
     // Clear existing timeout
@@ -187,7 +207,7 @@ export const useBadgeImagesMapDebounced = (badgeIds: string[], delay: number = 3
 
     // Debounce the request
     timeoutRef.current = setTimeout(async () => {
-      if (badgeIds.length === 0) {
+      if (productIds.length === 0) {
         setImagesMap({});
         setLoading(false);
         return;
@@ -200,23 +220,23 @@ export const useBadgeImagesMapDebounced = (badgeIds: string[], delay: number = 3
         setLoading(true);
 
         // Use cached requests to prevent duplicates
-        const promises = badgeIds.map(async (badgeId) => {
+        const promises = productIds.map(async (productId) => {
           try {
-            const images = await getBadgeImagesCached(badgeId);
-            return { badgeId, images };
+            const images = await getProductImagesCached(productId);
+            return { productId, images };
           } catch (err) {
             // Only log error if not aborted
             if (!abortControllerRef.current?.signal.aborted) {
-              console.error(`Error loading images for badge ${badgeId}:`, err);
+              console.error(`Error loading images for product ${productId}:`, err);
             }
-            return { badgeId, images: [] };
+            return { productId, images: [] };
           }
         });
 
         const results = await Promise.all(promises);
-        const map: Record<string, BadgeImage[]> = {};
-        results.forEach(({ badgeId, images }) => {
-          map[badgeId] = images;
+        const map: Record<string, ProductImage[]> = {};
+        results.forEach(({ productId, images }) => {
+          map[productId] = images;
         });
 
         // Only update state if request wasn't aborted
@@ -227,7 +247,7 @@ export const useBadgeImagesMapDebounced = (badgeIds: string[], delay: number = 3
       } catch (err) {
         // Only log error if not aborted
         if (!abortControllerRef.current?.signal.aborted) {
-          console.error('Error loading badge images:', err);
+          console.error('Error loading product images:', err);
           setError(err instanceof Error ? err.message : 'Failed to load images');
           setImagesMap({});
         }
@@ -247,7 +267,7 @@ export const useBadgeImagesMapDebounced = (badgeIds: string[], delay: number = 3
         abortControllerRef.current.abort();
       }
     };
-  }, [badgeIdsKey, badgeIds, delay]);
+  }, [productIdsKey, productIds, delay]);
 
   return { imagesMap, loading, error };
 };

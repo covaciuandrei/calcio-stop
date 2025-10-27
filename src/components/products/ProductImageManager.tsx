@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { invalidateProductImageCache, useProductImages } from '../../hooks/useProductImages';
 import { supabase } from '../../lib/supabaseClient';
-import { ProductImage } from '../../types';
 import './ProductImageManager.css';
 import ProductImageUpload from './ProductImageUpload';
 
@@ -10,68 +10,20 @@ interface ProductImageManagerProps {
 }
 
 const ProductImageManager: React.FC<ProductImageManagerProps> = ({ productId, isAdmin = false }) => {
-  const [images, setImages] = useState<ProductImage[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
 
-  const loadImages = useCallback(async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('product_images')
-        .select('*')
-        .eq('product_id', productId)
-        .order('display_order', { ascending: true });
-
-      if (error) {
-        throw error;
-      }
-
-      // Map database response to frontend format
-      const mappedImages = (data || []).map((item) => ({
-        id: item.id,
-        productId: item.product_id,
-        imageUrl: item.image_url,
-        altText: item.alt_text,
-        isPrimary: item.is_primary,
-        displayOrder: item.display_order,
-        createdAt: item.created_at,
-      }));
-
-      setImages(mappedImages);
-    } catch (error) {
-      console.error('Error loading images:', error);
-      setError(error instanceof Error ? error.message : 'Failed to load images');
-    } finally {
-      setLoading(false);
-    }
-  }, [productId]);
-
-  // Load images for the product
-  useEffect(() => {
-    loadImages();
-  }, [loadImages]);
+  // Use cached hook for images
+  const { images, loading, error } = useProductImages(productId);
 
   const handleImageUploaded = (newImage: any) => {
-    // Map database response to frontend format
-    const mappedImage: ProductImage = {
-      id: newImage.id,
-      productId: newImage.product_id,
-      imageUrl: newImage.image_url,
-      altText: newImage.alt_text,
-      isPrimary: newImage.is_primary,
-      displayOrder: newImage.display_order,
-      createdAt: newImage.created_at,
-    };
-
-    setImages((prev) => [...prev, mappedImage]);
-    setError(null);
+    // Invalidate cache to force reload
+    invalidateProductImageCache(productId);
   };
 
   const handleUploadError = (errorMessage: string) => {
-    setError(errorMessage);
+    setLocalError(errorMessage);
   };
 
   const handleDeleteImage = async (imageId: string) => {
@@ -96,10 +48,11 @@ const ProductImageManager: React.FC<ProductImageManagerProps> = ({ productId, is
         throw error;
       }
 
-      setImages((prev) => prev.filter((img) => img.id !== imageId));
+      // Invalidate cache to force reload
+      invalidateProductImageCache(productId);
     } catch (error) {
       console.error('Error deleting image:', error);
-      setError(error instanceof Error ? error.message : 'Failed to delete image');
+      setLocalError(error instanceof Error ? error.message : 'Failed to delete image');
     }
   };
 
@@ -115,16 +68,11 @@ const ProductImageManager: React.FC<ProductImageManagerProps> = ({ productId, is
         throw error;
       }
 
-      // Update local state
-      setImages((prev) =>
-        prev.map((img) => ({
-          ...img,
-          isPrimary: img.id === imageId,
-        }))
-      );
+      // Invalidate cache to force reload
+      invalidateProductImageCache(productId);
     } catch (error) {
       console.error('Error setting primary image:', error);
-      setError(error instanceof Error ? error.message : 'Failed to set primary image');
+      setLocalError(error instanceof Error ? error.message : 'Failed to set primary image');
     }
   };
 
@@ -157,10 +105,10 @@ const ProductImageManager: React.FC<ProductImageManagerProps> = ({ productId, is
 
   return (
     <div className="product-image-manager">
-      {error && (
+      {(error || localError) && (
         <div className="error-message">
-          {error}
-          <button onClick={() => setError(null)} className="error-close">
+          {error || localError}
+          <button onClick={() => setLocalError(null)} className="error-close">
             ×
           </button>
         </div>

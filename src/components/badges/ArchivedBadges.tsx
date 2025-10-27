@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useBadgeImagesMap } from '../../hooks/useBadgeImages';
+import { useBadgeImagesMapDebounced } from '../../hooks/useBadgeImages';
 import { useBadgesActions, useBadgesStore } from '../../stores';
 import { Badge } from '../../types';
 
@@ -20,9 +20,9 @@ const ArchivedBadges: React.FC<Props> = ({ archivedBadges, searchTerm = '', onCl
   // Check if we're in public context
   const isPublicRoute = location.pathname.startsWith('/public');
 
-  // Get badge images for all archived badges
+  // Get badge images for all archived badges with debouncing to prevent request storms
   const badgeIds = archivedBadges.map((badge) => badge.id);
-  const { imagesMap } = useBadgeImagesMap(badgeIds);
+  const { imagesMap } = useBadgeImagesMapDebounced(badgeIds, 500);
 
   // Handle badge row click
   const handleBadgeClick = (badgeId: string) => {

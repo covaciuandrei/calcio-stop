@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useBadgeImagesMap } from '../../hooks/useBadgeImages';
+import { useBadgeImagesMapDebounced } from '../../hooks/useBadgeImages';
 import { Badge } from '../../types';
 
 interface Props {
@@ -26,9 +26,9 @@ const BadgeTableList: React.FC<Props> = ({
   // Check if we're in public context
   const isPublicRoute = location.pathname.startsWith('/public');
 
-  // Get badge images for all badges
+  // Get badge images for all badges with debouncing to prevent request storms
   const badgeIds = badges.map((badge) => badge.id);
-  const { imagesMap } = useBadgeImagesMap(badgeIds);
+  const { imagesMap } = useBadgeImagesMapDebounced(badgeIds, 500);
 
   // Check if badge is out of stock
   const isOutOfStock = (badge: { quantity: number }) => {
