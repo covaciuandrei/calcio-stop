@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useSalesActions } from '../../stores';
-import { Sale } from '../../types';
+import { Sale, SaleType } from '../../types';
 
 interface Props {
   editingSale: Sale | null;
@@ -15,6 +15,7 @@ const EditSaleModal: React.FC<Props> = ({ editingSale, setEditingSale }) => {
   const [priceSold, setPriceSold] = useState<number>(editingSale?.priceSold || 0);
   const [customerName, setCustomerName] = useState<string>(editingSale?.customerName || '');
   const [date, setDate] = useState<string>('');
+  const [saleType, setSaleType] = useState<SaleType>(editingSale?.saleType || 'IN-PERSON');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // Update state when editingSale changes
@@ -24,6 +25,7 @@ const EditSaleModal: React.FC<Props> = ({ editingSale, setEditingSale }) => {
       setPriceSold(editingSale.priceSold);
       setCustomerName(editingSale.customerName);
       setDate(new Date(editingSale.date).toISOString().slice(0, 10));
+      setSaleType(editingSale.saleType);
       setErrors({});
     }
   }, [editingSale]);
@@ -53,6 +55,7 @@ const EditSaleModal: React.FC<Props> = ({ editingSale, setEditingSale }) => {
       priceSold,
       customerName,
       date: date && date.trim() ? new Date(date).toISOString() : new Date().toISOString(),
+      saleType,
     });
     setEditingSale(null);
   };
@@ -108,6 +111,15 @@ const EditSaleModal: React.FC<Props> = ({ editingSale, setEditingSale }) => {
             <label>
               Date:
               <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            </label>
+          </div>
+          <div className="form-group">
+            <label>
+              Sale Type:
+              <select value={saleType} onChange={(e) => setSaleType(e.target.value as SaleType)}>
+                <option value="IN-PERSON">In-Person</option>
+                <option value="OLX">OLX</option>
+              </select>
             </label>
           </div>
 

@@ -80,6 +80,7 @@ CREATE TABLE IF NOT EXISTS sales (
     price_sold DECIMAL(10,2) NOT NULL,
     customer_name VARCHAR(255) NOT NULL,
     date DATE NOT NULL,
+    sale_type VARCHAR(20) NOT NULL CHECK (sale_type IN ('OLX', 'IN-PERSON')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

@@ -12,7 +12,7 @@ import {
   useSalesActions,
   useTeamsList,
 } from '../../stores';
-import { Sale } from '../../types';
+import { Sale, SaleType } from '../../types';
 import { getProductDisplayText } from '../../utils/utils';
 
 const AddSaleForm: React.FC = () => {
@@ -34,6 +34,7 @@ const AddSaleForm: React.FC = () => {
   const [priceSold, setPriceSold] = useState<number>(0);
   const [customerName, setCustomerName] = useState('');
   const [date, setDate] = useState('');
+  const [saleType, setSaleType] = useState<SaleType>('IN-PERSON');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // when product changes, default size selection to first available size
@@ -124,6 +125,7 @@ const AddSaleForm: React.FC = () => {
           return new Date().toISOString();
         }
       })(),
+      saleType,
       createdAt: new Date().toISOString(),
     };
 
@@ -136,6 +138,7 @@ const AddSaleForm: React.FC = () => {
     setPriceSold(0);
     setCustomerName('');
     setDate('');
+    setSaleType('IN-PERSON');
   };
 
   return (
@@ -237,6 +240,14 @@ const AddSaleForm: React.FC = () => {
       <div className="form-group">
         <label>Date</label>
         <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+      </div>
+
+      <div className="form-group">
+        <label>Sale Type</label>
+        <select value={saleType} onChange={(e) => setSaleType(e.target.value as SaleType)}>
+          <option value="IN-PERSON">In-Person</option>
+          <option value="OLX">OLX</option>
+        </select>
       </div>
 
       <div className="form-button-container">

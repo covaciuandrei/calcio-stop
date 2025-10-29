@@ -919,6 +919,7 @@ export async function createSale(data) {
     price_sold: data.priceSold,
     customer_name: data.customerName,
     date: data.date, // This will now store the full timestamp
+    sale_type: data.saleType,
     created_at: data.createdAt || new Date().toISOString(),
   };
 
@@ -935,6 +936,7 @@ export async function createSale(data) {
     priceSold: result.price_sold,
     customerName: result.customer_name,
     date: result.date,
+    saleType: result.sale_type,
     createdAt: result.created_at,
   };
 }
@@ -953,6 +955,7 @@ export async function getSales() {
     priceSold: sale.price_sold,
     customerName: sale.customer_name,
     date: sale.date,
+    saleType: sale.sale_type,
     createdAt: sale.created_at,
   }));
 }
@@ -979,6 +982,9 @@ export async function updateSale(id, updates) {
   if (updates.date !== undefined) {
     dbUpdates.date = updates.date;
   }
+  if (updates.saleType !== undefined) {
+    dbUpdates.sale_type = updates.saleType;
+  }
 
   const { data, error } = await supabase.from('sales').update(dbUpdates).eq('id', id).select().single();
 
@@ -993,6 +999,7 @@ export async function updateSale(id, updates) {
     priceSold: data.price_sold,
     customerName: data.customer_name,
     date: data.date,
+    saleType: data.sale_type,
     createdAt: data.created_at,
   };
 }

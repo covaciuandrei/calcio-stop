@@ -1,3 +1,5 @@
+export type SaleType = 'OLX' | 'IN-PERSON';
+
 export interface Sale {
   id: string;
   productId: string;
@@ -6,5 +8,6 @@ export interface Sale {
   priceSold: number;
   customerName: string;
   date: string;
+  saleType: SaleType;
   createdAt: string; // ISO date string
 }

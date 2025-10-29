@@ -45,7 +45,8 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, searchTerm =
       sale.size.toLowerCase().includes(searchTerm.toLowerCase()) ||
       sale.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       sale.quantity.toString().includes(searchTerm) ||
-      sale.priceSold.toString().includes(searchTerm)
+      sale.priceSold.toString().includes(searchTerm) ||
+      sale.saleType.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
 
@@ -66,6 +67,7 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, searchTerm =
           <th>Quantity</th>
           <th>Price Sold (RON)</th>
           <th>Customer</th>
+          <th>Sale Type</th>
           <th>Date</th>
           <th>Actions</th>
         </tr>
@@ -78,6 +80,7 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, searchTerm =
             <td>{s.quantity}</td>
             <td className="price-display">{s.priceSold ? s.priceSold.toFixed(2) : '0.00'} RON</td>
             <td>{s.customerName || 'N/A'}</td>
+            <td>{s.saleType}</td>
             <td>{new Date(s.date).toLocaleString()}</td>
             <td>
               <button onClick={() => onEdit(s)} className="btn btn-icon btn-success" title="Edit">
