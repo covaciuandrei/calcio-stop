@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import * as db from '../lib/db';
@@ -31,6 +32,7 @@ export const productsSelectors = {
     state.products.filter((p) => p.namesetId === namesetId),
   getAvailableProducts: (state: ProductsState) => state.products.filter((p) => p.sizes.some((s) => s.quantity > 0)),
   getSoldOutProducts: (state: ProductsState) => state.products.filter((p) => p.sizes.every((s) => s.quantity === 0)),
+  getAllProducts: (state: ProductsState) => [...state.products, ...state.archivedProducts], // Combined active and archived
   getTotalProducts: (state: ProductsState) => state.products.length,
   getTotalArchivedProducts: (state: ProductsState) => state.archivedProducts.length,
 };
@@ -222,6 +224,12 @@ export const useProductsStore = create<ProductsState>()(
 export const useProducts = () => useProductsStore();
 export const useProductsList = () => useProductsStore((state) => state.products);
 export const useArchivedProducts = () => useProductsStore((state) => state.archivedProducts);
+export const useAllProducts = () => {
+  const products = useProductsStore((state) => state.products);
+  const archivedProducts = useProductsStore((state) => state.archivedProducts);
+
+  return useMemo(() => [...products, ...archivedProducts], [products, archivedProducts]);
+};
 export const useSoldOutProducts = () => useProductsStore((state) => state.products);
 // Individual action hooks to avoid object recreation
 export const useAddProduct = () => useProductsStore((state) => state.addProduct);

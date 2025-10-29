@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { statsService } from '../../lib/statsService';
 import {
   useArchivedBadges,
   useArchivedKitTypes,
@@ -65,6 +66,13 @@ const ProductDetailPage: React.FC = () => {
       }
     }
   }, [id, activeProducts, archivedProducts]);
+
+  // Track product view when product is loaded (only for public routes)
+  useEffect(() => {
+    if (product && id && isPublicRoute) {
+      statsService.trackProductView(id);
+    }
+  }, [product, id, isPublicRoute]);
 
   // Close badge dropdown when clicking outside
   useEffect(() => {

@@ -122,6 +122,13 @@ CREATE TABLE IF NOT EXISTS settings (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Views table (for tracking product page views)
+CREATE TABLE IF NOT EXISTS views (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    timestamp TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Users table (for authentication)
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -142,7 +149,7 @@ ON CONFLICT (name) DO NOTHING;
 
 -- Insert default settings
 INSERT INTO settings (key, value) VALUES 
-    ('app_bar_order', '["dashboard", "products", "sales", "namesets", "teams", "badges", "kittypes"]'::jsonb),
+    ('app_bar_order', '["dashboard", "products", "sales", "namesets", "teams", "badges", "kittypes", "stats"]'::jsonb),
     ('dashboard_order', '["products", "sales", "namesets", "teams", "badges", "kitTypes"]'::jsonb),
     ('registration_enabled', 'true'::jsonb),
     ('maintenance_mode', 'false'::jsonb)
@@ -171,6 +178,8 @@ CREATE INDEX IF NOT EXISTS idx_product_images_product_id ON product_images(produ
 CREATE INDEX IF NOT EXISTS idx_product_images_display_order ON product_images(display_order);
 CREATE INDEX IF NOT EXISTS idx_order_images_order_id ON order_images(order_id);
 CREATE INDEX IF NOT EXISTS idx_order_images_display_order ON order_images(display_order);
+CREATE INDEX IF NOT EXISTS idx_views_product_id ON views(product_id);
+CREATE INDEX IF NOT EXISTS idx_views_timestamp ON views(timestamp);
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE teams ENABLE ROW LEVEL SECURITY;
@@ -184,6 +193,7 @@ ALTER TABLE order_images ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sales ENABLE ROW LEVEL SECURITY;
 ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE views ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for public access (adjust based on your security requirements)
 CREATE POLICY "Allow all operations for authenticated users" ON teams FOR ALL USING (true);
@@ -197,3 +207,22 @@ CREATE POLICY "Allow all operations for authenticated users" ON order_images FOR
 CREATE POLICY "Allow all operations for authenticated users" ON sales FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON settings FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON users FOR ALL USING (true);
+-- Allow inserts for everyone (including unauthenticated users) for view tracking
+CREATE POLICY "Allow inserts for view tracking" ON views 
+FOR INSERT 
+WITH CHECK (true);
+
+-- Allow reads for authenticated users only
+CREATE POLICY "Allow reads for authenticated users" ON views 
+FOR SELECT 
+USING (true);
+
+-- Allow updates for authenticated users only  
+CREATE POLICY "Allow updates for authenticated users" ON views 
+FOR UPDATE 
+USING (true);
+
+-- Allow deletes for authenticated users only
+CREATE POLICY "Allow deletes for authenticated users" ON views 
+FOR DELETE 
+USING (true);

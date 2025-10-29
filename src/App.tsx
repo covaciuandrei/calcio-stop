@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import './App.css';
+import StatsDashboard from './components/admin/StatsDashboard';
 import { SystemSettings } from './components/admin/SystemSettings';
 import { AuthGuard } from './components/auth/AuthGuard';
 import { UserMenu } from './components/auth/UserMenu';
@@ -154,6 +155,29 @@ const App: React.FC = () => {
                         <line x1="12" y1="22.08" x2="12" y2="12" />
                       </svg>
                     </button>
+                    <button
+                      className="settings-button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.location.href = '/stats';
+                      }}
+                      title="Statistics"
+                    >
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M3 3v18h18" />
+                        <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
+                      </svg>
+                    </button>
                     <UserMenu />
                   </div>
                 </nav>
@@ -169,6 +193,7 @@ const App: React.FC = () => {
                   <Route path="/badges" element={<BadgesPage />} />
                   <Route path="/badges/:id" element={<BadgeDetailPage />} />
                   <Route path="/kittypes" element={<KitTypesPage />} />
+                  <Route path="/stats" element={<StatsDashboard />} />
                   <Route path="/settings" element={<SystemSettings />} />
                 </Routes>
 

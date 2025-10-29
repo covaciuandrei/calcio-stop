@@ -40,6 +40,7 @@ export {
 } from './namesetsStore';
 export { useArchivedOrders, useOrdersActions, useOrdersList, useOrdersStore } from './ordersStore';
 export {
+  useAllProducts,
   useArchivedProducts,
   useProducts,
   useProductsActions,

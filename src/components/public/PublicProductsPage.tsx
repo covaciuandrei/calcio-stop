@@ -1,9 +1,9 @@
 import React from 'react';
-import { useProductsList } from '../../stores';
+import { useAllProducts } from '../../stores';
 import ProductsTableListCard from '../products/ProductsTableListCard';
 
 const PublicProductsPage: React.FC = () => {
-  const products = useProductsList();
+  const products = useAllProducts();
 
   return (
     <div className="public-mode">

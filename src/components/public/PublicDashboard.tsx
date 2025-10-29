@@ -1,15 +1,15 @@
 import React from 'react';
-import { useBadgesList, useProductsList } from '../../stores';
+import { useAllProducts, useBadgesList } from '../../stores';
 import BadgeTableListCard from '../badges/BadgeTableListCard';
 import ProductsTableListCard from '../products/ProductsTableListCard';
 
 const PublicDashboard: React.FC = () => {
-  const products = useProductsList();
+  const products = useAllProducts();
   const badges = useBadgesList();
 
   return (
     <div className="page-container">
-      <ProductsTableListCard products={products} isReadOnly={true} showActions={false} limit={10} />
+      <ProductsTableListCard products={products} isReadOnly={true} showActions={false} />
 
       <BadgeTableListCard badges={badges} isReadOnly={true} showActions={false} limit={10} />
     </div>
