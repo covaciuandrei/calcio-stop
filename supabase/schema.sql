@@ -83,6 +83,35 @@ CREATE TABLE IF NOT EXISTS sales (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Orders table
+CREATE TABLE IF NOT EXISTS orders (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    type VARCHAR(50) NOT NULL CHECK (type IN ('shirt', 'shorts', 'kid kit', 'adult kit')),
+    sizes JSONB NOT NULL DEFAULT '[]'::jsonb,
+    nameset_id UUID NULL REFERENCES namesets(id),
+    team_id UUID NULL REFERENCES teams(id),
+    kit_type_id UUID NOT NULL REFERENCES kit_types(id),
+    badge_id UUID NULL REFERENCES badges(id),
+    price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    status VARCHAR(50) NOT NULL DEFAULT 'to order' CHECK (status IN ('to order', 'ordered', 'received', 'message sent', 'finished')),
+    customer_name VARCHAR(255) NULL,
+    phone_number VARCHAR(20) NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    archived_at TIMESTAMP WITH TIME ZONE NULL
+);
+
+-- Order Images table
+CREATE TABLE IF NOT EXISTS order_images (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    image_url TEXT NOT NULL,
+    alt_text VARCHAR(255),
+    is_primary BOOLEAN DEFAULT FALSE,
+    display_order INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Settings table (for app configuration)
 CREATE TABLE IF NOT EXISTS settings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -124,15 +153,23 @@ CREATE INDEX IF NOT EXISTS idx_kit_types_archived_at ON kit_types(archived_at);
 CREATE INDEX IF NOT EXISTS idx_badges_archived_at ON badges(archived_at);
 CREATE INDEX IF NOT EXISTS idx_namesets_archived_at ON namesets(archived_at);
 CREATE INDEX IF NOT EXISTS idx_products_archived_at ON products(archived_at);
+CREATE INDEX IF NOT EXISTS idx_orders_archived_at ON orders(archived_at);
 CREATE INDEX IF NOT EXISTS idx_sales_date ON sales(date);
 CREATE INDEX IF NOT EXISTS idx_sales_product_id ON sales(product_id);
 CREATE INDEX IF NOT EXISTS idx_products_team_id ON products(team_id);
 CREATE INDEX IF NOT EXISTS idx_products_nameset_id ON products(nameset_id);
 CREATE INDEX IF NOT EXISTS idx_products_kit_type_id ON products(kit_type_id);
 CREATE INDEX IF NOT EXISTS idx_products_badge_id ON products(badge_id);
+CREATE INDEX IF NOT EXISTS idx_orders_team_id ON orders(team_id);
+CREATE INDEX IF NOT EXISTS idx_orders_nameset_id ON orders(nameset_id);
+CREATE INDEX IF NOT EXISTS idx_orders_kit_type_id ON orders(kit_type_id);
+CREATE INDEX IF NOT EXISTS idx_orders_badge_id ON orders(badge_id);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_namesets_kit_type_id ON namesets(kit_type_id);
 CREATE INDEX IF NOT EXISTS idx_product_images_product_id ON product_images(product_id);
 CREATE INDEX IF NOT EXISTS idx_product_images_display_order ON product_images(display_order);
+CREATE INDEX IF NOT EXISTS idx_order_images_order_id ON order_images(order_id);
+CREATE INDEX IF NOT EXISTS idx_order_images_display_order ON order_images(display_order);
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE teams ENABLE ROW LEVEL SECURITY;
@@ -141,6 +178,8 @@ ALTER TABLE badges ENABLE ROW LEVEL SECURITY;
 ALTER TABLE namesets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE product_images ENABLE ROW LEVEL SECURITY;
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE order_images ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sales ENABLE ROW LEVEL SECURITY;
 ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
@@ -152,6 +191,8 @@ CREATE POLICY "Allow all operations for authenticated users" ON badges FOR ALL U
 CREATE POLICY "Allow all operations for authenticated users" ON namesets FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON products FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON product_images FOR ALL USING (true);
+CREATE POLICY "Allow all operations for authenticated users" ON orders FOR ALL USING (true);
+CREATE POLICY "Allow all operations for authenticated users" ON order_images FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON sales FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON settings FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON users FOR ALL USING (true);

@@ -122,7 +122,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
       {isOpen && (
         <div className="filters-inline">
           <div className="filters-grid">
-            {/* Basic Product Info - Most Important */}
+            {/* Row 1: Team & Type */}
             <div className="filter-group">
               <label>Team</label>
               <select value={filters.team} onChange={(e) => handleFilterChange('team', e.target.value)}>
@@ -147,6 +147,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
               </select>
             </div>
 
+            {/* Row 2: Kit Type - Full width */}
             <div className="filter-group">
               <label>Kit Type</label>
               <select value={filters.kitType} onChange={(e) => handleFilterChange('kitType', e.target.value)}>
@@ -164,7 +165,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
               </select>
             </div>
 
-            {/* Price Range - Important for shopping */}
+            {/* Row 3: Price Range - Full width */}
             <div className="filter-group price-range">
               <label>Price Range</label>
               <div className="price-inputs">
@@ -184,7 +185,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
               </div>
             </div>
 
-            {/* Sizes - Important for shopping */}
+            {/* Row 4: Sizes - Full width */}
             <div className="filter-group">
               <label>Sizes</label>
               <div className="sizes-checkboxes">
@@ -201,7 +202,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
               </div>
             </div>
 
-            {/* Nameset Details */}
+            {/* Row 5: Season & Badge */}
             <div className="filter-group">
               <label>Season</label>
               <select value={filters.season} onChange={(e) => handleFilterChange('season', e.target.value)}>
@@ -214,6 +215,24 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
               </select>
             </div>
 
+            <div className="filter-group">
+              <label>Badge</label>
+              <select value={filters.badge} onChange={(e) => handleFilterChange('badge', e.target.value)}>
+                <option value="">All Badges</option>
+                {badges.map((badge) => (
+                  <option key={badge.id} value={badge.name}>
+                    {badge.name}
+                  </option>
+                ))}
+                {archivedBadges.map((badge) => (
+                  <option key={badge.id} value={badge.name}>
+                    {badge.name} (Archived)
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Row 6: Player & Number */}
             <div className="filter-group">
               <label>Player</label>
               <input
@@ -232,24 +251,6 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
                 value={filters.number}
                 onChange={(e) => handleFilterChange('number', e.target.value)}
               />
-            </div>
-
-            {/* Badge - Less commonly used */}
-            <div className="filter-group">
-              <label>Badge</label>
-              <select value={filters.badge} onChange={(e) => handleFilterChange('badge', e.target.value)}>
-                <option value="">All Badges</option>
-                {badges.map((badge) => (
-                  <option key={badge.id} value={badge.name}>
-                    {badge.name}
-                  </option>
-                ))}
-                {archivedBadges.map((badge) => (
-                  <option key={badge.id} value={badge.name}>
-                    {badge.name} (Archived)
-                  </option>
-                ))}
-              </select>
             </div>
           </div>
         </div>

@@ -80,6 +80,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  -webkit-overflow-scrolling: touch;
 }
 
 .tableContainer table {
@@ -88,6 +89,23 @@
   table-layout: auto;
   flex: 1;
   min-height: 0;
+}
+
+/* Mobile table container adjustments */
+@media (max-width: 768px) {
+  .tableContainer {
+    max-height: 500px;
+    min-height: 200px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .tableContainer {
+    max-height: 400px;
+    min-height: 150px;
+  }
 }
 
 .emptyState {

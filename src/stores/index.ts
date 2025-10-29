@@ -4,6 +4,7 @@ export * from './badgesStore';
 export * from './counterStore';
 export * from './kitTypesStore';
 export * from './namesetsStore';
+export * from './ordersStore';
 export * from './productsStore';
 export * from './salesStore';
 export * from './settingsStore';
@@ -37,6 +38,7 @@ export {
   useNamesetsStore,
   useSoldOutNamesets,
 } from './namesetsStore';
+export { useArchivedOrders, useOrdersActions, useOrdersList, useOrdersStore } from './ordersStore';
 export {
   useArchivedProducts,
   useProducts,

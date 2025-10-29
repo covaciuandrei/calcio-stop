@@ -21,6 +21,11 @@
   .product-detail-content {
     grid-template-columns: 1fr;
   }
+
+  /* Further reduce spacing on mobile for public mode */
+  .public-mode .product-detail-content {
+    gap: var(--space-1);
+  }
 }
 
 /* Product Images Section */
@@ -486,6 +491,11 @@
 
 .public-mode .product-detail-header .btn:not(.btn-secondary) {
   display: none;
+}
+
+/* Reduce spacing between main cards in public mode */
+.public-mode .product-detail-content {
+  gap: var(--space-2);
 }
 
 /* Ensure OLX Link button is visible in public mode */

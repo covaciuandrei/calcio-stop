@@ -732,7 +732,6 @@ export async function getProducts() {
     kitTypeId: item.kit_type_id,
     badgeId: item.badge_id,
     price: item.price,
-    olxLink: item.olx_link,
     createdAt: item.created_at,
     images: (item.product_images || []).map((img) => ({
       id: img.id,
@@ -779,7 +778,6 @@ export async function getArchivedProducts() {
     kitTypeId: item.kit_type_id,
     badgeId: item.badge_id,
     price: item.price,
-    olxLink: item.olx_link,
     createdAt: item.created_at,
     images: (item.product_images || []).map((img) => ({
       id: img.id,
@@ -1129,4 +1127,274 @@ export async function isRegistrationEnabled() {
 
 export async function setRegistrationEnabled(enabled) {
   return await setSystemSetting('registration_enabled', enabled);
+}
+
+// ============================================================================
+// ORDERS CRUD OPERATIONS
+// ============================================================================
+
+export async function addOrder(data) {
+  // Validate required fields
+  if (!data.name && !data.teamId) {
+    throw new Error('Order name or team is required');
+  }
+  if (!data.type) {
+    throw new Error('Order type is required');
+  }
+  if (!data.kitTypeId) {
+    throw new Error('Kit type is required');
+  }
+  if (!data.status) {
+    throw new Error('Order status is required');
+  }
+
+  // Map frontend data to database schema
+  const dbData = {
+    name: data.name,
+    type: data.type,
+    sizes: data.sizes || [],
+    nameset_id: data.namesetId || null,
+    team_id: data.teamId,
+    kit_type_id: data.kitTypeId,
+    badge_id: data.badgeId || null,
+    price: parseFloat(data.price) || 0.0,
+    status: data.status,
+    customer_name: data.customerName || null,
+    phone_number: data.phoneNumber || null,
+    created_at: data.createdAt || new Date().toISOString(),
+    archived_at: null,
+  };
+
+  const { data: result, error } = await supabase.from('orders').insert([dbData]).select().single();
+
+  if (error) {
+    throw error;
+  }
+
+  // Map database response back to frontend format
+  return {
+    id: result.id,
+    name: result.name,
+    type: result.type,
+    sizes: result.sizes,
+    namesetId: result.nameset_id,
+    teamId: result.team_id,
+    kitTypeId: result.kit_type_id,
+    badgeId: result.badge_id,
+    price: result.price,
+    status: result.status,
+    customerName: result.customer_name,
+    phoneNumber: result.phone_number,
+    createdAt: result.created_at,
+  };
+}
+
+export async function getOrders() {
+  const { data, error } = await supabase
+    .from('orders')
+    .select(
+      `
+      *,
+      order_images (
+        id,
+        order_id,
+        image_url,
+        alt_text,
+        is_primary,
+        display_order,
+        created_at
+      )
+    `
+    )
+    .is('archived_at', null)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return (data || []).map((item) => ({
+    id: item.id,
+    name: item.name,
+    type: item.type,
+    sizes: item.sizes,
+    namesetId: item.nameset_id,
+    teamId: item.team_id,
+    kitTypeId: item.kit_type_id,
+    badgeId: item.badge_id,
+    price: item.price,
+    status: item.status,
+    customerName: item.customer_name,
+    phoneNumber: item.phone_number,
+    createdAt: item.created_at,
+    images: (item.order_images || []).map((img) => ({
+      id: img.id,
+      orderId: img.order_id,
+      imageUrl: img.image_url,
+      altText: img.alt_text,
+      isPrimary: img.is_primary,
+      displayOrder: img.display_order,
+      createdAt: img.created_at,
+    })),
+  }));
+}
+
+export async function getArchivedOrders() {
+  const { data, error } = await supabase
+    .from('orders')
+    .select(
+      `
+      *,
+      order_images (
+        id,
+        order_id,
+        image_url,
+        alt_text,
+        is_primary,
+        display_order,
+        created_at
+      )
+    `
+    )
+    .not('archived_at', 'is', null)
+    .order('archived_at', { ascending: false });
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return (data || []).map((item) => ({
+    id: item.id,
+    name: item.name,
+    type: item.type,
+    sizes: item.sizes,
+    namesetId: item.nameset_id,
+    teamId: item.team_id,
+    kitTypeId: item.kit_type_id,
+    badgeId: item.badge_id,
+    price: item.price,
+    status: item.status,
+    customerName: item.customer_name,
+    phoneNumber: item.phone_number,
+    createdAt: item.created_at,
+    images: (item.order_images || []).map((img) => ({
+      id: img.id,
+      orderId: img.order_id,
+      imageUrl: img.image_url,
+      altText: img.alt_text,
+      isPrimary: img.is_primary,
+      displayOrder: img.display_order,
+      createdAt: img.created_at,
+    })),
+  }));
+}
+
+export async function updateOrder(id, updates) {
+  // Map frontend data to database schema
+  const dbUpdates = {};
+
+  if (updates.name !== undefined) {
+    dbUpdates.name = updates.name;
+  }
+  if (updates.type !== undefined) {
+    dbUpdates.type = updates.type;
+  }
+  if (updates.sizes !== undefined) {
+    dbUpdates.sizes = updates.sizes;
+  }
+  if (updates.namesetId !== undefined) {
+    dbUpdates.nameset_id = updates.namesetId;
+  }
+  if (updates.teamId !== undefined) {
+    dbUpdates.team_id = updates.teamId;
+  }
+  if (updates.kitTypeId !== undefined) {
+    dbUpdates.kit_type_id = updates.kitTypeId;
+  }
+  if (updates.badgeId !== undefined) {
+    dbUpdates.badge_id = updates.badgeId;
+  }
+  if (updates.price !== undefined) {
+    dbUpdates.price = parseFloat(updates.price);
+  }
+  if (updates.status !== undefined) {
+    dbUpdates.status = updates.status;
+  }
+  if (updates.customerName !== undefined) {
+    dbUpdates.customer_name = updates.customerName;
+  }
+  if (updates.phoneNumber !== undefined) {
+    dbUpdates.phone_number = updates.phoneNumber;
+  }
+
+  const { data, error } = await supabase
+    .from('orders')
+    .update(dbUpdates)
+    .eq('id', id)
+    .select(
+      `
+      *,
+      order_images (
+        id,
+        order_id,
+        image_url,
+        alt_text,
+        is_primary,
+        display_order,
+        created_at
+      )
+    `
+    )
+    .single();
+
+  if (error) throw error;
+
+  // Map database response back to frontend format
+  return {
+    id: data.id,
+    name: data.name,
+    type: data.type,
+    sizes: data.sizes,
+    namesetId: data.nameset_id,
+    teamId: data.team_id,
+    kitTypeId: data.kit_type_id,
+    badgeId: data.badge_id,
+    price: data.price,
+    status: data.status,
+    customerName: data.customer_name,
+    phoneNumber: data.phone_number,
+    createdAt: data.created_at,
+    images: (data.order_images || []).map((img) => ({
+      id: img.id,
+      orderId: img.order_id,
+      imageUrl: img.image_url,
+      altText: img.alt_text,
+      isPrimary: img.is_primary,
+      displayOrder: img.display_order,
+      createdAt: img.created_at,
+    })),
+  };
+}
+
+export async function deleteOrder(id) {
+  const { error } = await supabase.from('orders').delete().eq('id', id);
+
+  if (error) throw error;
+}
+
+export async function archiveOrder(id) {
+  const { data, error } = await supabase
+    .from('orders')
+    .update({ archived_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function unarchiveOrder(id) {
+  const { data, error } = await supabase.from('orders').update({ archived_at: null }).eq('id', id).select().single();
+
+  if (error) throw error;
+  return data;
 }
