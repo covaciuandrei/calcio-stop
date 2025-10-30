@@ -199,27 +199,39 @@ const StatsDashboard: React.FC = () => {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="dashboard-tabs">
+      <div className="dashboard-tabs" role="tablist" aria-label="Dashboard sections">
         <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'overview'}
+          tabIndex={activeTab === 'overview' ? 0 : -1}
           className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
           onClick={() => setActiveTab('overview')}
         >
           <span className="tab-icon">📊</span>
-          Overview
+          <span className="tab-label">Overview</span>
         </button>
         <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'products'}
+          tabIndex={activeTab === 'products' ? 0 : -1}
           className={`tab ${activeTab === 'products' ? 'active' : ''}`}
           onClick={() => setActiveTab('products')}
         >
           <span className="tab-icon">🛍️</span>
-          Products
+          <span className="tab-label">Products</span>
         </button>
         <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'inventory'}
+          tabIndex={activeTab === 'inventory' ? 0 : -1}
           className={`tab ${activeTab === 'inventory' ? 'active' : ''}`}
           onClick={() => setActiveTab('inventory')}
         >
           <span className="tab-icon">📦</span>
-          Inventory
+          <span className="tab-label">Inventory</span>
         </button>
       </div>
 
