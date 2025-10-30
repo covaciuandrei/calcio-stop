@@ -12,7 +12,13 @@ interface BadgeImageUploadProps {
   disabled?: boolean;
 }
 
-const BadgeImageUpload: React.FC<BadgeImageUploadProps> = ({ badgeId, onImageUploaded, onError, onAllUploadsComplete, disabled = false }) => {
+const BadgeImageUpload: React.FC<BadgeImageUploadProps> = ({
+  badgeId,
+  onImageUploaded,
+  onError,
+  onAllUploadsComplete,
+  disabled = false,
+}) => {
   const [isUploading, setIsUploading] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
   const [dragOver, setDragOver] = useState(false);
