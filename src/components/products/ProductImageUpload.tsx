@@ -24,88 +24,71 @@ const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
 
   const handleFileSelect = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
-
-    const originalFile = files[0];
-
-    // Validate file type
-    if (!originalFile.type.startsWith('image/')) {
-      onError('Please select an image file');
-      return;
-    }
-
     setIsUploading(true);
-
-    try {
+    for (let i = 0; i < files.length; i++) {
+      const originalFile = files[i];
+      // Validate file type
+      if (!originalFile.type.startsWith('image/')) {
+        onError('Please select image files only.');
+        continue;
+      }
       let fileToUpload = originalFile;
       let compressionInfo = '';
-
-      // Compress image if it's larger than 1MB
-      if (originalFile.size > 1024 * 1024) {
-        setIsCompressing(true);
-        try {
-          fileToUpload = await compressImage(originalFile, {
-            maxWidth: 1920,
-            maxHeight: 1080,
-            quality: 0.8,
-            maxSizeMB: 5,
-          });
-
-          const compressionData = getCompressionInfo(originalFile.size, fileToUpload.size);
-          compressionInfo = ` (${compressionData.text})`;
-        } catch (compressionError) {
-          console.warn('Image compression failed, using original file:', compressionError);
-          // If compression fails, try with original file
-        } finally {
-          setIsCompressing(false);
+      try {
+        // Compress image if it's larger than 1MB
+        if (originalFile.size > 1024 * 1024) {
+          setIsCompressing(true);
+          try {
+            fileToUpload = await compressImage(originalFile, {
+              maxWidth: 1920,
+              maxHeight: 1080,
+              quality: 0.8,
+              maxSizeMB: 5,
+            });
+            const compressionData = getCompressionInfo(originalFile.size, fileToUpload.size);
+            compressionInfo = ` (${compressionData.text})`;
+          } catch (compressionError) {
+            console.warn('Image compression failed, using original file:', compressionError);
+          } finally {
+            setIsCompressing(false);
+          }
         }
+        // Final size check
+        if (fileToUpload.size > 5 * 1024 * 1024) {
+          onError(
+            `File ${originalFile.name} is still too large after compression (${(fileToUpload.size / 1024 / 1024).toFixed(1)}MB)`
+          );
+          continue;
+        }
+        const fileExt = 'jpg';
+        const fileName = `${productId}/${Date.now()}_${i}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage.from('product-images').upload(fileName, fileToUpload);
+        if (uploadError) {
+          onError(`Upload failed for ${originalFile.name}: ${uploadError.message}`);
+          continue;
+        }
+        const { data: urlData } = supabase.storage.from('product-images').getPublicUrl(fileName);
+        const { data: imageData, error: dbError } = await supabase
+          .from('product_images')
+          .insert({
+            product_id: productId,
+            image_url: urlData.publicUrl,
+            alt_text: originalFile.name + compressionInfo,
+            is_primary: false,
+            display_order: 0,
+          })
+          .select()
+          .single();
+        if (dbError) {
+          onError(`DB error for ${originalFile.name}: ${dbError.message}`);
+          continue;
+        }
+        onImageUploaded(imageData);
+      } catch (error) {
+        onError(error instanceof Error ? error.message : `Failed to upload image ${originalFile.name}`);
       }
-
-      // Final size check (after compression)
-      if (fileToUpload.size > 5 * 1024 * 1024) {
-        onError(
-          `File is still too large after compression (${(fileToUpload.size / 1024 / 1024).toFixed(1)}MB). Please try a smaller image.`
-        );
-        return;
-      }
-
-      // Generate unique filename
-      const fileExt = 'jpg'; // Always use jpg after compression
-      const fileName = `${productId}/${Date.now()}.${fileExt}`;
-
-      // Upload file to Supabase Storage
-      const { error: uploadError } = await supabase.storage.from('product-images').upload(fileName, fileToUpload);
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      // Get public URL
-      const { data: urlData } = supabase.storage.from('product-images').getPublicUrl(fileName);
-
-      // Save image record to database
-      const { data: imageData, error: dbError } = await supabase
-        .from('product_images')
-        .insert({
-          product_id: productId,
-          image_url: urlData.publicUrl,
-          alt_text: originalFile.name + compressionInfo,
-          is_primary: false,
-          display_order: 0,
-        })
-        .select()
-        .single();
-
-      if (dbError) {
-        throw dbError;
-      }
-
-      onImageUploaded(imageData);
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      onError(error instanceof Error ? error.message : 'Failed to upload image');
-    } finally {
-      setIsUploading(false);
     }
+    setIsUploading(false);
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -143,6 +126,7 @@ const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
           ref={fileInputRef}
           type="file"
           accept="image/*"
+          multiple
           onChange={(e) => handleFileSelect(e.target.files)}
           style={{ display: 'none' }}
           disabled={disabled}
