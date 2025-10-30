@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { ProductImage } from '../types';
 
@@ -74,6 +74,12 @@ export const useProductImages = (productId: string) => {
   const [images, setImages] = useState<ProductImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refetchTrigger, setRefetchTrigger] = useState(0);
+
+  const refetch = useCallback(() => {
+    invalidateProductImageCache(productId);
+    setRefetchTrigger((prev) => prev + 1);
+  }, [productId]);
 
   useEffect(() => {
     const loadImages = async () => {
@@ -98,9 +104,9 @@ export const useProductImages = (productId: string) => {
     };
 
     loadImages();
-  }, [productId]);
+  }, [productId, refetchTrigger]);
 
-  return { images, loading, error };
+  return { images, loading, error, refetch };
 };
 
 export const useProductImagesMap = (productIds: string[]) => {

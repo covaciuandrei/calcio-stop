@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
-import { BadgeImage } from '../../types';
+import { useBadgeImages } from '../../hooks/useBadgeImages';
 import './BadgeImageManager.css';
 import BadgeImageUpload from './BadgeImageUpload';
 
@@ -10,68 +10,24 @@ interface BadgeImageManagerProps {
 }
 
 const BadgeImageManager: React.FC<BadgeImageManagerProps> = ({ badgeId, isAdmin = false }) => {
-  const [images, setImages] = useState<BadgeImage[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
 
-  const loadImages = useCallback(async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('badge_images')
-        .select('*')
-        .eq('badge_id', badgeId)
-        .order('display_order', { ascending: true });
-
-      if (error) {
-        throw error;
-      }
-
-      // Map database response to frontend format
-      const mappedImages = (data || []).map((item) => ({
-        id: item.id,
-        badgeId: item.badge_id,
-        imageUrl: item.image_url,
-        altText: item.alt_text,
-        isPrimary: item.is_primary,
-        displayOrder: item.display_order,
-        createdAt: item.created_at,
-      }));
-
-      setImages(mappedImages);
-    } catch (error) {
-      console.error('Error loading images:', error);
-      setError(error instanceof Error ? error.message : 'Failed to load images');
-    } finally {
-      setLoading(false);
-    }
-  }, [badgeId]);
-
-  // Load images for the badge
-  useEffect(() => {
-    loadImages();
-  }, [loadImages]);
+  // Use cached hook for images
+  const { images, loading, error, refetch } = useBadgeImages(badgeId);
 
   const handleImageUploaded = (newImage: any) => {
-    // Map database response to frontend format
-    const mappedImage: BadgeImage = {
-      id: newImage.id,
-      badgeId: newImage.badge_id,
-      imageUrl: newImage.image_url,
-      altText: newImage.alt_text,
-      isPrimary: newImage.is_primary,
-      displayOrder: newImage.display_order,
-      createdAt: newImage.created_at,
-    };
+    // Individual image uploaded (can be ignored if using onAllUploadsComplete)
+  };
 
-    setImages((prev) => [...prev, mappedImage]);
-    setError(null);
+  const handleAllUploadsComplete = () => {
+    // Refetch images to show all newly uploaded images
+    refetch();
   };
 
   const handleUploadError = (errorMessage: string) => {
-    setError(errorMessage);
+    setLocalError(errorMessage);
   };
 
   const handleDeleteImage = async (imageId: string) => {
@@ -96,10 +52,11 @@ const BadgeImageManager: React.FC<BadgeImageManagerProps> = ({ badgeId, isAdmin 
         throw error;
       }
 
-      setImages((prev) => prev.filter((img) => img.id !== imageId));
+      // Refetch images to show updated list
+      refetch();
     } catch (error) {
       console.error('Error deleting image:', error);
-      setError(error instanceof Error ? error.message : 'Failed to delete image');
+      setLocalError(error instanceof Error ? error.message : 'Failed to delete image');
     }
   };
 
@@ -115,16 +72,11 @@ const BadgeImageManager: React.FC<BadgeImageManagerProps> = ({ badgeId, isAdmin 
         throw error;
       }
 
-      // Update local state
-      setImages((prev) =>
-        prev.map((img) => ({
-          ...img,
-          isPrimary: img.id === imageId,
-        }))
-      );
+      // Refetch images to show updated list
+      refetch();
     } catch (error) {
       console.error('Error setting primary image:', error);
-      setError(error instanceof Error ? error.message : 'Failed to set primary image');
+      setLocalError(error instanceof Error ? error.message : 'Failed to set primary image');
     }
   };
 
@@ -157,10 +109,10 @@ const BadgeImageManager: React.FC<BadgeImageManagerProps> = ({ badgeId, isAdmin 
 
   return (
     <div className="badge-image-manager">
-      {error && (
+      {(error || localError) && (
         <div className="error-message">
-          {error}
-          <button onClick={() => setError(null)} className="error-close">
+          {error || localError}
+          <button onClick={() => setLocalError(null)} className="error-close">
             ×
           </button>
         </div>
@@ -249,7 +201,12 @@ const BadgeImageManager: React.FC<BadgeImageManagerProps> = ({ badgeId, isAdmin 
 
       {/* Upload Component for Admin */}
       {isAdmin && (
-        <BadgeImageUpload badgeId={badgeId} onImageUploaded={handleImageUploaded} onError={handleUploadError} />
+        <BadgeImageUpload
+          badgeId={badgeId}
+          onImageUploaded={handleImageUploaded}
+          onAllUploadsComplete={handleAllUploadsComplete}
+          onError={handleUploadError}
+        />
       )}
 
       {/* Image Modal */}

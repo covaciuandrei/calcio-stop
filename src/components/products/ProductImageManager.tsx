@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { invalidateProductImageCache, useProductImages } from '../../hooks/useProductImages';
+import { useProductImages } from '../../hooks/useProductImages';
 import { supabase } from '../../lib/supabaseClient';
 import './ProductImageManager.css';
 import ProductImageUpload from './ProductImageUpload';
@@ -15,11 +15,15 @@ const ProductImageManager: React.FC<ProductImageManagerProps> = ({ productId, is
   const [localError, setLocalError] = useState<string | null>(null);
 
   // Use cached hook for images
-  const { images, loading, error } = useProductImages(productId);
+  const { images, loading, error, refetch } = useProductImages(productId);
 
   const handleImageUploaded = (newImage: any) => {
-    // Invalidate cache to force reload
-    invalidateProductImageCache(productId);
+    // Individual image uploaded (can be ignored if using onAllUploadsComplete)
+  };
+
+  const handleAllUploadsComplete = () => {
+    // Refetch images to show all newly uploaded images
+    refetch();
   };
 
   const handleUploadError = (errorMessage: string) => {
@@ -48,8 +52,8 @@ const ProductImageManager: React.FC<ProductImageManagerProps> = ({ productId, is
         throw error;
       }
 
-      // Invalidate cache to force reload
-      invalidateProductImageCache(productId);
+      // Refetch images to show updated list
+      refetch();
     } catch (error) {
       console.error('Error deleting image:', error);
       setLocalError(error instanceof Error ? error.message : 'Failed to delete image');
@@ -68,8 +72,8 @@ const ProductImageManager: React.FC<ProductImageManagerProps> = ({ productId, is
         throw error;
       }
 
-      // Invalidate cache to force reload
-      invalidateProductImageCache(productId);
+      // Refetch images to show updated list
+      refetch();
     } catch (error) {
       console.error('Error setting primary image:', error);
       setLocalError(error instanceof Error ? error.message : 'Failed to set primary image');
@@ -197,7 +201,12 @@ const ProductImageManager: React.FC<ProductImageManagerProps> = ({ productId, is
 
       {/* Upload Component for Admin */}
       {isAdmin && (
-        <ProductImageUpload productId={productId} onImageUploaded={handleImageUploaded} onError={handleUploadError} />
+        <ProductImageUpload
+          productId={productId}
+          onImageUploaded={handleImageUploaded}
+          onAllUploadsComplete={handleAllUploadsComplete}
+          onError={handleUploadError}
+        />
       )}
 
       {/* Image Modal */}

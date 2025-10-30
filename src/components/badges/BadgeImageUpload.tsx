@@ -8,10 +8,11 @@ interface BadgeImageUploadProps {
   badgeId: string;
   onImageUploaded: (image: BadgeImage) => void;
   onError: (error: string) => void;
+  onAllUploadsComplete?: () => void;
   disabled?: boolean;
 }
 
-const BadgeImageUpload: React.FC<BadgeImageUploadProps> = ({ badgeId, onImageUploaded, onError, disabled = false }) => {
+const BadgeImageUpload: React.FC<BadgeImageUploadProps> = ({ badgeId, onImageUploaded, onError, onAllUploadsComplete, disabled = false }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -84,6 +85,10 @@ const BadgeImageUpload: React.FC<BadgeImageUploadProps> = ({ badgeId, onImageUpl
       }
     }
     setIsUploading(false);
+    // Call completion callback after all uploads finish
+    if (onAllUploadsComplete) {
+      onAllUploadsComplete();
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {

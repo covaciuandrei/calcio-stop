@@ -8,6 +8,7 @@ interface ProductImageUploadProps {
   productId: string;
   onImageUploaded: (image: ProductImage) => void;
   onError: (error: string) => void;
+  onAllUploadsComplete?: () => void;
   disabled?: boolean;
 }
 
@@ -15,6 +16,7 @@ const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
   productId,
   onImageUploaded,
   onError,
+  onAllUploadsComplete,
   disabled = false,
 }) => {
   const [isUploading, setIsUploading] = useState(false);
@@ -89,6 +91,10 @@ const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
       }
     }
     setIsUploading(false);
+    // Call completion callback after all uploads finish
+    if (onAllUploadsComplete) {
+      onAllUploadsComplete();
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {

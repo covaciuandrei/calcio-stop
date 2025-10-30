@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import * as db from '../lib/db';
 import { BadgeImage } from '../types';
 
@@ -54,6 +54,12 @@ export const useBadgeImages = (badgeId: string) => {
   const [images, setImages] = useState<BadgeImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refetchTrigger, setRefetchTrigger] = useState(0);
+
+  const refetch = useCallback(() => {
+    invalidateBadgeImageCache(badgeId);
+    setRefetchTrigger((prev) => prev + 1);
+  }, [badgeId]);
 
   useEffect(() => {
     const loadImages = async () => {
@@ -78,9 +84,9 @@ export const useBadgeImages = (badgeId: string) => {
     };
 
     loadImages();
-  }, [badgeId]);
+  }, [badgeId, refetchTrigger]);
 
-  return { images, loading, error };
+  return { images, loading, error, refetch };
 };
 
 export const useBadgeImagesMap = (badgeIds: string[]) => {
