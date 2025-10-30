@@ -51,6 +51,7 @@ const StatsDashboard: React.FC = () => {
       endDate: format(tomorrow, 'yyyy-MM-dd'),
     };
   });
+  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'inventory'>('overview');
 
   const loadStats = useCallback(async (currentDateRange: DateRange) => {
     try {
@@ -126,10 +127,15 @@ const StatsDashboard: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="stats-dashboard" style={{ position: 'relative' }}>
-        <div className="spinner-container">
-          <div className="spinner"></div>
-          <p className="loading-text">Loading statistics...</p>
+      <div className="modern-stats-dashboard">
+        <div className="loading-container">
+          <div className="loading-spinner">
+            <div className="spinner-ring"></div>
+            <div className="spinner-ring"></div>
+            <div className="spinner-ring"></div>
+          </div>
+          <h3>Loading Analytics</h3>
+          <p>Gathering your business insights...</p>
         </div>
       </div>
     );
@@ -137,94 +143,46 @@ const StatsDashboard: React.FC = () => {
 
   if (error) {
     return (
-      <div className="stats-dashboard">
-        <div className="card">
-          <div className="card-content">
-            <div className="error-message">
-              <h3>Error</h3>
-              <p>{error}</p>
-              <button onClick={() => loadStats(dateRange)} className="btn btn-primary">
-                Retry
-              </button>
-            </div>
-          </div>
+      <div className="modern-stats-dashboard">
+        <div className="error-container">
+          <div className="error-icon">⚠️</div>
+          <h3>Unable to Load Data</h3>
+          <p>{error}</p>
+          <button onClick={() => loadStats(dateRange)} className="btn btn-primary">
+            Try Again
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="stats-dashboard">
-      {/* Overview Cards */}
-      <div className="stats-overview">
-        <div className="stat-card">
-          <div className="stat-icon">💰</div>
-          <div className="stat-content">
-            <h3>Total Revenue</h3>
-            <p className="stat-value">{formatCurrency(dashboardStats.totalRevenue)}</p>
-          </div>
+    <div className="modern-stats-dashboard">
+      {/* Header Section */}
+      <div className="dashboard-header">
+        <div className="header-content">
+          <h1>Analytics Dashboard</h1>
+          <p>Comprehensive insights into your business performance</p>
         </div>
-        <div className="stat-card">
-          <div className="stat-icon">📦</div>
-          <div className="stat-content">
-            <h3>Total Sales</h3>
-            <p className="stat-value">{dashboardStats.totalSales}</p>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon">🛍️</div>
-          <div className="stat-content">
-            <h3>Total Products Sold</h3>
-            <p className="stat-value">{dashboardStats.totalProductsSold}</p>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon">👁️</div>
-          <div className="stat-content">
-            <h3>Total Views</h3>
-            <p className="stat-value">{dashboardStats.totalViews}</p>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon">⚠️</div>
-          <div className="stat-content">
-            <h3>Low Stock Items</h3>
-            <p className="stat-value">{dashboardStats.lowStockCount}</p>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon">🚫</div>
-          <div className="stat-content">
-            <h3>No Stock Items</h3>
-            <p className="stat-value">{dashboardStats.noStockCount}</p>
-          </div>
-        </div>
-        {/* Date Range Picker - Takes width of 2 stat cards */}
-        <div className="date-range-picker-compact">
-          <div className="date-range-container">
-            <div className="date-inputs-row">
-              <div className="date-input-group">
-                <label htmlFor="start-date">From:</label>
+        <div className="header-actions">
+          <div className="date-range-picker">
+            <div className="date-inputs">
+              <div className="date-group">
+                <label>From</label>
                 <input
-                  id="start-date"
                   type="date"
                   value={tempDateRange.startDate}
                   onChange={(e) => setTempDateRange((prev) => ({ ...prev, startDate: e.target.value }))}
-                  className="date-input"
                 />
               </div>
-              <div className="date-input-group">
-                <label htmlFor="end-date">To:</label>
+              <div className="date-group">
+                <label>To</label>
                 <input
-                  id="end-date"
                   type="date"
                   value={tempDateRange.endDate}
                   onChange={(e) => setTempDateRange((prev) => ({ ...prev, endDate: e.target.value }))}
-                  className="date-input"
                 />
               </div>
-            </div>
-            <div className="date-filter-button">
               <button
                 onClick={() => {
                   setDateRange(tempDateRange);
@@ -233,50 +191,145 @@ const StatsDashboard: React.FC = () => {
                 className="btn btn-primary"
                 disabled={isLoading}
               >
-                {isLoading ? 'Loading...' : 'Apply Filter'}
+                Apply
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Sales Statistics Chart - Full Width */}
-      <div className="stats-chart-full">
-        <div className="chart-container">
-          <div className="card">
-            <div className="card-header">
-              <h3>Sales Statistics</h3>
-              <div className="chart-toggle">
+      {/* Navigation Tabs */}
+      <div className="dashboard-tabs">
+        <button
+          className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
+          onClick={() => setActiveTab('overview')}
+        >
+          <span className="tab-icon">📊</span>
+          Overview
+        </button>
+        <button
+          className={`tab ${activeTab === 'products' ? 'active' : ''}`}
+          onClick={() => setActiveTab('products')}
+        >
+          <span className="tab-icon">🛍️</span>
+          Products
+        </button>
+        <button
+          className={`tab ${activeTab === 'inventory' ? 'active' : ''}`}
+          onClick={() => setActiveTab('inventory')}
+        >
+          <span className="tab-icon">📦</span>
+          Inventory
+        </button>
+      </div>
+
+      {/* Overview Tab */}
+      {activeTab === 'overview' && (
+        <div className="tab-content">
+          {/* Key Metrics Cards */}
+          <div className="metrics-grid">
+            <div className="metric-card revenue">
+              <div className="metric-icon">
+                <div className="icon-bg">💰</div>
+              </div>
+              <div className="metric-content">
+                <h3>Total Revenue</h3>
+                <div className="metric-value">{formatCurrency(dashboardStats.totalRevenue)}</div>
+                <div className="metric-trend">
+                  <span className="trend-icon">📈</span>
+                  <span>Revenue generated</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="metric-card sales">
+              <div className="metric-icon">
+                <div className="icon-bg">🛒</div>
+              </div>
+              <div className="metric-content">
+                <h3>Total Sales</h3>
+                <div className="metric-value">{dashboardStats.totalSales}</div>
+                <div className="metric-trend">
+                  <span className="trend-icon">📊</span>
+                  <span>Orders completed</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="metric-card products">
+              <div className="metric-icon">
+                <div className="icon-bg">📦</div>
+              </div>
+              <div className="metric-content">
+                <h3>Products Sold</h3>
+                <div className="metric-value">{dashboardStats.totalProductsSold}</div>
+                <div className="metric-trend">
+                  <span className="trend-icon">🎯</span>
+                  <span>Items sold</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="metric-card views">
+              <div className="metric-icon">
+                <div className="icon-bg">👁️</div>
+              </div>
+              <div className="metric-content">
+                <h3>Total Views</h3>
+                <div className="metric-value">{dashboardStats.totalViews}</div>
+                <div className="metric-trend">
+                  <span className="trend-icon">👀</span>
+                  <span>Page views</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Sales Chart */}
+          <div className="chart-section">
+            <div className="chart-header">
+              <h2>Sales Performance</h2>
+              <div className="chart-controls">
                 <button
-                  className={`toggle-btn ${viewMode === 'monthly' ? 'active' : ''}`}
+                  className={`control-btn ${viewMode === 'monthly' ? 'active' : ''}`}
                   onClick={() => setViewMode('monthly')}
                 >
                   Monthly
                 </button>
                 <button
-                  className={`toggle-btn ${viewMode === 'yearly' ? 'active' : ''}`}
+                  className={`control-btn ${viewMode === 'yearly' ? 'active' : ''}`}
                   onClick={() => setViewMode('yearly')}
                 >
                   Yearly
                 </button>
               </div>
             </div>
-            <div className="card-content">
-              <ResponsiveContainer width="100%" height={300}>
+            <div className="chart-container">
+              <ResponsiveContainer width="100%" height={400}>
                 <BarChart
                   key={`${viewMode}-${dateRange.startDate}-${dateRange.endDate}`}
                   data={viewMode === 'monthly' ? salesStats : yearlySalesStats}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
                   <XAxis
                     dataKey="month"
                     tickFormatter={viewMode === 'monthly' ? formatMonth : formatYear}
                     angle={-45}
                     textAnchor="end"
                     height={80}
+                    stroke="#6b7280"
+                    style={{ fontSize: '12px' }}
                   />
-                  <YAxis />
+                  <YAxis yAxisId="left" stroke="#6b7280" style={{ fontSize: '12px' }} />
+                  <YAxis yAxisId="right" orientation="right" stroke="#6b7280" style={{ fontSize: '12px' }} />
                   <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '12px',
+                      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+                    }}
                     formatter={(value: any, name: string) => {
                       return [
                         name === 'Products Sold' ? value : formatCurrency(value),
@@ -285,177 +338,216 @@ const StatsDashboard: React.FC = () => {
                     }}
                     labelFormatter={(label) => (viewMode === 'monthly' ? formatMonth(label) : formatYear(label))}
                   />
-                  <Bar dataKey="sales" fill="#0088FE" name="Products Sold" />
-                  <Bar dataKey="revenue" fill="#00C49F" name="Revenue" />
+                  <Bar yAxisId="left" dataKey="sales" fill="#0ea5e9" name="Products Sold" radius={[8, 8, 0, 0]} />
+                  <Bar yAxisId="right" dataKey="revenue" fill="#22c55e" name="Revenue" radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Top Products Section - Side by Side */}
-      <div className="stats-charts">
-        {/* Top Viewed Products List */}
-        <div className="chart-container">
-          <div className="card">
-            <div className="card-header">
-              <h3>Top 10 Viewed Products</h3>
-              <span className="badge info">{topViewedProducts.length} products</span>
-            </div>
-            <div className="card-content">
-              {topViewedProducts.length === 0 ? (
-                <p className="no-data">No product views found yet.</p>
-              ) : (
-                <div className="top-products-list">
-                  {topViewedProducts.map((product, index) => (
+      {/* Products Tab */}
+      {activeTab === 'products' && (
+        <div className="tab-content">
+          <div className="products-grid">
+            {/* Top Viewed Products */}
+            <div className="top-products-card">
+              <div className="top-products-header">
+                <div className="top-products-title-section">
+                  <div className="top-products-icon">👁️</div>
+                  <div>
+                    <h3 className="top-products-title">Most Viewed</h3>
+                    <p className="top-products-subtitle">{topViewedProducts.length} trending products</p>
+                  </div>
+                </div>
+              </div>
+              <div className="top-products-list-modern">
+                {topViewedProducts.length === 0 ? (
+                  <div className="no-data-modern">
+                    <div className="no-data-icon">📊</div>
+                    <p>No product views yet</p>
+                  </div>
+                ) : (
+                  topViewedProducts.map((product, index) => (
                     <div
                       key={product.productId}
-                      className="top-product-item clickable"
+                      className="top-product-item-modern"
                       onClick={() => handleTopProductClick(product.productId)}
                     >
-                      <div className="product-rank">
-                        <span className="rank-number">#{index + 1}</span>
+                      <div className="product-rank-modern" style={{ background: `linear-gradient(135deg, #0ea5e9, #0284c7)` }}>
+                        <span className="rank-number-modern">#{index + 1}</span>
                       </div>
-                      <div className="product-info">
-                        <h4>
+                      <div className="product-info-modern">
+                        <h4 className="product-name-modern">
                           {product.teamName} - {product.productName}
                         </h4>
-                        <span className="product-views">{product.views} views</span>
+                        <div className="product-metric">
+                          <span className="metric-icon">👁️</span>
+                          <span className="metric-value">{product.views.toLocaleString()} views</span>
+                        </div>
+                      </div>
+                      <div className="product-arrow">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <polyline points="9 18 15 12 9 6" />
+                        </svg>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
+                  ))
+                )}
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Top Sold Products List */}
-        <div className="chart-container">
-          <div className="card">
-            <div className="card-header">
-              <h3>Top 10 Sold Products</h3>
-              <span className="badge success">{topSoldProducts.length} products</span>
-            </div>
-            <div className="card-content">
-              {topSoldProducts.length === 0 ? (
-                <p className="no-data">No product sales found yet.</p>
-              ) : (
-                <div className="top-products-list">
-                  {topSoldProducts.map((product, index) => (
+            {/* Top Sold Products */}
+            <div className="top-products-card">
+              <div className="top-products-header">
+                <div className="top-products-title-section">
+                  <div className="top-products-icon">🏆</div>
+                  <div>
+                    <h3 className="top-products-title">Best Sellers</h3>
+                    <p className="top-products-subtitle">{topSoldProducts.length} top performers</p>
+                  </div>
+                </div>
+              </div>
+              <div className="top-products-list-modern">
+                {topSoldProducts.length === 0 ? (
+                  <div className="no-data-modern">
+                    <div className="no-data-icon">📦</div>
+                    <p>No sales data yet</p>
+                  </div>
+                ) : (
+                  topSoldProducts.map((product, index) => (
                     <div
                       key={product.productId}
-                      className="top-product-item clickable"
+                      className="top-product-item-modern"
                       onClick={() => handleTopSoldProductClick(product.productId)}
                     >
-                      <div className="product-rank">
-                        <span className="rank-number">#{index + 1}</span>
+                      <div className="product-rank-modern" style={{ background: `linear-gradient(135deg, #22c55e, #16a34a)` }}>
+                        <span className="rank-number-modern">#{index + 1}</span>
                       </div>
-                      <div className="product-info">
-                        <h4>
+                      <div className="product-info-modern">
+                        <h4 className="product-name-modern">
                           {product.teamName} - {product.productName}
                         </h4>
-                        <span className="product-views">{product.quantitySold} sold</span>
+                        <div className="product-metric">
+                          <span className="metric-icon">📦</span>
+                          <span className="metric-value">{product.quantitySold} sold</span>
+                        </div>
+                      </div>
+                      <div className="product-arrow">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <polyline points="9 18 15 12 9 6" />
+                        </svg>
                       </div>
                     </div>
-                  ))}
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Inventory Tab */}
+      {activeTab === 'inventory' && (
+        <div className="tab-content">
+          {/* Low Stock Products */}
+          <div className="inventory-section">
+            <div className="section-header">
+              <h2>Low Stock Alert</h2>
+              <div className="section-badge warning">{lowStockProducts.length} items</div>
+            </div>
+            <div className="inventory-list">
+              {lowStockProducts.length === 0 ? (
+                <div className="empty-state success">
+                  <div className="empty-icon">✅</div>
+                  <h3>All Good!</h3>
+                  <p>No low stock products found. Great inventory management!</p>
                 </div>
+              ) : (
+                lowStockProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className="inventory-item low-stock"
+                    onClick={() => handleLowStockProductClick(product.id)}
+                  >
+                    <div className="item-icon">⚠️</div>
+                    <div className="item-details">
+                      <h4>{product.name}</h4>
+                      <p className="item-type">{product.type}</p>
+                      <div className="stock-breakdown">
+                        {product.sizes.map((size) => (
+                          <span
+                            key={size.size}
+                            className={`stock-badge ${size.quantity === 0 ? 'out' : size.quantity <= 2 ? 'low' : 'ok'}`}
+                          >
+                            {size.size}: {size.quantity}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="item-arrow">→</div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* No Stock Products */}
+          <div className="inventory-section">
+            <div className="section-header">
+              <h2>Out of Stock</h2>
+              <div className="section-badge danger">{noStockProducts.length} items</div>
+            </div>
+            <div className="inventory-list">
+              {noStockProducts.length === 0 ? (
+                <div className="empty-state success">
+                  <div className="empty-icon">🎉</div>
+                  <h3>Perfect!</h3>
+                  <p>No out of stock products. Keep up the great work!</p>
+                </div>
+              ) : (
+                noStockProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className="inventory-item out-of-stock"
+                    onClick={() => handleNoStockProductClick(product.id)}
+                  >
+                    <div className="item-icon">🚫</div>
+                    <div className="item-details">
+                      <h4>{product.name}</h4>
+                      <p className="item-type">{product.type}</p>
+                      <div className="stock-breakdown">
+                        {product.sizes.map((size) => (
+                          <span
+                            key={size.size}
+                            className={`stock-badge ${size.quantity === 0 ? 'out' : size.quantity <= 2 ? 'low' : 'ok'}`}
+                          >
+                            {size.size}: {size.quantity}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="item-arrow">→</div>
+                  </div>
+                ))
               )}
             </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Low Stock Products */}
-      <div className="low-stock-section">
-        <div className="card">
-          <div className="card-header">
-            <h3>Low Stock Products</h3>
-            <span className="badge warning">{lowStockProducts.length} items</span>
+      {/* Footer */}
+      <div className="dashboard-footer">
+        <div className="footer-content">
+          <div className="refresh-info">
+            <span className="refresh-icon">🔄</span>
+            <span>Data refreshes automatically every 10 minutes</span>
           </div>
-          <div className="card-content">
-            {lowStockProducts.length === 0 ? (
-              <p className="no-data">No low stock products found. Great job! 🎉</p>
-            ) : (
-              <div className="low-stock-list">
-                {lowStockProducts.map((product) => (
-                  <div
-                    key={product.id}
-                    className="low-stock-item clickable"
-                    onClick={() => handleLowStockProductClick(product.id)}
-                  >
-                    <div className="product-info">
-                      <h4>{product.name}</h4>
-                      <span className="product-type">{product.type}</span>
-                    </div>
-                    <div className="stock-info">
-                      <span className="total-quantity">{product.totalQuantity} total</span>
-                      <div className="size-breakdown">
-                        {product.sizes.map((size) => (
-                          <span
-                            key={size.size}
-                            className={`size-item ${size.quantity === 0 ? 'out-of-stock' : size.quantity <= 2 ? 'low-stock' : 'in-stock'}`}
-                          >
-                            {size.size}: {size.quantity}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+          <div className="last-updated">
+            Last updated: {format(new Date(), 'MMM dd, yyyy HH:mm')}
           </div>
         </div>
-      </div>
-
-      {/* No Stock Products */}
-      <div className="no-stock-section">
-        <div className="card">
-          <div className="card-header">
-            <h3>No Stock Products</h3>
-            <span className="badge danger">{noStockProducts.length} items</span>
-          </div>
-          <div className="card-content">
-            {noStockProducts.length === 0 ? (
-              <p className="no-data">No out of stock products found. Great job! 🎉</p>
-            ) : (
-              <div className="no-stock-list">
-                {noStockProducts.map((product) => (
-                  <div
-                    key={product.id}
-                    className="no-stock-item clickable"
-                    onClick={() => handleNoStockProductClick(product.id)}
-                  >
-                    <div className="product-info">
-                      <h4>{product.name}</h4>
-                      <span className="product-type">{product.type}</span>
-                    </div>
-                    <div className="stock-info">
-                      <span className="total-quantity">{product.totalQuantity} total</span>
-                      <div className="size-breakdown">
-                        {product.sizes.map((size) => (
-                          <span
-                            key={size.size}
-                            className={`size-item ${size.quantity === 0 ? 'out-of-stock' : size.quantity <= 2 ? 'low-stock' : 'in-stock'}`}
-                          >
-                            {size.size}: {size.quantity}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Refresh Info */}
-      <div className="refresh-info">
-        <p>📊 Data refreshes automatically every 10 minutes</p>
       </div>
     </div>
   );
