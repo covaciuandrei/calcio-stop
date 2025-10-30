@@ -199,39 +199,27 @@ const StatsDashboard: React.FC = () => {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="dashboard-tabs" role="tablist" aria-label="Dashboard sections">
+      <div className="dashboard-tabs">
         <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'overview'}
-          tabIndex={activeTab === 'overview' ? 0 : -1}
           className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
           onClick={() => setActiveTab('overview')}
         >
           <span className="tab-icon">📊</span>
-          <span className="tab-label">Overview</span>
+          Overview
         </button>
         <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'products'}
-          tabIndex={activeTab === 'products' ? 0 : -1}
           className={`tab ${activeTab === 'products' ? 'active' : ''}`}
           onClick={() => setActiveTab('products')}
         >
           <span className="tab-icon">🛍️</span>
-          <span className="tab-label">Products</span>
+          Products
         </button>
         <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'inventory'}
-          tabIndex={activeTab === 'inventory' ? 0 : -1}
           className={`tab ${activeTab === 'inventory' ? 'active' : ''}`}
           onClick={() => setActiveTab('inventory')}
         >
           <span className="tab-icon">📦</span>
-          <span className="tab-label">Inventory</span>
+          Inventory
         </button>
       </div>
 
@@ -548,19 +536,6 @@ const StatsDashboard: React.FC = () => {
           </div>
         </div>
       )}
-
-      {/* Footer */}
-      <div className="dashboard-footer">
-        <div className="footer-content">
-          <div className="refresh-info">
-            <span className="refresh-icon">🔄</span>
-            <span>Data refreshes automatically every 10 minutes</span>
-          </div>
-          <div className="last-updated">
-            Last updated: {format(new Date(), 'MMM dd, yyyy HH:mm')}
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
