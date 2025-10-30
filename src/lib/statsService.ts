@@ -73,6 +73,21 @@ class StatsService {
     }
   }
 
+  // Delete all product views
+  async deleteAllViews(): Promise<void> {
+    try {
+      const { error } = await supabase.from('views').delete().neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all rows
+
+      if (error) {
+        console.error('Error deleting all views:', error);
+        throw error;
+      }
+    } catch (error) {
+      console.error('Error deleting all views:', error);
+      throw error;
+    }
+  }
+
   // Get sales statistics by month
   async getSalesStats(months: number = 12, dateRange?: DateRange): Promise<SalesStats[]> {
     try {

@@ -125,6 +125,19 @@ const StatsDashboard: React.FC = () => {
     navigate(`/products/${productId}`);
   };
 
+  const handleResetViews = async () => {
+    if (window.confirm('Are you sure you want to delete all views from history? This action cannot be undone.')) {
+      try {
+        await statsService.deleteAllViews();
+        // Reload stats after deletion
+        loadStats(dateRange);
+      } catch (error) {
+        console.error('Error resetting views:', error);
+        alert('Failed to reset views. Please try again.');
+      }
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="modern-stats-dashboard">
@@ -200,17 +213,11 @@ const StatsDashboard: React.FC = () => {
 
       {/* Navigation Tabs */}
       <div className="dashboard-tabs">
-        <button
-          className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
-          onClick={() => setActiveTab('overview')}
-        >
+        <button className={`tab ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
           <span className="tab-icon">📊</span>
           Overview
         </button>
-        <button
-          className={`tab ${activeTab === 'products' ? 'active' : ''}`}
-          onClick={() => setActiveTab('products')}
-        >
+        <button className={`tab ${activeTab === 'products' ? 'active' : ''}`} onClick={() => setActiveTab('products')}>
           <span className="tab-icon">🛍️</span>
           Products
         </button>
@@ -282,6 +289,9 @@ const StatsDashboard: React.FC = () => {
                   <span>Page views</span>
                 </div>
               </div>
+              <button className="metric-reset-btn" onClick={handleResetViews} title="Reset all views">
+                🔄
+              </button>
             </div>
           </div>
 
@@ -375,7 +385,10 @@ const StatsDashboard: React.FC = () => {
                       className="top-product-item-modern"
                       onClick={() => handleTopProductClick(product.productId)}
                     >
-                      <div className="product-rank-modern" style={{ background: `linear-gradient(135deg, #0ea5e9, #0284c7)` }}>
+                      <div
+                        className="product-rank-modern"
+                        style={{ background: `linear-gradient(135deg, #0ea5e9, #0284c7)` }}
+                      >
                         <span className="rank-number-modern">#{index + 1}</span>
                       </div>
                       <div className="product-info-modern">
@@ -388,7 +401,14 @@ const StatsDashboard: React.FC = () => {
                         </div>
                       </div>
                       <div className="product-arrow">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
                           <polyline points="9 18 15 12 9 6" />
                         </svg>
                       </div>
@@ -422,7 +442,10 @@ const StatsDashboard: React.FC = () => {
                       className="top-product-item-modern"
                       onClick={() => handleTopSoldProductClick(product.productId)}
                     >
-                      <div className="product-rank-modern" style={{ background: `linear-gradient(135deg, #22c55e, #16a34a)` }}>
+                      <div
+                        className="product-rank-modern"
+                        style={{ background: `linear-gradient(135deg, #22c55e, #16a34a)` }}
+                      >
                         <span className="rank-number-modern">#{index + 1}</span>
                       </div>
                       <div className="product-info-modern">
@@ -435,7 +458,14 @@ const StatsDashboard: React.FC = () => {
                         </div>
                       </div>
                       <div className="product-arrow">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
                           <polyline points="9 18 15 12 9 6" />
                         </svg>
                       </div>
