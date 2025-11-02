@@ -10,6 +10,7 @@ DROP POLICY IF EXISTS "Allow all operations for authenticated users" ON products
 DROP POLICY IF EXISTS "Allow all operations for authenticated users" ON sales;
 DROP POLICY IF EXISTS "Allow all operations for authenticated users" ON settings;
 DROP POLICY IF EXISTS "Allow all operations for authenticated users" ON users;
+DROP POLICY IF EXISTS "Allow all operations for authenticated users" ON leagues;
 
 -- TEAMS TABLE POLICIES
 -- Allow read access for everyone (authenticated and unauthenticated)
@@ -57,6 +58,11 @@ FOR SELECT USING (auth.role() = 'authenticated');
 
 -- Only authenticated users can modify users table
 CREATE POLICY "Allow authenticated users to modify users" ON users 
+FOR ALL USING (auth.role() = 'authenticated');
+
+-- LEAGUES TABLE POLICIES
+CREATE POLICY "Allow public read access" ON leagues FOR SELECT USING (true);
+CREATE POLICY "Allow authenticated users full access" ON leagues 
 FOR ALL USING (auth.role() = 'authenticated');
 
 -- Verify policies are created

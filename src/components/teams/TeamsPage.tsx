@@ -1,4 +1,5 @@
 import React from 'react';
+import LeaguesPage from '../leagues/LeaguesPage';
 import AddNewTeamCard from './AddNewTeamCard';
 import ArchivedTeamsCard from './ArchivedTeamsCard';
 import TeamsTableListCard from './TeamsTableListCard';
@@ -14,6 +15,11 @@ const TeamsPage: React.FC = () => {
 
       {/* Archived Teams Card */}
       <ArchivedTeamsCard />
+
+      {/* Leagues Manage Card */}
+      <div style={{ marginTop: 'var(--space-5)' }}>
+        <LeaguesPage />
+      </div>
     </div>
   );
 };

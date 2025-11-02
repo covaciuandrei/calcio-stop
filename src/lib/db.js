@@ -8,6 +8,7 @@ export async function createTeam(data) {
   // Map frontend data to database schema
   const dbData = {
     name: data.name,
+    leagues: data.leagues || [],
     created_at: data.createdAt || new Date().toISOString(),
     archived_at: null,
   };
@@ -20,6 +21,7 @@ export async function createTeam(data) {
   return {
     id: result.id,
     name: result.name,
+    leagues: result.leagues || [],
     createdAt: result.created_at,
   };
 }
@@ -37,6 +39,7 @@ export async function getTeams() {
   return (data || []).map((item) => ({
     id: item.id,
     name: item.name,
+    leagues: item.leagues || [],
     createdAt: item.created_at,
   }));
 }
@@ -54,6 +57,7 @@ export async function getArchivedTeams() {
   return (data || []).map((item) => ({
     id: item.id,
     name: item.name,
+    leagues: item.leagues || [],
     createdAt: item.created_at,
   }));
 }
@@ -62,6 +66,7 @@ export async function updateTeam(id, updates) {
   // Map frontend updates to database schema
   const dbUpdates = {};
   if (updates.name !== undefined) dbUpdates.name = updates.name;
+  if (updates.leagues !== undefined) dbUpdates.leagues = updates.leagues;
   if (updates.createdAt !== undefined) dbUpdates.created_at = updates.createdAt;
 
   const { data, error } = await supabase.from('teams').update(dbUpdates).eq('id', id).select().single();
@@ -72,6 +77,7 @@ export async function updateTeam(id, updates) {
   return {
     id: data.id,
     name: data.name,
+    leagues: data.leagues || [],
     createdAt: data.created_at,
   };
 }
@@ -1338,4 +1344,386 @@ export async function unarchiveOrder(id) {
 
   if (error) throw error;
   return data;
+}
+
+// ============================================================================
+// LEAGUES CRUD OPERATIONS
+// ============================================================================
+
+export async function createLeague(data) {
+  // Validate required fields
+  if (!data.name || !data.name.trim()) {
+    throw new Error('League name is required');
+  }
+
+  // Map frontend data to database schema
+  const dbData = {
+    name: data.name.trim(),
+    created_at: data.createdAt || new Date().toISOString(),
+    archived_at: null,
+  };
+
+  const { data: result, error } = await supabase.from('leagues').insert([dbData]).select().single();
+
+  if (error) {
+    if (error.code === '23505') {
+      throw new Error('A league with this name already exists');
+    }
+    throw error;
+  }
+
+  // Map database response back to frontend format
+  return {
+    id: result.id,
+    name: result.name,
+    createdAt: result.created_at,
+  };
+}
+
+export async function getLeagues() {
+  const { data, error } = await supabase
+    .from('leagues')
+    .select('*')
+    .is('archived_at', null)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching leagues:', error);
+    throw new Error('Failed to fetch leagues: ' + (error.message || 'Unknown error'));
+  }
+
+  // Map database response to frontend format
+  return (data || []).map((item) => ({
+    id: item.id,
+    name: item.name,
+    createdAt: item.created_at,
+  }));
+}
+
+export async function getArchivedLeagues() {
+  const { data, error } = await supabase
+    .from('leagues')
+    .select('*')
+    .not('archived_at', 'is', null)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching archived leagues:', error);
+    throw new Error('Failed to fetch archived leagues: ' + (error.message || 'Unknown error'));
+  }
+
+  // Map database response to frontend format
+  return (data || []).map((item) => ({
+    id: item.id,
+    name: item.name,
+    createdAt: item.created_at,
+  }));
+}
+
+export async function updateLeague(id, updates) {
+  // Validate input
+  if (!id) {
+    throw new Error('League ID is required');
+  }
+
+  if (updates.name !== undefined && (!updates.name || !updates.name.trim())) {
+    throw new Error('League name cannot be empty');
+  }
+
+  // Map frontend updates to database schema
+  const dbUpdates = {};
+  if (updates.name !== undefined) dbUpdates.name = updates.name.trim();
+  if (updates.createdAt !== undefined) dbUpdates.created_at = updates.createdAt;
+
+  // Check if there are any updates
+  if (Object.keys(dbUpdates).length === 0) {
+    throw new Error('No updates provided');
+  }
+
+  const { data, error } = await supabase.from('leagues').update(dbUpdates).eq('id', id).select().single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      throw new Error('League not found');
+    }
+    if (error.code === '23505') {
+      throw new Error('A league with this name already exists');
+    }
+    console.error('Error updating league:', error);
+    throw new Error('Failed to update league: ' + (error.message || 'Unknown error'));
+  }
+
+  if (!data) {
+    throw new Error('League not found');
+  }
+
+  // Map database response to frontend format
+  return {
+    id: data.id,
+    name: data.name,
+    createdAt: data.created_at,
+  };
+}
+
+export async function deleteLeague(id) {
+  // Validate input
+  if (!id) {
+    throw new Error('League ID is required');
+  }
+
+  // Check if there are any references to this league in teams.leagues array
+  // Fetch only id and leagues columns (not full records) and check efficiently
+  // Note: After running ADD_LEAGUES_FEATURE.sql, you can uncomment the RPC call below
+  // for better performance using the GIN index
+  const { data: teams, error: teamsError } = await supabase
+    .from('teams')
+    .select('id, leagues')
+    .limit(1000); // Reasonable limit - adjust if you have more than 1000 teams
+
+  if (teamsError) {
+    console.error('Error checking league references:', teamsError);
+    throw new Error('Failed to check league references: ' + (teamsError.message || 'Unknown error'));
+  }
+
+  // Check if any team references this league
+  const hasReferences = (teams || []).some((team) => {
+    const leagues = team.leagues || [];
+    return Array.isArray(leagues) && leagues.includes(id);
+  });
+
+  // If there are references, throw an error
+  if (hasReferences) {
+    throw new Error('Cannot delete league: it is referenced by teams. Please remove the league from all teams first.');
+  }
+
+  // If no references, proceed with deletion
+  const { error } = await supabase.from('leagues').delete().eq('id', id);
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      throw new Error('League not found');
+    }
+    console.error('Error deleting league:', error);
+    throw new Error('Failed to delete league: ' + (error.message || 'Unknown error'));
+  }
+
+  // OPTIMIZED VERSION (uncomment after running ADD_LEAGUES_FEATURE.sql):
+  // // Check if there are any references using the RPC function (much faster, uses GIN index)
+  // const { data: hasReferences, error: checkError } = await supabase.rpc('check_league_references', {
+  //   league_uuid: id,
+  // });
+  // if (checkError) {
+  //   throw new Error('Failed to check league references: ' + (checkError.message || 'Unknown error'));
+  // }
+  // if (hasReferences) {
+  //   throw new Error('Cannot delete league: it is referenced by teams. Please remove the league from all teams first.');
+  // }
+}
+
+export async function archiveLeague(id) {
+  // Validate input
+  if (!id) {
+    throw new Error('League ID is required');
+  }
+
+  const { data, error } = await supabase
+    .from('leagues')
+    .update({ archived_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      throw new Error('League not found');
+    }
+    console.error('Error archiving league:', error);
+    throw new Error('Failed to archive league: ' + (error.message || 'Unknown error'));
+  }
+
+  if (!data) {
+    throw new Error('League not found');
+  }
+
+  return data;
+}
+
+export async function restoreLeague(id) {
+  // Validate input
+  if (!id) {
+    throw new Error('League ID is required');
+  }
+
+  const { data, error } = await supabase.from('leagues').update({ archived_at: null }).eq('id', id).select().single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      throw new Error('League not found');
+    }
+    console.error('Error restoring league:', error);
+    throw new Error('Failed to restore league: ' + (error.message || 'Unknown error'));
+  }
+
+  if (!data) {
+    throw new Error('League not found');
+  }
+
+  return data;
+}
+
+// ============================================================================
+// TEAM-LEAGUES RELATIONSHIP OPERATIONS (using JSONB array)
+// ============================================================================
+
+export async function getTeamLeagues(teamId) {
+  // Validate input
+  if (!teamId) {
+    throw new Error('Team ID is required');
+  }
+
+  const { data, error } = await supabase.from('teams').select('leagues').eq('id', teamId).single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      throw new Error('Team not found');
+    }
+    console.error('Error fetching team leagues:', error);
+    throw new Error('Failed to fetch team leagues: ' + (error.message || 'Unknown error'));
+  }
+
+  if (!data) {
+    throw new Error('Team not found');
+  }
+
+  return (data?.leagues || []);
+}
+
+export async function getLeagueTeams(leagueId) {
+  // Validate input
+  if (!leagueId) {
+    throw new Error('League ID is required');
+  }
+
+  // Fetch teams and filter in JavaScript
+  // Note: After running ADD_LEAGUES_FEATURE.sql, you can uncomment the RPC call below
+  // for better performance using the GIN index
+  const { data: allTeams, error } = await supabase.from('teams').select('id, leagues').limit(1000);
+
+  if (error) {
+    console.error('Error fetching teams for league:', error);
+    throw new Error('Failed to fetch teams for league: ' + (error.message || 'Unknown error'));
+  }
+
+  // Filter teams that have this league in their leagues array
+  const teamsWithLeague = (allTeams || []).filter((team) => {
+    const leagues = team.leagues || [];
+    return Array.isArray(leagues) && leagues.includes(leagueId);
+  });
+
+  return teamsWithLeague.map((team) => team.id);
+
+  // OPTIMIZED VERSION (uncomment after running ADD_LEAGUES_FEATURE.sql):
+  // // Try using RPC function (much faster, uses GIN index)
+  // const { data: teamIds, error: rpcError } = await supabase.rpc('get_teams_for_league', {
+  //   league_uuid: leagueId,
+  // });
+  // if (rpcError) {
+  //   throw new Error('Failed to fetch teams for league: ' + (rpcError.message || 'Unknown error'));
+  // }
+  // return (teamIds || []).map((row) => row.team_id || row.teamId || row.id);
+}
+
+export async function setTeamLeagues(teamId, leagueIds) {
+  const { data, error } = await supabase
+    .from('teams')
+    .update({ leagues: leagueIds || [] })
+    .eq('id', teamId)
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  return data.leagues || [];
+}
+
+export async function addTeamToLeague(teamId, leagueId) {
+  // Validate input
+  if (!teamId) {
+    throw new Error('Team ID is required');
+  }
+  if (!leagueId) {
+    throw new Error('League ID is required');
+  }
+
+  // Get current leagues
+  const { data: team, error: fetchError } = await supabase.from('teams').select('leagues').eq('id', teamId).single();
+
+  if (fetchError) {
+    if (fetchError.code === 'PGRST116') {
+      throw new Error('Team not found');
+    }
+    console.error('Error fetching team:', fetchError);
+    throw new Error('Failed to fetch team: ' + (fetchError.message || 'Unknown error'));
+  }
+
+  if (!team) {
+    throw new Error('Team not found');
+  }
+
+  const currentLeagues = team?.leagues || [];
+  
+  // Add league if not already present
+  if (!currentLeagues.includes(leagueId)) {
+    const updatedLeagues = [...currentLeagues, leagueId];
+    
+    const { data, error } = await supabase
+      .from('teams')
+      .update({ leagues: updatedLeagues })
+      .eq('id', teamId)
+      .select('leagues')
+      .single();
+
+    if (error) {
+      console.error('Error updating team leagues:', error);
+      throw new Error('Failed to add league to team: ' + (error.message || 'Unknown error'));
+    }
+    return data?.leagues || [];
+  }
+
+  return currentLeagues;
+}
+
+export async function removeTeamFromLeague(teamId, leagueId) {
+  // Validate input
+  if (!teamId) {
+    throw new Error('Team ID is required');
+  }
+  if (!leagueId) {
+    throw new Error('League ID is required');
+  }
+
+  // Get current leagues
+  const { data: team, error: fetchError } = await supabase.from('teams').select('leagues').eq('id', teamId).single();
+
+  if (fetchError) {
+    if (fetchError.code === 'PGRST116') {
+      throw new Error('Team not found');
+    }
+    console.error('Error fetching team:', fetchError);
+    throw new Error('Failed to fetch team: ' + (fetchError.message || 'Unknown error'));
+  }
+
+  if (!team) {
+    throw new Error('Team not found');
+  }
+
+  const currentLeagues = team?.leagues || [];
+  const updatedLeagues = currentLeagues.filter((id) => id !== leagueId);
+
+  const { error } = await supabase.from('teams').update({ leagues: updatedLeagues }).eq('id', teamId);
+
+  if (error) {
+    console.error('Error removing league from team:', error);
+    throw new Error('Failed to remove league from team: ' + (error.message || 'Unknown error'));
+  }
 }

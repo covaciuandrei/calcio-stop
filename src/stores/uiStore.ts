@@ -28,11 +28,13 @@ interface SearchState {
   teams: string;
   badges: string;
   kitTypes: string;
+  leagues: string;
   archivedProducts: string;
   archivedNamesets: string;
   archivedTeams: string;
   archivedBadges: string;
   archivedKitTypes: string;
+  archivedLeagues: string;
 }
 
 interface UIState {
@@ -94,10 +96,12 @@ export const useUIStore = create<UIState>()(
         teams: '',
         badges: '',
         kitTypes: '',
+        leagues: '',
         archivedProducts: '',
         archivedNamesets: '',
         archivedTeams: '',
         archivedBadges: '',
+        archivedLeagues: '',
         archivedKitTypes: '',
       },
 
@@ -201,11 +205,13 @@ export const useUIStore = create<UIState>()(
             teams: '',
             badges: '',
             kitTypes: '',
+            leagues: '',
             archivedProducts: '',
             archivedNamesets: '',
             archivedTeams: '',
             archivedBadges: '',
             archivedKitTypes: '',
+            archivedLeagues: '',
           },
         }));
       },
@@ -243,8 +249,10 @@ export const useNamesetsSearch = () => useUIStore((state) => state.searchTerms.n
 export const useTeamsSearch = () => useUIStore((state) => state.searchTerms.teams);
 export const useBadgesSearch = () => useUIStore((state) => state.searchTerms.badges);
 export const useKitTypesSearch = () => useUIStore((state) => state.searchTerms.kitTypes);
+export const useLeaguesSearch = () => useUIStore((state) => state.searchTerms.leagues);
 export const useArchivedProductsSearch = () => useUIStore((state) => state.searchTerms.archivedProducts);
 export const useArchivedNamesetsSearch = () => useUIStore((state) => state.searchTerms.archivedNamesets);
 export const useArchivedTeamsSearch = () => useUIStore((state) => state.searchTerms.archivedTeams);
 export const useArchivedBadgesSearch = () => useUIStore((state) => state.searchTerms.archivedBadges);
 export const useArchivedKitTypesSearch = () => useUIStore((state) => state.searchTerms.archivedKitTypes);
+export const useArchivedLeaguesSearch = () => useUIStore((state) => state.searchTerms.archivedLeagues);

@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import {
   useBadgesActions,
   useKitTypesActions,
+  useLeaguesActions,
   useNamesetsActions,
   useProductsActions,
   useSalesActions,
@@ -21,6 +22,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const { loadTeams, loadArchivedTeams } = useTeamsActions();
   const { loadBadges, loadArchivedBadges } = useBadgesActions();
   const { loadKitTypes, loadArchivedKitTypes } = useKitTypesActions();
+  const { loadLeagues, loadArchivedLeagues } = useLeaguesActions();
   const { loadNamesets, loadArchivedNamesets } = useNamesetsActions();
   const { loadProducts, loadArchivedProducts } = useProductsActions();
   const { loadSales } = useSalesActions();
@@ -43,6 +45,8 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
             loadArchivedBadges(),
             loadKitTypes(),
             loadArchivedKitTypes(),
+            loadLeagues(),
+            loadArchivedLeagues(),
             loadNamesets(),
             loadArchivedNamesets(),
             loadProducts(),
@@ -65,6 +69,8 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     loadArchivedBadges,
     loadKitTypes,
     loadArchivedKitTypes,
+    loadLeagues,
+    loadArchivedLeagues,
     loadNamesets,
     loadArchivedNamesets,
     loadProducts,

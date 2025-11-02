@@ -3,6 +3,7 @@ import {
   useBadgesList,
   useDashboardOrder,
   useKitTypesList,
+  useLeaguesList,
   useNamesetsList,
   useProductsList,
   useSalesList,
@@ -10,6 +11,7 @@ import {
 } from '../stores';
 import BadgesPage from './badges/BadgesPage';
 import KitTypesPage from './kittypes/KitTypesPage';
+import LeaguesPage from './leagues/LeaguesPage';
 import NamesetsPage from './namesets/NamesetsPage';
 import ProductsPage from './products/ProductsPage';
 import SalesPage from './sales/SalesPage';
@@ -25,6 +27,7 @@ const Dashboard: React.FC = () => {
   const teams = useTeamsList();
   const badges = useBadgesList();
   const kitTypes = useKitTypesList();
+  const leagues = useLeaguesList();
   const dashboardOrder = useDashboardOrder();
 
   // State for managing collapsed/expanded state of each card
@@ -35,6 +38,7 @@ const Dashboard: React.FC = () => {
     teams: false,
     badges: false,
     kitTypes: false,
+    leagues: false,
   });
 
   const toggleCard = (cardName: keyof typeof collapsedCards) => {
@@ -81,6 +85,12 @@ const Dashboard: React.FC = () => {
       description: 'Define kit types like 1st Kit, 2nd Kit, etc.',
       count: kitTypes.length,
       component: <KitTypesPage />,
+    },
+    leagues: {
+      title: 'Manage Leagues',
+      description: 'Manage championships and competitions',
+      count: leagues.length,
+      component: <LeaguesPage />,
     },
   };
 

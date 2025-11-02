@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import {
   useBadgesActions,
   useKitTypesActions,
+  useLeaguesActions,
   useNamesetsActions,
   useProductsActions,
   useTeamsActions,
@@ -26,6 +27,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
   const { loadTeams, loadArchivedTeams } = useTeamsActions();
   const { loadNamesets, loadArchivedNamesets } = useNamesetsActions();
   const { loadKitTypes, loadArchivedKitTypes } = useKitTypesActions();
+  const { loadLeagues, loadArchivedLeagues } = useLeaguesActions();
 
   // Load all data needed to display products properly when component mounts (no authentication required)
   useEffect(() => {
@@ -43,6 +45,8 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
           loadArchivedNamesets(),
           loadKitTypes(),
           loadArchivedKitTypes(),
+          loadLeagues(),
+          loadArchivedLeagues(),
         ]);
         console.log('Public data (products, badges, teams, namesets, kit types) loaded successfully');
       } catch (error) {
@@ -62,6 +66,8 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
     loadArchivedNamesets,
     loadKitTypes,
     loadArchivedKitTypes,
+    loadLeagues,
+    loadArchivedLeagues,
   ]);
 
   return (

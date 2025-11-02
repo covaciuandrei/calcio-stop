@@ -8,6 +8,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS teams (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
+    leagues JSONB NOT NULL DEFAULT '[]'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     archived_at TIMESTAMP WITH TIME ZONE NULL
 );
@@ -118,6 +119,14 @@ CREATE TABLE IF NOT EXISTS views (
     timestamp TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Leagues (Championships/Competitions) table
+CREATE TABLE IF NOT EXISTS leagues (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    archived_at TIMESTAMP WITH TIME ZONE NULL
+);
+
 -- Users table (for authentication)
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -167,6 +176,8 @@ CREATE INDEX IF NOT EXISTS idx_product_images_product_id ON product_images(produ
 CREATE INDEX IF NOT EXISTS idx_product_images_display_order ON product_images(display_order);
 CREATE INDEX IF NOT EXISTS idx_views_product_id ON views(product_id);
 CREATE INDEX IF NOT EXISTS idx_views_timestamp ON views(timestamp);
+CREATE INDEX IF NOT EXISTS idx_leagues_archived_at ON leagues(archived_at);
+CREATE INDEX IF NOT EXISTS idx_teams_leagues ON teams USING GIN (leagues);
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE teams ENABLE ROW LEVEL SECURITY;
@@ -180,6 +191,7 @@ ALTER TABLE sales ENABLE ROW LEVEL SECURITY;
 ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE views ENABLE ROW LEVEL SECURITY;
+ALTER TABLE leagues ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for public access (adjust based on your security requirements)
 CREATE POLICY "Allow all operations for authenticated users" ON teams FOR ALL USING (true);
@@ -192,6 +204,7 @@ CREATE POLICY "Allow all operations for authenticated users" ON orders FOR ALL U
 CREATE POLICY "Allow all operations for authenticated users" ON sales FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON settings FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON users FOR ALL USING (true);
+CREATE POLICY "Allow all operations for authenticated users" ON leagues FOR ALL USING (true);
 -- Allow inserts for everyone (including unauthenticated users) for view tracking
 CREATE POLICY "Allow inserts for view tracking" ON views 
 FOR INSERT 
