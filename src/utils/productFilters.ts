@@ -23,6 +23,29 @@ export const applyProductFilters = (
       }
     }
 
+    // League filter - check if product's team belongs to any of the selected leagues
+    if (filters.leagues.length > 0) {
+      if (!product.teamId) {
+        // Product has no team, so it doesn't belong to any league
+        return false;
+      }
+      // Find the team (check both active and archived)
+      let team = teams.find((t) => t.id === product.teamId);
+      if (!team) {
+        team = archivedTeams.find((t) => t.id === product.teamId);
+      }
+      if (!team) {
+        // Team not found, can't verify league membership
+        return false;
+      }
+      // Check if team's leagues array includes any of the selected league IDs
+      const teamLeagues = team.leagues || [];
+      const hasMatchingLeague = filters.leagues.some((leagueId) => teamLeagues.includes(leagueId));
+      if (!hasMatchingLeague) {
+        return false;
+      }
+    }
+
     // Type filter
     if (filters.type && product.type !== filters.type) {
       return false;
@@ -110,6 +133,7 @@ export const getActiveFiltersCount = (filters: ProductFiltersState): number => {
   if (filters.player) count++;
   if (filters.number) count++;
   if (filters.badge) count++;
+  if (filters.leagues.length > 0) count++;
   if (filters.priceMin) count++;
   if (filters.priceMax) count++;
 

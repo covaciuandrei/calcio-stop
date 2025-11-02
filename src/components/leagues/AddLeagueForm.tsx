@@ -12,7 +12,7 @@ const AddLeagueForm: React.FC<Props> = ({ onAdd }) => {
   const [name, setName] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
     const newErrors: { [key: string]: string } = {};
@@ -28,13 +28,16 @@ const AddLeagueForm: React.FC<Props> = ({ onAdd }) => {
 
     setErrors({});
 
-    const newLeague: Omit<League, 'id' | 'createdAt'> = {
-      name: name.trim(),
-    };
-
-    addLeague(newLeague);
-    if (onAdd) onAdd({ ...newLeague, id: '', createdAt: new Date().toISOString() });
-    setName('');
+    try {
+      const newLeague = await addLeague({
+        name: name.trim(),
+      });
+      if (onAdd) onAdd(newLeague);
+      setName('');
+    } catch (error) {
+      // Error is already handled by the store
+      console.error('Error adding league:', error);
+    }
   };
 
   return (

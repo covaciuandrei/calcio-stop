@@ -12,7 +12,7 @@ interface LeaguesState {
   error: string | null;
 
   // Actions
-  addLeague: (league: Omit<League, 'id' | 'createdAt'>) => Promise<void>;
+  addLeague: (league: Omit<League, 'id' | 'createdAt'>) => Promise<League>;
   updateLeague: (id: string, updates: Partial<League>) => Promise<void>;
   deleteLeague: (id: string) => Promise<void>;
   archiveLeague: (id: string) => Promise<void>;
@@ -55,11 +55,13 @@ export const useLeaguesStore = create<LeaguesState>()(
             leagues: [...state.leagues, newLeague],
             isLoading: false,
           }));
+          return newLeague;
         } catch (error) {
           set({
             error: error instanceof Error ? error.message : 'Failed to add league',
             isLoading: false,
           });
+          throw error;
         }
       },
 

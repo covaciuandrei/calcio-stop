@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useTeamsActions } from '../../stores';
 import { Team } from '../../types';
+import LeagueMultiPicker from '../leagues/LeagueMultiPicker';
 
 interface Props {
   onAdd?: (newTeam: Team) => void;
@@ -12,6 +13,7 @@ const AddTeamForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
   // Get store actions
   const { addTeam } = useTeamsActions();
   const [name, setName] = useState('');
+  const [selectedLeagueIds, setSelectedLeagueIds] = useState<string[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -33,13 +35,14 @@ const AddTeamForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
     const newTeam: Team = {
       id: uuidv4(),
       name: name.trim(),
-      leagues: [],
+      leagues: selectedLeagueIds,
       createdAt: new Date().toISOString(),
     };
 
     addTeam(newTeam);
     if (onAdd) onAdd(newTeam);
     setName('');
+    setSelectedLeagueIds([]);
   };
 
   return (
@@ -72,6 +75,16 @@ const AddTeamForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
         />
         {errors.name && <div className="error-message">{errors.name}</div>}
       </div>
+      {!isInDropdown && (
+        <div className="form-group">
+          <label>Leagues</label>
+          <LeagueMultiPicker
+            selectedLeagueIds={selectedLeagueIds}
+            onLeaguesChange={setSelectedLeagueIds}
+            placeholder="Select leagues (optional)"
+          />
+        </div>
+      )}
       <div className="form-button-container">
         <button
           type="submit"

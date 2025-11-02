@@ -55,6 +55,7 @@ const SoldOutProductsCard: React.FC<SoldOutProductsCardProps> = ({ isReadOnly = 
     player: '',
     number: '',
     badge: '',
+    leagues: [],
     priceMin: '',
     priceMax: '',
   });
@@ -117,6 +118,7 @@ const SoldOutProductsCard: React.FC<SoldOutProductsCardProps> = ({ isReadOnly = 
       player: '',
       number: '',
       badge: '',
+      leagues: [],
       priceMin: '',
       priceMax: '',
     });

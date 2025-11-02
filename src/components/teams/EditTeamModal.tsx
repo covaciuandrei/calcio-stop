@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTeamsActions } from '../../stores';
 import { Team } from '../../types';
+import LeagueMultiPicker from '../leagues/LeagueMultiPicker';
 
 interface Props {
   editingTeam: Team | null;
@@ -12,12 +13,14 @@ const EditTeamModal: React.FC<Props> = ({ editingTeam, setEditingTeam }) => {
   // Get store actions
   const { updateTeam } = useTeamsActions();
   const [name, setName] = useState(editingTeam?.name || '');
+  const [selectedLeagueIds, setSelectedLeagueIds] = useState<string[]>(editingTeam?.leagues || []);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // Update state when editingTeam changes
   React.useEffect(() => {
     if (editingTeam) {
       setName(editingTeam.name);
+      setSelectedLeagueIds(editingTeam.leagues || []);
       setErrors({});
     }
   }, [editingTeam]);
@@ -40,6 +43,7 @@ const EditTeamModal: React.FC<Props> = ({ editingTeam, setEditingTeam }) => {
 
     updateTeam(editingTeam.id, {
       name: name.trim(),
+      leagues: selectedLeagueIds,
     });
     setEditingTeam(null);
   };
@@ -66,6 +70,17 @@ const EditTeamModal: React.FC<Props> = ({ editingTeam, setEditingTeam }) => {
               />
             </label>
             {errors.name && <div className="error-message">{errors.name}</div>}
+          </div>
+
+          <div className={`form-group`}>
+            <label>
+              Leagues:
+              <LeagueMultiPicker
+                selectedLeagueIds={selectedLeagueIds}
+                onLeaguesChange={setSelectedLeagueIds}
+                placeholder="Select leagues (optional)"
+              />
+            </label>
           </div>
 
           <div className="modal-buttons">

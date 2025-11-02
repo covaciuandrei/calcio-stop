@@ -5,6 +5,7 @@ import {
   useArchivedNamesets,
   useBadgesList,
   useKitTypesList,
+  useLeaguesList,
   useNamesetsList,
   useTeamsList,
 } from '../../stores';
@@ -21,6 +22,7 @@ export interface ProductFiltersState {
   player: string;
   number: string;
   badge: string;
+  leagues: string[];
   priceMin: string;
   priceMax: string;
 }
@@ -42,6 +44,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
     player: '',
     number: '',
     badge: '',
+    leagues: [],
     priceMin: '',
     priceMax: '',
   });
@@ -54,6 +57,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
   const archivedKitTypes = useArchivedKitTypes();
   const badges = useBadgesList();
   const archivedBadges = useArchivedBadges();
+  const leagues = useLeaguesList();
 
   // Get unique values for filter options
   const uniqueTypes = Array.from(new Set(products.map((p) => p.type)));
@@ -80,6 +84,13 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
     handleFilterChange('sizes', newSizes);
   };
 
+  const handleLeagueToggle = (leagueId: string) => {
+    const newLeagues = filters.leagues.includes(leagueId)
+      ? filters.leagues.filter((id) => id !== leagueId)
+      : [...filters.leagues, leagueId];
+    handleFilterChange('leagues', newLeagues);
+  };
+
   const handleReset = () => {
     const resetFilters: ProductFiltersState = {
       team: '',
@@ -90,6 +101,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
       player: '',
       number: '',
       badge: '',
+      leagues: [],
       priceMin: '',
       priceMax: '',
     };
@@ -232,7 +244,40 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
               </select>
             </div>
 
-            {/* Row 6: Player & Number */}
+            {/* Row 6: Leagues - Full width */}
+            <div className="filter-group">
+              <label>Leagues</label>
+              <div className="sizes-checkboxes">
+                {leagues.map((league) => (
+                  <label
+                    key={league.id}
+                    className="size-checkbox"
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: '8px',
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={filters.leagues.includes(league.id)}
+                      onChange={() => handleLeagueToggle(league.id)}
+                      style={{
+                        width: '14px',
+                        height: '14px',
+                        margin: 0,
+                        cursor: 'pointer',
+                        flexShrink: 0,
+                      }}
+                    />
+                    <span style={{ flex: 1 }}>{league.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Row 7: Player & Number */}
             <div className="filter-group">
               <label>Player</label>
               <input

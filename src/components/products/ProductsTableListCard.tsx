@@ -55,6 +55,7 @@ const ProductsTableListCard: React.FC<ProductsTableListCardProps> = ({
     player: '',
     number: '',
     badge: '',
+    leagues: [],
     priceMin: '',
     priceMax: '',
   });
@@ -120,6 +121,7 @@ const ProductsTableListCard: React.FC<ProductsTableListCardProps> = ({
       player: '',
       number: '',
       badge: '',
+      leagues: [],
       priceMin: '',
       priceMax: '',
     });
