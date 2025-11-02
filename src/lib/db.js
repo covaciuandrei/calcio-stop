@@ -738,6 +738,7 @@ export async function getProducts() {
     kitTypeId: item.kit_type_id,
     badgeId: item.badge_id,
     price: item.price,
+    olxLink: item.olx_link,
     createdAt: item.created_at,
     images: (item.product_images || []).map((img) => ({
       id: img.id,
@@ -784,6 +785,7 @@ export async function getArchivedProducts() {
     kitTypeId: item.kit_type_id,
     badgeId: item.badge_id,
     price: item.price,
+    olxLink: item.olx_link,
     createdAt: item.created_at,
     images: (item.product_images || []).map((img) => ({
       id: img.id,
@@ -902,14 +904,42 @@ export async function archiveProduct(id) {
     .single();
 
   if (error) throw error;
-  return data;
+
+  // Map database response to frontend format
+  return {
+    id: data.id,
+    name: data.name,
+    type: data.type,
+    sizes: data.sizes,
+    namesetId: data.nameset_id,
+    teamId: data.team_id,
+    kitTypeId: data.kit_type_id,
+    badgeId: data.badge_id,
+    price: data.price,
+    olxLink: data.olx_link,
+    createdAt: data.created_at,
+  };
 }
 
 export async function restoreProduct(id) {
   const { data, error } = await supabase.from('products').update({ archived_at: null }).eq('id', id).select().single();
 
   if (error) throw error;
-  return data;
+
+  // Map database response to frontend format
+  return {
+    id: data.id,
+    name: data.name,
+    type: data.type,
+    sizes: data.sizes,
+    namesetId: data.nameset_id,
+    teamId: data.team_id,
+    kitTypeId: data.kit_type_id,
+    badgeId: data.badge_id,
+    price: data.price,
+    olxLink: data.olx_link,
+    createdAt: data.created_at,
+  };
 }
 
 // ============================================================================
