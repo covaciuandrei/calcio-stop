@@ -988,8 +988,31 @@ export async function createSale(data) {
   }
 }
 
-export async function getSales() {
-  const { data, error } = await supabase.from('sales').select('*').order('created_at', { ascending: false });
+export async function getSales(filters = {}) {
+  // Default to current month if no date range is provided
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+  // Extract filters
+  const startDate = filters.startDate || startOfMonth.toISOString().split('T')[0];
+  const endDate = filters.endDate || endOfMonth.toISOString().split('T')[0];
+  const saleType = filters.saleType; // 'OLX', 'IN-PERSON', or undefined (all)
+
+  // Build query
+  let query = supabase
+    .from('sales')
+    .select('*')
+    .gte('date', startDate)
+    .lte('date', endDate)
+    .order('date', { ascending: false });
+
+  // Add sale type filter if provided
+  if (saleType) {
+    query = query.eq('sale_type', saleType);
+  }
+
+  const { data, error } = await query;
 
   if (error) throw error;
 

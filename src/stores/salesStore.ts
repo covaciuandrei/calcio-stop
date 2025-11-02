@@ -3,18 +3,26 @@ import { devtools } from 'zustand/middleware';
 import * as db from '../lib/db';
 import { Sale } from '../types';
 
+interface SalesFilters {
+  startDate?: string;
+  endDate?: string;
+  saleType?: 'OLX' | 'IN-PERSON';
+}
+
 interface SalesState {
   // State
   sales: Sale[];
   isLoading: boolean;
   error: string | null;
+  filters: SalesFilters;
 
   // Actions
   addSale: (sale: Omit<Sale, 'id' | 'createdAt'>) => Promise<void>;
   updateSale: (id: string, updates: Partial<Sale>) => Promise<void>;
   deleteSale: (id: string) => Promise<void>;
   setSales: (sales: Sale[]) => void;
-  loadSales: () => Promise<void>;
+  setFilters: (filters: SalesFilters) => void;
+  loadSales: (filters?: SalesFilters) => Promise<void>;
 }
 
 // Selectors
@@ -37,11 +45,22 @@ export const salesSelectors = {
 // Store
 export const useSalesStore = create<SalesState>()(
   devtools(
-    (set, get) => ({
-      // Initial state
-      sales: [],
-      isLoading: false,
-      error: null,
+    (set, get) => {
+      // Calculate default filters (current month)
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+      const defaultFilters: SalesFilters = {
+        startDate: startOfMonth.toISOString().split('T')[0],
+        endDate: endOfMonth.toISOString().split('T')[0],
+      };
+
+      return {
+        // Initial state
+        sales: [],
+        isLoading: false,
+        error: null,
+        filters: defaultFilters,
 
       // Actions
       addSale: async (saleData: Omit<Sale, 'id' | 'createdAt'>) => {
@@ -99,11 +118,16 @@ export const useSalesStore = create<SalesState>()(
         set({ sales });
       },
 
-      loadSales: async () => {
+      setFilters: (filters: SalesFilters) => {
+        set({ filters });
+      },
+
+      loadSales: async (filters?: SalesFilters) => {
         set({ isLoading: true, error: null });
         try {
-          const sales = await db.getSales();
-          set({ sales, isLoading: false });
+          const filtersToUse = filters || get().filters;
+          const sales = await db.getSales(filtersToUse);
+          set({ sales, filters: filtersToUse, isLoading: false });
         } catch (error) {
           set({
             error: error instanceof Error ? error.message : 'Failed to load sales',
@@ -111,7 +135,8 @@ export const useSalesStore = create<SalesState>()(
           });
         }
       },
-    }),
+      };
+    },
     {
       name: 'sales-store',
     }
@@ -127,5 +152,8 @@ export const useSalesActions = () => ({
   updateSale: useSalesStore.getState().updateSale,
   deleteSale: useSalesStore.getState().deleteSale,
   setSales: useSalesStore.getState().setSales,
+  setFilters: useSalesStore.getState().setFilters,
   loadSales: useSalesStore.getState().loadSales,
 });
+
+export const useSalesFilters = () => useSalesStore((state) => state.filters);

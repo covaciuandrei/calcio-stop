@@ -56,7 +56,7 @@ export {
   useProductsStore,
   useSoldOutProducts,
 } from './productsStore';
-export { useSales, useSalesActions, useSalesList, useSalesStore } from './salesStore';
+export { useSales, useSalesActions, useSalesFilters, useSalesList, useSalesStore } from './salesStore';
 export { useAppBarOrder, useDashboardOrder, useSettings, useSettingsActions } from './settingsStore';
 export { useArchivedTeams, useTeams, useTeamsActions, useTeamsList, useTeamsStore } from './teamsStore';
 export {
