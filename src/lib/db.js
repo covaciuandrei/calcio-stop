@@ -1199,20 +1199,7 @@ export async function addOrder(data) {
 export async function getOrders() {
   const { data, error } = await supabase
     .from('orders')
-    .select(
-      `
-      *,
-      order_images (
-        id,
-        order_id,
-        image_url,
-        alt_text,
-        is_primary,
-        display_order,
-        created_at
-      )
-    `
-    )
+    .select('*')
     .is('archived_at', null)
     .order('created_at', { ascending: false });
 
@@ -1233,35 +1220,13 @@ export async function getOrders() {
     customerName: item.customer_name,
     phoneNumber: item.phone_number,
     createdAt: item.created_at,
-    images: (item.order_images || []).map((img) => ({
-      id: img.id,
-      orderId: img.order_id,
-      imageUrl: img.image_url,
-      altText: img.alt_text,
-      isPrimary: img.is_primary,
-      displayOrder: img.display_order,
-      createdAt: img.created_at,
-    })),
   }));
 }
 
 export async function getArchivedOrders() {
   const { data, error } = await supabase
     .from('orders')
-    .select(
-      `
-      *,
-      order_images (
-        id,
-        order_id,
-        image_url,
-        alt_text,
-        is_primary,
-        display_order,
-        created_at
-      )
-    `
-    )
+    .select('*')
     .not('archived_at', 'is', null)
     .order('archived_at', { ascending: false });
 
@@ -1282,15 +1247,6 @@ export async function getArchivedOrders() {
     customerName: item.customer_name,
     phoneNumber: item.phone_number,
     createdAt: item.created_at,
-    images: (item.order_images || []).map((img) => ({
-      id: img.id,
-      orderId: img.order_id,
-      imageUrl: img.image_url,
-      altText: img.alt_text,
-      isPrimary: img.is_primary,
-      displayOrder: img.display_order,
-      createdAt: img.created_at,
-    })),
   }));
 }
 
@@ -1336,20 +1292,7 @@ export async function updateOrder(id, updates) {
     .from('orders')
     .update(dbUpdates)
     .eq('id', id)
-    .select(
-      `
-      *,
-      order_images (
-        id,
-        order_id,
-        image_url,
-        alt_text,
-        is_primary,
-        display_order,
-        created_at
-      )
-    `
-    )
+    .select('*')
     .single();
 
   if (error) throw error;
@@ -1369,15 +1312,6 @@ export async function updateOrder(id, updates) {
     customerName: data.customer_name,
     phoneNumber: data.phone_number,
     createdAt: data.created_at,
-    images: (data.order_images || []).map((img) => ({
-      id: img.id,
-      orderId: img.order_id,
-      imageUrl: img.image_url,
-      altText: img.alt_text,
-      isPrimary: img.is_primary,
-      displayOrder: img.display_order,
-      createdAt: img.created_at,
-    })),
   };
 }
 

@@ -102,17 +102,6 @@ CREATE TABLE IF NOT EXISTS orders (
     archived_at TIMESTAMP WITH TIME ZONE NULL
 );
 
--- Order Images table
-CREATE TABLE IF NOT EXISTS order_images (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-    image_url TEXT NOT NULL,
-    alt_text VARCHAR(255),
-    is_primary BOOLEAN DEFAULT FALSE,
-    display_order INTEGER DEFAULT 0,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
 -- Settings table (for app configuration)
 CREATE TABLE IF NOT EXISTS settings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -176,8 +165,6 @@ CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_namesets_kit_type_id ON namesets(kit_type_id);
 CREATE INDEX IF NOT EXISTS idx_product_images_product_id ON product_images(product_id);
 CREATE INDEX IF NOT EXISTS idx_product_images_display_order ON product_images(display_order);
-CREATE INDEX IF NOT EXISTS idx_order_images_order_id ON order_images(order_id);
-CREATE INDEX IF NOT EXISTS idx_order_images_display_order ON order_images(display_order);
 CREATE INDEX IF NOT EXISTS idx_views_product_id ON views(product_id);
 CREATE INDEX IF NOT EXISTS idx_views_timestamp ON views(timestamp);
 
@@ -189,7 +176,6 @@ ALTER TABLE namesets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE product_images ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
-ALTER TABLE order_images ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sales ENABLE ROW LEVEL SECURITY;
 ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
@@ -203,7 +189,6 @@ CREATE POLICY "Allow all operations for authenticated users" ON namesets FOR ALL
 CREATE POLICY "Allow all operations for authenticated users" ON products FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON product_images FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON orders FOR ALL USING (true);
-CREATE POLICY "Allow all operations for authenticated users" ON order_images FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON sales FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON settings FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON users FOR ALL USING (true);

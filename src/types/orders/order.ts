@@ -6,16 +6,6 @@ export enum OrderStatus {
   FINISHED = 'finished',
 }
 
-export interface OrderImage {
-  id: string;
-  orderId: string;
-  imageUrl: string;
-  altText?: string;
-  isPrimary: boolean;
-  displayOrder: number;
-  createdAt: string;
-}
-
 export interface Order {
   id: string;
   name: string;
@@ -33,5 +23,4 @@ export interface Order {
   customerName?: string; // Can be empty
   phoneNumber?: string; // Can be empty
   createdAt: string;
-  images?: OrderImage[];
 }
