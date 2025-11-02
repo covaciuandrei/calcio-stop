@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useKitTypesActions, useKitTypesList, useKitTypesSearch, useSearchActions } from '../../stores';
 import { KitType } from '../../types';
 import styles from '../shared/TableListCard.module.css';
@@ -28,7 +28,13 @@ const KitTypesTableListCard: React.FC<KitTypesTableListCardProps> = ({
 
   // Use prop kitTypes if provided, otherwise use store kitTypes
   const kitTypes = propKitTypes || storeKitTypes;
-  const displayKitTypes = limit ? kitTypes.slice(0, limit) : kitTypes;
+  
+  // Sort kitTypes alphabetically by name
+  const sortedKitTypes = useMemo(() => {
+    return [...kitTypes].sort((a, b) => a.name.localeCompare(b.name));
+  }, [kitTypes]);
+  
+  const displayKitTypes = limit ? sortedKitTypes.slice(0, limit) : sortedKitTypes;
 
   const handleArchive = (id: string) => {
     if (!isReadOnly) {

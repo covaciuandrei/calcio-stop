@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useBadgesActions, useBadgesList, useBadgesSearch, useSearchActions } from '../../stores';
 import { Badge } from '../../types';
 import styles from '../shared/TableListCard.module.css';
@@ -28,7 +28,13 @@ const BadgeTableListCard: React.FC<BadgeTableListCardProps> = ({
 
   // Use prop badges if provided, otherwise use store badges
   const badges = propBadges || storeBadges;
-  const displayBadges = limit ? badges.slice(0, limit) : badges;
+  
+  // Sort badges alphabetically by name
+  const sortedBadges = useMemo(() => {
+    return [...badges].sort((a, b) => a.name.localeCompare(b.name));
+  }, [badges]);
+  
+  const displayBadges = limit ? sortedBadges.slice(0, limit) : sortedBadges;
 
   const handleArchive = (id: string) => {
     if (!isReadOnly) {

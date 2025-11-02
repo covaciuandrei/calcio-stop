@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useSalesActions, useSalesList } from '../../stores';
 import { Sale } from '../../types';
 import styles from '../shared/TableListCard.module.css';
@@ -13,6 +13,15 @@ const SalesTableListCard: React.FC = () => {
   const [isSalesExpanded, setIsSalesExpanded] = useState(true);
   const [salesSearchTerm, setSalesSearchTerm] = useState('');
 
+  // Sort sales by date descending (most recent first)
+  const sortedSales = useMemo(() => {
+    return [...sales].sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return dateB - dateA; // Descending order (newest first)
+    });
+  }, [sales]);
+
   const handleDelete = (id: string) => {
     if (!window.confirm('Are you sure you want to delete this sale?')) return;
     deleteSale(id);
@@ -26,22 +35,22 @@ const SalesTableListCard: React.FC = () => {
   return (
     <>
       <div className="card">
-        {sales.length > 0 ? (
+        {sortedSales.length > 0 ? (
           <>
             <div
               className={`card-header mini-header mini-header-orange ${styles.expandableHeader}`}
               onClick={() => setIsSalesExpanded(!isSalesExpanded)}
             >
-              <span>Sales History ({sales.length})</span>
+              <span>Sales History ({sortedSales.length})</span>
               <span className={`${styles.expandIcon} ${isSalesExpanded ? styles.expanded : styles.collapsed}`}>▼</span>
             </div>
             {!isSalesExpanded && (
-              <div className={styles.collapsedContent}>There are {sales.length} sales recorded.</div>
+              <div className={styles.collapsedContent}>There are {sortedSales.length} sales recorded.</div>
             )}
             {isSalesExpanded && (
               <>
                 <h3 className="card-section-header">Sales History</h3>
-                {sales.length >= 2 && (
+                {sortedSales.length >= 2 && (
                   <div className={styles.searchContainer}>
                     <input
                       type="text"
@@ -54,7 +63,7 @@ const SalesTableListCard: React.FC = () => {
                 )}
                 <div className={styles.tableContainer}>
                   <SalesTableList
-                    sales={sales}
+                    sales={sortedSales}
                     onEdit={handleEditClick}
                     onDelete={handleDelete}
                     searchTerm={salesSearchTerm}

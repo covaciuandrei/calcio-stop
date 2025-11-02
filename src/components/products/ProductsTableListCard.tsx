@@ -48,7 +48,7 @@ const ProductsTableListCard: React.FC<ProductsTableListCardProps> = ({
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isProductsExpanded, setIsProductsExpanded] = useState(true);
   const [productsSearchTerm, setProductsSearchTerm] = useState('');
-  const [sortOption, setSortOption] = useState<SortOption>('');
+  const [sortOption, setSortOption] = useState<SortOption>('name-asc'); // Default to alphabetical sorting
   const [filters, setFilters] = useState<ProductFiltersState>({
     team: '',
     type: '',

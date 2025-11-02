@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useArchivedLeagues } from '../../stores';
 import styles from '../shared/TableListCard.module.css';
 import ArchivedLeagues from './ArchivedLeagues';
@@ -8,27 +8,32 @@ const ArchivedLeaguesCard: React.FC = () => {
   const archivedLeagues = useArchivedLeagues();
   const [isArchivedLeaguesExpanded, setIsArchivedLeaguesExpanded] = useState(false);
   const [archivedLeaguesSearchTerm, setArchivedLeaguesSearchTerm] = useState('');
+  
+  // Sort archived leagues alphabetically by name
+  const sortedArchivedLeagues = useMemo(() => {
+    return [...archivedLeagues].sort((a, b) => a.name.localeCompare(b.name));
+  }, [archivedLeagues]);
 
   return (
     <div className="card" style={{ marginTop: 'var(--space-5)' }}>
-      {archivedLeagues.length > 0 ? (
+      {sortedArchivedLeagues.length > 0 ? (
         <>
           <div
             className={`card-header mini-header mini-header-red ${styles.expandableHeader}`}
             onClick={() => setIsArchivedLeaguesExpanded(!isArchivedLeaguesExpanded)}
           >
-            <span>Archived Leagues ({archivedLeagues.length})</span>
+            <span>Archived Leagues ({sortedArchivedLeagues.length})</span>
             <span className={`${styles.expandIcon} ${isArchivedLeaguesExpanded ? styles.expanded : styles.collapsed}`}>
               ▼
             </span>
           </div>
           {!isArchivedLeaguesExpanded && (
-            <div className={styles.collapsedContent}>There are {archivedLeagues.length} leagues available.</div>
+            <div className={styles.collapsedContent}>There are {sortedArchivedLeagues.length} leagues available.</div>
           )}
           {isArchivedLeaguesExpanded && (
             <>
               <h3 className="card-section-header">Archived Leagues List</h3>
-              {archivedLeagues.length >= 2 && (
+              {sortedArchivedLeagues.length >= 2 && (
                 <div className={styles.searchContainer}>
                   <input
                     type="text"
@@ -41,7 +46,7 @@ const ArchivedLeaguesCard: React.FC = () => {
               )}
               <div className={styles.tableContainer}>
                 <ArchivedLeagues
-                  archivedLeagues={archivedLeagues}
+                  archivedLeagues={sortedArchivedLeagues}
                   searchTerm={archivedLeaguesSearchTerm}
                   onClearSearch={() => setArchivedLeaguesSearchTerm('')}
                 />

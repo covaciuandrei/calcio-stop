@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNamesetsActions, useNamesetsList } from '../../stores';
 import { Nameset } from '../../types';
 import styles from '../shared/TableListCard.module.css';
@@ -27,7 +27,13 @@ const NamesetsTableListCard: React.FC<NamesetsTableListCardProps> = ({
 
   // Use prop namesets if provided, otherwise use store namesets
   const namesets = propNamesets || storeNamesets;
-  const displayNamesets = limit ? namesets.slice(0, limit) : namesets;
+  
+  // Sort namesets alphabetically by playerName
+  const sortedNamesets = useMemo(() => {
+    return [...namesets].sort((a, b) => a.playerName.localeCompare(b.playerName));
+  }, [namesets]);
+  
+  const displayNamesets = limit ? sortedNamesets.slice(0, limit) : sortedNamesets;
 
   const handleArchive = (id: string) => {
     if (!isReadOnly) {

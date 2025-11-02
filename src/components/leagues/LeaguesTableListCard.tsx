@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useLeaguesActions, useLeaguesList, useSearchActions } from '../../stores';
 import { League } from '../../types';
 import styles from '../shared/TableListCard.module.css';
@@ -28,7 +28,13 @@ const LeaguesTableListCard: React.FC<LeaguesTableListCardProps> = ({
 
   // Use prop leagues if provided, otherwise use store leagues
   const leagues = propLeagues || storeLeagues;
-  const displayLeagues = limit ? leagues.slice(0, limit) : leagues;
+  
+  // Sort leagues alphabetically by name
+  const sortedLeagues = useMemo(() => {
+    return [...leagues].sort((a, b) => a.name.localeCompare(b.name));
+  }, [leagues]);
+  
+  const displayLeagues = limit ? sortedLeagues.slice(0, limit) : sortedLeagues;
 
   const handleArchive = (id: string) => {
     if (!isReadOnly) {

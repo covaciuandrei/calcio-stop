@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useArchivedBadges } from '../../stores';
 import styles from '../shared/TableListCard.module.css';
 import ArchivedBadges from './ArchivedBadges';
@@ -8,27 +8,32 @@ const ArchivedBadgesCard: React.FC = () => {
   const archivedBadges = useArchivedBadges();
   const [isArchivedBadgesExpanded, setIsArchivedBadgesExpanded] = useState(false);
   const [archivedBadgesSearchTerm, setArchivedBadgesSearchTerm] = useState('');
+  
+  // Sort archived badges alphabetically by name
+  const sortedArchivedBadges = useMemo(() => {
+    return [...archivedBadges].sort((a, b) => a.name.localeCompare(b.name));
+  }, [archivedBadges]);
 
   return (
     <div className="card" style={{ marginTop: 'var(--space-5)' }}>
-      {archivedBadges.length > 0 ? (
+      {sortedArchivedBadges.length > 0 ? (
         <>
           <div
             className={`card-header mini-header mini-header-red ${styles.expandableHeader}`}
             onClick={() => setIsArchivedBadgesExpanded(!isArchivedBadgesExpanded)}
           >
-            <span>Archived Badges ({archivedBadges.length})</span>
+            <span>Archived Badges ({sortedArchivedBadges.length})</span>
             <span className={`${styles.expandIcon} ${isArchivedBadgesExpanded ? styles.expanded : styles.collapsed}`}>
               ▼
             </span>
           </div>
           {!isArchivedBadgesExpanded && (
-            <div className={styles.collapsedContent}>There are {archivedBadges.length} badges available.</div>
+            <div className={styles.collapsedContent}>There are {sortedArchivedBadges.length} badges available.</div>
           )}
           {isArchivedBadgesExpanded && (
             <>
               <h3 className="card-section-header">Archived Badges List</h3>
-              {archivedBadges.length >= 2 && (
+              {sortedArchivedBadges.length >= 2 && (
                 <div className={styles.searchContainer}>
                   <input
                     type="text"
@@ -41,7 +46,7 @@ const ArchivedBadgesCard: React.FC = () => {
               )}
               <div className={styles.tableContainer}>
                 <ArchivedBadges
-                  archivedBadges={archivedBadges}
+                  archivedBadges={sortedArchivedBadges}
                   searchTerm={archivedBadgesSearchTerm}
                   onClearSearch={() => setArchivedBadgesSearchTerm('')}
                 />
