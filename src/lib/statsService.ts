@@ -17,6 +17,7 @@ export interface TopViewedShirt {
   productName: string;
   teamName: string;
   views: number;
+  mainImageUrl?: string;
 }
 
 export interface TopSoldProduct {
@@ -24,6 +25,7 @@ export interface TopSoldProduct {
   productName: string;
   teamName: string;
   quantitySold: number;
+  mainImageUrl?: string;
 }
 
 export interface LowStockProduct {
@@ -410,6 +412,27 @@ class StatsService {
       console.log('Grouped product views:', Array.from(productViews.entries()));
       console.log('Total unique products:', productViews.size);
 
+      // Get product images for all products that have views
+      const productsWithViews = Array.from(productViews.entries())
+        .filter(([, data]) => data.views > 0)
+        .map(([productId]) => productId);
+
+      // Fetch images for all products with views
+      const { data: imagesData } = await supabase
+        .from('product_images')
+        .select('product_id, image_url, is_primary, display_order')
+        .in('product_id', productsWithViews)
+        .order('is_primary', { ascending: false })
+        .order('display_order', { ascending: true });
+
+      // Create a map of productId -> main image URL
+      const productImageMap = new Map<string, string>();
+      imagesData?.forEach((img) => {
+        if (!productImageMap.has(img.product_id)) {
+          productImageMap.set(img.product_id, img.image_url);
+        }
+      });
+
       // Convert to array, filter out products with 0 views, and sort by views
       const result: TopViewedShirt[] = Array.from(productViews.entries())
         .map(([productId, data]) => ({
@@ -417,6 +440,7 @@ class StatsService {
           productName: data.name,
           teamName: data.teamName,
           views: data.views,
+          mainImageUrl: productImageMap.get(productId),
         }))
         .filter((product) => product.views > 0) // Only show products with views
         .sort((a, b) => b.views - a.views)
@@ -521,6 +545,27 @@ class StatsService {
       console.log('Grouped product sales:', Array.from(productSales.entries()));
       console.log('Total unique products:', productSales.size);
 
+      // Get product images for all products that have sales
+      const productsWithSales = Array.from(productSales.entries())
+        .filter(([, data]) => data.quantitySold > 0)
+        .map(([productId]) => productId);
+
+      // Fetch images for all products with sales
+      const { data: imagesData } = await supabase
+        .from('product_images')
+        .select('product_id, image_url, is_primary, display_order')
+        .in('product_id', productsWithSales)
+        .order('is_primary', { ascending: false })
+        .order('display_order', { ascending: true });
+
+      // Create a map of productId -> main image URL
+      const productImageMap = new Map<string, string>();
+      imagesData?.forEach((img) => {
+        if (!productImageMap.has(img.product_id)) {
+          productImageMap.set(img.product_id, img.image_url);
+        }
+      });
+
       // Convert to array, filter out products with 0 sales, and sort by sales
       const result: TopSoldProduct[] = Array.from(productSales.entries())
         .map(([productId, data]) => ({
@@ -528,6 +573,7 @@ class StatsService {
           productName: data.name,
           teamName: data.teamName,
           quantitySold: data.quantitySold,
+          mainImageUrl: productImageMap.get(productId),
         }))
         .filter((product) => product.quantitySold > 0) // Only show products with sales
         .sort((a, b) => b.quantitySold - a.quantitySold)

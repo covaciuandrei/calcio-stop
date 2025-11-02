@@ -391,6 +391,15 @@ const StatsDashboard: React.FC = () => {
                       >
                         <span className="rank-number-modern">#{index + 1}</span>
                       </div>
+                      {product.mainImageUrl ? (
+                        <img
+                          src={product.mainImageUrl}
+                          alt={product.productName}
+                          className="product-image-thumbnail"
+                        />
+                      ) : (
+                        <div className="product-image-placeholder">📷</div>
+                      )}
                       <div className="product-info-modern">
                         <h4 className="product-name-modern">
                           {product.teamName} - {product.productName}
@@ -448,6 +457,15 @@ const StatsDashboard: React.FC = () => {
                       >
                         <span className="rank-number-modern">#{index + 1}</span>
                       </div>
+                      {product.mainImageUrl ? (
+                        <img
+                          src={product.mainImageUrl}
+                          alt={product.productName}
+                          className="product-image-thumbnail"
+                        />
+                      ) : (
+                        <div className="product-image-placeholder">📷</div>
+                      )}
                       <div className="product-info-modern">
                         <h4 className="product-name-modern">
                           {product.teamName} - {product.productName}
