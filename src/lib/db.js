@@ -917,34 +917,75 @@ export async function restoreProduct(id) {
 // ============================================================================
 
 export async function createSale(data) {
+  // Validate input
+  if (!data.items || !Array.isArray(data.items) || data.items.length === 0) {
+    throw new Error('Sale must have at least one item');
+  }
+
+  // Map frontend items to database JSONB format
+  const itemsData = data.items.map((item) => ({
+    productId: item.productId,
+    size: item.size,
+    quantity: item.quantity,
+    priceSold: item.priceSold,
+  }));
+
   // Map frontend data to database schema
   const dbData = {
-    product_id: data.productId,
-    size: data.size,
-    quantity: data.quantity,
-    price_sold: data.priceSold,
+    items: itemsData,
     customer_name: data.customerName,
     date: data.date, // This will now store the full timestamp
     sale_type: data.saleType,
     created_at: data.createdAt || new Date().toISOString(),
   };
 
+  // Backward compatibility: if old columns exist, also populate them from first item
+  if (data.items.length > 0) {
+    const firstItem = data.items[0];
+    dbData.product_id = firstItem.productId;
+    dbData.size = firstItem.size;
+    dbData.quantity = firstItem.quantity;
+    dbData.price_sold = firstItem.priceSold;
+  }
+
   const { data: result, error } = await supabase.from('sales').insert([dbData]).select().single();
 
   if (error) throw error;
 
   // Map database response back to frontend format
-  return {
-    id: result.id,
-    productId: result.product_id,
-    size: result.size,
-    quantity: result.quantity,
-    priceSold: result.price_sold,
-    customerName: result.customer_name,
-    date: result.date,
-    saleType: result.sale_type,
-    createdAt: result.created_at,
-  };
+  // Support both new (items) and old (product_id, etc.) formats for backward compatibility
+  if (result.items && Array.isArray(result.items) && result.items.length > 0) {
+    return {
+      id: result.id,
+      items: result.items.map((item) => ({
+        productId: item.productId || item.product_id,
+        size: item.size,
+        quantity: item.quantity,
+        priceSold: item.priceSold || item.price_sold,
+      })),
+      customerName: result.customer_name,
+      date: result.date,
+      saleType: result.sale_type,
+      createdAt: result.created_at,
+    };
+  } else {
+    // Fallback for old format
+    return {
+      id: result.id,
+      items: [
+        {
+          productId: result.product_id,
+          size: result.size,
+          quantity: result.quantity,
+          priceSold: result.price_sold,
+        },
+      ],
+      customerName: result.customer_name,
+      date: result.date,
+      saleType: result.sale_type,
+      createdAt: result.created_at,
+    };
+  }
 }
 
 export async function getSales() {
@@ -953,35 +994,96 @@ export async function getSales() {
   if (error) throw error;
 
   // Map database fields to frontend format
-  return (data || []).map((sale) => ({
-    id: sale.id,
-    productId: sale.product_id,
-    size: sale.size,
-    quantity: sale.quantity,
-    priceSold: sale.price_sold,
-    customerName: sale.customer_name,
-    date: sale.date,
-    saleType: sale.sale_type,
-    createdAt: sale.created_at,
-  }));
+  // Support both new (items) and old (product_id, etc.) formats for backward compatibility
+  return (data || []).map((sale) => {
+    if (sale.items && Array.isArray(sale.items) && sale.items.length > 0) {
+      return {
+        id: sale.id,
+        items: sale.items.map((item) => ({
+          productId: item.productId || item.product_id,
+          size: item.size,
+          quantity: item.quantity,
+          priceSold: item.priceSold || item.price_sold,
+        })),
+        customerName: sale.customer_name,
+        date: sale.date,
+        saleType: sale.sale_type,
+        createdAt: sale.created_at,
+      };
+    } else {
+      // Fallback for old format
+      return {
+        id: sale.id,
+        items: [
+          {
+            productId: sale.product_id,
+            size: sale.size,
+            quantity: sale.quantity,
+            priceSold: sale.price_sold,
+          },
+        ],
+        customerName: sale.customer_name,
+        date: sale.date,
+        saleType: sale.sale_type,
+        createdAt: sale.created_at,
+      };
+    }
+  });
 }
 
 export async function updateSale(id, updates) {
   // Map frontend data to database schema
   const dbUpdates = {};
 
+  if (updates.items !== undefined) {
+    if (!Array.isArray(updates.items) || updates.items.length === 0) {
+      throw new Error('Sale must have at least one item');
+    }
+    // Map frontend items to database JSONB format
+    dbUpdates.items = updates.items.map((item) => ({
+      productId: item.productId,
+      size: item.size,
+      quantity: item.quantity,
+      priceSold: item.priceSold,
+    }));
+    
+    // Backward compatibility: update old columns from first item
+    if (updates.items.length > 0) {
+      const firstItem = updates.items[0];
+      dbUpdates.product_id = firstItem.productId;
+      dbUpdates.size = firstItem.size;
+      dbUpdates.quantity = firstItem.quantity;
+      dbUpdates.price_sold = firstItem.priceSold;
+    }
+  }
+
+  // Backward compatibility: handle old format updates
   if (updates.productId !== undefined) {
     dbUpdates.product_id = updates.productId;
+    // If items array exists, update first item
+    if (dbUpdates.items && dbUpdates.items.length > 0) {
+      dbUpdates.items[0].productId = updates.productId;
+    }
   }
   if (updates.size !== undefined) {
     dbUpdates.size = updates.size;
+    if (dbUpdates.items && dbUpdates.items.length > 0) {
+      dbUpdates.items[0].size = updates.size;
+    }
   }
   if (updates.quantity !== undefined) {
     dbUpdates.quantity = parseInt(updates.quantity);
+    if (dbUpdates.items && dbUpdates.items.length > 0) {
+      dbUpdates.items[0].quantity = parseInt(updates.quantity);
+    }
   }
   if (updates.priceSold !== undefined) {
     dbUpdates.price_sold = parseFloat(updates.priceSold);
+    if (dbUpdates.items && dbUpdates.items.length > 0) {
+      dbUpdates.items[0].priceSold = parseFloat(updates.priceSold);
+    }
   }
+
   if (updates.customerName !== undefined) {
     dbUpdates.customer_name = updates.customerName;
   }
@@ -997,17 +1099,38 @@ export async function updateSale(id, updates) {
   if (error) throw error;
 
   // Map database response back to frontend format
-  return {
-    id: data.id,
-    productId: data.product_id,
-    size: data.size,
-    quantity: data.quantity,
-    priceSold: data.price_sold,
-    customerName: data.customer_name,
-    date: data.date,
-    saleType: data.sale_type,
-    createdAt: data.created_at,
-  };
+  if (data.items && Array.isArray(data.items) && data.items.length > 0) {
+    return {
+      id: data.id,
+      items: data.items.map((item) => ({
+        productId: item.productId || item.product_id,
+        size: item.size,
+        quantity: item.quantity,
+        priceSold: item.priceSold || item.price_sold,
+      })),
+      customerName: data.customer_name,
+      date: data.date,
+      saleType: data.sale_type,
+      createdAt: data.created_at,
+    };
+  } else {
+    // Fallback for old format
+    return {
+      id: data.id,
+      items: [
+        {
+          productId: data.product_id,
+          size: data.size,
+          quantity: data.quantity,
+          priceSold: data.price_sold,
+        },
+      ],
+      customerName: data.customer_name,
+      date: data.date,
+      saleType: data.sale_type,
+      createdAt: data.created_at,
+    };
+  }
 }
 
 export async function deleteSale(id) {

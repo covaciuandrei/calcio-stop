@@ -20,11 +20,15 @@ interface SalesState {
 // Selectors
 export const salesSelectors = {
   getSaleById: (state: SalesState, id: string) => state.sales.find((s) => s.id === id),
-  getSalesByProduct: (state: SalesState, productId: string) => state.sales.filter((s) => s.productId === productId),
+  getSalesByProduct: (state: SalesState, productId: string) =>
+    state.sales.filter((s) => s.items.some((item) => item.productId === productId)),
   getSalesByCustomer: (state: SalesState, customerName: string) =>
     state.sales.filter((s) => s.customerName.toLowerCase().includes(customerName.toLowerCase())),
   getTotalRevenue: (state: SalesState) =>
-    state.sales.reduce((total, sale) => total + sale.priceSold * sale.quantity, 0),
+    state.sales.reduce(
+      (total, sale) => total + sale.items.reduce((itemTotal, item) => itemTotal + item.priceSold * item.quantity, 0),
+      0
+    ),
   getTotalSales: (state: SalesState) => state.sales.length,
   getSalesByDateRange: (state: SalesState, startDate: string, endDate: string) =>
     state.sales.filter((s) => s.date >= startDate && s.date <= endDate),

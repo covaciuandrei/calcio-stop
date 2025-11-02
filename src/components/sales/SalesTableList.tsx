@@ -1,14 +1,18 @@
 import React from 'react';
 import {
   useArchivedBadges,
+  useArchivedKitTypes,
   useArchivedNamesets,
   useArchivedProducts,
+  useArchivedTeams,
   useBadgesList,
+  useKitTypesList,
   useNamesetsList,
   useProductsList,
+  useTeamsList,
 } from '../../stores';
 import { Sale } from '../../types';
-import { getBadgeInfo, getNamesetInfo, getProductInfo } from '../../utils/utils';
+import { getProductDisplayText, getProductInfo } from '../../utils/utils';
 
 interface Props {
   sales: Sale[];
@@ -23,29 +27,50 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, searchTerm =
   const archivedProducts = useArchivedProducts();
   const namesets = useNamesetsList();
   const archivedNamesets = useArchivedNamesets();
+  const teams = useTeamsList();
+  const archivedTeams = useArchivedTeams();
   const badges = useBadgesList();
   const archivedBadges = useArchivedBadges();
+  const kitTypes = useKitTypesList();
+  const archivedKitTypes = useArchivedKitTypes();
+
   const getProductDetails = (productId: string) => {
     const product = getProductInfo(productId, products, archivedProducts);
 
     if (!product) return 'Unknown product';
-    const namesetInfo = getNamesetInfo(product.namesetId, namesets, archivedNamesets);
-    const badgeInfo = getBadgeInfo(product.badgeId, badges, archivedBadges);
-    const badgeText = badgeInfo !== '-' ? ` (${badgeInfo})` : '';
-    return `${product.name} - ${product.type} - ${namesetInfo.playerName} #${
-      namesetInfo.number > 0 ? namesetInfo.number : '-'
-    }${badgeText}`;
+
+    return getProductDisplayText(
+      product,
+      namesets,
+      archivedNamesets,
+      teams,
+      archivedTeams,
+      badges,
+      archivedBadges,
+      kitTypes,
+      archivedKitTypes
+    );
+  };
+
+  // Calculate total for a sale
+  const getSaleTotal = (sale: Sale): number => {
+    return sale.items.reduce((total, item) => total + item.priceSold * item.quantity, 0);
   };
 
   // Filter sales based on search term
   const filteredSales = sales.filter((sale) => {
-    const productDetails = getProductDetails(sale.productId);
+    const matchesItems = sale.items.some((item) => {
+      const productDetails = getProductDetails(item.productId);
+      return (
+        productDetails.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.size.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.quantity.toString().includes(searchTerm) ||
+        item.priceSold.toString().includes(searchTerm)
+      );
+    });
     return (
-      productDetails.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      sale.size.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      matchesItems ||
       sale.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      sale.quantity.toString().includes(searchTerm) ||
-      sale.priceSold.toString().includes(searchTerm) ||
       sale.saleType.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
@@ -64,10 +89,8 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, searchTerm =
       <table>
         <thead>
           <tr>
-            <th>Product</th>
-            <th>Size</th>
-            <th>Quantity</th>
-            <th>Price Sold (RON)</th>
+            <th>Items</th>
+            <th>Total (RON)</th>
             <th>Customer</th>
             <th>Sale Type</th>
             <th>Date</th>
@@ -77,10 +100,17 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, searchTerm =
         <tbody>
           {filteredSales.map((s) => (
             <tr key={s.id}>
-              <td>{getProductDetails(s.productId)}</td>
-              <td>{s.size}</td>
-              <td>{s.quantity}</td>
-              <td className="price-display">{s.priceSold ? s.priceSold.toFixed(2) : '0.00'} RON</td>
+              <td>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  {s.items.map((item, idx) => (
+                    <div key={idx} style={{ fontSize: '0.875rem' }}>
+                      {getProductDetails(item.productId)} - Size: {item.size} - Qty: {item.quantity} -{' '}
+                      {item.priceSold.toFixed(2)} RON
+                    </div>
+                  ))}
+                </div>
+              </td>
+              <td className="price-display">{getSaleTotal(s).toFixed(2)} RON</td>
               <td>{s.customerName || 'N/A'}</td>
               <td>{s.saleType}</td>
               <td>{new Date(s.date).toLocaleString()}</td>
@@ -103,20 +133,25 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, searchTerm =
           <div key={s.id} className="mobile-table-card">
             <div className="mobile-card-header">
               <div className="mobile-card-title">
-                <h4>{getProductDetails(s.productId)}</h4>
+                <h4>
+                  {s.items.length} Item{s.items.length !== 1 ? 's' : ''}
+                </h4>
                 <p className="mobile-card-subtitle">{s.saleType}</p>
               </div>
-              <div className="mobile-card-price">{s.priceSold ? s.priceSold.toFixed(2) : '0.00'} RON</div>
+              <div className="mobile-card-price">{getSaleTotal(s).toFixed(2)} RON</div>
             </div>
 
             <div className="mobile-card-details">
-              <div className="mobile-detail-item">
-                <span className="mobile-detail-label">Size</span>
-                <span className="mobile-detail-value">{s.size}</span>
-              </div>
-              <div className="mobile-detail-item">
-                <span className="mobile-detail-label">Quantity</span>
-                <span className="mobile-detail-value">{s.quantity}</span>
+              <div className="mobile-detail-item" style={{ gridColumn: '1 / -1' }}>
+                <span className="mobile-detail-label">Items</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
+                  {s.items.map((item, idx) => (
+                    <div key={idx} style={{ fontSize: '0.875rem' }}>
+                      {getProductDetails(item.productId)} - {item.size} x{item.quantity} - {item.priceSold.toFixed(2)}{' '}
+                      RON
+                    </div>
+                  ))}
+                </div>
               </div>
               <div className="mobile-detail-item">
                 <span className="mobile-detail-label">Customer</span>

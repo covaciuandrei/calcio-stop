@@ -91,7 +91,7 @@ class StatsService {
   // Get sales statistics by month
   async getSalesStats(months: number = 12, dateRange?: DateRange): Promise<SalesStats[]> {
     try {
-      let query = supabase.from('sales').select('date, quantity, price_sold').order('date', { ascending: true });
+      let query = supabase.from('sales').select('date, items, quantity, price_sold, product_id, size').order('date', { ascending: true });
 
       // Apply date range filter if provided
       if (dateRange) {
@@ -162,15 +162,26 @@ class StatsService {
 
         const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
+        // Calculate totals from items array (support both new and old format)
+        const items = sale.items || [
+          {
+            productId: sale.product_id,
+            size: sale.size,
+            quantity: sale.quantity,
+            priceSold: sale.price_sold,
+          },
+        ];
+        const totalQuantity = items.reduce((sum: number, item: any) => sum + item.quantity, 0);
+        const totalRevenue = items.reduce((sum: number, item: any) => sum + item.priceSold * item.quantity, 0);
+
         console.log('Processing sale:', {
           originalDate: sale.date,
           parsedDate: date,
           monthKey,
           year: date.getFullYear(),
           month: date.getMonth() + 1,
-          quantity: sale.quantity,
-          price: sale.price_sold,
-          revenue: sale.price_sold * sale.quantity,
+          quantity: totalQuantity,
+          revenue: totalRevenue,
         });
 
         if (!monthlyStats.has(monthKey)) {
@@ -180,11 +191,11 @@ class StatsService {
         const stats = monthlyStats.get(monthKey)!;
         const beforeSales = stats.sales;
         const beforeRevenue = stats.revenue;
-        stats.sales += sale.quantity;
-        stats.revenue += sale.price_sold * sale.quantity;
+        stats.sales += totalQuantity;
+        stats.revenue += totalRevenue;
 
         console.log(
-          `Adding to ${monthKey}: sales ${beforeSales} + ${sale.quantity} = ${stats.sales}, revenue ${beforeRevenue} + ${sale.price_sold * sale.quantity} = ${stats.revenue}`
+          `Adding to ${monthKey}: sales ${beforeSales} + ${totalQuantity} = ${stats.sales}, revenue ${beforeRevenue} + ${totalRevenue} = ${stats.revenue}`
         );
       });
 
@@ -214,7 +225,7 @@ class StatsService {
     try {
       const { data, error } = await supabase
         .from('sales')
-        .select('date, quantity, price_sold')
+        .select('date, items, quantity, price_sold, product_id, size')
         .order('date', { ascending: true });
 
       if (error) {
@@ -232,9 +243,21 @@ class StatsService {
           yearlyStats.set(yearKey, { sales: 0, revenue: 0 });
         }
 
+        // Calculate totals from items array (support both new and old format)
+        const items = sale.items || [
+          {
+            productId: sale.product_id,
+            size: sale.size,
+            quantity: sale.quantity,
+            priceSold: sale.price_sold,
+          },
+        ];
+        const totalQuantity = items.reduce((sum: number, item: any) => sum + item.quantity, 0);
+        const totalRevenue = items.reduce((sum: number, item: any) => sum + item.priceSold * item.quantity, 0);
+
         const stats = yearlyStats.get(yearKey)!;
-        stats.sales += sale.quantity;
-        stats.revenue += sale.price_sold * sale.quantity;
+        stats.sales += totalQuantity;
+        stats.revenue += totalRevenue;
       });
 
       // Convert to array and format
@@ -451,10 +474,10 @@ class StatsService {
         });
       });
 
-      // Get all sales with product info
+      // Get all sales with items array and product info
       let salesQuery = supabase
         .from('sales')
-        .select('product_id, quantity, products!inner(id, name, type)')
+        .select('items, product_id, quantity, size, price_sold, products!inner(id, name, type)')
         .order('date', { ascending: false });
 
       // Apply date range filter if provided
@@ -474,25 +497,25 @@ class StatsService {
 
       // Count sales for each product
       salesData?.forEach((sale) => {
-        const product = sale.products;
+        // Support both new (items) and old (product_id, quantity) formats
+        const items = sale.items || [
+          {
+            productId: sale.product_id,
+            size: sale.size || '',
+            quantity: sale.quantity || 0,
+            priceSold: sale.price_sold || 0,
+          },
+        ];
 
-        if (!product) {
-          console.warn('No product data in sale:', sale);
-          return;
-        }
+        items.forEach((item: any) => {
+          // Try to get product info from the sale's products join or use productId directly
+          const productId = item.productId || sale.product_id;
+          const quantity = item.quantity || sale.quantity || 0;
 
-        // Handle both object and array cases (in case Supabase returns differently)
-        const actualProduct = Array.isArray(product) ? product[0] : product;
-
-        if (!actualProduct) {
-          return; // Skip invalid products
-        }
-
-        const productId = sale.product_id;
-
-        if (productSales.has(productId)) {
-          productSales.get(productId)!.quantitySold += sale.quantity;
-        }
+          if (productId && productSales.has(productId)) {
+            productSales.get(productId)!.quantitySold += quantity;
+          }
+        });
       });
 
       console.log('Grouped product sales:', Array.from(productSales.entries()));
