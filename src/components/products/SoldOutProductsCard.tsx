@@ -13,9 +13,11 @@ import {
 } from '../../stores';
 import { Product } from '../../types';
 import { applyProductFilters } from '../../utils/productFilters';
+import { sortProducts, SortOption } from '../../utils/productSort';
 import styles from '../shared/TableListCard.module.css';
 import EditProductModal from './EditProductModal';
 import ProductFilters, { ProductFiltersState } from './ProductFilters';
+import ProductSort from './ProductSort';
 import ProductsTableList from './ProductsTableList';
 
 interface SoldOutProductsCardProps {
@@ -46,6 +48,7 @@ const SoldOutProductsCard: React.FC<SoldOutProductsCardProps> = ({ isReadOnly = 
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isSoldOutExpanded, setIsSoldOutExpanded] = useState(true);
   const [soldOutSearchTerm, setSoldOutSearchTerm] = useState('');
+  const [sortOption, setSortOption] = useState<SortOption>('');
   const [filters, setFilters] = useState<ProductFiltersState>({
     team: '',
     type: '',
@@ -60,7 +63,7 @@ const SoldOutProductsCard: React.FC<SoldOutProductsCardProps> = ({ isReadOnly = 
     priceMax: '',
   });
 
-  // Apply filters to sold-out products
+  // Apply filters and sorting to sold-out products
   const filteredSoldOutProducts = useMemo(() => {
     const filtered = applyProductFilters(
       soldOutProducts,
@@ -74,10 +77,23 @@ const SoldOutProductsCard: React.FC<SoldOutProductsCardProps> = ({ isReadOnly = 
       badges,
       archivedBadges
     );
-    return limit ? filtered.slice(0, limit) : filtered;
+    const sorted = sortProducts(
+      filtered,
+      sortOption,
+      namesets,
+      archivedNamesets,
+      teams,
+      archivedTeams,
+      badges,
+      archivedBadges,
+      kitTypes,
+      archivedKitTypes
+    );
+    return limit ? sorted.slice(0, limit) : sorted;
   }, [
     soldOutProducts,
     filters,
+    sortOption,
     teams,
     archivedTeams,
     namesets,
@@ -154,11 +170,14 @@ const SoldOutProductsCard: React.FC<SoldOutProductsCardProps> = ({ isReadOnly = 
               {isSoldOutExpanded && (
                 <>
                   <h3 className="card-section-header">Sold Out Products List</h3>
-                  <ProductFilters
-                    products={soldOutProducts}
-                    onFiltersChange={handleFiltersChange}
-                    onReset={handleResetFilters}
-                  />
+                  <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap', alignItems: 'flex-start' }}>
+                    <ProductFilters
+                      products={soldOutProducts}
+                      onFiltersChange={handleFiltersChange}
+                      onReset={handleResetFilters}
+                    />
+                    <ProductSort onSortChange={setSortOption} />
+                  </div>
                   {displaySoldOutProducts.length >= 2 && (
                     <div className={styles.searchContainer}>
                       <input

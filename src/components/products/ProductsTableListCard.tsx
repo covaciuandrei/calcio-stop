@@ -13,9 +13,11 @@ import {
 } from '../../stores';
 import { Product } from '../../types';
 import { applyProductFilters } from '../../utils/productFilters';
+import { sortProducts, SortOption } from '../../utils/productSort';
 import styles from '../shared/TableListCard.module.css';
 import EditProductModal from './EditProductModal';
 import ProductFilters, { ProductFiltersState } from './ProductFilters';
+import ProductSort from './ProductSort';
 import ProductsTableList from './ProductsTableList';
 
 interface ProductsTableListCardProps {
@@ -46,6 +48,7 @@ const ProductsTableListCard: React.FC<ProductsTableListCardProps> = ({
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isProductsExpanded, setIsProductsExpanded] = useState(true);
   const [productsSearchTerm, setProductsSearchTerm] = useState('');
+  const [sortOption, setSortOption] = useState<SortOption>('');
   const [filters, setFilters] = useState<ProductFiltersState>({
     team: '',
     type: '',
@@ -63,7 +66,7 @@ const ProductsTableListCard: React.FC<ProductsTableListCardProps> = ({
   // Use prop products if provided, otherwise use store products
   const products = propProducts || storeProducts;
 
-  // Apply filters to products
+  // Apply filters and sorting to products
   const filteredProducts = useMemo(() => {
     const filtered = applyProductFilters(
       products,
@@ -77,10 +80,23 @@ const ProductsTableListCard: React.FC<ProductsTableListCardProps> = ({
       badges,
       archivedBadges
     );
-    return limit ? filtered.slice(0, limit) : filtered;
+    const sorted = sortProducts(
+      filtered,
+      sortOption,
+      namesets,
+      archivedNamesets,
+      teams,
+      archivedTeams,
+      badges,
+      archivedBadges,
+      kitTypes,
+      archivedKitTypes
+    );
+    return limit ? sorted.slice(0, limit) : sorted;
   }, [
     products,
     filters,
+    sortOption,
     teams,
     archivedTeams,
     namesets,
@@ -154,7 +170,10 @@ const ProductsTableListCard: React.FC<ProductsTableListCardProps> = ({
         {(isReadOnly || isProductsExpanded) && (
           <>
             <h3 className="card-section-header">Product List</h3>
-            <ProductFilters products={products} onFiltersChange={handleFiltersChange} onReset={handleResetFilters} />
+            <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap', alignItems: 'flex-start' }}>
+              <ProductFilters products={products} onFiltersChange={handleFiltersChange} onReset={handleResetFilters} />
+              <ProductSort onSortChange={setSortOption} />
+            </div>
             {displayProducts.length >= 2 && (
               <div className={styles.searchContainer}>
                 <input
