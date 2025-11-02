@@ -50,11 +50,30 @@ const EditSaleModal: React.FC<Props> = ({ editingSale, setEditingSale }) => {
 
     setErrors({});
 
+    // Preserve the original time when updating the date
+    const originalDate = new Date(editingSale.date);
+    let updatedDate: Date;
+    
+    if (date && date.trim()) {
+      // Get the new date from the input
+      const newDate = new Date(date);
+      // Preserve hours, minutes, seconds, and milliseconds from the original date
+      updatedDate = new Date(newDate);
+      updatedDate.setHours(
+        originalDate.getHours(),
+        originalDate.getMinutes(),
+        originalDate.getSeconds(),
+        originalDate.getMilliseconds()
+      );
+    } else {
+      updatedDate = new Date();
+    }
+
     updateSale(editingSale.id, {
       quantity,
       priceSold,
       customerName,
-      date: date && date.trim() ? new Date(date).toISOString() : new Date().toISOString(),
+      date: updatedDate.toISOString(),
       saleType,
     });
     setEditingSale(null);

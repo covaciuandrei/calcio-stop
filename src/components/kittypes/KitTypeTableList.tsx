@@ -30,39 +30,73 @@ const KitTypeTableList: React.FC<Props> = ({ kitTypes, onEdit, onArchive, search
   }
 
   return (
-    <table>
-      <thead>
-        <tr>
-          <th>Kit Type Name</th>
-          {!isReadOnly && <th>Actions</th>}
-        </tr>
-      </thead>
-      <tbody>
+    <>
+      {/* Desktop Table */}
+      <table>
+        <thead>
+          <tr>
+            <th>Kit Type Name</th>
+            {!isReadOnly && <th>Actions</th>}
+          </tr>
+        </thead>
+        <tbody>
+          {filteredKitTypes.map((kt) => {
+            const isDefault = isDefaultKitType(kt);
+
+            return (
+              <tr key={kt.id}>
+                <td>{kt.name}</td>
+                {!isReadOnly && (
+                  <td>
+                    {!isDefault && (
+                      <button onClick={() => onEdit(kt)} className="btn btn-icon btn-success" title="Edit">
+                        ✏️
+                      </button>
+                    )}
+                    {!isDefault && (
+                      <button onClick={() => onArchive(kt.id)} className="btn btn-icon btn-secondary" title="Archive">
+                        📦
+                      </button>
+                    )}
+                  </td>
+                )}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+
+      {/* Mobile Card Layout */}
+      <div className="mobile-table-cards">
         {filteredKitTypes.map((kt) => {
           const isDefault = isDefaultKitType(kt);
 
           return (
-            <tr key={kt.id}>
-              <td>{kt.name}</td>
-              {!isReadOnly && (
-                <td>
-                  {!isDefault && (
-                    <button onClick={() => onEdit(kt)} className="btn btn-icon btn-success" title="Edit">
-                      ✏️
+            <div key={kt.id} className="mobile-table-card">
+              <div className="mobile-card-header">
+                <div className="mobile-card-title">
+                  <h4>{kt.name}</h4>
+                  {isDefault && <p className="mobile-card-subtitle">Default Kit Type</p>}
+                </div>
+              </div>
+
+              {!isReadOnly && !isDefault && (
+                <div className="mobile-card-status">
+                  <div className="mobile-card-actions">
+                    <button onClick={() => onEdit(kt)} className="btn btn-success" title="Edit">
+                      Edit
                     </button>
-                  )}
-                  {!isDefault && (
-                    <button onClick={() => onArchive(kt.id)} className="btn btn-icon btn-secondary" title="Archive">
-                      📦
+                    <button onClick={() => onArchive(kt.id)} className="btn btn-secondary" title="Archive">
+                      Archive
                     </button>
-                  )}
-                </td>
+                  </div>
+                </div>
               )}
-            </tr>
+            </div>
           );
         })}
-      </tbody>
-    </table>
+      </div>
+    </>
   );
 };
 

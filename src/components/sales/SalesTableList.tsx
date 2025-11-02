@@ -59,41 +59,89 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, searchTerm =
   }
 
   return (
-    <table>
-      <thead>
-        <tr>
-          <th>Product</th>
-          <th>Size</th>
-          <th>Quantity</th>
-          <th>Price Sold (RON)</th>
-          <th>Customer</th>
-          <th>Sale Type</th>
-          <th>Date</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {filteredSales.map((s) => (
-          <tr key={s.id}>
-            <td>{getProductDetails(s.productId)}</td>
-            <td>{s.size}</td>
-            <td>{s.quantity}</td>
-            <td className="price-display">{s.priceSold ? s.priceSold.toFixed(2) : '0.00'} RON</td>
-            <td>{s.customerName || 'N/A'}</td>
-            <td>{s.saleType}</td>
-            <td>{new Date(s.date).toLocaleString()}</td>
-            <td>
-              <button onClick={() => onEdit(s)} className="btn btn-icon btn-success" title="Edit">
-                ✏️
-              </button>
-              <button onClick={() => onDelete(s.id)} className="btn btn-icon btn-danger" title="Delete">
-                🗑️
-              </button>
-            </td>
+    <>
+      {/* Desktop Table */}
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Size</th>
+            <th>Quantity</th>
+            <th>Price Sold (RON)</th>
+            <th>Customer</th>
+            <th>Sale Type</th>
+            <th>Date</th>
+            <th>Actions</th>
           </tr>
+        </thead>
+        <tbody>
+          {filteredSales.map((s) => (
+            <tr key={s.id}>
+              <td>{getProductDetails(s.productId)}</td>
+              <td>{s.size}</td>
+              <td>{s.quantity}</td>
+              <td className="price-display">{s.priceSold ? s.priceSold.toFixed(2) : '0.00'} RON</td>
+              <td>{s.customerName || 'N/A'}</td>
+              <td>{s.saleType}</td>
+              <td>{new Date(s.date).toLocaleString()}</td>
+              <td>
+                <button onClick={() => onEdit(s)} className="btn btn-icon btn-success" title="Edit">
+                  ✏️
+                </button>
+                <button onClick={() => onDelete(s.id)} className="btn btn-icon btn-danger" title="Delete">
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Mobile Card Layout */}
+      <div className="mobile-table-cards">
+        {filteredSales.map((s) => (
+          <div key={s.id} className="mobile-table-card">
+            <div className="mobile-card-header">
+              <div className="mobile-card-title">
+                <h4>{getProductDetails(s.productId)}</h4>
+                <p className="mobile-card-subtitle">{s.saleType}</p>
+              </div>
+              <div className="mobile-card-price">{s.priceSold ? s.priceSold.toFixed(2) : '0.00'} RON</div>
+            </div>
+
+            <div className="mobile-card-details">
+              <div className="mobile-detail-item">
+                <span className="mobile-detail-label">Size</span>
+                <span className="mobile-detail-value">{s.size}</span>
+              </div>
+              <div className="mobile-detail-item">
+                <span className="mobile-detail-label">Quantity</span>
+                <span className="mobile-detail-value">{s.quantity}</span>
+              </div>
+              <div className="mobile-detail-item">
+                <span className="mobile-detail-label">Customer</span>
+                <span className="mobile-detail-value">{s.customerName || 'N/A'}</span>
+              </div>
+              <div className="mobile-detail-item">
+                <span className="mobile-detail-label">Date</span>
+                <span className="mobile-detail-value">{new Date(s.date).toLocaleDateString()}</span>
+              </div>
+            </div>
+
+            <div className="mobile-card-status">
+              <div className="mobile-card-actions">
+                <button onClick={() => onEdit(s)} className="btn btn-success" title="Edit">
+                  Edit
+                </button>
+                <button onClick={() => onDelete(s.id)} className="btn btn-danger" title="Delete">
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
         ))}
-      </tbody>
-    </table>
+      </div>
+    </>
   );
 };
 
