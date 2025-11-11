@@ -11,7 +11,6 @@ import {
   useProductsList,
   useTeamsList,
 } from '../../stores';
-import { Product } from '../../types';
 import { getProductDisplayText } from '../../utils/utils';
 import styles from '../shared/Picker.module.css';
 

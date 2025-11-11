@@ -1,16 +1,8 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
-  useArchivedBadges,
-  useArchivedKitTypes,
-  useArchivedNamesets,
-  useArchivedTeams,
-  useBadgesList,
-  useKitTypesList,
-  useNamesetsList,
   useProductsList,
   useSalesActions,
-  useTeamsList,
 } from '../../stores';
 import { Sale, SaleItem, SaleType } from '../../types';
 import ProductPicker from '../products/ProductPicker';
@@ -24,14 +16,6 @@ const EditSaleModal: React.FC<Props> = ({ editingSale, setEditingSale }) => {
   // Get store actions and data
   const { updateSale } = useSalesActions();
   const products = useProductsList();
-  const namesets = useNamesetsList();
-  const archivedNamesets = useArchivedNamesets();
-  const teams = useTeamsList();
-  const archivedTeams = useArchivedTeams();
-  const badges = useBadgesList();
-  const archivedBadges = useArchivedBadges();
-  const kitTypes = useKitTypesList();
-  const archivedKitTypes = useArchivedKitTypes();
 
   const [saleItems, setSaleItems] = useState<SaleItem[]>([]);
   const [customerName, setCustomerName] = useState<string>('');

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useLeaguesActions, useLeaguesList } from '../../stores';
+import { useLeaguesList } from '../../stores';
 import styles from '../shared/Picker.module.css';
 import AddLeagueForm from './AddLeagueForm';
 

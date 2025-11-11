@@ -1,16 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
-  useArchivedBadges,
-  useArchivedKitTypes,
-  useArchivedNamesets,
-  useArchivedTeams,
-  useBadgesList,
-  useKitTypesList,
-  useNamesetsList,
   useProductsActions,
   useProductsList,
   useSalesActions,
-  useTeamsList,
 } from '../../stores';
 import { Sale, SaleItem, SaleType } from '../../types';
 import ProductPicker from '../products/ProductPicker';
@@ -20,14 +12,6 @@ const AddSaleForm: React.FC = () => {
   const products = useProductsList();
   const { updateProduct } = useProductsActions();
   const { addSale } = useSalesActions();
-  const namesets = useNamesetsList();
-  const archivedNamesets = useArchivedNamesets();
-  const teams = useTeamsList();
-  const archivedTeams = useArchivedTeams();
-  const badges = useBadgesList();
-  const archivedBadges = useArchivedBadges();
-  const kitTypes = useKitTypesList();
-  const archivedKitTypes = useArchivedKitTypes();
 
   const [saleItems, setSaleItems] = useState<SaleItem[]>([
     { productId: '', size: '', quantity: 1, priceSold: 0 },
