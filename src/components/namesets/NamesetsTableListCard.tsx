@@ -27,12 +27,16 @@ const NamesetsTableListCard: React.FC<NamesetsTableListCardProps> = ({
 
   // Use prop namesets if provided, otherwise use store namesets
   const namesets = propNamesets || storeNamesets;
-  
+
   // Sort namesets alphabetically by playerName
   const sortedNamesets = useMemo(() => {
-    return [...namesets].sort((a, b) => a.playerName.localeCompare(b.playerName));
+    return [...namesets].sort((a, b) => {
+      const nameA = a.playerName || '';
+      const nameB = b.playerName || '';
+      return nameA.localeCompare(nameB);
+    });
   }, [namesets]);
-  
+
   const displayNamesets = limit ? sortedNamesets.slice(0, limit) : sortedNamesets;
 
   const handleArchive = (id: string) => {

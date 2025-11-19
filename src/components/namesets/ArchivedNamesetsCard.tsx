@@ -8,10 +8,14 @@ const ArchivedNamesetsCard: React.FC = () => {
   const archivedNamesets = useArchivedNamesets();
   const [isArchivedNamesetsExpanded, setIsArchivedNamesetsExpanded] = useState(false);
   const [archivedNamesetsSearchTerm, setArchivedNamesetsSearchTerm] = useState('');
-  
+
   // Sort archived namesets alphabetically by playerName
   const sortedArchivedNamesets = useMemo(() => {
-    return [...archivedNamesets].sort((a, b) => a.playerName.localeCompare(b.playerName));
+    return [...archivedNamesets].sort((a, b) => {
+      const nameA = a.playerName || '';
+      const nameB = b.playerName || '';
+      return nameA.localeCompare(nameB);
+    });
   }, [archivedNamesets]);
 
   return (
