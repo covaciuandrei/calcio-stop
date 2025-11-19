@@ -17,10 +17,11 @@ import PublicBadgesPage from './components/public/PublicBadgesPage';
 import PublicDashboard from './components/public/PublicDashboard';
 import { PublicLayout } from './components/public/PublicLayout';
 import PublicProductsPage from './components/public/PublicProductsPage';
+import ReservationsPage from './components/reservations/ReservationsPage';
 import SalesPage from './components/sales/SalesPage';
 import SettingsPopup from './components/shared/SettingsPopup';
 import TeamsPage from './components/teams/TeamsPage';
-import { useAppBarOrder } from './stores';
+import { useAppBarOrder, useAuth } from './stores';
 
 // Navigation items configuration
 const NAVIGATION_ITEMS = {
@@ -37,6 +38,8 @@ const NAVIGATION_ITEMS = {
 const App: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const appBarOrder = useAppBarOrder();
+  const { user, isAuthenticated } = useAuth();
+  const isAdmin = user?.role === 'admin' && isAuthenticated;
 
   const openSettings = () => {
     setIsSettingsOpen(true);
@@ -193,6 +196,7 @@ const App: React.FC = () => {
                   <Route path="/badges" element={<BadgesPage />} />
                   <Route path="/badges/:id" element={<BadgeDetailPage />} />
                   <Route path="/kittypes" element={<KitTypesPage />} />
+                  {isAdmin && <Route path="/reservations" element={<ReservationsPage />} />}
                   <Route path="/stats" element={<StatsDashboard />} />
                   <Route path="/settings" element={<SystemSettings />} />
                 </Routes>

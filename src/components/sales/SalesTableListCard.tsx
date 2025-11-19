@@ -113,7 +113,7 @@ const SalesTableListCard: React.FC = () => {
                 }}
               />
               {sortedSales.length >= 2 && (
-                <div className={styles.searchContainer} style={{ flex: 1, minWidth: '200px' }}>
+                <div className={styles.searchContainer} style={{ flex: 1, minWidth: '200px', marginBottom: 0 }}>
                   <input
                     type="text"
                     placeholder="Search sales..."

@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import {
+  useAuth,
   useBadgesList,
   useDashboardOrder,
   useKitTypesList,
   useLeaguesList,
   useNamesetsList,
   useProductsList,
+  useReservationsList,
   useSalesList,
   useTeamsList,
 } from '../stores';
@@ -14,6 +16,7 @@ import KitTypesPage from './kittypes/KitTypesPage';
 import LeaguesPage from './leagues/LeaguesPage';
 import NamesetsPage from './namesets/NamesetsPage';
 import ProductsPage from './products/ProductsPage';
+import ReservationsPage from './reservations/ReservationsPage';
 import SalesPage from './sales/SalesPage';
 import CollapsibleHeader from './shared/CollapsibleHeader';
 import styles from './shared/TableListCard.module.css';
@@ -28,7 +31,10 @@ const Dashboard: React.FC = () => {
   const badges = useBadgesList();
   const kitTypes = useKitTypesList();
   const leagues = useLeaguesList();
+  const reservations = useReservationsList();
   const dashboardOrder = useDashboardOrder();
+  const { user, isAuthenticated } = useAuth();
+  const isAdmin = user?.role === 'admin' && isAuthenticated;
 
   // State for managing collapsed/expanded state of each card
   const [collapsedCards, setCollapsedCards] = useState({
@@ -39,6 +45,7 @@ const Dashboard: React.FC = () => {
     badges: false,
     kitTypes: false,
     leagues: false,
+    reservations: false,
   });
 
   const toggleCard = (cardName: keyof typeof collapsedCards) => {
@@ -49,7 +56,15 @@ const Dashboard: React.FC = () => {
   };
 
   // Dashboard cards configuration
-  const dashboardCards = {
+  const dashboardCards: {
+    [key: string]: {
+      title: string;
+      description: string;
+      count: number;
+      component: React.ReactElement;
+      adminOnly?: boolean;
+    };
+  } = {
     products: {
       title: 'Manage Products',
       description: 'Stock, prices, and inventory management',
@@ -92,6 +107,13 @@ const Dashboard: React.FC = () => {
       count: leagues.length,
       component: <LeaguesPage />,
     },
+    reservations: {
+      title: 'Manage Reservations',
+      description: 'Track and manage product reservations',
+      count: reservations.length,
+      component: <ReservationsPage />,
+      adminOnly: true,
+    },
   };
 
   return (
@@ -99,6 +121,8 @@ const Dashboard: React.FC = () => {
       {dashboardOrder.map((cardId) => {
         const card = dashboardCards[cardId as keyof typeof dashboardCards];
         if (!card) return null;
+        // Hide admin-only cards for non-admin users
+        if (card.adminOnly && !isAdmin) return null;
 
         return (
           <div key={cardId} className="card">

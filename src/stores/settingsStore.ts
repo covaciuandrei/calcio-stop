@@ -39,7 +39,7 @@ interface SettingsState {
 // Default orders
 const DEFAULT_APPBAR_ORDER = ['dashboard', 'products', 'sales', 'namesets', 'teams', 'badges', 'kittypes'];
 
-const DEFAULT_DASHBOARD_ORDER = ['products', 'sales', 'namesets', 'teams', 'badges', 'kitTypes'];
+const DEFAULT_DASHBOARD_ORDER = ['products', 'sales', 'namesets', 'teams', 'badges', 'kitTypes', 'reservations'];
 
 // Store
 export const useSettingsStore = create<SettingsState>()(

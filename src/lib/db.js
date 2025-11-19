@@ -1287,6 +1287,319 @@ export async function reverseSale(id) {
 }
 
 // ============================================================================
+// RESERVATIONS CRUD OPERATIONS
+// ============================================================================
+
+export async function createReservation(data) {
+  // Validate input
+  if (!data.items || !Array.isArray(data.items) || data.items.length === 0) {
+    throw new Error('Reservation must have at least one item');
+  }
+
+  // Map frontend items to database JSONB format
+  const itemsData = data.items.map((item) => ({
+    productId: item.productId,
+    size: item.size,
+    quantity: item.quantity,
+    priceSold: item.priceSold,
+  }));
+
+  // Map frontend data to database schema
+  const dbData = {
+    items: itemsData,
+    customer_name: data.customerName,
+    expiring_date: data.expiringDate,
+    status: 'pending',
+    created_at: data.createdAt || new Date().toISOString(),
+    completed_at: null,
+  };
+
+  const { data: result, error } = await supabase.from('reservations').insert([dbData]).select().single();
+
+  if (error) throw error;
+
+  // Reduce product stock when reservation is created
+  const itemsByProduct = {};
+  for (const item of itemsData) {
+    if (!itemsByProduct[item.productId]) {
+      itemsByProduct[item.productId] = [];
+    }
+    itemsByProduct[item.productId].push({ size: item.size, quantity: item.quantity });
+  }
+
+  // Update product stock - one update per product to avoid race conditions
+  for (const productId in itemsByProduct) {
+    const productItems = itemsByProduct[productId];
+
+    // Get the product
+    const { data: product, error: productError } = await supabase
+      .from('products')
+      .select('sizes')
+      .eq('id', productId)
+      .single();
+
+    if (productError) {
+      console.error(`Error fetching product ${productId}:`, productError);
+      continue;
+    }
+
+    if (!product) {
+      console.warn(`Product ${productId} not found`);
+      continue;
+    }
+
+    // Update all sizes for this product in one operation
+    const updatedSizes = (product.sizes || []).map((sizeObj) => {
+      const itemsForThisSize = productItems.filter((item) => item.size === sizeObj.size);
+      if (itemsForThisSize.length > 0) {
+        const totalQuantityToSubtract = itemsForThisSize.reduce((sum, item) => sum + item.quantity, 0);
+        return {
+          ...sizeObj,
+          quantity: Math.max(0, (sizeObj.quantity || 0) - totalQuantityToSubtract),
+        };
+      }
+      return sizeObj;
+    });
+
+    // Update the product
+    const { error: updateError } = await supabase.from('products').update({ sizes: updatedSizes }).eq('id', productId);
+
+    if (updateError) {
+      console.error(`Error updating product ${productId}:`, updateError);
+      continue;
+    }
+  }
+
+  // Map database response back to frontend format
+  return {
+    id: result.id,
+    items: result.items || [],
+    customerName: result.customer_name,
+    expiringDate: result.expiring_date,
+    status: result.status,
+    createdAt: result.created_at,
+    completedAt: result.completed_at || undefined,
+  };
+}
+
+export async function getReservations() {
+  const { data, error } = await supabase.from('reservations').select('*').order('created_at', { ascending: false });
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return (data || []).map((reservation) => ({
+    id: reservation.id,
+    items: reservation.items || [],
+    customerName: reservation.customer_name,
+    expiringDate: reservation.expiring_date,
+    status: reservation.status,
+    createdAt: reservation.created_at,
+    completedAt: reservation.completed_at || undefined,
+  }));
+}
+
+export async function updateReservation(id, updates) {
+  // Map frontend data to database schema
+  const dbUpdates = {};
+
+  if (updates.items !== undefined) {
+    if (!Array.isArray(updates.items) || updates.items.length === 0) {
+      throw new Error('Reservation must have at least one item');
+    }
+    dbUpdates.items = updates.items.map((item) => ({
+      productId: item.productId,
+      size: item.size,
+      quantity: item.quantity,
+      priceSold: item.priceSold,
+    }));
+  }
+
+  if (updates.customerName !== undefined) {
+    dbUpdates.customer_name = updates.customerName;
+  }
+  if (updates.expiringDate !== undefined) {
+    dbUpdates.expiring_date = updates.expiringDate;
+  }
+  if (updates.status !== undefined) {
+    dbUpdates.status = updates.status;
+  }
+  if (updates.completedAt !== undefined) {
+    dbUpdates.completed_at = updates.completedAt;
+  }
+
+  const { data, error } = await supabase.from('reservations').update(dbUpdates).eq('id', id).select().single();
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return {
+    id: data.id,
+    items: data.items || [],
+    customerName: data.customer_name,
+    expiringDate: data.expiring_date,
+    status: data.status,
+    createdAt: data.created_at,
+    completedAt: data.completed_at || undefined,
+  };
+}
+
+export async function deleteReservation(id) {
+  // First, get the reservation to restore stock
+  const { data: reservation, error: fetchError } = await supabase
+    .from('reservations')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (fetchError) throw fetchError;
+  if (!reservation) throw new Error('Reservation not found');
+
+  // Only restore stock if reservation is not completed
+  if (reservation.status === 'pending') {
+    const items = reservation.items || [];
+
+    // Group items by productId
+    const itemsByProduct = {};
+    for (const item of items) {
+      const productId = item.productId;
+      if (!productId) continue;
+
+      if (!itemsByProduct[productId]) {
+        itemsByProduct[productId] = [];
+      }
+      itemsByProduct[productId].push({ size: item.size, quantity: item.quantity });
+    }
+
+    // Restore product quantities
+    for (const productId in itemsByProduct) {
+      const productItems = itemsByProduct[productId];
+
+      // Get the product
+      const { data: product, error: productError } = await supabase
+        .from('products')
+        .select('sizes')
+        .eq('id', productId)
+        .single();
+
+      if (productError) {
+        console.error(`Error fetching product ${productId}:`, productError);
+        continue;
+      }
+
+      if (!product) {
+        console.warn(`Product ${productId} not found`);
+        continue;
+      }
+
+      // Restore quantities for all sizes
+      const updatedSizes = (product.sizes || []).map((sizeObj) => {
+        const itemsForThisSize = productItems.filter((item) => item.size === sizeObj.size);
+        if (itemsForThisSize.length > 0) {
+          const totalQuantityToRestore = itemsForThisSize.reduce((sum, item) => sum + item.quantity, 0);
+          return {
+            ...sizeObj,
+            quantity: (sizeObj.quantity || 0) + totalQuantityToRestore,
+          };
+        }
+        return sizeObj;
+      });
+
+      // Update the product
+      const { error: updateError } = await supabase
+        .from('products')
+        .update({ sizes: updatedSizes })
+        .eq('id', productId);
+
+      if (updateError) {
+        console.error(`Error updating product ${productId}:`, updateError);
+        continue;
+      }
+    }
+  }
+
+  // Delete the reservation
+  const { error: deleteError } = await supabase.from('reservations').delete().eq('id', id);
+
+  if (deleteError) throw deleteError;
+}
+
+export async function completeReservation(id, saleData) {
+  // Get the reservation
+  const { data: reservation, error: fetchError } = await supabase
+    .from('reservations')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (fetchError) throw fetchError;
+  if (!reservation) throw new Error('Reservation not found');
+  if (reservation.status === 'completed') {
+    throw new Error('Reservation is already completed');
+  }
+
+  // Create the sale (stock is NOT modified here because it was already reduced when reservation was created)
+  const saleItems = reservation.items.map((item) => ({
+    productId: item.productId,
+    size: item.size,
+    quantity: item.quantity,
+    priceSold: item.priceSold,
+  }));
+
+  // Map frontend items to database JSONB format
+  const itemsData = saleItems.map((item) => ({
+    productId: item.productId,
+    size: item.size,
+    quantity: item.quantity,
+    priceSold: item.priceSold,
+  }));
+
+  // Create the sale directly (stock is NOT modified - already reduced when reservation was created)
+  const dbSaleData = {
+    items: itemsData,
+    customer_name: saleData.customerName || reservation.customer_name,
+    date: saleData.date || new Date().toISOString(),
+    sale_type: saleData.saleType || 'IN-PERSON',
+    created_at: new Date().toISOString(),
+  };
+
+  // Backward compatibility: populate old columns from first item
+  if (itemsData.length > 0) {
+    const firstItem = itemsData[0];
+    dbSaleData.product_id = firstItem.productId;
+    dbSaleData.size = firstItem.size;
+    dbSaleData.quantity = firstItem.quantity;
+    dbSaleData.price_sold = firstItem.priceSold;
+  }
+
+  const { error: saleError } = await supabase.from('sales').insert([dbSaleData]);
+
+  if (saleError) throw saleError;
+
+  // Update reservation status to completed
+  const completedAt = new Date().toISOString();
+  const { data: updatedReservation, error: updateError } = await supabase
+    .from('reservations')
+    .update({ status: 'completed', completed_at: completedAt })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (updateError) throw updateError;
+
+  // Map database response to frontend format
+  return {
+    id: updatedReservation.id,
+    items: updatedReservation.items || [],
+    customerName: updatedReservation.customer_name,
+    expiringDate: updatedReservation.expiring_date,
+    status: updatedReservation.status,
+    createdAt: updatedReservation.created_at,
+    completedAt: updatedReservation.completed_at || undefined,
+  };
+}
+
+// ============================================================================
 // SETTINGS CRUD OPERATIONS
 // ============================================================================
 
@@ -1319,7 +1632,7 @@ export async function setAppBarOrder(order) {
 
 export async function getDashboardOrder() {
   const result = await getSetting('dashboard_order');
-  return result || ['products', 'sales', 'namesets', 'teams', 'badges', 'kitTypes'];
+  return result || ['products', 'sales', 'namesets', 'teams', 'badges', 'kitTypes', 'reservations'];
 }
 
 export async function setDashboardOrder(order) {

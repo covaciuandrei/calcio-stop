@@ -48,6 +48,7 @@ const DASHBOARD_ITEMS = [
   { id: 'teams', title: 'Manage Teams', description: 'Organize your teams and player rosters' },
   { id: 'badges', title: 'Manage Badges', description: 'Create and manage badges for shirts' },
   { id: 'kitTypes', title: 'Manage Kit Types', description: 'Define kit types like 1st Kit, 2nd Kit, etc.' },
+  { id: 'reservations', title: 'Manage Reservations', description: 'Track and manage product reservations' },
 ];
 
 // Sortable Item Component

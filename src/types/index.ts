@@ -5,5 +5,6 @@ export * from './leagues';
 export * from './namesets';
 export * from './orders';
 export * from './products';
+export * from './reservations';
 export * from './sales';
 export * from './teams';

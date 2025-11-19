@@ -103,6 +103,17 @@ CREATE TABLE IF NOT EXISTS orders (
     archived_at TIMESTAMP WITH TIME ZONE NULL
 );
 
+-- Reservations table
+CREATE TABLE IF NOT EXISTS reservations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    items JSONB NOT NULL DEFAULT '[]'::jsonb,
+    customer_name VARCHAR(255) NOT NULL,
+    expiring_date TIMESTAMP WITH TIME ZONE NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    completed_at TIMESTAMP WITH TIME ZONE NULL
+);
+
 -- Settings table (for app configuration)
 CREATE TABLE IF NOT EXISTS settings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -148,7 +159,7 @@ ON CONFLICT (name) DO NOTHING;
 -- Insert default settings
 INSERT INTO settings (key, value) VALUES 
     ('app_bar_order', '["dashboard", "products", "sales", "namesets", "teams", "badges", "kittypes", "stats"]'::jsonb),
-    ('dashboard_order', '["products", "sales", "namesets", "teams", "badges", "kitTypes"]'::jsonb),
+    ('dashboard_order', '["products", "sales", "namesets", "teams", "badges", "kitTypes", "reservations"]'::jsonb),
     ('registration_enabled', 'true'::jsonb),
     ('maintenance_mode', 'false'::jsonb)
 ON CONFLICT (key) DO NOTHING;
@@ -171,6 +182,9 @@ CREATE INDEX IF NOT EXISTS idx_orders_nameset_id ON orders(nameset_id);
 CREATE INDEX IF NOT EXISTS idx_orders_kit_type_id ON orders(kit_type_id);
 CREATE INDEX IF NOT EXISTS idx_orders_badge_id ON orders(badge_id);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_reservations_status ON reservations(status);
+CREATE INDEX IF NOT EXISTS idx_reservations_expiring_date ON reservations(expiring_date);
+CREATE INDEX IF NOT EXISTS idx_reservations_created_at ON reservations(created_at);
 CREATE INDEX IF NOT EXISTS idx_namesets_kit_type_id ON namesets(kit_type_id);
 CREATE INDEX IF NOT EXISTS idx_product_images_product_id ON product_images(product_id);
 CREATE INDEX IF NOT EXISTS idx_product_images_display_order ON product_images(display_order);
@@ -187,6 +201,7 @@ ALTER TABLE namesets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE product_images ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reservations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sales ENABLE ROW LEVEL SECURITY;
 ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
@@ -201,6 +216,10 @@ CREATE POLICY "Allow all operations for authenticated users" ON namesets FOR ALL
 CREATE POLICY "Allow all operations for authenticated users" ON products FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON product_images FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON orders FOR ALL USING (true);
+CREATE POLICY "Allow authenticated users to read reservations" ON reservations 
+FOR SELECT USING (auth.role() = 'authenticated');
+CREATE POLICY "Allow authenticated users full access to reservations" ON reservations 
+FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "Allow all operations for authenticated users" ON sales FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON settings FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON users FOR ALL USING (true);
