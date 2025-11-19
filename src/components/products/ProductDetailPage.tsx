@@ -470,6 +470,27 @@ const ProductDetailPage: React.FC = () => {
               {/* Sizes and Quantities */}
               <div className="sizes-section">
                 <h4>Sizes & Quantities</h4>
+                {showAdminFeatures &&
+                  (() => {
+                    const totalQuantity = product.sizes.reduce((sum, sq) => sum + sq.quantity, 0);
+                    const isTotalOutOfStock = totalQuantity === 0;
+                    const isTotalLowStock = totalQuantity >= 1 && totalQuantity <= 3;
+
+                    return (
+                      <div
+                        className={`size-item total-quantity ${isTotalOutOfStock ? 'total-zero' : isTotalLowStock ? 'total-low' : 'total-stocked'}`}
+                        style={{
+                          marginBottom: 'var(--space-3)',
+                          width: '100%',
+                          maxWidth: '200px',
+                          margin: '0 auto var(--space-3)',
+                        }}
+                      >
+                        <span className="size-label">Total:</span>
+                        <span className="quantity-label">{totalQuantity}</span>
+                      </div>
+                    );
+                  })()}
                 <div className="sizes-grid">
                   {product.sizes.map((sizeQty) => {
                     const stockStatus = getStockStatus(sizeQty.quantity);

@@ -9,6 +9,7 @@ import {
   useNamesetsList,
   useTeamsList,
 } from '../../stores';
+import { useAuth } from '../../stores/authStore';
 import { Product } from '../../types';
 import { getNamesetInfo } from '../../utils/utils';
 import './ProductFilters.css';
@@ -25,6 +26,8 @@ export interface ProductFiltersState {
   leagues: string[];
   priceMin: string;
   priceMax: string;
+  totalMin: string;
+  totalMax: string;
 }
 
 interface ProductFiltersProps {
@@ -35,6 +38,9 @@ interface ProductFiltersProps {
 
 const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChange, onReset }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, isAuthenticated } = useAuth();
+  const isAdmin = user?.role === 'admin' && isAuthenticated;
+
   const [filters, setFilters] = useState<ProductFiltersState>({
     team: '',
     type: '',
@@ -47,6 +53,8 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
     leagues: [],
     priceMin: '',
     priceMax: '',
+    totalMin: '',
+    totalMax: '',
   });
 
   // Get data from stores
@@ -104,6 +112,8 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
       leagues: [],
       priceMin: '',
       priceMax: '',
+      totalMin: '',
+      totalMax: '',
     };
     setFilters(resetFilters);
     onReset();
@@ -196,6 +206,28 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
                 />
               </div>
             </div>
+
+            {/* Row 3.5: Total Quantity Range - Full width (Admin only) */}
+            {isAdmin && (
+              <div className="filter-group price-range">
+                <label>Total Quantity Range</label>
+                <div className="price-inputs">
+                  <input
+                    type="number"
+                    placeholder="Min"
+                    value={filters.totalMin}
+                    onChange={(e) => handleFilterChange('totalMin', e.target.value)}
+                  />
+                  <span>to</span>
+                  <input
+                    type="number"
+                    placeholder="Max"
+                    value={filters.totalMax}
+                    onChange={(e) => handleFilterChange('totalMax', e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Row 4: Sizes - Full width */}
             <div className="filter-group">

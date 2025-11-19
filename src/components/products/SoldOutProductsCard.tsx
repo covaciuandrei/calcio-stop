@@ -13,7 +13,7 @@ import {
 } from '../../stores';
 import { Product } from '../../types';
 import { applyProductFilters } from '../../utils/productFilters';
-import { sortProducts, SortOption } from '../../utils/productSort';
+import { SortOption, sortProducts } from '../../utils/productSort';
 import styles from '../shared/TableListCard.module.css';
 import EditProductModal from './EditProductModal';
 import ProductFilters, { ProductFiltersState } from './ProductFilters';
@@ -61,6 +61,8 @@ const SoldOutProductsCard: React.FC<SoldOutProductsCardProps> = ({ isReadOnly = 
     leagues: [],
     priceMin: '',
     priceMax: '',
+    totalMin: '',
+    totalMax: '',
   });
 
   // Apply filters and sorting to sold-out products
@@ -137,6 +139,8 @@ const SoldOutProductsCard: React.FC<SoldOutProductsCardProps> = ({ isReadOnly = 
       leagues: [],
       priceMin: '',
       priceMax: '',
+      totalMin: '',
+      totalMax: '',
     });
   };
 

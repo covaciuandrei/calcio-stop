@@ -576,7 +576,7 @@ table .btn {
 .navbar a {
   color: var(--gray-600);
   text-decoration: none;
-  font-weight: var(--font-weight-medium); 
+  font-weight: var(--font-weight-medium);
   padding: var(--space-3) calc(var(--space-3) * 0.9);
   border-radius: var(--radius-lg);
   transition: all var(--transition-slow);
@@ -1151,6 +1151,25 @@ td button:hover {
   .mobile-status-badge.out-of-stock {
     background: var(--accent-red-100);
     color: var(--accent-red-700);
+  }
+
+  /* Total quantity styling - red for zero stock, yellow for 1-3, green for > 3 */
+  .mobile-status-badge.total-quantity.total-zero {
+    background-color: #fee2e2;
+    border: 1px solid #fca5a5;
+    color: #dc2626;
+  }
+
+  .mobile-status-badge.total-quantity.total-low {
+    background-color: #fef3c7;
+    border: 1px solid #fbbf24;
+    color: #d97706;
+  }
+
+  .mobile-status-badge.total-quantity.total-stocked {
+    background-color: #dbeafe;
+    border: 1px solid #93c5fd;
+    color: #1e40af;
   }
 
   .mobile-card-actions {

@@ -118,6 +118,25 @@ export const applyProductFilters = (
       }
     }
 
+    // Total quantity range filter
+    if (filters.totalMin || filters.totalMax) {
+      const totalQuantity = product.sizes.reduce((sum, sq) => sum + sq.quantity, 0);
+
+      if (filters.totalMin) {
+        const minTotal = parseFloat(filters.totalMin);
+        if (isNaN(minTotal) || totalQuantity < minTotal) {
+          return false;
+        }
+      }
+
+      if (filters.totalMax) {
+        const maxTotal = parseFloat(filters.totalMax);
+        if (isNaN(maxTotal) || totalQuantity > maxTotal) {
+          return false;
+        }
+      }
+    }
+
     return true;
   });
 };
@@ -136,6 +155,8 @@ export const getActiveFiltersCount = (filters: ProductFiltersState): number => {
   if (filters.leagues.length > 0) count++;
   if (filters.priceMin) count++;
   if (filters.priceMax) count++;
+  if (filters.totalMin) count++;
+  if (filters.totalMax) count++;
 
   return count;
 };

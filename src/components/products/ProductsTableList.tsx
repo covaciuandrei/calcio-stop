@@ -10,6 +10,7 @@ import {
   useNamesetsList,
   useTeamsList,
 } from '../../stores';
+import { useAuth } from '../../stores/authStore';
 import { Product } from '../../types';
 import { getBadgeInfo, getKitTypeInfo, getNamesetInfo, getTeamInfo } from '../../utils/utils';
 
@@ -24,9 +25,16 @@ interface Props {
 const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, searchTerm = '', isReadOnly = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, isAuthenticated } = useAuth();
 
   // Check if this is a public route
   const isPublicRoute = location.pathname.startsWith('/public');
+
+  // Check if user is admin
+  const isAdmin = user?.role === 'admin' && isAuthenticated;
+
+  // Show total quantity only for admins on non-public routes
+  const showTotal = isAdmin && !isPublicRoute;
 
   // Get data from stores
   const namesets = useNamesetsList();
@@ -135,20 +143,49 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
               <td>{getKitTypeInfo(p.kitTypeId, kitTypes, archivedKitTypes)}</td>
               <td>
                 <div className="size-quantity-display">
-                  {p.sizes.map((sq) => {
-                    const stockStatus = getStockStatus(sq.quantity);
-                    const isOutOfStock = sq.quantity === 0;
-                    const isLowStock = sq.quantity > 0 && sq.quantity <= 2;
+                  {showTotal
+                    ? (() => {
+                        const totalQuantity = p.sizes.reduce((sum, sq) => sum + sq.quantity, 0);
+                        const isTotalOutOfStock = totalQuantity === 0;
+                        const isTotalLowStock = totalQuantity >= 1 && totalQuantity <= 3;
 
-                    return (
-                      <div
-                        key={sq.size}
-                        className={`size-quantity-item ${isOutOfStock ? 'out-of-stock' : isLowStock ? 'low-stock' : 'in-stock'}`}
-                      >
-                        {sq.size}: {isPublicRoute ? stockStatus : sq.quantity}
-                      </div>
-                    );
-                  })}
+                        return (
+                          <>
+                            <div
+                              className={`size-quantity-item total-quantity ${isTotalOutOfStock ? 'total-zero' : isTotalLowStock ? 'total-low' : 'total-stocked'}`}
+                            >
+                              Total: {totalQuantity}
+                            </div>
+                            {p.sizes.map((sq) => {
+                              const isOutOfStock = sq.quantity === 0;
+                              const isLowStock = sq.quantity > 0 && sq.quantity <= 2;
+
+                              return (
+                                <div
+                                  key={sq.size}
+                                  className={`size-quantity-item ${isOutOfStock ? 'out-of-stock' : isLowStock ? 'low-stock' : 'in-stock'}`}
+                                >
+                                  {sq.size}: {sq.quantity}
+                                </div>
+                              );
+                            })}
+                          </>
+                        );
+                      })()
+                    : p.sizes.map((sq) => {
+                        const stockStatus = getStockStatus(sq.quantity);
+                        const isOutOfStock = sq.quantity === 0;
+                        const isLowStock = sq.quantity > 0 && sq.quantity <= 2;
+
+                        return (
+                          <div
+                            key={sq.size}
+                            className={`size-quantity-item ${isOutOfStock ? 'out-of-stock' : isLowStock ? 'low-stock' : 'in-stock'}`}
+                          >
+                            {sq.size}: {isPublicRoute ? stockStatus : sq.quantity}
+                          </div>
+                        );
+                      })}
                 </div>
               </td>
               <td>
@@ -256,22 +293,55 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
 
               <div className="mobile-card-status">
                 <div className="size-quantity-display">
-                  {p.sizes.map((sq) => {
-                    const stockStatus = getStockStatus(sq.quantity);
-                    const isOutOfStockSize = sq.quantity === 0;
-                    const isLowStockSize = sq.quantity > 0 && sq.quantity <= 2;
+                  {showTotal
+                    ? (() => {
+                        const totalQuantity = p.sizes.reduce((sum, sq) => sum + sq.quantity, 0);
+                        const isTotalOutOfStock = totalQuantity === 0;
+                        const isTotalLowStock = totalQuantity >= 1 && totalQuantity <= 3;
 
-                    return (
-                      <span
-                        key={sq.size}
-                        className={`mobile-status-badge ${
-                          isOutOfStockSize ? 'out-of-stock' : isLowStockSize ? 'low-stock' : 'in-stock'
-                        }`}
-                      >
-                        {sq.size}: {isPublicRoute ? stockStatus : sq.quantity}
-                      </span>
-                    );
-                  })}
+                        return (
+                          <>
+                            <span
+                              className={`mobile-status-badge total-quantity ${
+                                isTotalOutOfStock ? 'total-zero' : isTotalLowStock ? 'total-low' : 'total-stocked'
+                              }`}
+                            >
+                              Total: {totalQuantity}
+                            </span>
+                            {p.sizes.map((sq) => {
+                              const isOutOfStockSize = sq.quantity === 0;
+                              const isLowStockSize = sq.quantity > 0 && sq.quantity <= 2;
+
+                              return (
+                                <span
+                                  key={sq.size}
+                                  className={`mobile-status-badge ${
+                                    isOutOfStockSize ? 'out-of-stock' : isLowStockSize ? 'low-stock' : 'in-stock'
+                                  }`}
+                                >
+                                  {sq.size}: {sq.quantity}
+                                </span>
+                              );
+                            })}
+                          </>
+                        );
+                      })()
+                    : p.sizes.map((sq) => {
+                        const stockStatus = getStockStatus(sq.quantity);
+                        const isOutOfStockSize = sq.quantity === 0;
+                        const isLowStockSize = sq.quantity > 0 && sq.quantity <= 2;
+
+                        return (
+                          <span
+                            key={sq.size}
+                            className={`mobile-status-badge ${
+                              isOutOfStockSize ? 'out-of-stock' : isLowStockSize ? 'low-stock' : 'in-stock'
+                            }`}
+                          >
+                            {sq.size}: {isPublicRoute ? stockStatus : sq.quantity}
+                          </span>
+                        );
+                      })}
                 </div>
                 {!isReadOnly && (
                   <div className="mobile-card-actions" onClick={(e) => e.stopPropagation()}>
