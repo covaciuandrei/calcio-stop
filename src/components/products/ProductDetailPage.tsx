@@ -108,6 +108,12 @@ const ProductDetailPage: React.FC = () => {
     };
   }, [isNamesetDropdownOpen]);
 
+  // Filter badges based on stock for public routes
+  const availableBadges = isPublicRoute ? badges.filter((badge) => badge.quantity > 0) : badges;
+
+  // Filter namesets based on stock for public routes
+  const availableNamesets = isPublicRoute ? namesets.filter((nameset) => nameset.quantity > 0) : namesets;
+
   // Calculate total price
   const selectedBadge = badges.find((b) => b.id === selectedBadgeId);
   const selectedNameset = namesets.find((n) => n.id === selectedNamesetId);
@@ -288,7 +294,7 @@ const ProductDetailPage: React.FC = () => {
                       </div>
                       {isBadgeDropdownOpen && (
                         <div className="badge-dropdown">
-                          {badges.length === 0 ? (
+                          {availableBadges.length === 0 ? (
                             <div className="badge-dropdown-empty">No badges available</div>
                           ) : (
                             <>
@@ -302,7 +308,7 @@ const ProductDetailPage: React.FC = () => {
                                 <div className="badge-option-name">None</div>
                                 <div className="badge-option-details">No badge selected</div>
                               </div>
-                              {badges.map((badge) => (
+                              {availableBadges.map((badge) => (
                                 <div
                                   key={badge.id}
                                   className={`badge-dropdown-option ${selectedBadgeId === badge.id ? 'selected' : ''}`}
@@ -340,7 +346,7 @@ const ProductDetailPage: React.FC = () => {
                       </div>
                       {isBadgeDropdownOpen && (
                         <div className="badge-dropdown">
-                          {badges.length === 0 ? (
+                          {availableBadges.length === 0 ? (
                             <div className="badge-dropdown-empty">No badges available</div>
                           ) : (
                             <>
@@ -354,7 +360,7 @@ const ProductDetailPage: React.FC = () => {
                                 <div className="badge-option-name">None</div>
                                 <div className="badge-option-details">No badge selected</div>
                               </div>
-                              {badges.map((badge) => (
+                              {availableBadges.map((badge) => (
                                 <div
                                   key={badge.id}
                                   className={`badge-dropdown-option ${selectedBadgeId === badge.id ? 'selected' : ''}`}
@@ -395,7 +401,7 @@ const ProductDetailPage: React.FC = () => {
                       </div>
                       {isNamesetDropdownOpen && (
                         <div className="nameset-dropdown">
-                          {namesets.length === 0 ? (
+                          {availableNamesets.length === 0 ? (
                             <div className="nameset-dropdown-empty">No namesets available</div>
                           ) : (
                             <>
@@ -409,7 +415,7 @@ const ProductDetailPage: React.FC = () => {
                                 <div className="nameset-option-name">None</div>
                                 <div className="nameset-option-details">No nameset selected</div>
                               </div>
-                              {namesets.map((nameset) => (
+                              {availableNamesets.map((nameset) => (
                                 <div
                                   key={nameset.id}
                                   className={`nameset-dropdown-option ${selectedNamesetId === nameset.id ? 'selected' : ''}`}
