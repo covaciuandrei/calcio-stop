@@ -20,6 +20,7 @@ interface SalesState {
   addSale: (sale: Omit<Sale, 'id' | 'createdAt'>) => Promise<void>;
   updateSale: (id: string, updates: Partial<Sale>) => Promise<void>;
   deleteSale: (id: string) => Promise<void>;
+  reverseSale: (id: string) => Promise<void>;
   setSales: (sales: Sale[]) => void;
   setFilters: (filters: SalesFilters) => void;
   loadSales: (filters?: SalesFilters) => Promise<void>;
@@ -62,79 +63,99 @@ export const useSalesStore = create<SalesState>()(
         error: null,
         filters: defaultFilters,
 
-      // Actions
-      addSale: async (saleData: Omit<Sale, 'id' | 'createdAt'>) => {
-        set({ isLoading: true, error: null });
-        try {
-          const newSale = await db.createSale({
-            ...saleData,
-            createdAt: new Date().toISOString(),
-          });
-          set((state) => ({
-            sales: [...state.sales, newSale],
-            isLoading: false,
-          }));
-        } catch (error) {
-          set({
-            error: error instanceof Error ? error.message : 'Failed to add sale',
-            isLoading: false,
-          });
-        }
-      },
+        // Actions
+        addSale: async (saleData: Omit<Sale, 'id' | 'createdAt'>) => {
+          set({ isLoading: true, error: null });
+          try {
+            const newSale = await db.createSale({
+              ...saleData,
+              createdAt: new Date().toISOString(),
+            });
+            set((state) => ({
+              sales: [...state.sales, newSale],
+              isLoading: false,
+            }));
+          } catch (error) {
+            set({
+              error: error instanceof Error ? error.message : 'Failed to add sale',
+              isLoading: false,
+            });
+          }
+        },
 
-      updateSale: async (id: string, updates: Partial<Sale>) => {
-        set({ isLoading: true, error: null });
-        try {
-          const updatedSale = await db.updateSale(id, updates);
-          set((state) => ({
-            sales: state.sales.map((s) => (s.id === id ? updatedSale : s)),
-            isLoading: false,
-          }));
-        } catch (error) {
-          set({
-            error: error instanceof Error ? error.message : 'Failed to update sale',
-            isLoading: false,
-          });
-        }
-      },
+        updateSale: async (id: string, updates: Partial<Sale>) => {
+          set({ isLoading: true, error: null });
+          try {
+            const updatedSale = await db.updateSale(id, updates);
+            set((state) => ({
+              sales: state.sales.map((s) => (s.id === id ? updatedSale : s)),
+              isLoading: false,
+            }));
+          } catch (error) {
+            set({
+              error: error instanceof Error ? error.message : 'Failed to update sale',
+              isLoading: false,
+            });
+          }
+        },
 
-      deleteSale: async (id: string) => {
-        set({ isLoading: true, error: null });
-        try {
-          await db.deleteSale(id);
-          set((state) => ({
-            sales: state.sales.filter((s) => s.id !== id),
-            isLoading: false,
-          }));
-        } catch (error) {
-          set({
-            error: error instanceof Error ? error.message : 'Failed to delete sale',
-            isLoading: false,
-          });
-        }
-      },
+        deleteSale: async (id: string) => {
+          set({ isLoading: true, error: null });
+          try {
+            await db.deleteSale(id);
+            set((state) => ({
+              sales: state.sales.filter((s) => s.id !== id),
+              isLoading: false,
+            }));
+          } catch (error) {
+            set({
+              error: error instanceof Error ? error.message : 'Failed to delete sale',
+              isLoading: false,
+            });
+          }
+        },
 
-      setSales: (sales: Sale[]) => {
-        set({ sales });
-      },
+        reverseSale: async (id: string) => {
+          set({ isLoading: true, error: null });
+          try {
+            await db.reverseSale(id);
+            // Reload products to reflect restored quantities
+            const { useProductsStore } = await import('./productsStore');
+            await useProductsStore.getState().loadProducts();
+            // Remove the sale from the list
+            set((state) => ({
+              sales: state.sales.filter((s) => s.id !== id),
+              isLoading: false,
+            }));
+          } catch (error) {
+            set({
+              error: error instanceof Error ? error.message : 'Failed to reverse sale',
+              isLoading: false,
+            });
+          }
+        },
 
-      setFilters: (filters: SalesFilters) => {
-        set({ filters });
-      },
+        setSales: (sales: Sale[]) => {
+          set({ sales });
+        },
 
-      loadSales: async (filters?: SalesFilters) => {
-        set({ isLoading: true, error: null });
-        try {
-          const filtersToUse = filters || get().filters;
-          const sales = await db.getSales(filtersToUse);
-          set({ sales, filters: filtersToUse, isLoading: false });
-        } catch (error) {
-          set({
-            error: error instanceof Error ? error.message : 'Failed to load sales',
-            isLoading: false,
-          });
-        }
-      },
+        setFilters: (filters: SalesFilters) => {
+          set({ filters });
+        },
+
+        loadSales: async (filters?: SalesFilters) => {
+          set({ isLoading: true, error: null });
+          try {
+            const filtersToUse = filters || get().filters;
+            const sales = await db.getSales(filtersToUse);
+            set({ sales, filters: filtersToUse, isLoading: false });
+          } catch (error) {
+            set({
+              error: error instanceof Error ? error.message : 'Failed to load sales',
+              isLoading: false,
+            });
+          }
+        },
       };
     },
     {
@@ -151,6 +172,7 @@ export const useSalesActions = () => ({
   addSale: useSalesStore.getState().addSale,
   updateSale: useSalesStore.getState().updateSale,
   deleteSale: useSalesStore.getState().deleteSale,
+  reverseSale: useSalesStore.getState().reverseSale,
   setSales: useSalesStore.getState().setSales,
   setFilters: useSalesStore.getState().setFilters,
   loadSales: useSalesStore.getState().loadSales,

@@ -1099,7 +1099,7 @@ export async function updateSale(id, updates) {
       quantity: item.quantity,
       priceSold: item.priceSold,
     }));
-    
+
     // Backward compatibility: update old columns from first item
     if (updates.items.length > 0) {
       const firstItem = updates.items[0];
@@ -1190,6 +1190,100 @@ export async function deleteSale(id) {
   const { error } = await supabase.from('sales').delete().eq('id', id);
 
   if (error) throw error;
+}
+
+export async function reverseSale(id) {
+  // First, get the sale to access its items
+  const { data: sale, error: saleError } = await supabase.from('sales').select('*').eq('id', id).single();
+
+  if (saleError) throw saleError;
+  if (!sale) throw new Error('Sale not found');
+
+  // Parse items from the sale (support both new and old formats)
+  let items = [];
+  if (sale.items && Array.isArray(sale.items) && sale.items.length > 0) {
+    items = sale.items;
+  } else {
+    // Fallback for old format
+    items = [
+      {
+        productId: sale.product_id,
+        size: sale.size,
+        quantity: sale.quantity,
+        priceSold: sale.price_sold,
+      },
+    ];
+  }
+
+  // Group items by productId to handle multiple sizes of the same product
+  const itemsByProduct = {};
+  for (const item of items) {
+    const productId = item.productId || item.product_id;
+    const size = item.size;
+    const quantity = item.quantity;
+
+    if (!productId || !size || !quantity) {
+      console.warn('Invalid item data:', item);
+      continue;
+    }
+
+    if (!itemsByProduct[productId]) {
+      itemsByProduct[productId] = [];
+    }
+    itemsByProduct[productId].push({ size, quantity });
+  }
+
+  // Restore product quantities - one update per product to avoid race conditions
+  for (const productId in itemsByProduct) {
+    const productItems = itemsByProduct[productId];
+
+    // Get the product once
+    const { data: product, error: productError } = await supabase
+      .from('products')
+      .select('sizes')
+      .eq('id', productId)
+      .single();
+
+    if (productError) {
+      console.error(`Error fetching product ${productId}:`, productError);
+      // Continue with other products even if one fails
+      continue;
+    }
+
+    if (!product) {
+      console.warn(`Product ${productId} not found`);
+      continue;
+    }
+
+    // Restore quantities for all sizes of this product in one update
+    const updatedSizes = (product.sizes || []).map((sizeObj) => {
+      // Find all items for this size
+      const itemsForThisSize = productItems.filter((item) => item.size === sizeObj.size);
+      if (itemsForThisSize.length > 0) {
+        // Sum up all quantities to restore for this size
+        const totalQuantityToRestore = itemsForThisSize.reduce((sum, item) => sum + item.quantity, 0);
+        return {
+          ...sizeObj,
+          quantity: (sizeObj.quantity || 0) + totalQuantityToRestore,
+        };
+      }
+      return sizeObj;
+    });
+
+    // Update the product with all restored quantities at once
+    const { error: updateError } = await supabase.from('products').update({ sizes: updatedSizes }).eq('id', productId);
+
+    if (updateError) {
+      console.error(`Error updating product ${productId}:`, updateError);
+      // Continue with other products even if one fails
+      continue;
+    }
+  }
+
+  // Delete the sale after restoring quantities
+  const { error: deleteError } = await supabase.from('sales').delete().eq('id', id);
+
+  if (deleteError) throw deleteError;
 }
 
 // ============================================================================
@@ -1470,12 +1564,7 @@ export async function updateOrder(id, updates) {
     dbUpdates.phone_number = updates.phoneNumber;
   }
 
-  const { data, error } = await supabase
-    .from('orders')
-    .update(dbUpdates)
-    .eq('id', id)
-    .select('*')
-    .single();
+  const { data, error } = await supabase.from('orders').update(dbUpdates).eq('id', id).select('*').single();
 
   if (error) throw error;
 
@@ -1651,10 +1740,7 @@ export async function deleteLeague(id) {
   // Fetch only id and leagues columns (not full records) and check efficiently
   // Note: After running ADD_LEAGUES_FEATURE.sql, you can uncomment the RPC call below
   // for better performance using the GIN index
-  const { data: teams, error: teamsError } = await supabase
-    .from('teams')
-    .select('id, leagues')
-    .limit(1000); // Reasonable limit - adjust if you have more than 1000 teams
+  const { data: teams, error: teamsError } = await supabase.from('teams').select('id, leagues').limit(1000); // Reasonable limit - adjust if you have more than 1000 teams
 
   if (teamsError) {
     console.error('Error checking league references:', teamsError);
@@ -1771,7 +1857,7 @@ export async function getTeamLeagues(teamId) {
     throw new Error('Team not found');
   }
 
-  return (data?.leagues || []);
+  return data?.leagues || [];
 }
 
 export async function getLeagueTeams(leagueId) {
@@ -1847,11 +1933,11 @@ export async function addTeamToLeague(teamId, leagueId) {
   }
 
   const currentLeagues = team?.leagues || [];
-  
+
   // Add league if not already present
   if (!currentLeagues.includes(leagueId)) {
     const updatedLeagues = [...currentLeagues, leagueId];
-    
+
     const { data, error } = await supabase
       .from('teams')
       .update({ leagues: updatedLeagues })

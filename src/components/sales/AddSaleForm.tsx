@@ -1,9 +1,5 @@
 import React, { useState } from 'react';
-import {
-  useProductsActions,
-  useProductsList,
-  useSalesActions,
-} from '../../stores';
+import { useProductsActions, useProductsList, useSalesActions } from '../../stores';
 import { Sale, SaleItem, SaleType } from '../../types';
 import ProductPicker from '../products/ProductPicker';
 
@@ -13,9 +9,7 @@ const AddSaleForm: React.FC = () => {
   const { updateProduct } = useProductsActions();
   const { addSale } = useSalesActions();
 
-  const [saleItems, setSaleItems] = useState<SaleItem[]>([
-    { productId: '', size: '', quantity: 1, priceSold: 0 },
-  ]);
+  const [saleItems, setSaleItems] = useState<SaleItem[]>([{ productId: '', size: '', quantity: 1, priceSold: 0 }]);
   const [customerName, setCustomerName] = useState('');
   const [date, setDate] = useState('');
   const [saleType, setSaleType] = useState<SaleType>('IN-PERSON');
@@ -115,21 +109,42 @@ const AddSaleForm: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSale = () => {
+  const handleSale = async () => {
     if (!validateItems()) {
       return;
     }
 
-    // Update product stock for all items
+    // Group items by productId to handle multiple sizes of the same product
+    const itemsByProduct: { [productId: string]: Array<{ size: string; quantity: number }> } = {};
     saleItems.forEach((item) => {
-      const product = products.find((p) => p.id === item.productId);
-      if (product) {
-        const updatedSizes = product.sizes.map((sq) =>
-          sq.size === item.size ? { ...sq, quantity: sq.quantity - item.quantity } : sq
-        );
-        updateProduct(item.productId, { sizes: updatedSizes });
+      if (!itemsByProduct[item.productId]) {
+        itemsByProduct[item.productId] = [];
       }
+      itemsByProduct[item.productId].push({ size: item.size, quantity: item.quantity });
     });
+
+    // Update product stock - one update per product to avoid race conditions
+    for (const productId in itemsByProduct) {
+      const product = products.find((p) => p.id === productId);
+      if (product) {
+        const productItems = itemsByProduct[productId];
+        // Update all sizes for this product in one operation
+        const updatedSizes = product.sizes.map((sq) => {
+          // Find all items for this size
+          const itemsForThisSize = productItems.filter((item) => item.size === sq.size);
+          if (itemsForThisSize.length > 0) {
+            // Sum up all quantities to subtract for this size
+            const totalQuantityToSubtract = itemsForThisSize.reduce((sum, item) => sum + item.quantity, 0);
+            return {
+              ...sq,
+              quantity: sq.quantity - totalQuantityToSubtract,
+            };
+          }
+          return sq;
+        });
+        await updateProduct(productId, { sizes: updatedSizes });
+      }
+    }
 
     const newSale: Omit<Sale, 'id' | 'createdAt'> = {
       items: saleItems.map((item) => ({
@@ -172,11 +187,32 @@ const AddSaleForm: React.FC = () => {
       {saleItems.map((item, index) => {
         const product = products.find((p) => p.id === item.productId);
         return (
-          <div key={index} style={{ width: '100%', marginBottom: 'var(--space-4)', padding: 'var(--space-3)', border: '1px solid var(--gray-300)', borderRadius: 'var(--radius-md)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-2)' }}>
+          <div
+            key={index}
+            style={{
+              width: '100%',
+              marginBottom: 'var(--space-4)',
+              padding: 'var(--space-3)',
+              border: '1px solid var(--gray-300)',
+              borderRadius: 'var(--radius-md)',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 'var(--space-2)',
+              }}
+            >
               <h5 style={{ margin: 0 }}>Item {index + 1}</h5>
               {saleItems.length > 1 && (
-                <button type="button" onClick={() => removeItem(index)} className="btn btn-danger" style={{ padding: '4px 8px', fontSize: '12px' }}>
+                <button
+                  type="button"
+                  onClick={() => removeItem(index)}
+                  className="btn btn-danger"
+                  style={{ padding: '4px 8px', fontSize: '12px' }}
+                >
                   Remove
                 </button>
               )}

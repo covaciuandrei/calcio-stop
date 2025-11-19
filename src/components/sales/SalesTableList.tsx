@@ -18,10 +18,11 @@ interface Props {
   sales: Sale[];
   onEdit: (sale: Sale) => void;
   onDelete: (id: string) => void;
+  onReverse: (id: string) => void;
   searchTerm?: string;
 }
 
-const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, searchTerm = '' }) => {
+const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, onReverse, searchTerm = '' }) => {
   // Get data from stores
   const products = useProductsList();
   const archivedProducts = useArchivedProducts();
@@ -118,6 +119,9 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, searchTerm =
                 <button onClick={() => onEdit(s)} className="btn btn-icon btn-success" title="Edit">
                   ✏️
                 </button>
+                <button onClick={() => onReverse(s.id)} className="btn btn-icon btn-warning" title="Reverse Sale">
+                  ↶
+                </button>
                 <button onClick={() => onDelete(s.id)} className="btn btn-icon btn-danger" title="Delete">
                   🗑️
                 </button>
@@ -167,6 +171,9 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, searchTerm =
               <div className="mobile-card-actions">
                 <button onClick={() => onEdit(s)} className="btn btn-success" title="Edit">
                   Edit
+                </button>
+                <button onClick={() => onReverse(s.id)} className="btn btn-warning" title="Reverse Sale">
+                  Reverse
                 </button>
                 <button onClick={() => onDelete(s.id)} className="btn btn-danger" title="Delete">
                   Delete
