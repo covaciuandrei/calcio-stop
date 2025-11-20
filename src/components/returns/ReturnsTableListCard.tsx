@@ -70,8 +70,9 @@ const ReturnsTableListCard: React.FC = () => {
                 display: 'flex',
                 gap: 'var(--space-2)',
                 marginBottom: 'var(--space-3)',
-                flexWrap: 'wrap',
-                alignItems: 'center',
+                flexWrap: 'nowrap',
+                alignItems: 'flex-end',
+                width: '100%',
               }}
             >
               <ReturnsFilters
@@ -96,13 +97,41 @@ const ReturnsTableListCard: React.FC = () => {
                 }}
               />
               {sortedReturns.length >= 2 && (
-                <div className={styles.searchContainer} style={{ flex: 1, minWidth: '200px', marginBottom: 0 }}>
+                <div style={{ 
+                  flex: 1, 
+                  minWidth: '200px', 
+                  display: 'flex', 
+                  alignItems: 'flex-end',
+                  alignSelf: 'flex-end',
+                  marginBottom: 0 
+                }}>
                   <input
                     type="text"
                     placeholder="Search returns..."
                     value={returnsSearchTerm}
                     onChange={(e) => setReturnsSearchTerm(e.target.value)}
-                    className={styles.searchInput}
+                    style={{
+                      width: '100%',
+                      padding: 'calc(var(--space-2) * 1.2) var(--space-2)',
+                      border: '1px solid var(--gray-300)',
+                      borderRadius: 'var(--radius-md)',
+                      fontSize: 'var(--font-size-sm)',
+                      background: 'rgba(255, 255, 255, 0.9)',
+                      transition: 'all var(--transition-normal)',
+                      height: 'calc(38px * 1.2)',
+                      boxSizing: 'border-box',
+                      margin: 0,
+                      lineHeight: 'normal',
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.outline = 'none';
+                      e.target.style.borderColor = 'var(--primary-500)';
+                      e.target.style.boxShadow = '0 0 0 3px rgba(14, 165, 233, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = 'var(--gray-300)';
+                      e.target.style.boxShadow = 'none';
+                    }}
                   />
                 </div>
               )}

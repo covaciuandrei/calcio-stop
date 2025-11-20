@@ -141,3 +141,89 @@
   background: var(--gray-200);
   border-color: var(--gray-400);
 }
+
+/* Returns filters - display all items in a row */
+.sales-filters {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-2);
+  align-items: flex-end;
+  flex-wrap: nowrap;
+}
+
+.sales-filters .filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex-shrink: 0;
+  justify-content: flex-end;
+}
+
+.sales-filters .filter-group label {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--gray-700);
+  margin: 0;
+  line-height: 1.2;
+  height: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.sales-filters .filter-group input,
+.sales-filters .filter-group select {
+  padding: calc(var(--space-2) * 1.2) var(--space-2);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  background: rgba(255, 255, 255, 0.9);
+  transition: all var(--transition-normal);
+  height: calc(38px * 1.2);
+  box-sizing: border-box;
+  min-width: 150px;
+  margin: 0;
+}
+
+.sales-filters .filter-group input:focus,
+.sales-filters .filter-group select:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.sales-filters .btn {
+  height: calc(38px * 1.2) !important;
+  padding: 0 var(--space-3) !important;
+  border: 1px solid var(--gray-300) !important;
+  border-radius: var(--radius-md) !important;
+  font-size: var(--font-size-sm) !important;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  box-sizing: border-box;
+  flex-shrink: 0;
+  white-space: nowrap;
+  margin: 0 !important;
+  align-self: flex-end;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(38px * 1.2) !important;
+  line-height: 1 !important;
+  background: linear-gradient(135deg, var(--gray-500), var(--gray-600)) !important;
+  color: white !important;
+  box-shadow: none !important;
+}
+
+.sales-filters .btn::before {
+  display: none !important;
+}
+
+.sales-filters .btn:hover {
+  background: linear-gradient(135deg, var(--gray-600), var(--gray-700)) !important;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.sales-filters .btn:active {
+  transform: translateY(0) !important;
+}
