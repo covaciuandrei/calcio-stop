@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useBadgeImagesMapDebounced } from '../../hooks/useBadgeImages';
+import { useNamesetImagesMapDebounced } from '../../hooks/useNamesetImages';
 import { statsService } from '../../lib/statsService';
 import {
   useArchivedBadges,
@@ -113,6 +115,37 @@ const ProductDetailPage: React.FC = () => {
 
   // Filter namesets based on stock for public routes
   const availableNamesets = isPublicRoute ? namesets.filter((nameset) => nameset.quantity > 0) : namesets;
+
+  // Get images for badges and namesets in dropdowns
+  const badgeIds = availableBadges.map((badge) => badge.id);
+  const namesetIds = availableNamesets.map((nameset) => nameset.id);
+  const { imagesMap: badgeImagesMap } = useBadgeImagesMapDebounced(badgeIds, 300);
+  const { imagesMap: namesetImagesMap } = useNamesetImagesMapDebounced(namesetIds, 300);
+
+  // Get images for the product's current badge and nameset (if they exist)
+  // Also include selected badge/nameset from dropdowns
+  const allBadgeIdsForImages = [
+    ...(product?.badgeId ? [product.badgeId] : []),
+    ...(selectedBadgeId && selectedBadgeId !== product?.badgeId ? [selectedBadgeId] : []),
+  ];
+  const allNamesetIdsForImages = [
+    ...(product?.namesetId ? [product.namesetId] : []),
+    ...(selectedNamesetId && selectedNamesetId !== product?.namesetId ? [selectedNamesetId] : []),
+  ];
+  const { imagesMap: productBadgeImagesMap } = useBadgeImagesMapDebounced(allBadgeIdsForImages, 300);
+  const { imagesMap: productNamesetImagesMap } = useNamesetImagesMapDebounced(allNamesetIdsForImages, 300);
+
+  // Get primary images for current product badge and nameset
+  const currentBadgeImages = product?.badgeId ? productBadgeImagesMap[product.badgeId] || [] : [];
+  const currentBadgePrimaryImage = currentBadgeImages.find((img) => img.isPrimary) || currentBadgeImages[0];
+  const currentNamesetImages = product?.namesetId ? productNamesetImagesMap[product.namesetId] || [] : [];
+  const currentNamesetPrimaryImage = currentNamesetImages.find((img) => img.isPrimary) || currentNamesetImages[0];
+
+  // Get primary images for selected badge and nameset from dropdowns
+  const selectedBadgeImages = selectedBadgeId ? productBadgeImagesMap[selectedBadgeId] || [] : [];
+  const selectedBadgePrimaryImage = selectedBadgeImages.find((img) => img.isPrimary) || selectedBadgeImages[0];
+  const selectedNamesetImages = selectedNamesetId ? productNamesetImagesMap[selectedNamesetId] || [] : [];
+  const selectedNamesetPrimaryImage = selectedNamesetImages.find((img) => img.isPrimary) || selectedNamesetImages[0];
 
   // Calculate total price
   const selectedBadge = badges.find((b) => b.id === selectedBadgeId);
@@ -263,24 +296,41 @@ const ProductDetailPage: React.FC = () => {
                 )}
                 {product.namesetId && (
                   <>
-                    <div className="detail-item">
-                      <label>Season:</label>
-                      <span>{namesetInfo.season}</span>
-                    </div>
-                    <div className="detail-item">
-                      <label>Player:</label>
-                      <span>{namesetInfo.playerName}</span>
-                    </div>
-                    <div className="detail-item">
-                      <label>Number:</label>
-                      <span>{namesetInfo.number > 0 ? namesetInfo.number : '-'}</span>
+                    <div className="detail-item detail-item-with-image">
+                      <label>Nameset:</label>
+                      <div className="detail-item-content">
+                        {currentNamesetPrimaryImage && (
+                          <img
+                            src={currentNamesetPrimaryImage.imageUrl}
+                            alt={namesetInfo.playerName || 'Nameset image'}
+                            className="detail-item-image"
+                          />
+                        )}
+                        <div className="detail-item-text">
+                          <div className="detail-item-name">{namesetInfo.playerName}</div>
+                          <div className="detail-item-subtitle">
+                            #{namesetInfo.number > 0 ? namesetInfo.number : '-'} • {namesetInfo.season}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </>
                 )}
                 {product.badgeId && (
-                  <div className="detail-item">
+                  <div className="detail-item detail-item-with-image">
                     <label>Badge:</label>
-                    <span>{badgeInfo}</span>
+                    <div className="detail-item-content">
+                      {currentBadgePrimaryImage && (
+                        <img
+                          src={currentBadgePrimaryImage.imageUrl}
+                          alt={badgeInfo || 'Badge image'}
+                          className="detail-item-image"
+                        />
+                      )}
+                      <div className="detail-item-text">
+                        <div className="detail-item-name">{badgeInfo}</div>
+                      </div>
+                    </div>
                   </div>
                 )}
                 {!isPublicRoute && (
@@ -332,21 +382,36 @@ const ProductDetailPage: React.FC = () => {
                                 <div className="badge-option-name">None</div>
                                 <div className="badge-option-details">No badge selected</div>
                               </div>
-                              {availableBadges.map((badge) => (
-                                <div
-                                  key={badge.id}
-                                  className={`badge-dropdown-option ${selectedBadgeId === badge.id ? 'selected' : ''}`}
-                                  onClick={() => {
-                                    setSelectedBadgeId(badge.id);
-                                    setIsBadgeDropdownOpen(false);
-                                  }}
-                                >
-                                  <div className="badge-option-name">{badge.name}</div>
-                                  <div className="badge-option-details">
-                                    Season: {badge.season} | Price: {badge.price || 0} RON | Qty: {badge.quantity}
+                              {availableBadges.map((badge) => {
+                                const badgeImages = badgeImagesMap[badge.id] || [];
+                                const primaryImage = badgeImages.find((img) => img.isPrimary) || badgeImages[0];
+                                return (
+                                  <div
+                                    key={badge.id}
+                                    className={`badge-dropdown-option ${selectedBadgeId === badge.id ? 'selected' : ''}`}
+                                    onClick={() => {
+                                      setSelectedBadgeId(badge.id);
+                                      setIsBadgeDropdownOpen(false);
+                                    }}
+                                  >
+                                    <div className="badge-option-content">
+                                      {primaryImage && (
+                                        <img
+                                          src={primaryImage.imageUrl}
+                                          alt={badge.name || 'Badge image'}
+                                          className="badge-option-image"
+                                        />
+                                      )}
+                                      <div className="badge-option-text">
+                                        <div className="badge-option-name">{badge.name}</div>
+                                        <div className="badge-option-details">
+                                          Season: {badge.season} | Price: {badge.price || 0} RON | Qty: {badge.quantity}
+                                        </div>
+                                      </div>
+                                    </div>
                                   </div>
-                                </div>
-                              ))}
+                                );
+                              })}
                             </>
                           )}
                         </div>
@@ -384,21 +449,36 @@ const ProductDetailPage: React.FC = () => {
                                 <div className="badge-option-name">None</div>
                                 <div className="badge-option-details">No badge selected</div>
                               </div>
-                              {availableBadges.map((badge) => (
-                                <div
-                                  key={badge.id}
-                                  className={`badge-dropdown-option ${selectedBadgeId === badge.id ? 'selected' : ''}`}
-                                  onClick={() => {
-                                    setSelectedBadgeId(badge.id);
-                                    setIsBadgeDropdownOpen(false);
-                                  }}
-                                >
-                                  <div className="badge-option-name">{badge.name}</div>
-                                  <div className="badge-option-details">
-                                    Season: {badge.season} | Price: {badge.price || 0} RON | Qty: {badge.quantity}
+                              {availableBadges.map((badge) => {
+                                const badgeImages = badgeImagesMap[badge.id] || [];
+                                const primaryImage = badgeImages.find((img) => img.isPrimary) || badgeImages[0];
+                                return (
+                                  <div
+                                    key={badge.id}
+                                    className={`badge-dropdown-option ${selectedBadgeId === badge.id ? 'selected' : ''}`}
+                                    onClick={() => {
+                                      setSelectedBadgeId(badge.id);
+                                      setIsBadgeDropdownOpen(false);
+                                    }}
+                                  >
+                                    <div className="badge-option-content">
+                                      {primaryImage && (
+                                        <img
+                                          src={primaryImage.imageUrl}
+                                          alt={badge.name || 'Badge image'}
+                                          className="badge-option-image"
+                                        />
+                                      )}
+                                      <div className="badge-option-text">
+                                        <div className="badge-option-name">{badge.name}</div>
+                                        <div className="badge-option-details">
+                                          Season: {badge.season} | Price: {badge.price || 0} RON | Qty: {badge.quantity}
+                                        </div>
+                                      </div>
+                                    </div>
                                   </div>
-                                </div>
-                              ))}
+                                );
+                              })}
                             </>
                           )}
                         </div>
@@ -439,23 +519,39 @@ const ProductDetailPage: React.FC = () => {
                                 <div className="nameset-option-name">None</div>
                                 <div className="nameset-option-details">No nameset selected</div>
                               </div>
-                              {availableNamesets.map((nameset) => (
-                                <div
-                                  key={nameset.id}
-                                  className={`nameset-dropdown-option ${selectedNamesetId === nameset.id ? 'selected' : ''}`}
-                                  onClick={() => {
-                                    setSelectedNamesetId(nameset.id);
-                                    setIsNamesetDropdownOpen(false);
-                                  }}
-                                >
-                                  <div className="nameset-option-name">
-                                    {nameset.playerName} #{nameset.number}
+                              {availableNamesets.map((nameset) => {
+                                const namesetImages = namesetImagesMap[nameset.id] || [];
+                                const primaryImage = namesetImages.find((img) => img.isPrimary) || namesetImages[0];
+                                return (
+                                  <div
+                                    key={nameset.id}
+                                    className={`nameset-dropdown-option ${selectedNamesetId === nameset.id ? 'selected' : ''}`}
+                                    onClick={() => {
+                                      setSelectedNamesetId(nameset.id);
+                                      setIsNamesetDropdownOpen(false);
+                                    }}
+                                  >
+                                    <div className="nameset-option-content">
+                                      {primaryImage && (
+                                        <img
+                                          src={primaryImage.imageUrl}
+                                          alt={nameset.playerName || 'Nameset image'}
+                                          className="nameset-option-image"
+                                        />
+                                      )}
+                                      <div className="nameset-option-text">
+                                        <div className="nameset-option-name">
+                                          {nameset.playerName} #{nameset.number}
+                                        </div>
+                                        <div className="nameset-option-details">
+                                          Season: {nameset.season} | Price: {nameset.price || 0} RON | Qty:{' '}
+                                          {nameset.quantity}
+                                        </div>
+                                      </div>
+                                    </div>
                                   </div>
-                                  <div className="nameset-option-details">
-                                    Season: {nameset.season} | Price: {nameset.price || 0} RON | Qty: {nameset.quantity}
-                                  </div>
-                                </div>
-                              ))}
+                                );
+                              })}
                             </>
                           )}
                         </div>
@@ -472,16 +568,34 @@ const ProductDetailPage: React.FC = () => {
                   <span className="total-price-value">{product.price.toFixed(2)} RON</span>
                 </div>
                 {selectedBadge && selectedBadgeId !== product.badgeId && (
-                  <div className="total-price-row">
-                    <span className="total-price-label">Badge ({selectedBadge.name}):</span>
+                  <div className="total-price-row total-price-row-with-image">
+                    <div className="total-price-content">
+                      {selectedBadgePrimaryImage && (
+                        <img
+                          src={selectedBadgePrimaryImage.imageUrl}
+                          alt={selectedBadge.name || 'Badge image'}
+                          className="total-price-image"
+                        />
+                      )}
+                      <span className="total-price-label">Badge ({selectedBadge.name}):</span>
+                    </div>
                     <span className="total-price-value">+{(badgePrice || 0).toFixed(2)} RON</span>
                   </div>
                 )}
                 {selectedNameset && selectedNamesetId !== product.namesetId && (
-                  <div className="total-price-row">
-                    <span className="total-price-label">
-                      Nameset ({selectedNameset.playerName} #{selectedNameset.number}):
-                    </span>
+                  <div className="total-price-row total-price-row-with-image">
+                    <div className="total-price-content">
+                      {selectedNamesetPrimaryImage && (
+                        <img
+                          src={selectedNamesetPrimaryImage.imageUrl}
+                          alt={selectedNameset.playerName || 'Nameset image'}
+                          className="total-price-image"
+                        />
+                      )}
+                      <span className="total-price-label">
+                        Nameset ({selectedNameset.playerName} #{selectedNameset.number}):
+                      </span>
+                    </div>
                     <span className="total-price-value">+{(namesetPrice || 0).toFixed(2)} RON</span>
                   </div>
                 )}

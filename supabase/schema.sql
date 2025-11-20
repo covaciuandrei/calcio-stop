@@ -77,6 +77,17 @@ CREATE TABLE IF NOT EXISTS product_images (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Badge Images table
+CREATE TABLE IF NOT EXISTS badge_images (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    badge_id UUID NOT NULL REFERENCES badges(id) ON DELETE CASCADE,
+    image_url TEXT NOT NULL,
+    alt_text VARCHAR(255),
+    is_primary BOOLEAN DEFAULT FALSE,
+    display_order INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Nameset Images table
 CREATE TABLE IF NOT EXISTS nameset_images (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -217,6 +228,8 @@ CREATE INDEX IF NOT EXISTS idx_reservations_created_at ON reservations(created_a
 CREATE INDEX IF NOT EXISTS idx_namesets_kit_type_id ON namesets(kit_type_id);
 CREATE INDEX IF NOT EXISTS idx_product_images_product_id ON product_images(product_id);
 CREATE INDEX IF NOT EXISTS idx_product_images_display_order ON product_images(display_order);
+CREATE INDEX IF NOT EXISTS idx_badge_images_badge_id ON badge_images(badge_id);
+CREATE INDEX IF NOT EXISTS idx_badge_images_display_order ON badge_images(display_order);
 CREATE INDEX IF NOT EXISTS idx_nameset_images_nameset_id ON nameset_images(nameset_id);
 CREATE INDEX IF NOT EXISTS idx_nameset_images_display_order ON nameset_images(display_order);
 CREATE INDEX IF NOT EXISTS idx_views_product_id ON views(product_id);
@@ -231,6 +244,7 @@ ALTER TABLE badges ENABLE ROW LEVEL SECURITY;
 ALTER TABLE namesets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE product_images ENABLE ROW LEVEL SECURITY;
+ALTER TABLE badge_images ENABLE ROW LEVEL SECURITY;
 ALTER TABLE nameset_images ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reservations ENABLE ROW LEVEL SECURITY;
@@ -248,7 +262,11 @@ CREATE POLICY "Allow all operations for authenticated users" ON badges FOR ALL U
 CREATE POLICY "Allow all operations for authenticated users" ON namesets FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON products FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON product_images FOR ALL USING (true);
+CREATE POLICY "Allow public read access to product images" ON product_images FOR SELECT USING (true);
+CREATE POLICY "Allow all operations for authenticated users" ON badge_images FOR ALL USING (true);
+CREATE POLICY "Allow public read access to badge images" ON badge_images FOR SELECT USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON nameset_images FOR ALL USING (true);
+CREATE POLICY "Allow public read access to nameset images" ON nameset_images FOR SELECT USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON orders FOR ALL USING (true);
 CREATE POLICY "Allow authenticated users to read reservations" ON reservations 
 FOR SELECT USING (auth.role() = 'authenticated');

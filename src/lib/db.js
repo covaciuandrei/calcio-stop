@@ -440,7 +440,10 @@ export async function getBadgeImages(badgeId) {
     .eq('badge_id', badgeId)
     .order('display_order', { ascending: true });
 
-  if (error) throw error;
+  if (error) {
+    console.error('Error fetching badge images:', error);
+    throw error;
+  }
 
   // Map database response to frontend format
   return (data || []).map((item) => ({
@@ -685,7 +688,10 @@ export async function getNamesetImages(namesetId) {
     .eq('nameset_id', namesetId)
     .order('display_order', { ascending: true });
 
-  if (error) throw error;
+  if (error) {
+    console.error('Error fetching nameset images:', error);
+    throw error;
+  }
 
   // Map database response to frontend format
   return (data || []).map((item) => ({
