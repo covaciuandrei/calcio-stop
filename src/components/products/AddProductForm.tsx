@@ -83,6 +83,21 @@ const AddProductForm: React.FC = () => {
       }
     }
 
+    // Validate sale price
+    if (isOnSale) {
+      if (salePrice === '' || salePrice === null || salePrice === undefined) {
+        newErrors.salePrice = 'Sale price is required when product is on sale';
+      } else {
+        const salePriceNum = Number(salePrice);
+        const originalPrice = Number(price);
+        if (isNaN(salePriceNum) || salePriceNum <= 0) {
+          newErrors.salePrice = 'Sale price must be a positive number';
+        } else if (salePriceNum >= originalPrice) {
+          newErrors.salePrice = 'Sale price must be smaller than the original price';
+        }
+      }
+    }
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -287,19 +302,25 @@ const AddProductForm: React.FC = () => {
       </div>
 
       {isOnSale && (
-        <div className="form-group">
+        <div className={`form-group ${errors.salePrice ? 'has-error' : ''}`}>
           <label>Sale Price (RON)</label>
           <input
             type="number"
             min={0}
+            max={price > 0 ? price - 0.01 : undefined}
             step={0.01}
             placeholder="Enter sale price"
             value={salePrice}
             onChange={(e) => {
               const val = e.target.value;
               setSalePrice(val === '' ? '' : parseFloat(val));
+              // Clear error when user starts typing
+              if (errors.salePrice) {
+                setErrors((prev) => ({ ...prev, salePrice: '' }));
+              }
             }}
           />
+          {errors.salePrice && <div className="error-message">{errors.salePrice}</div>}
         </div>
       )}
 

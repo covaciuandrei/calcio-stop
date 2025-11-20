@@ -86,6 +86,21 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
       newErrors.name = 'Please enter product notes or select a team';
     }
 
+    // Validate sale price
+    if (isOnSale) {
+      if (salePrice === '' || salePrice === null || salePrice === undefined) {
+        newErrors.salePrice = 'Sale price is required when product is on sale';
+      } else {
+        const salePriceNum = Number(salePrice);
+        const originalPrice = Number(price);
+        if (isNaN(salePriceNum) || salePriceNum <= 0) {
+          newErrors.salePrice = 'Sale price must be a positive number';
+        } else if (salePriceNum >= originalPrice) {
+          newErrors.salePrice = 'Sale price must be smaller than the original price';
+        }
+      }
+    }
+
     // Allow zero quantities (out of stock products)
     // Note: Badge quantity validation is not needed when editing products
     // Badge quantities are only checked when adding new products
@@ -258,7 +273,7 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
             />
           </label>
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <label className={styles.onSaleCheckboxLabel}>
             <input
               type="checkbox"
               checked={isOnSale}
@@ -268,25 +283,34 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
                   setSalePrice('');
                 }
               }}
+              className={styles.onSaleCheckbox}
             />
             <span>On Sale</span>
           </label>
 
           {isOnSale && (
-            <label>
-              Sale Price (RON):
-              <input
-                type="number"
-                min={0}
-                step={0.01}
-                placeholder="Enter sale price"
-                value={salePrice}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setSalePrice(val === '' ? '' : parseFloat(val));
-                }}
-              />
-            </label>
+            <div className={`form-group ${errors.salePrice ? 'has-error' : ''}`}>
+              <label>
+                Sale Price (RON):
+                <input
+                  type="number"
+                  min={0}
+                  max={price > 0 ? price - 0.01 : undefined}
+                  step={0.01}
+                  placeholder="Enter sale price"
+                  value={salePrice}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setSalePrice(val === '' ? '' : parseFloat(val));
+                    // Clear error when user starts typing
+                    if (errors.salePrice) {
+                      setErrors((prev) => ({ ...prev, salePrice: '' }));
+                    }
+                  }}
+                />
+              </label>
+              {errors.salePrice && <div className="error-message">{errors.salePrice}</div>}
+            </div>
           )}
 
           <div className="modal-buttons">

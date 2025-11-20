@@ -12,3 +12,29 @@
   max-height: 90vh;
   overflow-y: auto;
 }
+
+.onSaleCheckboxLabel {
+  display: flex;
+  align-items: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--gray-700);
+  margin-bottom: var(--space-1);
+  margin-top: var(--space-2);
+  gap: var(--space-1);
+}
+
+.onSaleCheckbox {
+  width: 12px;
+  height: 12px;
+  accent-color: var(--color-primary);
+  border-color: var(--gray-300);
+  border-radius: var(--radius-md);
+  background: var(--gray-50);
+  cursor: pointer;
+  margin: 0;
+}
+
+input[type='checkbox'] {
+  transform: scale(0.5);
+}
