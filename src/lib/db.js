@@ -647,6 +647,88 @@ export async function deleteNameset(id) {
   if (error) throw error;
 }
 
+// ============================================================================
+// NAMESET IMAGES CRUD OPERATIONS
+// ============================================================================
+
+export async function createNamesetImage(data) {
+  // Map frontend data to database schema
+  const dbData = {
+    nameset_id: data.namesetId,
+    image_url: data.imageUrl,
+    alt_text: data.altText,
+    is_primary: data.isPrimary || false,
+    display_order: data.displayOrder || 0,
+    created_at: data.createdAt || new Date().toISOString(),
+  };
+
+  const { data: result, error } = await supabase.from('nameset_images').insert([dbData]).select().single();
+
+  if (error) throw error;
+
+  // Map database response back to frontend format
+  return {
+    id: result.id,
+    namesetId: result.nameset_id,
+    imageUrl: result.image_url,
+    altText: result.alt_text,
+    isPrimary: result.is_primary,
+    displayOrder: result.display_order,
+    createdAt: result.created_at,
+  };
+}
+
+export async function getNamesetImages(namesetId) {
+  const { data, error } = await supabase
+    .from('nameset_images')
+    .select('*')
+    .eq('nameset_id', namesetId)
+    .order('display_order', { ascending: true });
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return (data || []).map((item) => ({
+    id: item.id,
+    namesetId: item.nameset_id,
+    imageUrl: item.image_url,
+    altText: item.alt_text,
+    isPrimary: item.is_primary,
+    displayOrder: item.display_order,
+    createdAt: item.created_at,
+  }));
+}
+
+export async function updateNamesetImage(id, updates) {
+  // Map frontend updates to database schema
+  const dbUpdates = {};
+  if (updates.imageUrl !== undefined) dbUpdates.image_url = updates.imageUrl;
+  if (updates.altText !== undefined) dbUpdates.alt_text = updates.altText;
+  if (updates.isPrimary !== undefined) dbUpdates.is_primary = updates.isPrimary;
+  if (updates.displayOrder !== undefined) dbUpdates.display_order = updates.displayOrder;
+
+  const { data, error } = await supabase.from('nameset_images').update(dbUpdates).eq('id', id).select().single();
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return {
+    id: data.id,
+    namesetId: data.nameset_id,
+    imageUrl: data.image_url,
+    altText: data.alt_text,
+    isPrimary: data.is_primary,
+    displayOrder: data.display_order,
+    createdAt: data.created_at,
+  };
+}
+
+export async function deleteNamesetImage(id) {
+  const { error } = await supabase.from('nameset_images').delete().eq('id', id);
+
+  if (error) throw error;
+}
+
 export async function archiveNameset(id) {
   const { data, error } = await supabase
     .from('namesets')

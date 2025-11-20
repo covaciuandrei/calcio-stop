@@ -9,6 +9,7 @@ import BadgeDetailPage from './components/badges/BadgeDetailPage';
 import BadgesPage from './components/badges/BadgesPage';
 import Dashboard from './components/Dashboard';
 import KitTypesPage from './components/kittypes/KitTypesPage';
+import NamesetDetailPage from './components/namesets/NamesetDetailPage';
 import NamesetsPage from './components/namesets/NamesetsPage';
 import OrdersPage from './components/orders/OrdersPage';
 import ProductDetailPage from './components/products/ProductDetailPage';
@@ -91,6 +92,14 @@ const App: React.FC = () => {
           element={
             <PublicLayout>
               <BadgeDetailPage />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/public/namesets/:id"
+          element={
+            <PublicLayout>
+              <NamesetDetailPage />
             </PublicLayout>
           }
         />
@@ -195,6 +204,7 @@ const App: React.FC = () => {
                   <Route path="/returns" element={<ReturnsPage />} />
                   <Route path="/orders" element={<OrdersPage />} />
                   <Route path="/namesets" element={<NamesetsPage />} />
+                  <Route path="/namesets/:id" element={<NamesetDetailPage />} />
                   <Route path="/teams" element={<TeamsPage />} />
                   <Route path="/badges" element={<BadgesPage />} />
                   <Route path="/badges/:id" element={<BadgeDetailPage />} />

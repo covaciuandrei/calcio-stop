@@ -9,3 +9,13 @@ export interface Nameset {
   location?: string; // location where the nameset is stored
   createdAt: string; // ISO date string
 }
+
+export interface NamesetImage {
+  id: string;
+  namesetId: string;
+  imageUrl: string;
+  altText?: string;
+  isPrimary: boolean;
+  displayOrder: number;
+  createdAt: string;
+}

@@ -1,5 +1,6 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useNamesetImagesMapDebounced } from '../../hooks/useNamesetImages';
 import { useArchivedKitTypes, useKitTypesList } from '../../stores';
 import { Nameset } from '../../types';
 import { getKitTypeInfo } from '../../utils/utils';
@@ -21,6 +22,7 @@ const NamesetTableList: React.FC<Props> = ({
   searchTerm = '',
   isReadOnly = false,
 }) => {
+  const navigate = useNavigate();
   const location = useLocation();
   // Check if this is a public route
   const isPublicRoute = location.pathname.startsWith('/public');
@@ -28,6 +30,10 @@ const NamesetTableList: React.FC<Props> = ({
   // Get data from stores
   const kitTypes = useKitTypesList();
   const archivedKitTypes = useArchivedKitTypes();
+
+  // Get nameset images for all namesets with debouncing to prevent request storms
+  const namesetIds = namesets.map((nameset) => nameset.id);
+  const { imagesMap } = useNamesetImagesMapDebounced(namesetIds, 500);
 
   // Check if nameset is out of stock
   const isOutOfStock = (nameset: { quantity: number }) => {
@@ -39,6 +45,11 @@ const NamesetTableList: React.FC<Props> = ({
     if (quantity === 0) return 'NO STOCK';
     if (quantity <= 2) return 'LOW STOCK';
     return 'IN STOCK';
+  };
+
+  // Handle nameset row click
+  const handleNamesetClick = (namesetId: string) => {
+    navigate(isPublicRoute ? `/public/namesets/${namesetId}` : `/namesets/${namesetId}`);
   };
 
   // Filter namesets based on search term
@@ -63,11 +74,12 @@ const NamesetTableList: React.FC<Props> = ({
       <table>
         <thead>
           <tr>
+            <th>Image</th>
             <th>Player</th>
             <th>Number</th>
             <th>Season</th>
             <th>Kit Type</th>
-            <th>Quantity</th>
+            <th>{isPublicRoute ? 'Availability' : 'Quantity'}</th>
             <th>Price</th>
             {!isPublicRoute && <th>Location</th>}
             {!isReadOnly && <th>Actions</th>}
@@ -77,9 +89,34 @@ const NamesetTableList: React.FC<Props> = ({
           {filteredNamesets.map((n) => {
             const isLowStock = n.quantity > 0 && n.quantity <= 2;
             const isOutOfStockNameset = isOutOfStock(n);
+            const namesetImages = imagesMap[n.id] || [];
+            const primaryImage = namesetImages.find((img) => img.isPrimary) || namesetImages[0];
 
             return (
-              <tr key={n.id} className={isOutOfStockNameset ? 'out-of-stock-row' : ''}>
+              <tr
+                key={n.id}
+                className={`nameset-row ${isOutOfStockNameset ? 'out-of-stock-row' : ''}`}
+                onClick={() => handleNamesetClick(n.id)}
+                style={{ cursor: 'pointer' }}
+              >
+                <td
+                  className="nameset-image-preview"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNamesetClick(n.id);
+                  }}
+                  title="Click to view nameset details"
+                >
+                  {primaryImage ? (
+                    <img
+                      src={primaryImage.imageUrl}
+                      alt={n.playerName || 'Nameset image'}
+                      className="nameset-thumbnail"
+                    />
+                  ) : (
+                    <div className="no-image-placeholder">📷</div>
+                  )}
+                </td>
                 <td>
                   {n.playerName}
                   {isOutOfStockNameset && <div className="out-of-stock-badge">OUT OF STOCK</div>}
@@ -87,21 +124,23 @@ const NamesetTableList: React.FC<Props> = ({
                 <td>{n.number}</td>
                 <td>{n.season}</td>
                 <td>{getKitTypeInfo(n.kitTypeId, kitTypes, archivedKitTypes)}</td>
-                <td className="quantity-display">
-                  <span
-                    className={`badge-stock-status ${
-                      isOutOfStockNameset ? 'out-of-stock' : isLowStock ? 'low-stock' : 'in-stock'
-                    }`}
-                  >
-                    {getStockStatus(n.quantity)}
-                  </span>
-                  <br />
-                  <span style={{ fontSize: '0.85em', color: 'var(--gray-600)' }}>{n.quantity}</span>
+                <td className="price-display">
+                  {isPublicRoute ? (
+                    <span
+                      className={`nameset-stock-status ${
+                        n.quantity === 0 ? 'out-of-stock' : n.quantity <= 2 ? 'low-stock' : 'in-stock'
+                      }`}
+                    >
+                      {getStockStatus(n.quantity)}
+                    </span>
+                  ) : (
+                    n.quantity
+                  )}
                 </td>
                 <td className="price-display">{n.price.toFixed(2)} RON</td>
                 {!isPublicRoute && <td>{n.location || '-'}</td>}
                 {!isReadOnly && (
-                  <td>
+                  <td onClick={(e) => e.stopPropagation()}>
                     <button onClick={() => onEdit(n)} className="btn btn-icon btn-success" title="Edit">
                       ✏️
                     </button>
@@ -126,10 +165,27 @@ const NamesetTableList: React.FC<Props> = ({
         {filteredNamesets.map((n) => {
           const isLowStock = n.quantity > 0 && n.quantity <= 2;
           const isOutOfStockNameset = isOutOfStock(n);
+          const namesetImages = imagesMap[n.id] || [];
+          const primaryImage = namesetImages.find((img) => img.isPrimary) || namesetImages[0];
+          const stockStatus = getStockStatus(n.quantity);
 
           return (
-            <div key={n.id} className={`mobile-table-card ${isOutOfStockNameset ? 'out-of-stock-row' : ''}`}>
+            <div
+              key={n.id}
+              className={`mobile-table-card ${isOutOfStockNameset ? 'out-of-stock-row' : ''}`}
+              onClick={() => handleNamesetClick(n.id)}
+              style={{ cursor: 'pointer' }}
+            >
               <div className="mobile-card-header">
+                {primaryImage ? (
+                  <img
+                    src={primaryImage.imageUrl}
+                    alt={n.playerName || 'Nameset image'}
+                    className="mobile-card-image"
+                  />
+                ) : (
+                  <div className="mobile-card-no-image">📷</div>
+                )}
                 <div className="mobile-card-title">
                   <h4>{n.playerName}</h4>
                   <p className="mobile-card-subtitle">
@@ -145,8 +201,8 @@ const NamesetTableList: React.FC<Props> = ({
                   <span className="mobile-detail-value">{getKitTypeInfo(n.kitTypeId, kitTypes, archivedKitTypes)}</span>
                 </div>
                 <div className="mobile-detail-item">
-                  <span className="mobile-detail-label">Quantity</span>
-                  <span className="mobile-detail-value">{n.quantity}</span>
+                  <span className="mobile-detail-label">Availability</span>
+                  <span className="mobile-detail-value">{isPublicRoute ? stockStatus : `${n.quantity} units`}</span>
                 </div>
                 {!isPublicRoute && n.location && (
                   <div className="mobile-detail-item">
@@ -154,18 +210,24 @@ const NamesetTableList: React.FC<Props> = ({
                     <span className="mobile-detail-value">{n.location}</span>
                   </div>
                 )}
+                {isOutOfStockNameset && (
+                  <div className="mobile-detail-item">
+                    <span className="mobile-detail-label">Status</span>
+                    <span className="mobile-detail-value out-of-stock">Out of Stock</span>
+                  </div>
+                )}
               </div>
 
               <div className="mobile-card-status">
                 <span
                   className={`mobile-status-badge ${
-                    isOutOfStockNameset ? 'out-of-stock' : isLowStock ? 'low-stock' : 'in-stock'
+                    n.quantity === 0 ? 'out-of-stock' : n.quantity <= 2 ? 'low-stock' : 'in-stock'
                   }`}
                 >
-                  {getStockStatus(n.quantity)}
+                  {stockStatus}
                 </span>
                 {!isReadOnly && (
-                  <div className="mobile-card-actions">
+                  <div className="mobile-card-actions" onClick={(e) => e.stopPropagation()}>
                     <button onClick={() => onEdit(n)} className="btn btn-success" title="Edit">
                       Edit
                     </button>

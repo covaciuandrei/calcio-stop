@@ -4,6 +4,7 @@ import { useKitTypesList, useNamesetsActions } from '../../stores';
 import { Nameset } from '../../types';
 import { generateSeasons } from '../../utils/utils';
 import KitTypePicker from '../kittypes/KitTypePicker';
+import NamesetImageManager from './NamesetImageManager';
 
 interface Props {
   editingNameset: Nameset | null;
@@ -191,6 +192,12 @@ const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }
                 onChange={(e) => setLocation(e.target.value)}
               />
             </label>
+          </div>
+
+          {/* Nameset Images */}
+          <div className="form-group">
+            <label>Images:</label>
+            <NamesetImageManager namesetId={editingNameset.id} isAdmin={true} />
           </div>
 
           <div className="modal-buttons">

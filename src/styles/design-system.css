@@ -929,6 +929,34 @@ td button:hover {
   color: #dc2626;
 }
 
+/* Nameset Stock Status Display */
+.nameset-stock-status {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  min-width: 80px;
+  text-align: center;
+}
+
+.nameset-stock-status.in-stock {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+.nameset-stock-status.low-stock {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+}
+
+.nameset-stock-status.out-of-stock {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
 /* Price Display */
 .price-display {
   font-weight: var(--font-weight-semibold);
@@ -1323,14 +1351,16 @@ td button:hover {
 
   /* Mobile-specific table column adjustments */
   .badge-image-preview,
-  .product-image-preview {
+  .product-image-preview,
+  .nameset-image-preview {
     width: 32px;
     height: 32px;
     padding: 1px;
   }
 
   .badge-thumbnail,
-  .product-thumbnail {
+  .product-thumbnail,
+  .nameset-thumbnail {
     width: 24px;
     height: 24px;
   }
@@ -1857,6 +1887,28 @@ textarea:invalid:focus {
   transform: scale(1.05);
 }
 
+/* Nameset Image Styles (matching badge image styles) */
+.nameset-image-preview {
+  width: 60px;
+  height: 60px;
+  padding: var(--space-1);
+  text-align: center;
+  vertical-align: middle;
+}
+
+.nameset-thumbnail {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-border);
+  transition: transform 0.2s ease;
+}
+
+.nameset-thumbnail:hover {
+  transform: scale(1.05);
+}
+
 .no-image-placeholder {
   width: 50px;
   height: 50px;
@@ -1883,5 +1935,21 @@ textarea:invalid:focus {
 }
 
 .badge-row.out-of-stock-row:hover {
+  background-color: rgba(239, 68, 68, 0.05);
+}
+
+.nameset-row {
+  transition: background-color 0.2s ease;
+}
+
+.nameset-row:hover {
+  background-color: var(--color-background-secondary);
+}
+
+.nameset-row.out-of-stock-row {
+  opacity: 0.6;
+}
+
+.nameset-row.out-of-stock-row:hover {
   background-color: rgba(239, 68, 68, 0.05);
 }
