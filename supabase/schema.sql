@@ -60,6 +60,8 @@ CREATE TABLE IF NOT EXISTS products (
     price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     olx_link TEXT NULL,
     location VARCHAR(255) NULL,
+    is_on_sale BOOLEAN NOT NULL DEFAULT FALSE,
+    sale_price DECIMAL(10,2) NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     archived_at TIMESTAMP WITH TIME ZONE NULL
 );

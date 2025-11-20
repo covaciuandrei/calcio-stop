@@ -223,7 +223,29 @@ const ProductDetailPage: React.FC = () => {
                 </div>
                 <div className="detail-item">
                   <label>Price:</label>
-                  <span className="price-display">{product.price.toFixed(2)} RON</span>
+                  {product.isOnSale && product.salePrice ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <span style={{ textDecoration: 'line-through', color: 'var(--gray-500)', fontSize: '0.9em' }}>
+                        {product.price.toFixed(2)} RON
+                      </span>
+                      <span className="price-display" style={{ color: 'var(--accent-red-600)', fontWeight: 'bold' }}>
+                        {product.salePrice.toFixed(2)} RON
+                        <span
+                          style={{
+                            marginLeft: '8px',
+                            fontSize: '0.8em',
+                            background: 'var(--accent-red-100)',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                          }}
+                        >
+                          ON SALE
+                        </span>
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="price-display">{product.price.toFixed(2)} RON</span>
+                  )}
                 </div>
                 {product.olxLink && (
                   <div className="detail-item">

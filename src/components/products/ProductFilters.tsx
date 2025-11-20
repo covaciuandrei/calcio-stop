@@ -28,6 +28,7 @@ export interface ProductFiltersState {
   priceMax: string;
   totalMin: string;
   totalMax: string;
+  onSale: string; // 'all', 'on-sale', 'not-on-sale'
 }
 
 interface ProductFiltersProps {
@@ -55,6 +56,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
     priceMax: '',
     totalMin: '',
     totalMax: '',
+    onSale: 'all',
   });
 
   // Get data from stores
@@ -114,6 +116,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
       priceMax: '',
       totalMin: '',
       totalMax: '',
+      onSale: 'all',
     };
     setFilters(resetFilters);
     onReset();
@@ -328,6 +331,35 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
                 value={filters.number}
                 onChange={(e) => handleFilterChange('number', e.target.value)}
               />
+            </div>
+
+            {/* Row 8: On Sale Filter - Radio Buttons */}
+            <div className="filter-group">
+              <label className="sale-status-label">Sale Status</label>
+              <div className="sale-status-options">
+                <label className="sale-status-radio-label">
+                  <input
+                    type="radio"
+                    name="onSale"
+                    value="all"
+                    checked={filters.onSale === 'all'}
+                    onChange={(e) => handleFilterChange('onSale', e.target.value)}
+                    className="sale-status-radio"
+                  />
+                  <span>All Products</span>
+                </label>
+                <label className="sale-status-radio-label">
+                  <input
+                    type="radio"
+                    name="onSale"
+                    value="on-sale"
+                    checked={filters.onSale === 'on-sale'}
+                    onChange={(e) => handleFilterChange('onSale', e.target.value)}
+                    className="sale-status-radio"
+                  />
+                  <span>On Sale</span>
+                </label>
+              </div>
             </div>
           </div>
         </div>

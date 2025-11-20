@@ -36,6 +36,8 @@ export interface Product {
   price: number; // default price per unit
   olxLink?: string; // OLX listing URL
   location?: string; // location where the product is stored
+  isOnSale?: boolean; // whether the product is on sale
+  salePrice?: number; // special sale price (only used when isOnSale is true)
   createdAt: string; // ISO date string
   images?: ProductImage[]; // product images
 }

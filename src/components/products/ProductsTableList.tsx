@@ -208,7 +208,40 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
                 })()}
               </td>
               <td>{getBadgeInfo(p.badgeId, badges, archivedBadges)}</td>
-              <td className="price-display">{p.price.toFixed ? p.price.toFixed(2) : p.price} RON</td>
+              <td className="price-display" style={{ position: 'relative' }}>
+                {p.isOnSale && p.salePrice ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <div style={{ position: 'relative', display: 'inline-block' }}>
+                      <span style={{ textDecoration: 'line-through', color: 'var(--gray-500)', fontSize: '0.85em' }}>
+                        {p.price.toFixed ? p.price.toFixed(2) : p.price} RON
+                      </span>
+                      <span
+                        style={{
+                          position: 'absolute',
+                          top: '-8px',
+                          right: '-8px',
+                          background: 'linear-gradient(135deg, var(--accent-red-500), var(--accent-red-600))',
+                          color: 'white',
+                          fontSize: '0.84rem',
+                          fontWeight: 'bold',
+                          padding: '3px 8px',
+                          borderRadius: '4px',
+                          zIndex: 10,
+                          boxShadow: '0 2px 4px rgba(239, 68, 68, 0.3)',
+                          pointerEvents: 'none',
+                        }}
+                      >
+                        🔥 SALE
+                      </span>
+                    </div>
+                    <span style={{ color: 'var(--accent-red-600)', fontWeight: 'bold' }}>
+                      {p.salePrice.toFixed(2)} RON
+                    </span>
+                  </div>
+                ) : (
+                  <span>{p.price.toFixed ? p.price.toFixed(2) : p.price} RON</span>
+                )}
+              </td>
               {!isPublicRoute && <td>{p.location || '-'}</td>}
               {!isReadOnly && (
                 <td onClick={(e) => e.stopPropagation()}>
@@ -239,8 +272,28 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
               key={p.id}
               className={`mobile-table-card ${isOutOfStockProduct ? 'out-of-stock-row' : ''}`}
               onClick={() => handleProductClick(p.id)}
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: 'pointer', position: 'relative' }}
             >
+              {p.isOnSale && (
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: '4px',
+                    right: '4px',
+                    background: 'linear-gradient(135deg, var(--accent-red-500), var(--accent-red-600))',
+                    color: 'white',
+                    fontSize: '0.84rem',
+                    fontWeight: 'bold',
+                    padding: '3px 8px',
+                    borderRadius: '4px',
+                    zIndex: 10,
+                    boxShadow: '0 2px 4px rgba(239, 68, 68, 0.3)',
+                    pointerEvents: 'none',
+                  }}
+                >
+                  🔥 SALE
+                </span>
+              )}
               <div className="mobile-card-header">
                 {p.images && p.images.length > 0 ? (
                   <img
@@ -255,7 +308,40 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
                   <h4>{teamInfo}</h4>
                   <p className="mobile-card-subtitle">{p.name || '-'}</p>
                 </div>
-                <div className="mobile-card-price">{p.price.toFixed ? p.price.toFixed(2) : p.price} RON</div>
+                <div className="mobile-card-price" style={{ position: 'relative' }}>
+                  {p.isOnSale && p.salePrice ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignItems: 'flex-end' }}>
+                      <div style={{ position: 'relative', display: 'inline-block' }}>
+                        <span style={{ textDecoration: 'line-through', color: 'var(--gray-500)', fontSize: '0.85em' }}>
+                          {p.price.toFixed ? p.price.toFixed(2) : p.price} RON
+                        </span>
+                        <span
+                          style={{
+                            position: 'absolute',
+                            top: '-8px',
+                            right: '-8px',
+                            background: 'linear-gradient(135deg, var(--accent-red-500), var(--accent-red-600))',
+                            color: 'white',
+                            fontSize: '0.84rem',
+                            fontWeight: 'bold',
+                            padding: '3px 8px',
+                            borderRadius: '4px',
+                            zIndex: 10,
+                            boxShadow: '0 2px 4px rgba(239, 68, 68, 0.3)',
+                            pointerEvents: 'none',
+                          }}
+                        >
+                          🔥 SALE
+                        </span>
+                      </div>
+                      <span style={{ color: 'var(--accent-red-600)', fontWeight: 'bold' }}>
+                        {p.salePrice.toFixed(2)} RON
+                      </span>
+                    </div>
+                  ) : (
+                    <span>{p.price.toFixed ? p.price.toFixed(2) : p.price} RON</span>
+                  )}
+                </div>
               </div>
 
               <div className="mobile-card-details">

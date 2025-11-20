@@ -32,6 +32,8 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
   const [price, setPrice] = useState<number>(editingProduct?.price || 0);
   const [olxLink, setOlxLink] = useState<string>(editingProduct?.olxLink || '');
   const [location, setLocation] = useState<string>(editingProduct?.location || '');
+  const [isOnSale, setIsOnSale] = useState<boolean>(editingProduct?.isOnSale || false);
+  const [salePrice, setSalePrice] = useState<number | ''>(editingProduct?.salePrice || '');
   const [hasLoaded, setHasLoaded] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -48,6 +50,8 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
       setPrice(editingProduct.price || 0);
       setOlxLink(editingProduct.olxLink || '');
       setLocation(editingProduct.location || '');
+      setIsOnSale(editingProduct.isOnSale || false);
+      setSalePrice(editingProduct.salePrice || '');
       // Use setTimeout to ensure sizes are loaded before enabling type changes
       setTimeout(() => setHasLoaded(true), 0);
     }
@@ -93,6 +97,15 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
 
     setErrors({});
 
+    // Prepare sale price: if on sale and has value, use it; if not on sale, clear it
+    let finalSalePrice: number | undefined = undefined;
+    if (isOnSale) {
+      finalSalePrice = salePrice !== '' ? Number(salePrice) : undefined;
+    } else {
+      // If turning off sale, explicitly clear the sale price by setting to undefined
+      finalSalePrice = undefined;
+    }
+
     updateProduct(editingProduct.id, {
       name: name.trim() || '',
       type,
@@ -104,6 +117,8 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
       price: Number(price) || 0,
       olxLink: olxLink.trim() || undefined,
       location: location.trim() || undefined,
+      isOnSale: isOnSale,
+      salePrice: finalSalePrice,
     });
 
     // Note: Badge and nameset quantities are not updated when editing products
@@ -242,6 +257,37 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
               onChange={(e) => setLocation(e.target.value)}
             />
           </label>
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <input
+              type="checkbox"
+              checked={isOnSale}
+              onChange={(e) => {
+                setIsOnSale(e.target.checked);
+                if (!e.target.checked) {
+                  setSalePrice('');
+                }
+              }}
+            />
+            <span>On Sale</span>
+          </label>
+
+          {isOnSale && (
+            <label>
+              Sale Price (RON):
+              <input
+                type="number"
+                min={0}
+                step={0.01}
+                placeholder="Enter sale price"
+                value={salePrice}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setSalePrice(val === '' ? '' : parseFloat(val));
+                }}
+              />
+            </label>
+          )}
 
           <div className="modal-buttons">
             <button type="submit" className="btn btn-success">

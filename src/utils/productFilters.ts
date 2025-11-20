@@ -118,6 +118,16 @@ export const applyProductFilters = (
       }
     }
 
+    // On Sale filter
+    if (filters.onSale && filters.onSale !== 'all') {
+      if (filters.onSale === 'on-sale' && !product.isOnSale) {
+        return false;
+      }
+      if (filters.onSale === 'not-on-sale' && product.isOnSale) {
+        return false;
+      }
+    }
+
     // Total quantity range filter
     if (filters.totalMin || filters.totalMax) {
       const totalQuantity = product.sizes.reduce((sum, sq) => sum + sq.quantity, 0);

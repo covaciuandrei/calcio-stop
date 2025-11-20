@@ -63,6 +63,7 @@ const ProductsTableListCard: React.FC<ProductsTableListCardProps> = ({
     priceMax: '',
     totalMin: '',
     totalMax: '',
+    onSale: 'all',
   });
 
   // Use prop products if provided, otherwise use store products
@@ -144,6 +145,7 @@ const ProductsTableListCard: React.FC<ProductsTableListCardProps> = ({
       priceMax: '',
       totalMin: '',
       totalMax: '',
+      onSale: 'all',
     });
   };
 

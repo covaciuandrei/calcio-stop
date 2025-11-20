@@ -26,6 +26,8 @@ const AddProductForm: React.FC = () => {
   const [price, setPrice] = useState<number>(0);
   const [olxLink, setOlxLink] = useState<string>('');
   const [location, setLocation] = useState<string>('');
+  const [isOnSale, setIsOnSale] = useState<boolean>(false);
+  const [salePrice, setSalePrice] = useState<number | ''>('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
@@ -100,6 +102,8 @@ const AddProductForm: React.FC = () => {
       price: Number(price) || 0,
       olxLink: olxLink.trim() || undefined,
       location: location.trim() || undefined,
+      isOnSale: isOnSale,
+      salePrice: isOnSale && salePrice !== '' ? Number(salePrice) : undefined,
       createdAt: new Date().toISOString(),
     };
 
@@ -126,6 +130,8 @@ const AddProductForm: React.FC = () => {
     setPrice(0);
     setOlxLink('');
     setLocation('');
+    setIsOnSale(false);
+    setSalePrice('');
     setErrors({}); // Clear any errors
 
     // Set default kit type after a brief delay to ensure state is reset
@@ -265,6 +271,37 @@ const AddProductForm: React.FC = () => {
           onChange={(e) => setLocation(e.target.value)}
         />
       </div>
+
+      <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <input
+          type="checkbox"
+          checked={isOnSale}
+          onChange={(e) => {
+            setIsOnSale(e.target.checked);
+            if (!e.target.checked) {
+              setSalePrice('');
+            }
+          }}
+        />
+        <label style={{ margin: 0 }}>On Sale</label>
+      </div>
+
+      {isOnSale && (
+        <div className="form-group">
+          <label>Sale Price (RON)</label>
+          <input
+            type="number"
+            min={0}
+            step={0.01}
+            placeholder="Enter sale price"
+            value={salePrice}
+            onChange={(e) => {
+              const val = e.target.value;
+              setSalePrice(val === '' ? '' : parseFloat(val));
+            }}
+          />
+        </div>
+      )}
 
       <div className="form-button-container">
         <button onClick={handleAddProduct} className="btn btn-success">

@@ -694,6 +694,8 @@ export async function createProduct(data) {
     price: parseFloat(data.price) || 0.0,
     olx_link: data.olxLink || null,
     location: data.location || null,
+    is_on_sale: data.isOnSale || false,
+    sale_price: data.salePrice ? parseFloat(data.salePrice) : null,
     created_at: data.createdAt || new Date().toISOString(),
     archived_at: null,
   };
@@ -717,6 +719,8 @@ export async function createProduct(data) {
     price: result.price,
     olxLink: result.olx_link,
     location: result.location || undefined,
+    isOnSale: result.is_on_sale || false,
+    salePrice: result.sale_price || undefined,
     createdAt: result.created_at,
   };
 }
@@ -756,6 +760,8 @@ export async function getProducts() {
     price: item.price,
     olxLink: item.olx_link,
     location: item.location || undefined,
+    isOnSale: item.is_on_sale || false,
+    salePrice: item.sale_price || undefined,
     createdAt: item.created_at,
     images: (item.product_images || []).map((img) => ({
       id: img.id,
@@ -804,6 +810,8 @@ export async function getArchivedProducts() {
     price: item.price,
     olxLink: item.olx_link,
     location: item.location || undefined,
+    isOnSale: item.is_on_sale || false,
+    salePrice: item.sale_price || undefined,
     createdAt: item.created_at,
     images: (item.product_images || []).map((img) => ({
       id: img.id,
@@ -851,6 +859,13 @@ export async function updateProduct(id, updates) {
   if (updates.location !== undefined) {
     dbUpdates.location = updates.location || null;
   }
+  if (updates.isOnSale !== undefined) {
+    dbUpdates.is_on_sale = updates.isOnSale || false;
+  }
+  if (updates.salePrice !== undefined) {
+    dbUpdates.sale_price =
+      updates.salePrice !== undefined && updates.salePrice !== null ? parseFloat(updates.salePrice) : null;
+  }
 
   const { data, error } = await supabase
     .from('products')
@@ -887,6 +902,8 @@ export async function updateProduct(id, updates) {
     price: data.price,
     olxLink: data.olx_link,
     location: data.location || undefined,
+    isOnSale: data.is_on_sale || false,
+    salePrice: data.sale_price || undefined,
     createdAt: data.created_at,
     images: (data.product_images || []).map((img) => ({
       id: img.id,
@@ -940,6 +957,8 @@ export async function archiveProduct(id) {
     price: data.price,
     olxLink: data.olx_link,
     location: data.location || undefined,
+    isOnSale: data.is_on_sale || false,
+    salePrice: data.sale_price || undefined,
     createdAt: data.created_at,
   };
 }
@@ -962,6 +981,8 @@ export async function restoreProduct(id) {
     price: data.price,
     olxLink: data.olx_link,
     location: data.location || undefined,
+    isOnSale: data.is_on_sale || false,
+    salePrice: data.sale_price || undefined,
     createdAt: data.created_at,
   };
 }

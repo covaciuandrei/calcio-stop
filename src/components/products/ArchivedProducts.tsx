@@ -187,7 +187,32 @@ const ArchivedProducts: React.FC<Props> = ({ archivedProducts, searchTerm = '', 
                 })()}
               </td>
               <td>{getBadgeInfo(p.badgeId, badges, archivedBadges)}</td>
-              <td className="price-display">{p.price.toFixed ? p.price.toFixed(2) : p.price} RON</td>
+              <td className="price-display">
+                {p.isOnSale && p.salePrice ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <span style={{ textDecoration: 'line-through', color: 'var(--gray-500)', fontSize: '0.85em' }}>
+                      {p.price.toFixed ? p.price.toFixed(2) : p.price} RON
+                    </span>
+                    <span style={{ color: 'var(--accent-red-600)', fontWeight: 'bold' }}>
+                      {p.salePrice.toFixed(2)} RON
+                      <span
+                        style={{
+                          marginLeft: '4px',
+                          fontSize: '0.7em',
+                          background: 'var(--accent-red-100)',
+                          padding: '1px 4px',
+                          borderRadius: '3px',
+                          color: 'var(--accent-red-700)',
+                        }}
+                      >
+                        SALE
+                      </span>
+                    </span>
+                  </div>
+                ) : (
+                  <span>{p.price.toFixed ? p.price.toFixed(2) : p.price} RON</span>
+                )}
+              </td>
               <td>{p.location || '-'}</td>
               <td onClick={(e) => e.stopPropagation()}>
                 <button onClick={() => handleRestore(p.id)} className="btn btn-icon btn-success" title="Restore">

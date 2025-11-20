@@ -63,6 +63,7 @@ const SoldOutProductsCard: React.FC<SoldOutProductsCardProps> = ({ isReadOnly = 
     priceMax: '',
     totalMin: '',
     totalMax: '',
+    onSale: 'all',
   });
 
   // Apply filters and sorting to sold-out products
@@ -141,6 +142,7 @@ const SoldOutProductsCard: React.FC<SoldOutProductsCardProps> = ({ isReadOnly = 
       priceMax: '',
       totalMin: '',
       totalMax: '',
+      onSale: 'all',
     });
   };
 
