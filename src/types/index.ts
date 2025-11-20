@@ -8,4 +8,5 @@ export * from './products';
 export * from './reservations';
 export * from './returns';
 export * from './sales';
+export * from './suppliers';
 export * from './teams';

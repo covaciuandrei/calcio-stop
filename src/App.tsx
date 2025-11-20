@@ -22,6 +22,7 @@ import ReservationsPage from './components/reservations/ReservationsPage';
 import ReturnsPage from './components/returns/ReturnsPage';
 import SalesPage from './components/sales/SalesPage';
 import SettingsPopup from './components/shared/SettingsPopup';
+import SuppliersPage from './components/suppliers/SuppliersPage';
 import TeamsPage from './components/teams/TeamsPage';
 import { useAppBarOrder, useAuth } from './stores';
 
@@ -35,6 +36,7 @@ const NAVIGATION_ITEMS = {
   teams: { label: 'Teams', path: '/teams', end: false },
   badges: { label: 'Badges', path: '/badges', end: false },
   kittypes: { label: 'Kit Types', path: '/kittypes', end: false },
+  suppliers: { label: 'Suppliers', path: '/suppliers', end: false },
   settings: { label: 'System Settings', path: '/settings', end: false },
 };
 
@@ -114,6 +116,9 @@ const App: React.FC = () => {
                   {appBarOrder.map((itemId) => {
                     const item = NAVIGATION_ITEMS[itemId as keyof typeof NAVIGATION_ITEMS];
                     if (!item) return null;
+
+                    // Hide suppliers navigation item for non-admin users
+                    if (itemId === 'suppliers' && !isAdmin) return null;
 
                     return (
                       <NavLink key={itemId} to={item.path} end={item.end}>
@@ -209,6 +214,7 @@ const App: React.FC = () => {
                   <Route path="/badges" element={<BadgesPage />} />
                   <Route path="/badges/:id" element={<BadgeDetailPage />} />
                   <Route path="/kittypes" element={<KitTypesPage />} />
+                  {isAdmin && <Route path="/suppliers" element={<SuppliersPage />} />}
                   {isAdmin && <Route path="/reservations" element={<ReservationsPage />} />}
                   <Route path="/stats" element={<StatsDashboard />} />
                   <Route path="/settings" element={<SystemSettings />} />

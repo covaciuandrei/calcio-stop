@@ -16,7 +16,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useAppBarOrder, useDashboardOrder, useSettingsActions } from '../../stores';
+import { useAppBarOrder, useAuth, useDashboardOrder, useSettingsActions } from '../../stores';
 import styles from './SettingsPopup.module.css';
 
 // Types
@@ -39,6 +39,7 @@ const APP_BAR_ITEMS = [
   { id: 'teams', label: 'Teams', path: '/teams' },
   { id: 'badges', label: 'Badges', path: '/badges' },
   { id: 'kittypes', label: 'Kit Types', path: '/kittypes' },
+  { id: 'suppliers', label: 'Suppliers', path: '/suppliers' },
 ];
 
 const DASHBOARD_ITEMS = [
@@ -104,6 +105,8 @@ const SettingsPopup: React.FC<SettingsPopupProps> = ({ isOpen, onClose }) => {
   const appBarOrder = useAppBarOrder();
   const dashboardOrder = useDashboardOrder();
   const { setAppBarOrder, setDashboardOrder, resetAllSettings } = useSettingsActions();
+  const { user, isAuthenticated } = useAuth();
+  const isAdmin = user?.role === 'admin' && isAuthenticated;
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -119,10 +122,12 @@ const SettingsPopup: React.FC<SettingsPopupProps> = ({ isOpen, onClose }) => {
   // Initialize local state when popup opens
   React.useEffect(() => {
     if (isOpen) {
-      setLocalAppBarOrder([...appBarOrder]);
+      // Filter out suppliers for non-admin users
+      const filteredAppBarOrder = isAdmin ? [...appBarOrder] : appBarOrder.filter((id) => id !== 'suppliers');
+      setLocalAppBarOrder(filteredAppBarOrder);
       setLocalDashboardOrder([...dashboardOrder]);
     }
-  }, [isOpen, appBarOrder, dashboardOrder]);
+  }, [isOpen, appBarOrder, dashboardOrder, isAdmin]);
 
   const handleAppBarDragEnd = useCallback(
     (event: DragEndEvent) => {
@@ -151,24 +156,52 @@ const SettingsPopup: React.FC<SettingsPopupProps> = ({ isOpen, onClose }) => {
   );
 
   const handleSave = useCallback(() => {
-    setAppBarOrder(localAppBarOrder);
+    // Filter out suppliers for non-admin users before saving
+    const orderToSave = isAdmin ? localAppBarOrder : localAppBarOrder.filter((id) => id !== 'suppliers');
+    setAppBarOrder(orderToSave);
     setDashboardOrder(localDashboardOrder);
     onClose();
-  }, [localAppBarOrder, localDashboardOrder, setAppBarOrder, setDashboardOrder, onClose]);
+  }, [localAppBarOrder, localDashboardOrder, setAppBarOrder, setDashboardOrder, onClose, isAdmin]);
 
   const handleResetAppBar = useCallback(() => {
-    setLocalAppBarOrder(['dashboard', 'products', 'sales', 'namesets', 'teams', 'badges', 'kittypes']);
-  }, []);
+    const defaultOrder = [
+      'dashboard',
+      'products',
+      'sales',
+      'returns',
+      'namesets',
+      'teams',
+      'badges',
+      'kittypes',
+      'suppliers',
+    ];
+    // Filter out suppliers for non-admin users
+    const filteredOrder = isAdmin ? defaultOrder : defaultOrder.filter((id) => id !== 'suppliers');
+    setLocalAppBarOrder(filteredOrder);
+  }, [isAdmin]);
 
   const handleResetDashboard = useCallback(() => {
-    setLocalDashboardOrder(['products', 'sales', 'namesets', 'teams', 'badges', 'kitTypes']);
+    setLocalDashboardOrder(['products', 'sales', 'returns', 'namesets', 'teams', 'badges', 'kitTypes']);
   }, []);
 
   const handleResetAll = useCallback(() => {
     resetAllSettings();
-    setLocalAppBarOrder(['dashboard', 'products', 'sales', 'namesets', 'teams', 'badges', 'kittypes']);
-    setLocalDashboardOrder(['products', 'sales', 'namesets', 'teams', 'badges', 'kitTypes']);
-  }, [resetAllSettings]);
+    const defaultOrder = [
+      'dashboard',
+      'products',
+      'sales',
+      'returns',
+      'namesets',
+      'teams',
+      'badges',
+      'kittypes',
+      'suppliers',
+    ];
+    // Filter out suppliers for non-admin users
+    const filteredOrder = isAdmin ? defaultOrder : defaultOrder.filter((id) => id !== 'suppliers');
+    setLocalAppBarOrder(filteredOrder);
+    setLocalDashboardOrder(['products', 'sales', 'returns', 'namesets', 'teams', 'badges', 'kitTypes']);
+  }, [resetAllSettings, isAdmin]);
 
   const toggleSection = useCallback(
     (section: 'appbar' | 'dashboard') => {
@@ -179,20 +212,26 @@ const SettingsPopup: React.FC<SettingsPopupProps> = ({ isOpen, onClose }) => {
 
   // Memoize the item lists to prevent unnecessary re-renders
   const appBarItems = useMemo(() => {
-    return localAppBarOrder.map((itemId) => {
-      const item = APP_BAR_ITEMS.find((i) => i.id === itemId);
-      if (!item) return null;
+    return localAppBarOrder
+      .filter((itemId) => {
+        // Hide suppliers for non-admin users
+        if (itemId === 'suppliers' && !isAdmin) return false;
+        return true;
+      })
+      .map((itemId) => {
+        const item = APP_BAR_ITEMS.find((i) => i.id === itemId);
+        if (!item) return null;
 
-      return (
-        <SortableItem key={itemId} id={itemId}>
-          <div className={styles.sortableItemContent}>
-            <DragHandle />
-            <span className={styles.itemLabel}>{item.label}</span>
-          </div>
-        </SortableItem>
-      );
-    });
-  }, [localAppBarOrder]);
+        return (
+          <SortableItem key={itemId} id={itemId}>
+            <div className={styles.sortableItemContent}>
+              <DragHandle />
+              <span className={styles.itemLabel}>{item.label}</span>
+            </div>
+          </SortableItem>
+        );
+      });
+  }, [localAppBarOrder, isAdmin]);
 
   const dashboardItems = useMemo(() => {
     return localDashboardOrder.map((itemId) => {
@@ -260,7 +299,10 @@ const SettingsPopup: React.FC<SettingsPopupProps> = ({ isOpen, onClose }) => {
             {expandedSection === 'appbar' && (
               <div className={styles.sectionContent}>
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleAppBarDragEnd}>
-                  <SortableContext items={localAppBarOrder} strategy={verticalListSortingStrategy}>
+                  <SortableContext
+                    items={localAppBarOrder.filter((id) => isAdmin || id !== 'suppliers')}
+                    strategy={verticalListSortingStrategy}
+                  >
                     <div className={styles.sortableList}>{appBarItems}</div>
                   </SortableContext>
                 </DndContext>

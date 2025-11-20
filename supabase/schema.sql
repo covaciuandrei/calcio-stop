@@ -186,6 +186,33 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Sellers table
+CREATE TABLE IF NOT EXISTS sellers (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    website_url TEXT NULL,
+    special_notes TEXT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    archived_at TIMESTAMP WITH TIME ZONE NULL
+);
+
+-- Seller Products junction table (many-to-many relationship)
+CREATE TABLE IF NOT EXISTS seller_products (
+    seller_id UUID NOT NULL REFERENCES sellers(id) ON DELETE CASCADE,
+    product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    PRIMARY KEY (seller_id, product_id)
+);
+
+-- Product Links table
+CREATE TABLE IF NOT EXISTS product_links (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    seller_id UUID NULL REFERENCES sellers(id) ON DELETE SET NULL,
+    url TEXT NOT NULL,
+    label VARCHAR(255) NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Insert default kit types (UUID auto-generated)
 INSERT INTO kit_types (name, created_at) VALUES 
     ('1st Kit', '2024-01-01T00:00:00.000Z'),
@@ -196,7 +223,7 @@ ON CONFLICT (name) DO NOTHING;
 
 -- Insert default settings
 INSERT INTO settings (key, value) VALUES 
-    ('app_bar_order', '["dashboard", "products", "sales", "returns", "namesets", "teams", "badges", "kittypes", "stats"]'::jsonb),
+    ('app_bar_order', '["dashboard", "products", "sales", "returns", "namesets", "teams", "badges", "kittypes", "suppliers", "stats"]'::jsonb),
     ('dashboard_order', '["products", "sales", "returns", "namesets", "teams", "badges", "kitTypes", "reservations"]'::jsonb),
     ('registration_enabled', 'true'::jsonb),
     ('maintenance_mode', 'false'::jsonb)
@@ -236,6 +263,11 @@ CREATE INDEX IF NOT EXISTS idx_views_product_id ON views(product_id);
 CREATE INDEX IF NOT EXISTS idx_views_timestamp ON views(timestamp);
 CREATE INDEX IF NOT EXISTS idx_leagues_archived_at ON leagues(archived_at);
 CREATE INDEX IF NOT EXISTS idx_teams_leagues ON teams USING GIN (leagues);
+CREATE INDEX IF NOT EXISTS idx_sellers_archived_at ON sellers(archived_at);
+CREATE INDEX IF NOT EXISTS idx_seller_products_seller_id ON seller_products(seller_id);
+CREATE INDEX IF NOT EXISTS idx_seller_products_product_id ON seller_products(product_id);
+CREATE INDEX IF NOT EXISTS idx_product_links_product_id ON product_links(product_id);
+CREATE INDEX IF NOT EXISTS idx_product_links_seller_id ON product_links(seller_id);
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE teams ENABLE ROW LEVEL SECURITY;
@@ -254,6 +286,9 @@ ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE views ENABLE ROW LEVEL SECURITY;
 ALTER TABLE leagues ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sellers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE seller_products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE product_links ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for public access (adjust based on your security requirements)
 CREATE POLICY "Allow all operations for authenticated users" ON teams FOR ALL USING (true);
@@ -277,6 +312,9 @@ CREATE POLICY "Allow all operations for authenticated users" ON returns FOR ALL 
 CREATE POLICY "Allow all operations for authenticated users" ON settings FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON users FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON leagues FOR ALL USING (true);
+CREATE POLICY "Allow all operations for authenticated users" ON sellers FOR ALL USING (true);
+CREATE POLICY "Allow all operations for authenticated users" ON seller_products FOR ALL USING (true);
+CREATE POLICY "Allow all operations for authenticated users" ON product_links FOR ALL USING (true);
 -- Allow inserts for everyone (including unauthenticated users) for view tracking
 CREATE POLICY "Allow inserts for view tracking" ON views 
 FOR INSERT 

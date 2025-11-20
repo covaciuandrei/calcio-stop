@@ -2681,3 +2681,322 @@ export async function removeTeamFromLeague(teamId, leagueId) {
     throw new Error('Failed to remove league from team: ' + (error.message || 'Unknown error'));
   }
 }
+
+// ============================================================================
+// SELLERS CRUD OPERATIONS
+// ============================================================================
+
+export async function createSeller(data) {
+  // Map frontend data to database schema
+  const dbData = {
+    name: data.name,
+    website_url: data.websiteUrl || null,
+    special_notes: data.specialNotes || null,
+    created_at: data.createdAt || new Date().toISOString(),
+    archived_at: null,
+  };
+
+  const { data: result, error } = await supabase.from('sellers').insert([dbData]).select().single();
+
+  if (error) throw error;
+
+  // Create seller-product relationships if productIds are provided
+  if (data.productIds && data.productIds.length > 0) {
+    const sellerProducts = data.productIds.map((productId) => ({
+      seller_id: result.id,
+      product_id: productId,
+    }));
+
+    const { error: relError } = await supabase.from('seller_products').insert(sellerProducts);
+
+    if (relError) {
+      // Rollback seller creation if relationships fail
+      await supabase.from('sellers').delete().eq('id', result.id);
+      throw relError;
+    }
+  }
+
+  // Fetch the created seller with product relationships
+  const seller = await getSellerById(result.id);
+
+  // Map database response back to frontend format
+  return seller;
+}
+
+export async function getSellers() {
+  const { data, error } = await supabase
+    .from('sellers')
+    .select('*')
+    .is('archived_at', null)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+
+  // Fetch product relationships for each seller
+  const sellers = await Promise.all(
+    (data || []).map(async (item) => {
+      const { data: sellerProducts } = await supabase
+        .from('seller_products')
+        .select('product_id')
+        .eq('seller_id', item.id);
+
+      const productIds = (sellerProducts || []).map((sp) => sp.product_id);
+
+      return {
+        id: item.id,
+        name: item.name,
+        websiteUrl: item.website_url || undefined,
+        specialNotes: item.special_notes || undefined,
+        productIds: productIds,
+        createdAt: item.created_at,
+      };
+    })
+  );
+
+  return sellers;
+}
+
+export async function getSellerById(id) {
+  const { data, error } = await supabase.from('sellers').select('*').eq('id', id).single();
+
+  if (error) throw error;
+
+  // Fetch product relationships
+  const { data: sellerProducts } = await supabase.from('seller_products').select('product_id').eq('seller_id', id);
+
+  const productIds = (sellerProducts || []).map((sp) => sp.product_id);
+
+  return {
+    id: data.id,
+    name: data.name,
+    websiteUrl: data.website_url || undefined,
+    specialNotes: data.special_notes || undefined,
+    productIds: productIds,
+    createdAt: data.created_at,
+  };
+}
+
+export async function getArchivedSellers() {
+  const { data, error } = await supabase
+    .from('sellers')
+    .select('*')
+    .not('archived_at', 'is', null)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+
+  // Fetch product relationships for each seller
+  const sellers = await Promise.all(
+    (data || []).map(async (item) => {
+      const { data: sellerProducts } = await supabase
+        .from('seller_products')
+        .select('product_id')
+        .eq('seller_id', item.id);
+
+      const productIds = (sellerProducts || []).map((sp) => sp.product_id);
+
+      return {
+        id: item.id,
+        name: item.name,
+        websiteUrl: item.website_url || undefined,
+        specialNotes: item.special_notes || undefined,
+        productIds: productIds,
+        createdAt: item.created_at,
+      };
+    })
+  );
+
+  return sellers;
+}
+
+export async function updateSeller(id, updates) {
+  // Map frontend updates to database schema
+  const dbUpdates = {};
+  if (updates.name !== undefined) dbUpdates.name = updates.name;
+  if (updates.websiteUrl !== undefined) dbUpdates.website_url = updates.websiteUrl || null;
+  if (updates.specialNotes !== undefined) dbUpdates.special_notes = updates.specialNotes || null;
+
+  const { data, error } = await supabase.from('sellers').update(dbUpdates).eq('id', id).select().single();
+
+  if (error) throw error;
+
+  // Update product relationships if productIds are provided
+  if (updates.productIds !== undefined) {
+    // Delete existing relationships
+    await supabase.from('seller_products').delete().eq('seller_id', id);
+
+    // Create new relationships
+    if (updates.productIds.length > 0) {
+      const sellerProducts = updates.productIds.map((productId) => ({
+        seller_id: id,
+        product_id: productId,
+      }));
+
+      const { error: relError } = await supabase.from('seller_products').insert(sellerProducts);
+
+      if (relError) throw relError;
+    }
+  }
+
+  // Fetch the updated seller with product relationships
+  return await getSellerById(id);
+}
+
+export async function deleteSeller(id) {
+  // Check if there are product links referencing this seller
+  const { data: productLinks, error: linksError } = await supabase
+    .from('product_links')
+    .select('id')
+    .eq('seller_id', id)
+    .limit(1);
+
+  if (linksError) throw linksError;
+
+  // If there are references, throw an error
+  if (productLinks && productLinks.length > 0) {
+    throw new Error('Cannot delete seller: it is referenced by product links');
+  }
+
+  // Delete seller-product relationships first
+  await supabase.from('seller_products').delete().eq('seller_id', id);
+
+  // Delete the seller
+  const { error } = await supabase.from('sellers').delete().eq('id', id);
+
+  if (error) throw error;
+}
+
+export async function archiveSeller(id) {
+  const { data, error } = await supabase
+    .from('sellers')
+    .update({ archived_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  return await getSellerById(id);
+}
+
+export async function restoreSeller(id) {
+  const { data, error } = await supabase.from('sellers').update({ archived_at: null }).eq('id', id).select().single();
+
+  if (error) throw error;
+
+  return await getSellerById(id);
+}
+
+// ============================================================================
+// PRODUCT LINKS CRUD OPERATIONS
+// ============================================================================
+
+export async function createProductLink(data) {
+  // Map frontend data to database schema
+  const dbData = {
+    product_id: data.productId,
+    seller_id: data.sellerId || null,
+    url: data.url,
+    label: data.label || null,
+    created_at: data.createdAt || new Date().toISOString(),
+  };
+
+  const { data: result, error } = await supabase.from('product_links').insert([dbData]).select().single();
+
+  if (error) throw error;
+
+  // Map database response back to frontend format
+  return {
+    id: result.id,
+    productId: result.product_id,
+    sellerId: result.seller_id || undefined,
+    url: result.url,
+    label: result.label || undefined,
+    createdAt: result.created_at,
+  };
+}
+
+export async function getProductLinks() {
+  const { data, error } = await supabase.from('product_links').select('*').order('created_at', { ascending: false });
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return (data || []).map((item) => ({
+    id: item.id,
+    productId: item.product_id,
+    sellerId: item.seller_id || undefined,
+    url: item.url,
+    label: item.label || undefined,
+    createdAt: item.created_at,
+  }));
+}
+
+export async function getProductLinksByProductId(productId) {
+  const { data, error } = await supabase
+    .from('product_links')
+    .select('*')
+    .eq('product_id', productId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return (data || []).map((item) => ({
+    id: item.id,
+    productId: item.product_id,
+    sellerId: item.seller_id || undefined,
+    url: item.url,
+    label: item.label || undefined,
+    createdAt: item.created_at,
+  }));
+}
+
+export async function getProductLinksBySellerId(sellerId) {
+  const { data, error } = await supabase
+    .from('product_links')
+    .select('*')
+    .eq('seller_id', sellerId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return (data || []).map((item) => ({
+    id: item.id,
+    productId: item.product_id,
+    sellerId: item.seller_id || undefined,
+    url: item.url,
+    label: item.label || undefined,
+    createdAt: item.created_at,
+  }));
+}
+
+export async function updateProductLink(id, updates) {
+  // Map frontend updates to database schema
+  const dbUpdates = {};
+  if (updates.productId !== undefined) dbUpdates.product_id = updates.productId;
+  if (updates.sellerId !== undefined) dbUpdates.seller_id = updates.sellerId || null;
+  if (updates.url !== undefined) dbUpdates.url = updates.url;
+  if (updates.label !== undefined) dbUpdates.label = updates.label || null;
+
+  const { data, error } = await supabase.from('product_links').update(dbUpdates).eq('id', id).select().single();
+
+  if (error) throw error;
+
+  // Map database response to frontend format
+  return {
+    id: data.id,
+    productId: data.product_id,
+    sellerId: data.seller_id || undefined,
+    url: data.url,
+    label: data.label || undefined,
+    createdAt: data.created_at,
+  };
+}
+
+export async function deleteProductLink(id) {
+  const { error } = await supabase.from('product_links').delete().eq('id', id);
+
+  if (error) throw error;
+}

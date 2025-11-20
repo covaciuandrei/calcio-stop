@@ -37,7 +37,17 @@ interface SettingsState {
 }
 
 // Default orders
-const DEFAULT_APPBAR_ORDER = ['dashboard', 'products', 'sales', 'returns', 'namesets', 'teams', 'badges', 'kittypes'];
+const DEFAULT_APPBAR_ORDER = [
+  'dashboard',
+  'products',
+  'sales',
+  'returns',
+  'namesets',
+  'teams',
+  'badges',
+  'kittypes',
+  'suppliers',
+];
 
 const DEFAULT_DASHBOARD_ORDER = [
   'products',
