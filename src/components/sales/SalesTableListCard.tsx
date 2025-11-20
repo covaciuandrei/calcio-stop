@@ -10,7 +10,7 @@ const SalesTableListCard: React.FC = () => {
   // Get data and actions from stores
   const sales = useSalesList();
   const filters = useSalesFilters();
-  const { deleteSale, reverseSale, loadSales, setFilters } = useSalesActions();
+  const { deleteSale, reverseSale, returnSale, loadSales, setFilters } = useSalesActions();
   const [editingSale, setEditingSale] = useState<Sale | null>(null);
   const [isSalesExpanded, setIsSalesExpanded] = useState(true);
   const [salesSearchTerm, setSalesSearchTerm] = useState('');
@@ -55,6 +55,17 @@ const SalesTableListCard: React.FC = () => {
     )
       return;
     reverseSale(id);
+    setSalesSearchTerm(''); // Clear search after action
+  };
+
+  const handleReturn = (id: string) => {
+    if (
+      !window.confirm(
+        'Are you sure you want to return this sale? This will move it to returns, restore product quantities, and remove it from sales history.'
+      )
+    )
+      return;
+    returnSale(id);
     setSalesSearchTerm(''); // Clear search after action
   };
 
@@ -131,6 +142,7 @@ const SalesTableListCard: React.FC = () => {
                   onEdit={handleEditClick}
                   onDelete={handleDelete}
                   onReverse={handleReverse}
+                  onReturn={handleReturn}
                   searchTerm={salesSearchTerm}
                 />
               </div>

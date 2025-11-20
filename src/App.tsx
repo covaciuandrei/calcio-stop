@@ -18,6 +18,7 @@ import PublicDashboard from './components/public/PublicDashboard';
 import { PublicLayout } from './components/public/PublicLayout';
 import PublicProductsPage from './components/public/PublicProductsPage';
 import ReservationsPage from './components/reservations/ReservationsPage';
+import ReturnsPage from './components/returns/ReturnsPage';
 import SalesPage from './components/sales/SalesPage';
 import SettingsPopup from './components/shared/SettingsPopup';
 import TeamsPage from './components/teams/TeamsPage';
@@ -28,6 +29,7 @@ const NAVIGATION_ITEMS = {
   dashboard: { label: 'Dashboard', path: '/', end: true },
   products: { label: 'Products', path: '/products', end: false },
   sales: { label: 'Sales', path: '/sales', end: false },
+  returns: { label: 'Returns', path: '/returns', end: false },
   namesets: { label: 'Namesets', path: '/namesets', end: false },
   teams: { label: 'Teams', path: '/teams', end: false },
   badges: { label: 'Badges', path: '/badges', end: false },
@@ -190,6 +192,7 @@ const App: React.FC = () => {
                   <Route path="/products" element={<ProductsPage />} />
                   <Route path="/products/:id" element={<ProductDetailPage />} />
                   <Route path="/sales" element={<SalesPage />} />
+                  <Route path="/returns" element={<ReturnsPage />} />
                   <Route path="/orders" element={<OrdersPage />} />
                   <Route path="/namesets" element={<NamesetsPage />} />
                   <Route path="/teams" element={<TeamsPage />} />

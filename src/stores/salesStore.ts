@@ -21,6 +21,7 @@ interface SalesState {
   updateSale: (id: string, updates: Partial<Sale>) => Promise<void>;
   deleteSale: (id: string) => Promise<void>;
   reverseSale: (id: string) => Promise<void>;
+  returnSale: (id: string) => Promise<void>;
   setSales: (sales: Sale[]) => void;
   setFilters: (filters: SalesFilters) => void;
   loadSales: (filters?: SalesFilters) => Promise<void>;
@@ -135,6 +136,26 @@ export const useSalesStore = create<SalesState>()(
           }
         },
 
+        returnSale: async (id: string) => {
+          set({ isLoading: true, error: null });
+          try {
+            await db.returnSale(id);
+            // Reload products to reflect restored quantities
+            const { useProductsStore } = await import('./productsStore');
+            await useProductsStore.getState().loadProducts();
+            // Remove the sale from the list
+            set((state) => ({
+              sales: state.sales.filter((s) => s.id !== id),
+              isLoading: false,
+            }));
+          } catch (error) {
+            set({
+              error: error instanceof Error ? error.message : 'Failed to return sale',
+              isLoading: false,
+            });
+          }
+        },
+
         setSales: (sales: Sale[]) => {
           set({ sales });
         },
@@ -173,6 +194,7 @@ export const useSalesActions = () => ({
   updateSale: useSalesStore.getState().updateSale,
   deleteSale: useSalesStore.getState().deleteSale,
   reverseSale: useSalesStore.getState().reverseSale,
+  returnSale: useSalesStore.getState().returnSale,
   setSales: useSalesStore.getState().setSales,
   setFilters: useSalesStore.getState().setFilters,
   loadSales: useSalesStore.getState().loadSales,

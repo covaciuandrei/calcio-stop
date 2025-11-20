@@ -103,6 +103,17 @@ CREATE TABLE IF NOT EXISTS orders (
     archived_at TIMESTAMP WITH TIME ZONE NULL
 );
 
+-- Returns table
+CREATE TABLE IF NOT EXISTS returns (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    items JSONB NOT NULL DEFAULT '[]'::jsonb,
+    customer_name VARCHAR(255) NOT NULL,
+    date TIMESTAMP WITH TIME ZONE NOT NULL, -- Changed to TIMESTAMP to preserve original sale time
+    sale_type VARCHAR(20) NOT NULL CHECK (sale_type IN ('OLX', 'IN-PERSON')),
+    original_sale_id UUID NULL, -- Reference to original sale if available
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Reservations table
 CREATE TABLE IF NOT EXISTS reservations (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -158,8 +169,8 @@ ON CONFLICT (name) DO NOTHING;
 
 -- Insert default settings
 INSERT INTO settings (key, value) VALUES 
-    ('app_bar_order', '["dashboard", "products", "sales", "namesets", "teams", "badges", "kittypes", "stats"]'::jsonb),
-    ('dashboard_order', '["products", "sales", "namesets", "teams", "badges", "kitTypes", "reservations"]'::jsonb),
+    ('app_bar_order', '["dashboard", "products", "sales", "returns", "namesets", "teams", "badges", "kittypes", "stats"]'::jsonb),
+    ('dashboard_order', '["products", "sales", "returns", "namesets", "teams", "badges", "kitTypes", "reservations"]'::jsonb),
     ('registration_enabled', 'true'::jsonb),
     ('maintenance_mode', 'false'::jsonb)
 ON CONFLICT (key) DO NOTHING;
@@ -173,6 +184,8 @@ CREATE INDEX IF NOT EXISTS idx_products_archived_at ON products(archived_at);
 CREATE INDEX IF NOT EXISTS idx_orders_archived_at ON orders(archived_at);
 CREATE INDEX IF NOT EXISTS idx_sales_date ON sales(date);
 CREATE INDEX IF NOT EXISTS idx_sales_product_id ON sales(product_id);
+CREATE INDEX IF NOT EXISTS idx_returns_date ON returns(date);
+CREATE INDEX IF NOT EXISTS idx_returns_original_sale_id ON returns(original_sale_id);
 CREATE INDEX IF NOT EXISTS idx_products_team_id ON products(team_id);
 CREATE INDEX IF NOT EXISTS idx_products_nameset_id ON products(nameset_id);
 CREATE INDEX IF NOT EXISTS idx_products_kit_type_id ON products(kit_type_id);
@@ -203,6 +216,7 @@ ALTER TABLE product_images ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reservations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sales ENABLE ROW LEVEL SECURITY;
+ALTER TABLE returns ENABLE ROW LEVEL SECURITY;
 ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE views ENABLE ROW LEVEL SECURITY;
@@ -221,6 +235,7 @@ FOR SELECT USING (auth.role() = 'authenticated');
 CREATE POLICY "Allow authenticated users full access to reservations" ON reservations 
 FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "Allow all operations for authenticated users" ON sales FOR ALL USING (true);
+CREATE POLICY "Allow all operations for authenticated users" ON returns FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON settings FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON users FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON leagues FOR ALL USING (true);

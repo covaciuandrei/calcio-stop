@@ -8,6 +8,7 @@ import {
   useNamesetsList,
   useProductsList,
   useReservationsList,
+  useReturnsList,
   useSalesList,
   useTeamsList,
 } from '../stores';
@@ -17,6 +18,7 @@ import LeaguesPage from './leagues/LeaguesPage';
 import NamesetsPage from './namesets/NamesetsPage';
 import ProductsPage from './products/ProductsPage';
 import ReservationsPage from './reservations/ReservationsPage';
+import ReturnsPage from './returns/ReturnsPage';
 import SalesPage from './sales/SalesPage';
 import CollapsibleHeader from './shared/CollapsibleHeader';
 import styles from './shared/TableListCard.module.css';
@@ -26,6 +28,7 @@ const Dashboard: React.FC = () => {
   // Get data from stores
   const products = useProductsList();
   const sales = useSalesList();
+  const returns = useReturnsList();
   const namesets = useNamesetsList();
   const teams = useTeamsList();
   const badges = useBadgesList();
@@ -40,6 +43,7 @@ const Dashboard: React.FC = () => {
   const [collapsedCards, setCollapsedCards] = useState({
     products: false,
     sales: false,
+    returns: false,
     namesets: false,
     teams: false,
     badges: false,
@@ -76,6 +80,12 @@ const Dashboard: React.FC = () => {
       description: 'Track and record your sales transactions',
       count: sales.length,
       component: <SalesPage />,
+    },
+    returns: {
+      title: 'Manage Returns',
+      description: 'View and manage returned sales',
+      count: returns.length,
+      component: <ReturnsPage />,
     },
     namesets: {
       title: 'Manage Namesets',

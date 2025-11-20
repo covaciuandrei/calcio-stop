@@ -1287,6 +1287,252 @@ export async function reverseSale(id) {
 }
 
 // ============================================================================
+// RETURNS CRUD OPERATIONS
+// ============================================================================
+
+export async function createReturn(data) {
+  // Validate input
+  if (!data.items || !Array.isArray(data.items) || data.items.length === 0) {
+    throw new Error('Return must have at least one item');
+  }
+
+  // Map frontend items to database JSONB format
+  const itemsData = data.items.map((item) => ({
+    productId: item.productId,
+    size: item.size,
+    quantity: item.quantity,
+    priceSold: item.priceSold,
+  }));
+
+  // Map frontend data to database schema
+  const dbData = {
+    items: itemsData,
+    customer_name: data.customerName,
+    date: data.date,
+    sale_type: data.saleType,
+    original_sale_id: data.originalSaleId || null,
+    created_at: data.createdAt || new Date().toISOString(),
+  };
+
+  const { data: result, error } = await supabase.from('returns').insert([dbData]).select().single();
+
+  if (error) throw error;
+
+  // Map database response back to frontend format
+  return {
+    id: result.id,
+    items: result.items.map((item) => ({
+      productId: item.productId || item.product_id,
+      size: item.size,
+      quantity: item.quantity,
+      priceSold: item.priceSold || item.price_sold,
+    })),
+    customerName: result.customer_name,
+    date: result.date,
+    saleType: result.sale_type,
+    originalSaleId: result.original_sale_id,
+    createdAt: result.created_at,
+  };
+}
+
+export async function getReturns(filters = {}) {
+  // Default to current month if no date range is provided
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+  // Extract filters
+  const startDate = filters.startDate || startOfMonth.toISOString().split('T')[0];
+  const endDate = filters.endDate || endOfMonth.toISOString().split('T')[0];
+  const saleType = filters.saleType; // 'OLX', 'IN-PERSON', or undefined (all)
+
+  // Build query - filter by created_at (Returned At) instead of date (Sale Date)
+  let query = supabase
+    .from('returns')
+    .select('*')
+    .gte('created_at', startDate + 'T00:00:00.000Z')
+    .lte('created_at', endDate + 'T23:59:59.999Z')
+    .order('created_at', { ascending: false });
+
+  // Add sale type filter if provided
+  if (saleType) {
+    query = query.eq('sale_type', saleType);
+  }
+
+  const { data, error } = await query;
+
+  if (error) throw error;
+
+  // Map database fields to frontend format
+  return (data || []).map((returnRecord) => ({
+    id: returnRecord.id,
+    items: returnRecord.items.map((item) => ({
+      productId: item.productId || item.product_id,
+      size: item.size,
+      quantity: item.quantity,
+      priceSold: item.priceSold || item.price_sold,
+    })),
+    customerName: returnRecord.customer_name,
+    date: returnRecord.date,
+    saleType: returnRecord.sale_type,
+    originalSaleId: returnRecord.original_sale_id,
+    createdAt: returnRecord.created_at,
+  }));
+}
+
+export async function deleteReturn(id) {
+  const { error } = await supabase.from('returns').delete().eq('id', id);
+  if (error) throw error;
+}
+
+export async function returnSale(saleId) {
+  // First, get the sale to access its items
+  const { data: sale, error: saleError } = await supabase.from('sales').select('*').eq('id', saleId).single();
+
+  if (saleError) throw saleError;
+  if (!sale) throw new Error('Sale not found');
+
+  // Parse items from the sale (support both new and old formats)
+  let items = [];
+  if (sale.items && Array.isArray(sale.items) && sale.items.length > 0) {
+    items = sale.items;
+  } else {
+    // Fallback for old format
+    items = [
+      {
+        productId: sale.product_id,
+        size: sale.size,
+        quantity: sale.quantity,
+        priceSold: sale.price_sold,
+      },
+    ];
+  }
+
+  // Group items by productId to handle multiple sizes of the same product
+  const itemsByProduct = {};
+  for (const item of items) {
+    const productId = item.productId || item.product_id;
+    const size = item.size;
+    const quantity = item.quantity;
+
+    if (!productId || !size || !quantity) {
+      console.warn('Invalid item data:', item);
+      continue;
+    }
+
+    if (!itemsByProduct[productId]) {
+      itemsByProduct[productId] = [];
+    }
+    itemsByProduct[productId].push({ size, quantity });
+  }
+
+  // Restore product quantities - one update per product to avoid race conditions
+  for (const productId in itemsByProduct) {
+    const productItems = itemsByProduct[productId];
+
+    // Get the product once
+    const { data: product, error: productError } = await supabase
+      .from('products')
+      .select('sizes')
+      .eq('id', productId)
+      .single();
+
+    if (productError) {
+      console.error(`Error fetching product ${productId}:`, productError);
+      // Continue with other products even if one fails
+      continue;
+    }
+
+    if (!product) {
+      console.warn(`Product ${productId} not found`);
+      continue;
+    }
+
+    // Restore quantities for all sizes of this product in one update
+    const updatedSizes = (product.sizes || []).map((sizeObj) => {
+      // Find all items for this size
+      const itemsForThisSize = productItems.filter((item) => item.size === sizeObj.size);
+      if (itemsForThisSize.length > 0) {
+        // Sum up all quantities to restore for this size
+        const totalQuantityToRestore = itemsForThisSize.reduce((sum, item) => sum + item.quantity, 0);
+        return {
+          ...sizeObj,
+          quantity: (sizeObj.quantity || 0) + totalQuantityToRestore,
+        };
+      }
+      return sizeObj;
+    });
+
+    // Update the product with all restored quantities at once
+    const { error: updateError } = await supabase.from('products').update({ sizes: updatedSizes }).eq('id', productId);
+
+    if (updateError) {
+      console.error(`Error updating product ${productId}:`, updateError);
+      // Continue with other products even if one fails
+      continue;
+    }
+  }
+
+  // Create return record from sale data
+  // Use sale.created_at to preserve the original sale timestamp (date + time)
+  // If created_at is not available, fall back to sale.date
+  const originalSaleDate = sale.created_at || sale.date;
+
+  const returnData = {
+    items: items.map((item) => ({
+      productId: item.productId || item.product_id,
+      size: item.size,
+      quantity: item.quantity,
+      priceSold: item.priceSold || item.price_sold,
+    })),
+    customerName: sale.customer_name,
+    date: originalSaleDate, // Use created_at to preserve full timestamp
+    saleType: sale.sale_type,
+    originalSaleId: saleId,
+    createdAt: new Date().toISOString(),
+  };
+
+  // Create the return record
+  const { data: returnRecord, error: returnError } = await supabase
+    .from('returns')
+    .insert([
+      {
+        items: returnData.items,
+        customer_name: returnData.customerName,
+        date: returnData.date,
+        sale_type: returnData.saleType,
+        original_sale_id: returnData.originalSaleId,
+        created_at: returnData.createdAt,
+      },
+    ])
+    .select()
+    .single();
+
+  if (returnError) throw returnError;
+
+  // Delete the sale after creating return and restoring quantities
+  const { error: deleteError } = await supabase.from('sales').delete().eq('id', saleId);
+
+  if (deleteError) throw deleteError;
+
+  // Map database response back to frontend format
+  return {
+    id: returnRecord.id,
+    items: returnRecord.items.map((item) => ({
+      productId: item.productId || item.product_id,
+      size: item.size,
+      quantity: item.quantity,
+      priceSold: item.priceSold || item.price_sold,
+    })),
+    customerName: returnRecord.customer_name,
+    date: returnRecord.date,
+    saleType: returnRecord.sale_type,
+    originalSaleId: returnRecord.original_sale_id,
+    createdAt: returnRecord.created_at,
+  };
+}
+
+// ============================================================================
 // RESERVATIONS CRUD OPERATIONS
 // ============================================================================
 

@@ -6,5 +6,6 @@ export * from './namesets';
 export * from './orders';
 export * from './products';
 export * from './reservations';
+export * from './returns';
 export * from './sales';
 export * from './teams';

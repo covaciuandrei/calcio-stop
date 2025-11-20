@@ -11,19 +11,16 @@ import {
   useProductsList,
   useTeamsList,
 } from '../../stores';
-import { Sale } from '../../types';
+import { Return } from '../../types';
 import { getProductDisplayText, getProductInfo } from '../../utils/utils';
 
 interface Props {
-  sales: Sale[];
-  onEdit: (sale: Sale) => void;
+  returns: Return[];
   onDelete: (id: string) => void;
-  onReverse: (id: string) => void;
-  onReturn: (id: string) => void;
   searchTerm?: string;
 }
 
-const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, onReverse, onReturn, searchTerm = '' }) => {
+const ReturnsTableList: React.FC<Props> = ({ returns, onDelete, searchTerm = '' }) => {
   // Get data from stores
   const products = useProductsList();
   const archivedProducts = useArchivedProducts();
@@ -54,14 +51,14 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, onReverse, o
     );
   };
 
-  // Calculate total for a sale
-  const getSaleTotal = (sale: Sale): number => {
-    return sale.items.reduce((total, item) => total + item.priceSold * item.quantity, 0);
+  // Calculate total for a return
+  const getReturnTotal = (returnRecord: Return): number => {
+    return returnRecord.items.reduce((total, item) => total + item.priceSold * item.quantity, 0);
   };
 
-  // Filter sales based on search term
-  const filteredSales = sales.filter((sale) => {
-    const matchesItems = sale.items.some((item) => {
+  // Filter returns based on search term
+  const filteredReturns = returns.filter((returnRecord) => {
+    const matchesItems = returnRecord.items.some((item) => {
       const productDetails = getProductDetails(item.productId);
       return (
         productDetails.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -72,17 +69,17 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, onReverse, o
     });
     return (
       matchesItems ||
-      sale.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      sale.saleType.toLowerCase().includes(searchTerm.toLowerCase())
+      returnRecord.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      returnRecord.saleType.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
 
-  if (sales.length === 0) {
-    return <p>No sales recorded.</p>;
+  if (returns.length === 0) {
+    return <p>No returns recorded.</p>;
   }
 
-  if (filteredSales.length === 0 && searchTerm) {
-    return <p>No sales found matching "{searchTerm}".</p>;
+  if (filteredReturns.length === 0 && searchTerm) {
+    return <p>No returns found matching "{searchTerm}".</p>;
   }
 
   return (
@@ -95,16 +92,17 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, onReverse, o
             <th>Total (RON)</th>
             <th>Customer</th>
             <th>Sale Type</th>
-            <th>Date</th>
+            <th>Sale Date</th>
+            <th>Returned At</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {filteredSales.map((s) => (
-            <tr key={s.id}>
+          {filteredReturns.map((r) => (
+            <tr key={r.id}>
               <td>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  {s.items.map((item, idx) => (
+                  {r.items.map((item, idx) => (
                     <div key={idx} style={{ fontSize: '0.875rem' }}>
                       {getProductDetails(item.productId)} - Size: {item.size} - Qty: {item.quantity} -{' '}
                       {item.priceSold.toFixed(2)} RON
@@ -112,21 +110,13 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, onReverse, o
                   ))}
                 </div>
               </td>
-              <td className="price-display">{getSaleTotal(s).toFixed(2)} RON</td>
-              <td>{s.customerName || 'N/A'}</td>
-              <td>{s.saleType}</td>
-              <td>{new Date(s.date).toLocaleString()}</td>
+              <td className="price-display">{getReturnTotal(r).toFixed(2)} RON</td>
+              <td>{r.customerName || 'N/A'}</td>
+              <td>{r.saleType}</td>
+              <td>{new Date(r.date).toLocaleString()}</td>
+              <td>{new Date(r.createdAt).toLocaleString()}</td>
               <td>
-                <button onClick={() => onEdit(s)} className="btn btn-icon btn-success" title="Edit">
-                  ✏️
-                </button>
-                <button onClick={() => onReturn(s.id)} className="btn btn-icon btn-info" title="Return Sale">
-                  ↩️
-                </button>
-                <button onClick={() => onReverse(s.id)} className="btn btn-icon btn-warning" title="Reverse Sale">
-                  ↶
-                </button>
-                <button onClick={() => onDelete(s.id)} className="btn btn-icon btn-danger" title="Delete">
+                <button onClick={() => onDelete(r.id)} className="btn btn-icon btn-danger" title="Delete">
                   🗑️
                 </button>
               </td>
@@ -137,23 +127,23 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, onReverse, o
 
       {/* Mobile Card Layout */}
       <div className="mobile-table-cards">
-        {filteredSales.map((s) => (
-          <div key={s.id} className="mobile-table-card">
+        {filteredReturns.map((r) => (
+          <div key={r.id} className="mobile-table-card">
             <div className="mobile-card-header">
               <div className="mobile-card-title">
                 <h4>
-                  {s.items.length} Item{s.items.length !== 1 ? 's' : ''}
+                  {r.items.length} Item{r.items.length !== 1 ? 's' : ''}
                 </h4>
-                <p className="mobile-card-subtitle">{s.saleType}</p>
+                <p className="mobile-card-subtitle">{r.saleType}</p>
               </div>
-              <div className="mobile-card-price">{getSaleTotal(s).toFixed(2)} RON</div>
+              <div className="mobile-card-price">{getReturnTotal(r).toFixed(2)} RON</div>
             </div>
 
             <div className="mobile-card-details">
               <div className="mobile-detail-item" style={{ gridColumn: '1 / -1' }}>
                 <span className="mobile-detail-label">Items</span>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
-                  {s.items.map((item, idx) => (
+                  {r.items.map((item, idx) => (
                     <div key={idx} style={{ fontSize: '0.875rem' }}>
                       {getProductDetails(item.productId)} - {item.size} x{item.quantity} - {item.priceSold.toFixed(2)}{' '}
                       RON
@@ -163,26 +153,21 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, onReverse, o
               </div>
               <div className="mobile-detail-item">
                 <span className="mobile-detail-label">Customer</span>
-                <span className="mobile-detail-value">{s.customerName || 'N/A'}</span>
+                <span className="mobile-detail-value">{r.customerName || 'N/A'}</span>
               </div>
               <div className="mobile-detail-item">
-                <span className="mobile-detail-label">Date</span>
-                <span className="mobile-detail-value">{new Date(s.date).toLocaleDateString()}</span>
+                <span className="mobile-detail-label">Sale Date</span>
+                <span className="mobile-detail-value">{new Date(r.date).toLocaleString()}</span>
+              </div>
+              <div className="mobile-detail-item">
+                <span className="mobile-detail-label">Returned At</span>
+                <span className="mobile-detail-value">{new Date(r.createdAt).toLocaleString()}</span>
               </div>
             </div>
 
             <div className="mobile-card-status">
               <div className="mobile-card-actions">
-                <button onClick={() => onEdit(s)} className="btn btn-success" title="Edit">
-                  Edit
-                </button>
-                <button onClick={() => onReturn(s.id)} className="btn btn-info" title="Return Sale">
-                  Return
-                </button>
-                <button onClick={() => onReverse(s.id)} className="btn btn-warning" title="Reverse Sale">
-                  Reverse
-                </button>
-                <button onClick={() => onDelete(s.id)} className="btn btn-danger" title="Delete">
+                <button onClick={() => onDelete(r.id)} className="btn btn-danger" title="Delete">
                   Delete
                 </button>
               </div>
@@ -194,4 +179,4 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, onReverse, o
   );
 };
 
-export default SalesTableList;
+export default ReturnsTableList;
