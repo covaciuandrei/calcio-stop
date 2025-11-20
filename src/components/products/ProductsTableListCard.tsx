@@ -11,9 +11,12 @@ import {
   useProductsList,
   useTeamsList,
 } from '../../stores';
+import { useAuth } from '../../stores/authStore';
 import { Product } from '../../types';
+import { exportProductsToText } from '../../utils/productExport';
 import { applyProductFilters } from '../../utils/productFilters';
 import { SortOption, sortProducts } from '../../utils/productSort';
+import { getBadgeInfo, getNamesetInfo, getTeamInfo } from '../../utils/utils';
 import styles from '../shared/TableListCard.module.css';
 import EditProductModal from './EditProductModal';
 import ProductFilters, { ProductFiltersState } from './ProductFilters';
@@ -44,6 +47,8 @@ const ProductsTableListCard: React.FC<ProductsTableListCardProps> = ({
   const archivedKitTypes = useArchivedKitTypes();
   const badges = useBadgesList();
   const archivedBadges = useArchivedBadges();
+  const { user, isAuthenticated } = useAuth();
+  const isAdmin = user?.role === 'admin' && isAuthenticated;
 
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isProductsExpanded, setIsProductsExpanded] = useState(true);
@@ -149,6 +154,39 @@ const ProductsTableListCard: React.FC<ProductsTableListCardProps> = ({
     });
   };
 
+  const handleExport = () => {
+    // Apply search term filter to match what's visible in the table
+    let productsToExport = displayProducts;
+    if (productsSearchTerm.trim()) {
+      productsToExport = displayProducts.filter((product) => {
+        const teamInfo = getTeamInfo(product.teamId, teams, archivedTeams);
+        const namesetInfo = getNamesetInfo(product.namesetId, namesets, archivedNamesets);
+        const badgeInfo = getBadgeInfo(product.badgeId, badges, archivedBadges);
+        return (
+          product.name.toLowerCase().includes(productsSearchTerm.toLowerCase()) ||
+          product.type.toLowerCase().includes(productsSearchTerm.toLowerCase()) ||
+          teamInfo.toLowerCase().includes(productsSearchTerm.toLowerCase()) ||
+          namesetInfo.playerName.toLowerCase().includes(productsSearchTerm.toLowerCase()) ||
+          namesetInfo.season.toLowerCase().includes(productsSearchTerm.toLowerCase()) ||
+          badgeInfo.toLowerCase().includes(productsSearchTerm.toLowerCase()) ||
+          product.price.toString().includes(productsSearchTerm)
+        );
+      });
+    }
+
+    exportProductsToText(
+      productsToExport,
+      teams,
+      archivedTeams,
+      namesets,
+      archivedNamesets,
+      kitTypes,
+      archivedKitTypes,
+      badges,
+      archivedBadges
+    );
+  };
+
   return (
     <>
       <div className="card">
@@ -179,6 +217,25 @@ const ProductsTableListCard: React.FC<ProductsTableListCardProps> = ({
             <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap', alignItems: 'flex-start' }}>
               <ProductFilters products={products} onFiltersChange={handleFiltersChange} onReset={handleResetFilters} />
               <ProductSort onSortChange={setSortOption} />
+              {isAdmin && !isReadOnly && displayProducts.length > 0 && (
+                <button
+                  onClick={handleExport}
+                  style={{
+                    padding: 'var(--space-2) var(--space-4)',
+                    backgroundColor: 'var(--color-primary)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 'var(--radius-sm)',
+                    cursor: 'pointer',
+                    fontSize: 'var(--font-size-sm)',
+                    fontWeight: '500',
+                    whiteSpace: 'nowrap',
+                  }}
+                  title="Export filtered products to text file"
+                >
+                  📄 Export ({displayProducts.length})
+                </button>
+              )}
             </div>
             {displayProducts.length >= 2 && (
               <div className={styles.searchContainer}>
