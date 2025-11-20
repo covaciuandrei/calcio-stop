@@ -147,8 +147,8 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
   if (!editingProduct) return null;
 
   return createPortal(
-    <div className="modal">
-      <div className={`modal-content ${styles.modalContentScrollable}`}>
+    <div className="modal" onClick={() => setEditingProduct(null)}>
+      <div className={`modal-content ${styles.modalContentScrollable}`} onClick={(e) => e.stopPropagation()}>
         <h3>Edit Product</h3>
         <form onSubmit={handleSaveEdit}>
           <label>

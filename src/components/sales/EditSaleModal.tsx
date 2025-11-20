@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import {
-  useProductsList,
-  useSalesActions,
-} from '../../stores';
+import { useProductsList, useSalesActions } from '../../stores';
 import { Sale, SaleItem, SaleType } from '../../types';
 import ProductPicker from '../products/ProductPicker';
 
@@ -160,10 +157,14 @@ const EditSaleModal: React.FC<Props> = ({ editingSale, setEditingSale }) => {
   if (!editingSale) return null;
 
   return createPortal(
-    <div className="modal">
-      <div className="modal-content" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
+    <div className="modal" onClick={() => setEditingSale(null)}>
+      <div
+        className="modal-content"
+        style={{ maxHeight: '90vh', overflowY: 'auto' }}
+        onClick={(e) => e.stopPropagation()}
+      >
         <h3>Edit Sale</h3>
-        <form onSubmit={handleSaveEdit}>
+        <form onSubmit={handleSaveEdit} style={{ width: '100%', boxSizing: 'border-box', overflowX: 'hidden' }}>
           <h4 style={{ marginBottom: 'var(--space-2)' }}>Sale Items</h4>
           {saleItems.map((item, index) => {
             const product = products.find((p) => p.id === item.productId);
@@ -176,6 +177,7 @@ const EditSaleModal: React.FC<Props> = ({ editingSale, setEditingSale }) => {
                   padding: 'var(--space-3)',
                   border: '1px solid var(--gray-300)',
                   borderRadius: 'var(--radius-md)',
+                  boxSizing: 'border-box',
                 }}
               >
                 <div
@@ -228,8 +230,20 @@ const EditSaleModal: React.FC<Props> = ({ editingSale, setEditingSale }) => {
                   {errors[`item${index}_size`] && <div className="error-message">{errors[`item${index}_size`]}</div>}
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-2)' }}>
-                  <div className={`form-group ${errors[`item${index}_quantity`] ? 'has-error' : ''}`}>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: 'var(--space-2)',
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    minWidth: 0,
+                  }}
+                >
+                  <div
+                    className={`form-group ${errors[`item${index}_quantity`] ? 'has-error' : ''}`}
+                    style={{ width: '100%', boxSizing: 'border-box', minWidth: 0 }}
+                  >
                     <label>Quantity</label>
                     <input
                       type="number"
@@ -242,7 +256,10 @@ const EditSaleModal: React.FC<Props> = ({ editingSale, setEditingSale }) => {
                     )}
                   </div>
 
-                  <div className={`form-group ${errors[`item${index}_priceSold`] ? 'has-error' : ''}`}>
+                  <div
+                    className={`form-group ${errors[`item${index}_priceSold`] ? 'has-error' : ''}`}
+                    style={{ width: '100%', boxSizing: 'border-box', minWidth: 0 }}
+                  >
                     <label>Price Sold (RON)</label>
                     <input
                       type="number"
@@ -267,25 +284,19 @@ const EditSaleModal: React.FC<Props> = ({ editingSale, setEditingSale }) => {
           </div>
 
           <div className="form-group">
-            <label>
-              Customer Name:
-              <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
-            </label>
+            <label>Customer Name</label>
+            <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
           </div>
           <div className="form-group">
-            <label>
-              Date:
-              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-            </label>
+            <label>Date</label>
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           </div>
           <div className="form-group">
-            <label>
-              Sale Type:
-              <select value={saleType} onChange={(e) => setSaleType(e.target.value as SaleType)}>
-                <option value="IN-PERSON">In-Person</option>
-                <option value="OLX">OLX</option>
-              </select>
-            </label>
+            <label>Sale Type</label>
+            <select value={saleType} onChange={(e) => setSaleType(e.target.value as SaleType)}>
+              <option value="IN-PERSON">In-Person</option>
+              <option value="OLX">OLX</option>
+            </select>
           </div>
 
           <div className="modal-buttons">

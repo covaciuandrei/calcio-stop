@@ -67,8 +67,12 @@ const EditBadgeModal: React.FC<Props> = ({ editingBadge, setEditingBadge }) => {
   if (!editingBadge) return null;
 
   return createPortal(
-    <div className="modal">
-      <div className="modal-content" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
+    <div className="modal" onClick={() => setEditingBadge(null)}>
+      <div
+        className="modal-content"
+        style={{ maxHeight: '90vh', overflowY: 'auto' }}
+        onClick={(e) => e.stopPropagation()}
+      >
         <h3>Edit Badge</h3>
         <form onSubmit={handleSaveEdit}>
           <div className={`form-group ${errors.name ? 'has-error' : ''}`}>

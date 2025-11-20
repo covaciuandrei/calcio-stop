@@ -51,8 +51,12 @@ const EditTeamModal: React.FC<Props> = ({ editingTeam, setEditingTeam }) => {
   if (!editingTeam) return null;
 
   return createPortal(
-    <div className="modal">
-      <div className="modal-content" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
+    <div className="modal" onClick={() => setEditingTeam(null)}>
+      <div
+        className="modal-content"
+        style={{ maxHeight: '90vh', overflowY: 'auto' }}
+        onClick={(e) => e.stopPropagation()}
+      >
         <h3>Edit Team</h3>
         <form onSubmit={handleSaveEdit}>
           <div className={`form-group ${errors.name ? 'has-error' : ''}`}>

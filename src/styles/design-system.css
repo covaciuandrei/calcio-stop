@@ -792,7 +792,8 @@ td button:hover {
   font-size: var(--font-size-sm);
 }
 
-.modal-content input {
+.modal-content input,
+.modal-content select {
   margin: 0;
   width: 100%;
   box-sizing: border-box;
