@@ -20,6 +20,7 @@ import { getBadgeInfo, getNamesetInfo, getTeamInfo } from '../../utils/utils';
 import styles from '../shared/TableListCard.module.css';
 import EditProductModal from './EditProductModal';
 import ProductFilters, { ProductFiltersState } from './ProductFilters';
+import './ProductFilters.css';
 import ProductSort from './ProductSort';
 import ProductsTableList from './ProductsTableList';
 
@@ -214,27 +215,22 @@ const ProductsTableListCard: React.FC<ProductsTableListCardProps> = ({
         {(isReadOnly || isProductsExpanded) && (
           <>
             <h3 className="card-section-header">Product List</h3>
-            <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap', alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap', alignItems: 'center' }}>
               <ProductFilters products={products} onFiltersChange={handleFiltersChange} onReset={handleResetFilters} />
               <ProductSort onSortChange={setSortOption} />
               {isAdmin && !isReadOnly && displayProducts.length > 0 && (
-                <button
-                  onClick={handleExport}
-                  style={{
-                    padding: 'var(--space-2) var(--space-4)',
-                    backgroundColor: 'var(--color-primary)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: 'var(--radius-sm)',
-                    cursor: 'pointer',
-                    fontSize: 'var(--font-size-sm)',
-                    fontWeight: '500',
-                    whiteSpace: 'nowrap',
-                  }}
-                  title="Export filtered products to text file"
-                >
-                  📄 Export ({displayProducts.length})
-                </button>
+                <div className="product-filters" style={{ marginTop: 0 }}>
+                  <div className="filter-controls">
+                    <button
+                      onClick={handleExport}
+                      className="filter-toggle-btn"
+                      style={{ background: 'var(--primary-500)', color: 'white', borderColor: 'var(--primary-500)' }}
+                      title="Export filtered products to text file"
+                    >
+                      Export ({displayProducts.length})
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
             {displayProducts.length >= 2 && (
