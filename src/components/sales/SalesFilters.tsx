@@ -28,6 +28,7 @@ const SalesFilters: React.FC<SalesFiltersProps> = ({ startDate, endDate, saleTyp
     ) {
       setLocalFilters({ startDate, endDate, saleType });
     }
+    // Intentional: localFilters is not included to prevent infinite loop - we only update when props change
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startDate, endDate, saleType]);
 

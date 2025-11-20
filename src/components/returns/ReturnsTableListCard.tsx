@@ -26,6 +26,7 @@ const ReturnsTableListCard: React.FC = () => {
     if (hasValidDates) {
       loadReturns(currentFilters);
     }
+    // Intentional: loadReturns is stable and accessed via ref to prevent unnecessary re-renders
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.startDate, filters.endDate, filters.saleType]);
 

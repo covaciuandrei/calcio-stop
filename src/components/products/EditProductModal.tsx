@@ -60,18 +60,16 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
   // Update sizes when type changes - but only after initial load
   React.useEffect(() => {
     if (hasLoaded) {
-      console.log('Type changed, updating sizes. Type:', type);
       const availableSizes = type === ProductType.KID_KIT ? kidSizes : adultSizes;
-      console.log('New available sizes:', availableSizes);
 
       // Preserve existing quantities when changing type
       const newSizes = availableSizes.map((s) => {
         const existingSize = sizes.find((existing) => existing.size === s);
         return { size: s, quantity: existingSize ? existingSize.quantity : 0 };
       });
-      console.log('Setting new sizes:', newSizes);
       setSizes(newSizes);
     }
+    // Intentional: sizes is not included to avoid infinite loop - we only want to update when type or hasLoaded changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type, hasLoaded]);
 

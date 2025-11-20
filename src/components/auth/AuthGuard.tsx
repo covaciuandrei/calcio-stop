@@ -53,7 +53,6 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
             loadArchivedProducts(),
             loadSales(),
           ]);
-          console.log('All data loaded successfully');
         } catch (error) {
           console.error('Error loading data:', error);
         }

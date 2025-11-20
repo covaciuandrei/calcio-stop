@@ -52,23 +52,17 @@ export const useAuthStore = create<AuthState>()(
           set({ isLoading: true, error: null });
 
           try {
-            console.log('Attempting Supabase login for:', email);
-
             // Real Supabase authentication
             const { data, error } = await supabase.auth.signInWithPassword({
               email,
               password,
             });
 
-            console.log('Supabase login response:', { data, error });
-
             if (error) {
               throw new Error(error.message);
             }
 
             if (data.user) {
-              console.log('Login successful:', data.user);
-
               const user = {
                 id: data.user.id,
                 email: data.user.email || email,
@@ -95,8 +89,6 @@ export const useAuthStore = create<AuthState>()(
           set({ isLoading: true, error: null });
 
           try {
-            console.log('Attempting Supabase registration for:', email);
-
             // Real Supabase registration
             const { data, error } = await supabase.auth.signUp({
               email,
@@ -108,18 +100,13 @@ export const useAuthStore = create<AuthState>()(
               },
             });
 
-            console.log('Supabase registration response:', { data, error });
-
             if (error) {
               throw new Error(error.message);
             }
 
             if (data.user) {
-              console.log('User created successfully:', data.user);
-
               // Check if email confirmation is required
               if (data.user.email_confirmed_at === null) {
-                console.log('Email confirmation required');
                 set({
                   error: 'Please check your email and click the confirmation link to complete registration.',
                   isLoading: false,
@@ -152,21 +139,15 @@ export const useAuthStore = create<AuthState>()(
 
         logout: async () => {
           try {
-            console.log('Starting logout process...');
-
             // Sign out from Supabase
             const { error } = await supabase.auth.signOut();
 
             if (error) {
               console.error('Supabase signOut error:', error);
-            } else {
-              console.log('Successfully signed out from Supabase');
             }
           } catch (error) {
             console.error('Error signing out:', error);
           }
-
-          console.log('Clearing local state and localStorage...');
 
           // Clear localStorage FIRST to prevent persistence from restoring state
           localStorage.removeItem('auth-store');
@@ -179,8 +160,6 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
             error: null,
           });
-
-          console.log('Logout completed successfully');
         },
 
         setUser: (user: User) => {
@@ -212,8 +191,6 @@ export const useAuthStore = create<AuthState>()(
 
         initializeAuth: async () => {
           try {
-            console.log('Initializing authentication...');
-
             // First, clear any stale local state
             set({
               user: null,
@@ -227,8 +204,6 @@ export const useAuthStore = create<AuthState>()(
               data: { user },
             } = await supabase.auth.getUser();
 
-            console.log('Supabase auth check result:', user ? 'User found' : 'No user');
-
             if (user) {
               const userData = {
                 id: user.id,
@@ -237,8 +212,6 @@ export const useAuthStore = create<AuthState>()(
                 role: 'admin' as const,
               };
 
-              console.log('Setting authenticated user:', userData);
-
               set({
                 user: userData,
                 isAuthenticated: true,
@@ -246,7 +219,6 @@ export const useAuthStore = create<AuthState>()(
               });
             } else {
               // No authenticated user, ensure clean state
-              console.log('No authenticated user, clearing state');
               set({
                 user: null,
                 isAuthenticated: false,

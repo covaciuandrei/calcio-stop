@@ -122,11 +122,8 @@ const AddProductForm: React.FC = () => {
       createdAt: new Date().toISOString(),
     };
 
-    console.log('Adding product:', newProduct);
-
     try {
       await addProduct(newProduct);
-      console.log('Product added successfully');
     } catch (error) {
       console.error('Error adding product:', error);
       setErrors({ submit: 'Failed to add product. Please try again.' });

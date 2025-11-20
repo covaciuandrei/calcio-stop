@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { useProductsActions, useProductsList, useReservationsActions } from '../../stores';
+import { useProductsList, useReservationsActions } from '../../stores';
 import { ReservationItem } from '../../types';
 import ProductPicker from '../products/ProductPicker';
 
 const AddReservationForm: React.FC = () => {
   // Get data and actions from stores
   const products = useProductsList();
-  const { updateProduct } = useProductsActions();
   const { addReservation } = useReservationsActions();
 
   const [reservationItems, setReservationItems] = useState<ReservationItem[]>([

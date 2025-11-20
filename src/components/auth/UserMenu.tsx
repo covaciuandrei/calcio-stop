@@ -9,16 +9,12 @@ export const UserMenu: React.FC = () => {
   const menuRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = async () => {
-    console.log('handleLogout function called!');
     try {
-      console.log('Calling logout function...');
       await logout();
-      console.log('Logout function completed, closing menu...');
 
       // Small delay to ensure logout completes before closing
       setTimeout(() => {
         setIsOpen(false);
-        console.log('Menu closed successfully');
       }, 100);
     } catch (error) {
       console.error('Logout failed:', error);
@@ -45,7 +41,6 @@ export const UserMenu: React.FC = () => {
             onClick={(e) => {
               // Only close if clicking on the overlay itself, not on the popup
               if (e.target === e.currentTarget) {
-                console.log('Overlay clicked, closing popup');
                 setIsOpen(false);
               }
             }}
@@ -54,7 +49,6 @@ export const UserMenu: React.FC = () => {
               className={styles['profile-popup']}
               onClick={(e) => {
                 e.stopPropagation();
-                console.log('Popup content clicked, preventing close');
               }}
             >
               <div className={styles['profile-popup-header']}>
@@ -87,7 +81,6 @@ export const UserMenu: React.FC = () => {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      console.log('Logout button clicked!');
                       handleLogout();
                     }}
                     type="button"

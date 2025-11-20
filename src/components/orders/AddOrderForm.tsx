@@ -108,11 +108,8 @@ const AddOrderForm: React.FC<AddOrderFormProps> = ({ onClose }) => {
       phoneNumber: phoneNumber.trim() || undefined,
     };
 
-    console.log('Adding order:', newOrder);
-
     try {
       await addOrder(newOrder);
-      console.log('Order added successfully');
     } catch (error) {
       console.error('Error adding order:', error);
       setErrors({ submit: 'Failed to add order. Please try again.' });

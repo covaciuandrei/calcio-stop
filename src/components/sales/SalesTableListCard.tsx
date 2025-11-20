@@ -29,6 +29,7 @@ const SalesTableListCard: React.FC = () => {
     if (hasValidDates) {
       loadSales(currentFilters);
     }
+    // Intentional: loadSales is stable and accessed via ref to prevent unnecessary re-renders
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.startDate, filters.endDate, filters.saleType]);
 

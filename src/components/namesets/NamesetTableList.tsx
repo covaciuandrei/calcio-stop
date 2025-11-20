@@ -87,7 +87,6 @@ const NamesetTableList: React.FC<Props> = ({
         </thead>
         <tbody>
           {filteredNamesets.map((n) => {
-            const isLowStock = n.quantity > 0 && n.quantity <= 2;
             const isOutOfStockNameset = isOutOfStock(n);
             const namesetImages = imagesMap[n.id] || [];
             const primaryImage = namesetImages.find((img) => img.isPrimary) || namesetImages[0];
@@ -163,7 +162,6 @@ const NamesetTableList: React.FC<Props> = ({
       {/* Mobile Card Layout */}
       <div className="mobile-table-cards">
         {filteredNamesets.map((n) => {
-          const isLowStock = n.quantity > 0 && n.quantity <= 2;
           const isOutOfStockNameset = isOutOfStock(n);
           const namesetImages = imagesMap[n.id] || [];
           const primaryImage = namesetImages.find((img) => img.isPrimary) || namesetImages[0];

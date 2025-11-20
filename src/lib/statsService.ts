@@ -93,7 +93,10 @@ class StatsService {
   // Get sales statistics by month
   async getSalesStats(months: number = 12, dateRange?: DateRange): Promise<SalesStats[]> {
     try {
-      let query = supabase.from('sales').select('date, items, quantity, price_sold, product_id, size').order('date', { ascending: true });
+      let query = supabase
+        .from('sales')
+        .select('date, items, quantity, price_sold, product_id, size')
+        .order('date', { ascending: true });
 
       // Apply date range filter if provided
       if (dateRange) {
@@ -106,19 +109,6 @@ class StatsService {
         console.error('Error fetching sales data:', error);
         throw error;
       }
-
-      console.log('Raw sales data count:', data?.length);
-      console.log('Sample sale:', data?.[0]);
-      console.log(
-        'All sales dates:',
-        data?.map((s) => ({
-          date: s.date,
-          type: typeof s.date,
-          parsed: new Date(s.date),
-          year: new Date(s.date).getFullYear(),
-          month: new Date(s.date).getMonth() + 1,
-        }))
-      );
 
       // Group by month and calculate totals
       const monthlyStats = new Map<string, { sales: number; revenue: number }>();
@@ -176,32 +166,14 @@ class StatsService {
         const totalQuantity = items.reduce((sum: number, item: any) => sum + item.quantity, 0);
         const totalRevenue = items.reduce((sum: number, item: any) => sum + item.priceSold * item.quantity, 0);
 
-        console.log('Processing sale:', {
-          originalDate: sale.date,
-          parsedDate: date,
-          monthKey,
-          year: date.getFullYear(),
-          month: date.getMonth() + 1,
-          quantity: totalQuantity,
-          revenue: totalRevenue,
-        });
-
         if (!monthlyStats.has(monthKey)) {
           monthlyStats.set(monthKey, { sales: 0, revenue: 0 });
         }
 
         const stats = monthlyStats.get(monthKey)!;
-        const beforeSales = stats.sales;
-        const beforeRevenue = stats.revenue;
         stats.sales += totalQuantity;
         stats.revenue += totalRevenue;
-
-        console.log(
-          `Adding to ${monthKey}: sales ${beforeSales} + ${totalQuantity} = ${stats.sales}, revenue ${beforeRevenue} + ${totalRevenue} = ${stats.revenue}`
-        );
       });
-
-      console.log('Monthly stats before conversion:', Array.from(monthlyStats.entries()));
 
       // Convert to array and format
       const result: SalesStats[] = Array.from(monthlyStats.entries())
@@ -212,8 +184,6 @@ class StatsService {
         }))
         .sort((a, b) => a.month.localeCompare(b.month))
         .slice(-months); // Get last N months
-
-      console.log('Final sales result:', result);
 
       return result;
     } catch (error) {
@@ -348,8 +318,6 @@ class StatsService {
         throw productsError;
       }
 
-      console.log('All products in DB:', allProducts);
-
       // Initialize all products with 0 views
       const productViews = new Map<string, { name: string; teamName: string; views: number }>();
       allProducts?.forEach((product) => {
@@ -383,9 +351,6 @@ class StatsService {
         throw viewsError;
       }
 
-      console.log('Raw views data count:', viewsData?.length);
-      console.log('Sample view:', viewsData?.[0]);
-
       // Count views for each product
       viewsData?.forEach((view) => {
         const product = view.products;
@@ -408,9 +373,6 @@ class StatsService {
           productViews.get(productId)!.views += 1;
         }
       });
-
-      console.log('Grouped product views:', Array.from(productViews.entries()));
-      console.log('Total unique products:', productViews.size);
 
       // Get product images for all products that have views
       const productsWithViews = Array.from(productViews.entries())
@@ -446,18 +408,9 @@ class StatsService {
         .sort((a, b) => b.views - a.views)
         .slice(0, limit);
 
-      console.log('Final top products result:', result);
-      console.log('Returning top', result.length, 'products');
-
       return result;
     } catch (error) {
       console.error('Error fetching top viewed products:', error);
-      if (error instanceof Error) {
-        console.error('Error details:', {
-          message: error.message,
-          stack: error.stack,
-        });
-      }
       return [];
     }
   }
@@ -482,8 +435,6 @@ class StatsService {
         console.error('Error fetching products:', productsError);
         throw productsError;
       }
-
-      console.log('All products in DB:', allProducts);
 
       // Initialize all products with 0 sales
       const productSales = new Map<string, { name: string; teamName: string; quantitySold: number }>();
@@ -516,9 +467,6 @@ class StatsService {
         throw salesError;
       }
 
-      console.log('Raw sales data count:', salesData?.length);
-      console.log('Sample sale:', salesData?.[0]);
-
       // Count sales for each product
       salesData?.forEach((sale) => {
         // Support both new (items) and old (product_id, quantity) formats
@@ -541,9 +489,6 @@ class StatsService {
           }
         });
       });
-
-      console.log('Grouped product sales:', Array.from(productSales.entries()));
-      console.log('Total unique products:', productSales.size);
 
       // Get product images for all products that have sales
       const productsWithSales = Array.from(productSales.entries())
@@ -579,18 +524,9 @@ class StatsService {
         .sort((a, b) => b.quantitySold - a.quantitySold)
         .slice(0, limit);
 
-      console.log('Final top sold products result:', result);
-      console.log('Returning top', result.length, 'sold products');
-
       return result;
     } catch (error) {
       console.error('Error fetching top sold products:', error);
-      if (error instanceof Error) {
-        console.error('Error details:', {
-          message: error.message,
-          stack: error.stack,
-        });
-      }
       return [];
     }
   }

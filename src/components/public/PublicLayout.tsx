@@ -48,7 +48,6 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
           loadLeagues(),
           loadArchivedLeagues(),
         ]);
-        console.log('Public data (products, badges, teams, namesets, kit types) loaded successfully');
       } catch (error) {
         console.error('Error loading public data:', error);
       }
