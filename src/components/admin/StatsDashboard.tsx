@@ -85,11 +85,6 @@ const StatsDashboard: React.FC = () => {
 
   useEffect(() => {
     loadStats(dateRange);
-
-    // Auto-refresh every 10 minutes
-    const interval = setInterval(() => loadStats(dateRange), 600000);
-
-    return () => clearInterval(interval);
   }, [loadStats, dateRange]);
 
   const formatCurrency = (amount: number) => {
@@ -392,11 +387,7 @@ const StatsDashboard: React.FC = () => {
                         <span className="rank-number-modern">#{index + 1}</span>
                       </div>
                       {product.mainImageUrl ? (
-                        <img
-                          src={product.mainImageUrl}
-                          alt={product.productName}
-                          className="product-image-thumbnail"
-                        />
+                        <img src={product.mainImageUrl} alt={product.productName} className="product-image-thumbnail" />
                       ) : (
                         <div className="product-image-placeholder">📷</div>
                       )}
@@ -458,11 +449,7 @@ const StatsDashboard: React.FC = () => {
                         <span className="rank-number-modern">#{index + 1}</span>
                       </div>
                       {product.mainImageUrl ? (
-                        <img
-                          src={product.mainImageUrl}
-                          alt={product.productName}
-                          className="product-image-thumbnail"
-                        />
+                        <img src={product.mainImageUrl} alt={product.productName} className="product-image-thumbnail" />
                       ) : (
                         <div className="product-image-placeholder">📷</div>
                       )}
