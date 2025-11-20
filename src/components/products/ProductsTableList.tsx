@@ -105,6 +105,7 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
             <th>Number</th>
             <th>Badge</th>
             <th>Price</th>
+            {!isPublicRoute && <th>Location</th>}
             {!isReadOnly && <th>Actions</th>}
           </tr>
         </thead>
@@ -208,6 +209,7 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
               </td>
               <td>{getBadgeInfo(p.badgeId, badges, archivedBadges)}</td>
               <td className="price-display">{p.price.toFixed ? p.price.toFixed(2) : p.price} RON</td>
+              {!isPublicRoute && <td>{p.location || '-'}</td>}
               {!isReadOnly && (
                 <td onClick={(e) => e.stopPropagation()}>
                   <button onClick={() => onEdit(p)} className="btn btn-icon btn-success" title="Edit">
@@ -283,6 +285,12 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
                   <span className="mobile-detail-label">Badge</span>
                   <span className="mobile-detail-value">{badgeInfo}</span>
                 </div>
+                {!isPublicRoute && p.location && (
+                  <div className="mobile-detail-item">
+                    <span className="mobile-detail-label">Location</span>
+                    <span className="mobile-detail-value">{p.location}</span>
+                  </div>
+                )}
                 {isOutOfStockProduct && (
                   <div className="mobile-detail-item">
                     <span className="mobile-detail-label">Status</span>

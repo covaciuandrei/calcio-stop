@@ -91,6 +91,7 @@ const ArchivedBadges: React.FC<Props> = ({ archivedBadges, searchTerm = '', onCl
             <th>Season</th>
             <th>Quantity</th>
             <th>Price</th>
+            <th>Location</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -119,6 +120,7 @@ const ArchivedBadges: React.FC<Props> = ({ archivedBadges, searchTerm = '', onCl
                 <td>{b.season}</td>
                 <td className="price-display">{b.quantity}</td>
                 <td className="price-display">${b.price.toFixed(2)}</td>
+                <td>{b.location || '-'}</td>
                 <td onClick={(e) => e.stopPropagation()}>
                   <button onClick={() => handleRestore(b.id)} className="btn btn-icon btn-success" title="Restore">
                     ↩️

@@ -73,6 +73,8 @@ const ArchivedNamesets: React.FC<Props> = ({ archivedNamesets, searchTerm = '', 
             <th>Season</th>
             <th>Kit Type</th>
             <th>Quantity</th>
+            <th>Price</th>
+            <th>Location</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -84,6 +86,8 @@ const ArchivedNamesets: React.FC<Props> = ({ archivedNamesets, searchTerm = '', 
               <td>{n.season}</td>
               <td>{getKitTypeInfo(n.kitTypeId, kitTypes, archivedKitTypes)}</td>
               <td className="price-display">{n.quantity}</td>
+              <td className="price-display">{n.price.toFixed(2)} RON</td>
+              <td>{n.location || '-'}</td>
               <td>
                 <button onClick={() => handleRestore(n.id)} className="btn btn-icon btn-success" title="Restore">
                   ↩️

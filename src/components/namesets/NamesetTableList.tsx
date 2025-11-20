@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { useArchivedKitTypes, useKitTypesList } from '../../stores';
 import { Nameset } from '../../types';
 import { getKitTypeInfo } from '../../utils/utils';
@@ -20,6 +21,10 @@ const NamesetTableList: React.FC<Props> = ({
   searchTerm = '',
   isReadOnly = false,
 }) => {
+  const location = useLocation();
+  // Check if this is a public route
+  const isPublicRoute = location.pathname.startsWith('/public');
+
   // Get data from stores
   const kitTypes = useKitTypesList();
   const archivedKitTypes = useArchivedKitTypes();
@@ -64,6 +69,7 @@ const NamesetTableList: React.FC<Props> = ({
             <th>Kit Type</th>
             <th>Quantity</th>
             <th>Price</th>
+            {!isPublicRoute && <th>Location</th>}
             {!isReadOnly && <th>Actions</th>}
           </tr>
         </thead>
@@ -93,6 +99,7 @@ const NamesetTableList: React.FC<Props> = ({
                   <span style={{ fontSize: '0.85em', color: 'var(--gray-600)' }}>{n.quantity}</span>
                 </td>
                 <td className="price-display">{n.price.toFixed(2)} RON</td>
+                {!isPublicRoute && <td>{n.location || '-'}</td>}
                 {!isReadOnly && (
                   <td>
                     <button onClick={() => onEdit(n)} className="btn btn-icon btn-success" title="Edit">
@@ -141,6 +148,12 @@ const NamesetTableList: React.FC<Props> = ({
                   <span className="mobile-detail-label">Quantity</span>
                   <span className="mobile-detail-value">{n.quantity}</span>
                 </div>
+                {!isPublicRoute && n.location && (
+                  <div className="mobile-detail-item">
+                    <span className="mobile-detail-label">Location</span>
+                    <span className="mobile-detail-value">{n.location}</span>
+                  </div>
+                )}
               </div>
 
               <div className="mobile-card-status">

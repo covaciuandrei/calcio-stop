@@ -115,6 +115,7 @@ export const useProductsStore = create<ProductsState>()(
           const updatedProduct = await db.updateProduct(id, updates);
           set((state) => ({
             products: state.products.map((p) => (p.id === id ? updatedProduct : p)),
+            archivedProducts: state.archivedProducts.map((p) => (p.id === id ? updatedProduct : p)),
             isLoading: false,
           }));
         } catch (error) {

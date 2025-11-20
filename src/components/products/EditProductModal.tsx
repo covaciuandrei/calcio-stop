@@ -31,6 +31,7 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
   const [selectedBadgeId, setSelectedBadgeId] = useState<string | null>(editingProduct?.badgeId || null);
   const [price, setPrice] = useState<number>(editingProduct?.price || 0);
   const [olxLink, setOlxLink] = useState<string>(editingProduct?.olxLink || '');
+  const [location, setLocation] = useState<string>(editingProduct?.location || '');
   const [hasLoaded, setHasLoaded] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -46,6 +47,7 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
       setSelectedBadgeId(editingProduct.badgeId);
       setPrice(editingProduct.price || 0);
       setOlxLink(editingProduct.olxLink || '');
+      setLocation(editingProduct.location || '');
       // Use setTimeout to ensure sizes are loaded before enabling type changes
       setTimeout(() => setHasLoaded(true), 0);
     }
@@ -101,6 +103,7 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
       badgeId: selectedBadgeId,
       price: Number(price) || 0,
       olxLink: olxLink.trim() || undefined,
+      location: location.trim() || undefined,
     });
 
     // Note: Badge and nameset quantities are not updated when editing products
@@ -227,6 +230,16 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
               placeholder="https://www.olx.ro/..."
               value={olxLink}
               onChange={(e) => setOlxLink(e.target.value)}
+            />
+          </label>
+
+          <label>
+            Location (optional):
+            <input
+              type="text"
+              placeholder="e.g. Warehouse A, Shelf 3"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
             />
           </label>
 

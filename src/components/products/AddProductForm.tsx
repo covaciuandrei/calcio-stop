@@ -25,6 +25,7 @@ const AddProductForm: React.FC = () => {
   const [selectedBadgeId, setSelectedBadgeId] = useState<string | null>(null);
   const [price, setPrice] = useState<number>(0);
   const [olxLink, setOlxLink] = useState<string>('');
+  const [location, setLocation] = useState<string>('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
@@ -98,6 +99,7 @@ const AddProductForm: React.FC = () => {
       badgeId: selectedBadgeId,
       price: Number(price) || 0,
       olxLink: olxLink.trim() || undefined,
+      location: location.trim() || undefined,
       createdAt: new Date().toISOString(),
     };
 
@@ -123,6 +125,7 @@ const AddProductForm: React.FC = () => {
     setSelectedBadgeId(null);
     setPrice(0);
     setOlxLink('');
+    setLocation('');
     setErrors({}); // Clear any errors
 
     // Set default kit type after a brief delay to ensure state is reset
@@ -250,6 +253,16 @@ const AddProductForm: React.FC = () => {
           placeholder="https://www.olx.ro/..."
           value={olxLink}
           onChange={(e) => setOlxLink(e.target.value)}
+        />
+      </div>
+
+      <div className="form-group">
+        <label>Location (optional)</label>
+        <input
+          type="text"
+          placeholder="e.g. Warehouse A, Shelf 3"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
         />
       </div>
 

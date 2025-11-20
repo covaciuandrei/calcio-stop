@@ -73,6 +73,7 @@ const BadgeTableList: React.FC<Props> = ({
             <th>Season</th>
             <th>{isPublicRoute ? 'Availability' : 'Quantity'}</th>
             <th>Price</th>
+            {!isPublicRoute && <th>Location</th>}
             {!isReadOnly && <th>Actions</th>}
           </tr>
         </thead>
@@ -121,6 +122,7 @@ const BadgeTableList: React.FC<Props> = ({
                   )}
                 </td>
                 <td className="price-display">${b.price.toFixed(2)}</td>
+                {!isPublicRoute && <td>{b.location || '-'}</td>}
                 {!isReadOnly && (
                   <td onClick={(e) => e.stopPropagation()}>
                     <button onClick={() => onEdit(b)} className="btn btn-icon btn-success" title="Edit">
@@ -175,6 +177,12 @@ const BadgeTableList: React.FC<Props> = ({
                   <span className="mobile-detail-label">Availability</span>
                   <span className="mobile-detail-value">{isPublicRoute ? stockStatus : `${b.quantity} units`}</span>
                 </div>
+                {!isPublicRoute && b.location && (
+                  <div className="mobile-detail-item">
+                    <span className="mobile-detail-label">Location</span>
+                    <span className="mobile-detail-value">{b.location}</span>
+                  </div>
+                )}
                 {isOutOfStockBadge && (
                   <div className="mobile-detail-item">
                     <span className="mobile-detail-label">Status</span>

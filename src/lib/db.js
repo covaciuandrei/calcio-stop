@@ -273,6 +273,7 @@ export async function createBadge(data) {
     season: data.season,
     quantity: data.quantity,
     price: data.price || 0,
+    location: data.location || null,
     created_at: data.createdAt || new Date().toISOString(),
     archived_at: null,
   };
@@ -288,6 +289,7 @@ export async function createBadge(data) {
     season: result.season,
     quantity: result.quantity,
     price: result.price,
+    location: result.location || undefined,
     createdAt: result.created_at,
   };
 }
@@ -308,6 +310,7 @@ export async function getBadges() {
     season: item.season,
     quantity: item.quantity,
     price: item.price,
+    location: item.location || undefined,
     createdAt: item.created_at,
   }));
 }
@@ -328,6 +331,7 @@ export async function getArchivedBadges() {
     season: item.season,
     quantity: item.quantity,
     price: item.price,
+    location: item.location || undefined,
     createdAt: item.created_at,
   }));
 }
@@ -339,6 +343,7 @@ export async function updateBadge(id, updates) {
   if (updates.season !== undefined) dbUpdates.season = updates.season;
   if (updates.quantity !== undefined) dbUpdates.quantity = updates.quantity;
   if (updates.price !== undefined) dbUpdates.price = updates.price;
+  if (updates.location !== undefined) dbUpdates.location = updates.location || null;
   if (updates.createdAt !== undefined) dbUpdates.created_at = updates.createdAt;
 
   const { data, error } = await supabase.from('badges').update(dbUpdates).eq('id', id).select().single();
@@ -352,6 +357,7 @@ export async function updateBadge(id, updates) {
     season: data.season,
     quantity: data.quantity,
     price: data.price,
+    location: data.location || undefined,
     createdAt: data.created_at,
   };
 }
@@ -505,6 +511,7 @@ export async function createNameset(data) {
     quantity: parseInt(data.quantity) || 0, // Ensure it's an integer
     price: parseFloat(data.price) || 0.0, // Ensure it's a float
     kit_type_id: data.kitTypeId,
+    location: data.location || null,
     created_at: data.createdAt || new Date().toISOString(),
     archived_at: null,
   };
@@ -524,6 +531,7 @@ export async function createNameset(data) {
     quantity: result.quantity,
     price: result.price,
     kitTypeId: result.kit_type_id,
+    location: result.location || undefined,
     createdAt: result.created_at,
   };
 }
@@ -546,6 +554,7 @@ export async function getNamesets() {
     quantity: item.quantity,
     price: item.price,
     kitTypeId: item.kit_type_id,
+    location: item.location || undefined,
     createdAt: item.created_at,
   }));
 }
@@ -568,6 +577,7 @@ export async function getArchivedNamesets() {
     quantity: item.quantity,
     price: item.price,
     kitTypeId: item.kit_type_id,
+    location: item.location || undefined,
     createdAt: item.created_at,
   }));
 }
@@ -594,6 +604,9 @@ export async function updateNameset(id, updates) {
   if (updates.kitTypeId !== undefined) {
     dbUpdates.kit_type_id = updates.kitTypeId;
   }
+  if (updates.location !== undefined) {
+    dbUpdates.location = updates.location || null;
+  }
 
   const { data, error } = await supabase.from('namesets').update(dbUpdates).eq('id', id).select().single();
 
@@ -608,6 +621,7 @@ export async function updateNameset(id, updates) {
     quantity: data.quantity,
     price: data.price,
     kitTypeId: data.kit_type_id,
+    location: data.location || undefined,
     createdAt: data.created_at,
   };
 }
@@ -679,6 +693,7 @@ export async function createProduct(data) {
     badge_id: data.badgeId || null,
     price: parseFloat(data.price) || 0.0,
     olx_link: data.olxLink || null,
+    location: data.location || null,
     created_at: data.createdAt || new Date().toISOString(),
     archived_at: null,
   };
@@ -701,6 +716,7 @@ export async function createProduct(data) {
     badgeId: result.badge_id,
     price: result.price,
     olxLink: result.olx_link,
+    location: result.location || undefined,
     createdAt: result.created_at,
   };
 }
@@ -739,6 +755,7 @@ export async function getProducts() {
     badgeId: item.badge_id,
     price: item.price,
     olxLink: item.olx_link,
+    location: item.location || undefined,
     createdAt: item.created_at,
     images: (item.product_images || []).map((img) => ({
       id: img.id,
@@ -786,6 +803,7 @@ export async function getArchivedProducts() {
     badgeId: item.badge_id,
     price: item.price,
     olxLink: item.olx_link,
+    location: item.location || undefined,
     createdAt: item.created_at,
     images: (item.product_images || []).map((img) => ({
       id: img.id,
@@ -830,6 +848,9 @@ export async function updateProduct(id, updates) {
   if (updates.olxLink !== undefined) {
     dbUpdates.olx_link = updates.olxLink;
   }
+  if (updates.location !== undefined) {
+    dbUpdates.location = updates.location || null;
+  }
 
   const { data, error } = await supabase
     .from('products')
@@ -865,6 +886,7 @@ export async function updateProduct(id, updates) {
     badgeId: data.badge_id,
     price: data.price,
     olxLink: data.olx_link,
+    location: data.location || undefined,
     createdAt: data.created_at,
     images: (data.product_images || []).map((img) => ({
       id: img.id,
@@ -917,6 +939,7 @@ export async function archiveProduct(id) {
     badgeId: data.badge_id,
     price: data.price,
     olxLink: data.olx_link,
+    location: data.location || undefined,
     createdAt: data.created_at,
   };
 }
@@ -938,6 +961,7 @@ export async function restoreProduct(id) {
     badgeId: data.badge_id,
     price: data.price,
     olxLink: data.olx_link,
+    location: data.location || undefined,
     createdAt: data.created_at,
   };
 }

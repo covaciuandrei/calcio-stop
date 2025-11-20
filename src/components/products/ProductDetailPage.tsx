@@ -167,11 +167,7 @@ const ProductDetailPage: React.FC = () => {
 
   const handleEditClose = () => {
     setIsEditing(false);
-    // Refresh the product data after editing
-    if (id) {
-      const foundProduct = activeProducts.find((p) => p.id === id) || archivedProducts.find((p) => p.id === id);
-      setProduct(foundProduct || null);
-    }
+    // The useEffect will automatically refresh the product when activeProducts/archivedProducts update
   };
 
   return (
@@ -269,6 +265,12 @@ const ProductDetailPage: React.FC = () => {
                   <div className="detail-item">
                     <label>Created:</label>
                     <span>{new Date(product.createdAt).toLocaleDateString()}</span>
+                  </div>
+                )}
+                {showAdminFeatures && (
+                  <div className="detail-item">
+                    <label>Location:</label>
+                    <span>{product.location || '-'}</span>
                   </div>
                 )}
               </div>

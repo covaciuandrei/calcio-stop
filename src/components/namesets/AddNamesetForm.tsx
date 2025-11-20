@@ -19,6 +19,7 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
   const [season, setSeason] = useState('2025/2026');
   const [quantity, setQuantity] = useState<number | ''>('');
   const [price, setPrice] = useState<number | ''>('');
+  const [location, setLocation] = useState<string>('');
   const [selectedKitTypeId, setSelectedKitTypeId] = useState<string>('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -67,6 +68,7 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
       quantity: Number(quantity),
       price: Number(price),
       kitTypeId: selectedKitTypeId,
+      location: location.trim() || undefined,
       createdAt: new Date().toISOString(),
     };
 
@@ -77,6 +79,7 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
     setSeason('2025/2026');
     setQuantity('');
     setPrice('');
+    setLocation('');
     setSelectedKitTypeId(kitTypes.length > 0 ? kitTypes[0].id : '');
   };
 
@@ -226,6 +229,28 @@ const AddNamesetForm: React.FC<Props> = ({ onAdd, isInDropdown = false }) => {
           }
         />
         {errors.price && <div className="error-message">{errors.price}</div>}
+      </div>
+      <div className="form-group">
+        <label>Location (optional)</label>
+        <input
+          type="text"
+          placeholder="e.g. Warehouse A, Shelf 3"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          style={
+            isInDropdown
+              ? {
+                  width: '100%',
+                  height: 'calc(38px * 1.2)' /* Match picker height */,
+                  padding: 'calc(6px * 1.2) 8px' /* 20% taller padding */,
+                  border: '1px solid #d1d5db',
+                  borderRadius: '4px',
+                  fontSize: '13px',
+                  boxSizing: 'border-box',
+                }
+              : {}
+          }
+        />
       </div>
       <div className={`form-group ${errors.kitType ? 'has-error' : ''}`}>
         <label>Kit Type</label>

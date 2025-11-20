@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS badges (
     season VARCHAR(50) NOT NULL,
     quantity INTEGER NOT NULL DEFAULT 0,
     price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    location VARCHAR(255) NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     archived_at TIMESTAMP WITH TIME ZONE NULL
 );
@@ -41,6 +42,7 @@ CREATE TABLE IF NOT EXISTS namesets (
     quantity INTEGER NOT NULL DEFAULT 0,
     price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     kit_type_id UUID NOT NULL REFERENCES kit_types(id),
+    location VARCHAR(255) NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     archived_at TIMESTAMP WITH TIME ZONE NULL
 );
@@ -57,6 +59,7 @@ CREATE TABLE IF NOT EXISTS products (
     badge_id UUID NULL REFERENCES badges(id),
     price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     olx_link TEXT NULL,
+    location VARCHAR(255) NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     archived_at TIMESTAMP WITH TIME ZONE NULL
 );

@@ -16,6 +16,7 @@ const EditBadgeModal: React.FC<Props> = ({ editingBadge, setEditingBadge }) => {
   const [season, setSeason] = useState(editingBadge?.season || '2025/2026');
   const [quantity, setQuantity] = useState<number | ''>(editingBadge?.quantity || '');
   const [price, setPrice] = useState<number | ''>(editingBadge?.price || '');
+  const [location, setLocation] = useState<string>(editingBadge?.location || '');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // Update state when editingBadge changes
@@ -25,6 +26,7 @@ const EditBadgeModal: React.FC<Props> = ({ editingBadge, setEditingBadge }) => {
       setSeason(editingBadge.season);
       setQuantity(editingBadge.quantity);
       setPrice(editingBadge.price);
+      setLocation(editingBadge.location || '');
       setErrors({});
     }
   }, [editingBadge]);
@@ -57,6 +59,7 @@ const EditBadgeModal: React.FC<Props> = ({ editingBadge, setEditingBadge }) => {
       season,
       quantity: Number(quantity),
       price: Number(price),
+      location: location.trim() || undefined,
     });
     setEditingBadge(null);
   };
@@ -133,6 +136,17 @@ const EditBadgeModal: React.FC<Props> = ({ editingBadge, setEditingBadge }) => {
               />
             </label>
             {errors.price && <div className="error-message">{errors.price}</div>}
+          </div>
+          <div className="form-group">
+            <label>
+              Location (optional):
+              <input
+                type="text"
+                placeholder="e.g. Warehouse A, Shelf 3"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              />
+            </label>
           </div>
 
           <div className="modal-buttons">

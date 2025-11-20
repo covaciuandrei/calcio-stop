@@ -14,6 +14,7 @@ const AddBadgeForm: React.FC<Props> = ({ onAdd }) => {
   const [season, setSeason] = useState('2025/2026');
   const [quantity, setQuantity] = useState<number | ''>('');
   const [price, setPrice] = useState<number | ''>('');
+  const [location, setLocation] = useState<string>('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -44,6 +45,7 @@ const AddBadgeForm: React.FC<Props> = ({ onAdd }) => {
       season,
       quantity: Number(quantity),
       price: Number(price),
+      location: location.trim() || undefined,
       createdAt: new Date().toISOString(),
     };
 
@@ -53,6 +55,7 @@ const AddBadgeForm: React.FC<Props> = ({ onAdd }) => {
     setSeason('2025/2026');
     setQuantity('');
     setPrice('');
+    setLocation('');
   };
 
   return (
@@ -115,6 +118,15 @@ const AddBadgeForm: React.FC<Props> = ({ onAdd }) => {
           }}
         />
         {errors.price && <div className="error-message">{errors.price}</div>}
+      </div>
+      <div className="form-group">
+        <label>Location (optional)</label>
+        <input
+          type="text"
+          placeholder="e.g. Warehouse A, Shelf 3"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+        />
       </div>
       <div className="form-button-container">
         <button type="submit" className="btn btn-success">

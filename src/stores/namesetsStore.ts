@@ -73,6 +73,7 @@ export const useNamesetsStore = create<NamesetsState>()(
           const updatedNameset = await db.updateNameset(id, updates);
           set((state) => ({
             namesets: state.namesets.map((n) => (n.id === id ? updatedNameset : n)),
+            archivedNamesets: state.archivedNamesets.map((n) => (n.id === id ? updatedNameset : n)),
             isLoading: false,
           }));
         } catch (error) {

@@ -4,6 +4,7 @@ export interface Badge {
   season: string; // e.g. "2025/2026"
   quantity: number; // available quantity of this badge
   price: number; // price of the badge
+  location?: string; // location where the badge is stored
   createdAt: string; // ISO date string
 }
 

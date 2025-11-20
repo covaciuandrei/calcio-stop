@@ -35,6 +35,7 @@ export interface Product {
   badgeId: string | null; // reference to badge, null if no badge
   price: number; // default price per unit
   olxLink?: string; // OLX listing URL
+  location?: string; // location where the product is stored
   createdAt: string; // ISO date string
   images?: ProductImage[]; // product images
 }

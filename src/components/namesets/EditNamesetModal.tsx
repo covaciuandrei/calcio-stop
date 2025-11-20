@@ -19,6 +19,7 @@ const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }
   const [season, setSeason] = useState('2025/2026');
   const [quantity, setQuantity] = useState<number | ''>('');
   const [price, setPrice] = useState<number | ''>('');
+  const [location, setLocation] = useState<string>('');
   const [selectedKitTypeId, setSelectedKitTypeId] = useState<string>('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -30,6 +31,7 @@ const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }
       setSeason(editingNameset.season || '2025/2026');
       setQuantity(editingNameset.quantity || '');
       setPrice(editingNameset.price || '');
+      setLocation(editingNameset.location || '');
       setSelectedKitTypeId(editingNameset.kitTypeId || (kitTypes.length > 0 ? kitTypes[0].id : ''));
       setErrors({});
     } else {
@@ -39,6 +41,7 @@ const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }
       setSeason('2025/2026');
       setQuantity('');
       setPrice('');
+      setLocation('');
       setSelectedKitTypeId(kitTypes.length > 0 ? kitTypes[0].id : '');
       setErrors({});
     }
@@ -77,6 +80,7 @@ const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }
       quantity: Number(quantity),
       price: Number(price),
       kitTypeId: selectedKitTypeId,
+      location: location.trim() || undefined,
     });
     setEditingNameset(null);
   };
@@ -176,6 +180,17 @@ const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }
               />
             </label>
             {errors.price && <div className="error-message">{errors.price}</div>}
+          </div>
+          <div className="form-group">
+            <label>
+              Location (optional):
+              <input
+                type="text"
+                placeholder="e.g. Warehouse A, Shelf 3"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              />
+            </label>
           </div>
 
           <div className="modal-buttons">

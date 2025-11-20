@@ -79,11 +79,7 @@ const BadgeDetailPage: React.FC = () => {
 
   const handleEditClose = () => {
     setIsEditing(false);
-    // Refresh the badge data after editing
-    if (id) {
-      const foundBadge = activeBadges.find((b) => b.id === id) || archivedBadges.find((b) => b.id === id);
-      setBadge(foundBadge || null);
-    }
+    // The useEffect will automatically refresh the badge when activeBadges/archivedBadges update
   };
 
   return (
@@ -144,6 +140,12 @@ const BadgeDetailPage: React.FC = () => {
                   <div className="detail-item">
                     <label>Created:</label>
                     <span>{new Date(badge.createdAt).toLocaleDateString()}</span>
+                  </div>
+                )}
+                {showAdminFeatures && (
+                  <div className="detail-item">
+                    <label>Location:</label>
+                    <span>{badge.location || '-'}</span>
                   </div>
                 )}
               </div>

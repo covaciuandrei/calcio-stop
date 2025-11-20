@@ -72,6 +72,7 @@ export const useBadgesStore = create<BadgesState>()(
           const updatedBadge = await db.updateBadge(id, updates);
           set((state) => ({
             badges: state.badges.map((b) => (b.id === id ? updatedBadge : b)),
+            archivedBadges: state.archivedBadges.map((b) => (b.id === id ? updatedBadge : b)),
             isLoading: false,
           }));
         } catch (error) {
