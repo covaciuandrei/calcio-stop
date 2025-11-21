@@ -405,7 +405,8 @@ const ProductDetailPage: React.FC = () => {
                                       <div className="badge-option-text">
                                         <div className="badge-option-name">{badge.name}</div>
                                         <div className="badge-option-details">
-                                          Season: {badge.season} | Price: {badge.price || 0} RON | Qty: {badge.quantity}
+                                          Season: {badge.season} | Price: {badge.price || 0} RON
+                                          {!isPublicRoute && ` | Qty: ${badge.quantity}`}
                                         </div>
                                       </div>
                                     </div>
@@ -472,7 +473,8 @@ const ProductDetailPage: React.FC = () => {
                                       <div className="badge-option-text">
                                         <div className="badge-option-name">{badge.name}</div>
                                         <div className="badge-option-details">
-                                          Season: {badge.season} | Price: {badge.price || 0} RON | Qty: {badge.quantity}
+                                          Season: {badge.season} | Price: {badge.price || 0} RON
+                                          {!isPublicRoute && ` | Qty: ${badge.quantity}`}
                                         </div>
                                       </div>
                                     </div>
@@ -544,8 +546,8 @@ const ProductDetailPage: React.FC = () => {
                                           {nameset.playerName} #{nameset.number}
                                         </div>
                                         <div className="nameset-option-details">
-                                          Season: {nameset.season} | Price: {nameset.price || 0} RON | Qty:{' '}
-                                          {nameset.quantity}
+                                          Season: {nameset.season} | Price: {nameset.price || 0} RON
+                                          {!isPublicRoute && ` | Qty: ${nameset.quantity}`}
                                         </div>
                                       </div>
                                     </div>
