@@ -12,7 +12,7 @@ import {
   useTeamsList,
 } from '../../stores';
 import { Return } from '../../types';
-import { getProductDisplayText, getProductInfo } from '../../utils/utils';
+import { formatDateTime, getProductDisplayText, getProductInfo } from '../../utils/utils';
 
 interface Props {
   returns: Return[];
@@ -113,8 +113,8 @@ const ReturnsTableList: React.FC<Props> = ({ returns, onDelete, searchTerm = '' 
               <td className="price-display">{getReturnTotal(r).toFixed(2)} RON</td>
               <td>{r.customerName || 'N/A'}</td>
               <td>{r.saleType}</td>
-              <td>{new Date(r.date).toLocaleString()}</td>
-              <td>{new Date(r.createdAt).toLocaleString()}</td>
+              <td>{formatDateTime(r.date)}</td>
+              <td>{formatDateTime(r.createdAt)}</td>
               <td>
                 <button onClick={() => onDelete(r.id)} className="btn btn-icon btn-danger" title="Delete">
                   🗑️
@@ -157,11 +157,11 @@ const ReturnsTableList: React.FC<Props> = ({ returns, onDelete, searchTerm = '' 
               </div>
               <div className="mobile-detail-item">
                 <span className="mobile-detail-label">Sale Date</span>
-                <span className="mobile-detail-value">{new Date(r.date).toLocaleString()}</span>
+                <span className="mobile-detail-value">{formatDateTime(r.date)}</span>
               </div>
               <div className="mobile-detail-item">
                 <span className="mobile-detail-label">Returned At</span>
-                <span className="mobile-detail-value">{new Date(r.createdAt).toLocaleString()}</span>
+                <span className="mobile-detail-value">{formatDateTime(r.createdAt)}</span>
               </div>
             </div>
 

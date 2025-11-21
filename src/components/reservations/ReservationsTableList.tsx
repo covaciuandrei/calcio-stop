@@ -12,7 +12,7 @@ import {
   useTeamsList,
 } from '../../stores';
 import { Reservation } from '../../types';
-import { getProductDisplayText, getProductInfo } from '../../utils/utils';
+import { formatDate, getProductDisplayText, getProductInfo } from '../../utils/utils';
 
 interface Props {
   reservations: Reservation[];
@@ -151,7 +151,7 @@ const ReservationsTableList: React.FC<Props> = ({ reservations, onEdit, onDelete
                     )}
                   </div>
                 </td>
-                <td>{new Date(r.expiringDate).toLocaleDateString()}</td>
+                <td>{formatDate(r.expiringDate)}</td>
                 <td>
                   {r.status === 'pending' && (
                     <button onClick={() => onComplete(r.id)} className="btn btn-icon btn-success" title="Complete">
@@ -234,7 +234,7 @@ const ReservationsTableList: React.FC<Props> = ({ reservations, onEdit, onDelete
                 </div>
                 <div className="mobile-detail-item">
                   <span className="mobile-detail-label">Expiring Date</span>
-                  <span className="mobile-detail-value">{new Date(r.expiringDate).toLocaleDateString()}</span>
+                  <span className="mobile-detail-value">{formatDate(r.expiringDate)}</span>
                 </div>
               </div>
 

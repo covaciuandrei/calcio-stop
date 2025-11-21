@@ -12,7 +12,7 @@ import {
   useTeamsList,
 } from '../../stores';
 import { Sale } from '../../types';
-import { getProductDisplayText, getProductInfo } from '../../utils/utils';
+import { formatDate, formatDateTime, getProductDisplayText, getProductInfo } from '../../utils/utils';
 
 interface Props {
   sales: Sale[];
@@ -115,7 +115,7 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, onReverse, o
               <td className="price-display">{getSaleTotal(s).toFixed(2)} RON</td>
               <td>{s.customerName || 'N/A'}</td>
               <td>{s.saleType}</td>
-              <td>{new Date(s.date).toLocaleString()}</td>
+              <td>{formatDateTime(s.date)}</td>
               <td>
                 <button onClick={() => onEdit(s)} className="btn btn-icon btn-success" title="Edit">
                   ✏️
@@ -167,7 +167,7 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, onReverse, o
               </div>
               <div className="mobile-detail-item">
                 <span className="mobile-detail-label">Date</span>
-                <span className="mobile-detail-value">{new Date(s.date).toLocaleDateString()}</span>
+                <span className="mobile-detail-value">{formatDate(s.date)}</span>
               </div>
             </div>
 
