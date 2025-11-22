@@ -83,7 +83,8 @@ const ReturnsTableListCard: React.FC = () => {
                   setFilters({
                     startDate: newFilters.startDate,
                     endDate: newFilters.endDate,
-                    saleType: newFilters.saleType === '' ? undefined : (newFilters.saleType as 'OLX' | 'IN-PERSON'),
+                    saleType:
+                      newFilters.saleType === '' ? undefined : (newFilters.saleType as 'OLX' | 'IN-PERSON' | 'VINTED'),
                   });
                 }}
                 onReset={() => {
@@ -97,14 +98,16 @@ const ReturnsTableListCard: React.FC = () => {
                 }}
               />
               {sortedReturns.length >= 2 && (
-                <div style={{ 
-                  flex: 1, 
-                  minWidth: '200px', 
-                  display: 'flex', 
-                  alignItems: 'flex-end',
-                  alignSelf: 'flex-end',
-                  marginBottom: 0 
-                }}>
+                <div
+                  style={{
+                    flex: 1,
+                    minWidth: '200px',
+                    display: 'flex',
+                    alignItems: 'flex-end',
+                    alignSelf: 'flex-end',
+                    marginBottom: 0,
+                  }}
+                >
                   <input
                     type="text"
                     placeholder="Search returns..."

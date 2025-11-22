@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useProductsList, useReservationsActions } from '../../stores';
 import { Reservation, ReservationItem } from '../../types';
 import ProductPicker from '../products/ProductPicker';
+import DateInput from '../shared/DateInput';
 
 interface Props {
   editingReservation: Reservation | null;
@@ -17,6 +18,7 @@ const EditReservationModal: React.FC<Props> = ({ editingReservation, setEditingR
   const [reservationItems, setReservationItems] = useState<ReservationItem[]>([]);
   const [customerName, setCustomerName] = useState<string>('');
   const [expiringDate, setExpiringDate] = useState<string>('');
+  const [saleType, setSaleType] = useState<'OLX' | 'IN-PERSON' | 'VINTED'>('IN-PERSON');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // Update state when editingReservation changes
@@ -25,6 +27,7 @@ const EditReservationModal: React.FC<Props> = ({ editingReservation, setEditingR
       setReservationItems(editingReservation.items || []);
       setCustomerName(editingReservation.customerName);
       setExpiringDate(new Date(editingReservation.expiringDate).toISOString().slice(0, 10));
+      setSaleType(editingReservation.saleType || 'IN-PERSON');
       setErrors({});
     }
   }, [editingReservation]);
@@ -148,6 +151,7 @@ const EditReservationModal: React.FC<Props> = ({ editingReservation, setEditingR
       items: reservationItems,
       customerName: customerName.trim(),
       expiringDate: expiringDateTime.toISOString(),
+      saleType,
     });
 
     setEditingReservation(null);
@@ -194,12 +198,11 @@ const EditReservationModal: React.FC<Props> = ({ editingReservation, setEditingR
 
           <div style={{ marginBottom: 'var(--space-3)' }}>
             <label htmlFor="edit-expiringDate">Expiring Date *</label>
-            <input
-              type="date"
+            <DateInput
               id="edit-expiringDate"
               value={expiringDate}
-              onChange={(e) => {
-                setExpiringDate(e.target.value);
+              onChange={(value) => {
+                setExpiringDate(value);
                 if (errors.expiringDate) {
                   setErrors((prev) => {
                     const newErrors = { ...prev };
@@ -209,8 +212,22 @@ const EditReservationModal: React.FC<Props> = ({ editingReservation, setEditingR
                 }
               }}
               min={new Date().toISOString().split('T')[0]}
+              placeholder="dd/mm/yyyy"
             />
             {errors.expiringDate && <span className="error-text">{errors.expiringDate}</span>}
+          </div>
+
+          <div style={{ marginBottom: 'var(--space-3)' }}>
+            <label htmlFor="edit-saleType">Sale Type *</label>
+            <select
+              id="edit-saleType"
+              value={saleType}
+              onChange={(e) => setSaleType(e.target.value as 'OLX' | 'IN-PERSON' | 'VINTED')}
+            >
+              <option value="IN-PERSON">In-Person</option>
+              <option value="OLX">OLX</option>
+              <option value="VINTED">Vinted</option>
+            </select>
           </div>
 
           <div style={{ marginBottom: 'var(--space-3)' }}>

@@ -15,7 +15,7 @@ interface ReservationsState {
   deleteReservation: (id: string) => Promise<void>;
   completeReservation: (
     id: string,
-    saleData: { customerName?: string; date?: string; saleType?: 'OLX' | 'IN-PERSON' }
+    saleData: { customerName?: string; date?: string; saleType?: 'OLX' | 'IN-PERSON' | 'VINTED' }
   ) => Promise<void>;
   setReservations: (reservations: Reservation[]) => void;
   loadReservations: () => Promise<void>;

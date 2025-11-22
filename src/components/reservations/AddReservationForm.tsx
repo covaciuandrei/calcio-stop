@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useProductsList, useReservationsActions } from '../../stores';
 import { ReservationItem } from '../../types';
 import ProductPicker from '../products/ProductPicker';
+import DateInput from '../shared/DateInput';
 
 const AddReservationForm: React.FC = () => {
   // Get data and actions from stores
@@ -13,6 +14,7 @@ const AddReservationForm: React.FC = () => {
   ]);
   const [customerName, setCustomerName] = useState('');
   const [expiringDate, setExpiringDate] = useState('');
+  const [saleType, setSaleType] = useState<'OLX' | 'IN-PERSON' | 'VINTED'>('IN-PERSON');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // When product changes in any item, default size selection and price
@@ -141,6 +143,7 @@ const AddReservationForm: React.FC = () => {
       })),
       customerName: customerName.trim(),
       expiringDate: expiringDateTime.toISOString(),
+      saleType,
     };
 
     await addReservation(newReservation);
@@ -149,6 +152,7 @@ const AddReservationForm: React.FC = () => {
     setReservationItems([{ productId: '', size: '', quantity: 1, priceSold: 0 }]);
     setCustomerName('');
     setExpiringDate('');
+    setSaleType('IN-PERSON');
     setErrors({});
   };
 
@@ -182,12 +186,11 @@ const AddReservationForm: React.FC = () => {
 
       <div style={{ marginBottom: 'var(--space-3)' }}>
         <label htmlFor="expiringDate">Expiring Date *</label>
-        <input
-          type="date"
+        <DateInput
           id="expiringDate"
           value={expiringDate}
-          onChange={(e) => {
-            setExpiringDate(e.target.value);
+          onChange={(value) => {
+            setExpiringDate(value);
             if (errors.expiringDate) {
               setErrors((prev) => {
                 const newErrors = { ...prev };
@@ -197,8 +200,22 @@ const AddReservationForm: React.FC = () => {
             }
           }}
           min={new Date().toISOString().split('T')[0]}
+          placeholder="dd/mm/yyyy"
         />
         {errors.expiringDate && <span className="error-text">{errors.expiringDate}</span>}
+      </div>
+
+      <div style={{ marginBottom: 'var(--space-3)' }}>
+        <label htmlFor="saleType">Sale Type *</label>
+        <select
+          id="saleType"
+          value={saleType}
+          onChange={(e) => setSaleType(e.target.value as 'OLX' | 'IN-PERSON' | 'VINTED')}
+        >
+          <option value="IN-PERSON">In-Person</option>
+          <option value="OLX">OLX</option>
+          <option value="VINTED">Vinted</option>
+        </select>
       </div>
 
       <div style={{ marginBottom: 'var(--space-3)' }}>

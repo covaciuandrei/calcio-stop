@@ -12,6 +12,7 @@ import {
   TopViewedShirt,
   statsService,
 } from '../../lib/statsService';
+import DateInput from '../shared/DateInput';
 import './StatsDashboard.css';
 
 const StatsDashboard: React.FC = () => {
@@ -177,18 +178,18 @@ const StatsDashboard: React.FC = () => {
             <div className="date-inputs">
               <div className="date-group">
                 <label>From</label>
-                <input
-                  type="date"
+                <DateInput
                   value={tempDateRange.startDate}
-                  onChange={(e) => setTempDateRange((prev) => ({ ...prev, startDate: e.target.value }))}
+                  onChange={(value) => setTempDateRange((prev) => ({ ...prev, startDate: value }))}
+                  placeholder="dd/mm/yyyy"
                 />
               </div>
               <div className="date-group">
                 <label>To</label>
-                <input
-                  type="date"
+                <DateInput
                   value={tempDateRange.endDate}
-                  onChange={(e) => setTempDateRange((prev) => ({ ...prev, endDate: e.target.value }))}
+                  onChange={(value) => setTempDateRange((prev) => ({ ...prev, endDate: value }))}
+                  placeholder="dd/mm/yyyy"
                 />
               </div>
               <button

@@ -1,6 +1,6 @@
 import { Product } from '../products/product';
 
-export type SaleType = 'OLX' | 'IN-PERSON';
+export type SaleType = 'OLX' | 'IN-PERSON' | 'VINTED';
 
 export interface SaleItem {
   productId: string;

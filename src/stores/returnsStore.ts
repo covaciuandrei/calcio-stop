@@ -6,7 +6,7 @@ import { Return } from '../types';
 interface ReturnsFilters {
   startDate?: string;
   endDate?: string;
-  saleType?: 'OLX' | 'IN-PERSON';
+  saleType?: 'OLX' | 'IN-PERSON' | 'VINTED';
 }
 
 interface ReturnsState {

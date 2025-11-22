@@ -54,6 +54,7 @@ const NAVIGATION_ITEMS = {
   products: { label: 'Products', path: '/admin/products', end: false },
   sales: { label: 'Sales', path: '/admin/sales', end: false },
   returns: { label: 'Returns', path: '/admin/returns', end: false },
+  reservations: { label: 'Reservations', path: '/admin/reservations', end: false },
   namesets: { label: 'Namesets', path: '/admin/namesets', end: false },
   teams: { label: 'Teams', path: '/admin/teams', end: false },
   badges: { label: 'Badges', path: '/admin/badges', end: false },
@@ -140,8 +141,8 @@ const App: React.FC = () => {
                       const item = NAVIGATION_ITEMS[itemId as keyof typeof NAVIGATION_ITEMS];
                       if (!item) return null;
 
-                      // Hide suppliers navigation item for non-admin users
-                      if (itemId === 'suppliers' && !isAdmin) return null;
+                      // Hide suppliers and reservations navigation items for non-admin users
+                      if ((itemId === 'suppliers' || itemId === 'reservations') && !isAdmin) return null;
 
                       return (
                         <NavLink key={itemId} to={item.path} end={item.end}>

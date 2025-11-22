@@ -353,6 +353,49 @@ export const useRouteData = () => {
             'archivedProducts'
           );
         }
+        // Reservations page needs: products (for product picker), teams, namesets, kit types, badges (for display)
+        else if (normalizedPath.startsWith('/reservations')) {
+          addLoadIfNeeded(
+            loadPromises,
+            actions.loadProducts,
+            actions.loadArchivedProducts,
+            useProductsStore,
+            'products',
+            'archivedProducts'
+          );
+          addLoadIfNeeded(
+            loadPromises,
+            actions.loadTeams,
+            actions.loadArchivedTeams,
+            useTeamsStore,
+            'teams',
+            'archivedTeams'
+          );
+          addLoadIfNeeded(
+            loadPromises,
+            actions.loadNamesets,
+            actions.loadArchivedNamesets,
+            useNamesetsStore,
+            'namesets',
+            'archivedNamesets'
+          );
+          addLoadIfNeeded(
+            loadPromises,
+            actions.loadKitTypes,
+            actions.loadArchivedKitTypes,
+            useKitTypesStore,
+            'kitTypes',
+            'archivedKitTypes'
+          );
+          addLoadIfNeeded(
+            loadPromises,
+            actions.loadBadges,
+            actions.loadArchivedBadges,
+            useBadgesStore,
+            'badges',
+            'archivedBadges'
+          );
+        }
         // Dashboard needs everything (it shows all pages)
         else if (normalizedPath === '/' || normalizedPath === '/dashboard') {
           addLoadIfNeeded(

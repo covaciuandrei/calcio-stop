@@ -2205,6 +2205,7 @@ export async function createReservation(data) {
     items: itemsData,
     customer_name: data.customerName,
     expiring_date: data.expiringDate,
+    sale_type: data.saleType || 'IN-PERSON',
     status: 'pending',
     created_at: data.createdAt || new Date().toISOString(),
     completed_at: null,
@@ -2272,6 +2273,7 @@ export async function createReservation(data) {
     items: result.items || [],
     customerName: result.customer_name,
     expiringDate: result.expiring_date,
+    saleType: result.sale_type || 'IN-PERSON',
     status: result.status,
     createdAt: result.created_at,
     completedAt: result.completed_at || undefined,
@@ -2289,6 +2291,7 @@ export async function getReservations() {
     items: reservation.items || [],
     customerName: reservation.customer_name,
     expiringDate: reservation.expiring_date,
+    saleType: reservation.sale_type || 'IN-PERSON',
     status: reservation.status,
     createdAt: reservation.created_at,
     completedAt: reservation.completed_at || undefined,
@@ -2317,6 +2320,9 @@ export async function updateReservation(id, updates) {
   if (updates.expiringDate !== undefined) {
     dbUpdates.expiring_date = updates.expiringDate;
   }
+  if (updates.saleType !== undefined) {
+    dbUpdates.sale_type = updates.saleType;
+  }
   if (updates.status !== undefined) {
     dbUpdates.status = updates.status;
   }
@@ -2334,6 +2340,7 @@ export async function updateReservation(id, updates) {
     items: data.items || [],
     customerName: data.customer_name,
     expiringDate: data.expiring_date,
+    saleType: data.sale_type || 'IN-PERSON',
     status: data.status,
     createdAt: data.created_at,
     completedAt: data.completed_at || undefined,
@@ -2451,11 +2458,12 @@ export async function completeReservation(id, saleData) {
   }));
 
   // Create the sale directly (stock is NOT modified - already reduced when reservation was created)
+  // Use reservation's saleType if not provided in saleData
   const dbSaleData = {
     items: itemsData,
     customer_name: saleData.customerName || reservation.customer_name,
     date: saleData.date || new Date().toISOString(),
-    sale_type: saleData.saleType || 'IN-PERSON',
+    sale_type: saleData.saleType || reservation.sale_type || 'IN-PERSON',
     created_at: new Date().toISOString(),
   };
 
@@ -2489,6 +2497,7 @@ export async function completeReservation(id, saleData) {
     items: updatedReservation.items || [],
     customerName: updatedReservation.customer_name,
     expiringDate: updatedReservation.expiring_date,
+    saleType: updatedReservation.sale_type || 'IN-PERSON',
     status: updatedReservation.status,
     createdAt: updatedReservation.created_at,
     completedAt: updatedReservation.completed_at || undefined,

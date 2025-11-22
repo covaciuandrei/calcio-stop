@@ -35,6 +35,8 @@ const APP_BAR_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', path: '/' },
   { id: 'products', label: 'Products', path: '/products' },
   { id: 'sales', label: 'Sales', path: '/sales' },
+  { id: 'returns', label: 'Returns', path: '/returns' },
+  { id: 'reservations', label: 'Reservations', path: '/reservations' },
   { id: 'namesets', label: 'Namesets', path: '/namesets' },
   { id: 'teams', label: 'Teams', path: '/teams' },
   { id: 'badges', label: 'Badges', path: '/badges' },

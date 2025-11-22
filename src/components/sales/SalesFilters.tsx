@@ -1,11 +1,16 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import DateInput from '../shared/DateInput';
 import './SalesFilters.css';
 
 interface SalesFiltersProps {
   startDate: string;
   endDate: string;
-  saleType: 'OLX' | 'IN-PERSON' | '';
-  onFiltersChange: (filters: { startDate: string; endDate: string; saleType: 'OLX' | 'IN-PERSON' | '' }) => void;
+  saleType: 'OLX' | 'IN-PERSON' | 'VINTED' | '';
+  onFiltersChange: (filters: {
+    startDate: string;
+    endDate: string;
+    saleType: 'OLX' | 'IN-PERSON' | 'VINTED' | '';
+  }) => void;
   onReset: () => void;
 }
 
@@ -60,7 +65,7 @@ const SalesFilters: React.FC<SalesFiltersProps> = ({ startDate, endDate, saleTyp
 
   // Debounced filter change handler
   const debouncedFilterChange = useCallback(
-    (newFilters: { startDate: string; endDate: string; saleType: 'OLX' | 'IN-PERSON' | '' }) => {
+    (newFilters: { startDate: string; endDate: string; saleType: 'OLX' | 'IN-PERSON' | 'VINTED' | '' }) => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
@@ -79,13 +84,13 @@ const SalesFilters: React.FC<SalesFiltersProps> = ({ startDate, endDate, saleTyp
       onFiltersChange({
         startDate: newFilters.startDate,
         endDate: newFilters.endDate,
-        saleType: newFilters.saleType as 'OLX' | 'IN-PERSON' | '',
+        saleType: newFilters.saleType as 'OLX' | 'IN-PERSON' | 'VINTED' | '',
       });
     } else {
       debouncedFilterChange({
         startDate: newFilters.startDate,
         endDate: newFilters.endDate,
-        saleType: newFilters.saleType as 'OLX' | 'IN-PERSON' | '',
+        saleType: newFilters.saleType as 'OLX' | 'IN-PERSON' | 'VINTED' | '',
       });
     }
   };
@@ -98,7 +103,7 @@ const SalesFilters: React.FC<SalesFiltersProps> = ({ startDate, endDate, saleTyp
     onFiltersChange({
       startDate: localFilters.startDate,
       endDate: localFilters.endDate,
-      saleType: localFilters.saleType as 'OLX' | 'IN-PERSON' | '',
+      saleType: localFilters.saleType as 'OLX' | 'IN-PERSON' | 'VINTED' | '',
     });
   };
 
@@ -155,7 +160,7 @@ const SalesFilters: React.FC<SalesFiltersProps> = ({ startDate, endDate, saleTyp
                     const newFilters = {
                       startDate: startOfMonth.toISOString().split('T')[0],
                       endDate: endOfMonth.toISOString().split('T')[0],
-                      saleType: localFilters.saleType as 'OLX' | 'IN-PERSON' | '',
+                      saleType: localFilters.saleType as 'OLX' | 'IN-PERSON' | 'VINTED' | '',
                     };
                     setLocalFilters(newFilters);
                     // Clear debounce and apply immediately
@@ -192,7 +197,7 @@ const SalesFilters: React.FC<SalesFiltersProps> = ({ startDate, endDate, saleTyp
                     const newFilters = {
                       startDate: startOfMonth.toISOString().split('T')[0],
                       endDate: endOfMonth.toISOString().split('T')[0],
-                      saleType: localFilters.saleType as 'OLX' | 'IN-PERSON' | '',
+                      saleType: localFilters.saleType as 'OLX' | 'IN-PERSON' | 'VINTED' | '',
                     };
                     setLocalFilters(newFilters);
                     // Clear debounce and apply immediately
@@ -219,21 +224,19 @@ const SalesFilters: React.FC<SalesFiltersProps> = ({ startDate, endDate, saleTyp
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               <div>
                 <label style={{ fontSize: '0.75rem', marginBottom: '4px', display: 'block' }}>Start Date</label>
-                <input
-                  type="date"
+                <DateInput
                   value={localFilters.startDate}
-                  onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                  onBlur={handleDateBlur}
+                  onChange={(value) => handleFilterChange('startDate', value)}
+                  placeholder="dd/mm/yyyy"
                   className="sales-filter-input"
                 />
               </div>
               <div>
                 <label style={{ fontSize: '0.75rem', marginBottom: '4px', display: 'block' }}>End Date</label>
-                <input
-                  type="date"
+                <DateInput
                   value={localFilters.endDate}
-                  onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                  onBlur={handleDateBlur}
+                  onChange={(value) => handleFilterChange('endDate', value)}
+                  placeholder="dd/mm/yyyy"
                   className="sales-filter-input"
                 />
               </div>
@@ -275,6 +278,17 @@ const SalesFilters: React.FC<SalesFiltersProps> = ({ startDate, endDate, saleTyp
                   style={{ width: '14px', height: '14px', margin: 0, flexShrink: 0 }}
                 />
                 <span style={{ fontSize: '0.875rem' }}>OLX</span>
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                <input
+                  type="radio"
+                  name="saleType"
+                  value="VINTED"
+                  checked={localFilters.saleType === 'VINTED'}
+                  onChange={(e) => handleFilterChange('saleType', e.target.value)}
+                  style={{ width: '14px', height: '14px', margin: 0, flexShrink: 0 }}
+                />
+                <span style={{ fontSize: '0.875rem' }}>Vinted</span>
               </label>
             </div>
           </div>

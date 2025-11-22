@@ -117,7 +117,7 @@ CREATE TABLE IF NOT EXISTS sales (
     price_sold DECIMAL(10,2) NOT NULL,
     customer_name VARCHAR(255) NOT NULL,
     date DATE NOT NULL,
-    sale_type VARCHAR(20) NOT NULL CHECK (sale_type IN ('OLX', 'IN-PERSON')),
+    sale_type VARCHAR(20) NOT NULL CHECK (sale_type IN ('OLX', 'IN-PERSON', 'VINTED')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS returns (
     items JSONB NOT NULL DEFAULT '[]'::jsonb,
     customer_name VARCHAR(255) NOT NULL,
     date TIMESTAMP WITH TIME ZONE NOT NULL, -- Changed to TIMESTAMP to preserve original sale time
-    sale_type VARCHAR(20) NOT NULL CHECK (sale_type IN ('OLX', 'IN-PERSON')),
+    sale_type VARCHAR(20) NOT NULL CHECK (sale_type IN ('OLX', 'IN-PERSON', 'VINTED')),
     original_sale_id UUID NULL, -- Reference to original sale if available
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -156,6 +156,7 @@ CREATE TABLE IF NOT EXISTS reservations (
     items JSONB NOT NULL DEFAULT '[]'::jsonb,
     customer_name VARCHAR(255) NOT NULL,
     expiring_date TIMESTAMP WITH TIME ZONE NOT NULL,
+    sale_type VARCHAR(20) NOT NULL DEFAULT 'IN-PERSON' CHECK (sale_type IN ('OLX', 'IN-PERSON', 'VINTED')),
     status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     completed_at TIMESTAMP WITH TIME ZONE NULL

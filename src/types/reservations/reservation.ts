@@ -6,6 +6,7 @@ export interface ReservationItem {
 }
 
 export type ReservationStatus = 'pending' | 'completed';
+export type ReservationSaleType = 'OLX' | 'IN-PERSON' | 'VINTED';
 
 export interface Reservation {
   id: string;
@@ -13,6 +14,7 @@ export interface Reservation {
   customerName: string;
   expiringDate: string; // ISO date string
   status: ReservationStatus;
+  saleType: ReservationSaleType;
   createdAt: string; // ISO date string
   completedAt?: string; // ISO date string (only when completed)
 }

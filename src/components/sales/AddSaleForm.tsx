@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useProductsActions, useProductsList, useSalesActions } from '../../stores';
 import { Sale, SaleItem, SaleType } from '../../types';
 import ProductPicker from '../products/ProductPicker';
+import DateInput from '../shared/DateInput';
 
 const AddSaleForm: React.FC = () => {
   // Get data and actions from stores
@@ -292,7 +293,7 @@ const AddSaleForm: React.FC = () => {
 
       <div className="form-group">
         <label>Date</label>
-        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+        <DateInput value={date} onChange={(value) => setDate(value)} placeholder="dd/mm/yyyy" />
       </div>
 
       <div className="form-group">
@@ -300,6 +301,7 @@ const AddSaleForm: React.FC = () => {
         <select value={saleType} onChange={(e) => setSaleType(e.target.value as SaleType)}>
           <option value="IN-PERSON">In-Person</option>
           <option value="OLX">OLX</option>
+          <option value="VINTED">Vinted</option>
         </select>
       </div>
 

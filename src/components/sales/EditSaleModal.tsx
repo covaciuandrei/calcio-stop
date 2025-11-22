@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useProductsList, useSalesActions } from '../../stores';
 import { Sale, SaleItem, SaleType } from '../../types';
 import ProductPicker from '../products/ProductPicker';
+import DateInput from '../shared/DateInput';
 
 interface Props {
   editingSale: Sale | null;
@@ -289,13 +290,14 @@ const EditSaleModal: React.FC<Props> = ({ editingSale, setEditingSale }) => {
           </div>
           <div className="form-group">
             <label>Date</label>
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            <DateInput value={date} onChange={(value) => setDate(value)} placeholder="dd/mm/yyyy" />
           </div>
           <div className="form-group">
             <label>Sale Type</label>
             <select value={saleType} onChange={(e) => setSaleType(e.target.value as SaleType)}>
               <option value="IN-PERSON">In-Person</option>
               <option value="OLX">OLX</option>
+              <option value="VINTED">Vinted</option>
             </select>
           </div>
 

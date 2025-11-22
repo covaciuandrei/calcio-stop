@@ -42,6 +42,7 @@ const DEFAULT_APPBAR_ORDER = [
   'products',
   'sales',
   'returns',
+  'reservations',
   'namesets',
   'teams',
   'badges',
