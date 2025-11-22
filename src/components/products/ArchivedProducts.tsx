@@ -25,8 +25,8 @@ const ArchivedProducts: React.FC<Props> = ({ archivedProducts, searchTerm = '', 
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Check if this is a public route
-  const isPublicRoute = location.pathname.startsWith('/public');
+  // Check if this is a public route (not an admin route)
+  const isPublicRoute = !location.pathname.startsWith('/admin');
 
   // Get data from stores
   const namesets = useNamesetsList();
@@ -61,8 +61,8 @@ const ArchivedProducts: React.FC<Props> = ({ archivedProducts, searchTerm = '', 
 
   // Handle product row click
   const handleProductClick = (productId: string) => {
-    const isPublicRoute = location.pathname.startsWith('/public');
-    navigate(isPublicRoute ? `/public/products/${productId}` : `/products/${productId}`);
+    const isPublicRoute = !location.pathname.startsWith('/admin');
+    navigate(isPublicRoute ? `/products/${productId}` : `/admin/products/${productId}`);
   };
 
   // Filter products based on search term

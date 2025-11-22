@@ -48,18 +48,18 @@ const LoadingFallback: React.FC = () => (
   </div>
 );
 
-// Navigation items configuration
+// Navigation items configuration for admin routes
 const NAVIGATION_ITEMS = {
-  dashboard: { label: 'Dashboard', path: '/', end: true },
-  products: { label: 'Products', path: '/products', end: false },
-  sales: { label: 'Sales', path: '/sales', end: false },
-  returns: { label: 'Returns', path: '/returns', end: false },
-  namesets: { label: 'Namesets', path: '/namesets', end: false },
-  teams: { label: 'Teams', path: '/teams', end: false },
-  badges: { label: 'Badges', path: '/badges', end: false },
-  kittypes: { label: 'Kit Types', path: '/kittypes', end: false },
-  suppliers: { label: 'Suppliers', path: '/suppliers', end: false },
-  settings: { label: 'System Settings', path: '/settings', end: false },
+  dashboard: { label: 'Dashboard', path: '/admin', end: true },
+  products: { label: 'Products', path: '/admin/products', end: false },
+  sales: { label: 'Sales', path: '/admin/sales', end: false },
+  returns: { label: 'Returns', path: '/admin/returns', end: false },
+  namesets: { label: 'Namesets', path: '/admin/namesets', end: false },
+  teams: { label: 'Teams', path: '/admin/teams', end: false },
+  badges: { label: 'Badges', path: '/admin/badges', end: false },
+  kittypes: { label: 'Kit Types', path: '/admin/kittypes', end: false },
+  suppliers: { label: 'Suppliers', path: '/admin/suppliers', end: false },
+  settings: { label: 'System Settings', path: '/admin/settings', end: false },
 };
 
 const App: React.FC = () => {
@@ -79,9 +79,9 @@ const App: React.FC = () => {
     <Router>
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
-          {/* Public routes - no authentication required (only products and badges) */}
+          {/* Public routes - no authentication required (root path) */}
           <Route
-            path="/public"
+            path="/"
             element={
               <PublicLayout>
                 <PublicDashboard />
@@ -89,7 +89,7 @@ const App: React.FC = () => {
             }
           />
           <Route
-            path="/public/products"
+            path="/products"
             element={
               <PublicLayout>
                 <PublicProductsPage />
@@ -97,7 +97,7 @@ const App: React.FC = () => {
             }
           />
           <Route
-            path="/public/products/:id"
+            path="/products/:id"
             element={
               <PublicLayout>
                 <ProductDetailPage />
@@ -105,7 +105,7 @@ const App: React.FC = () => {
             }
           />
           <Route
-            path="/public/badges"
+            path="/badges"
             element={
               <PublicLayout>
                 <PublicBadgesPage />
@@ -113,7 +113,7 @@ const App: React.FC = () => {
             }
           />
           <Route
-            path="/public/badges/:id"
+            path="/badges/:id"
             element={
               <PublicLayout>
                 <BadgeDetailPage />
@@ -121,7 +121,7 @@ const App: React.FC = () => {
             }
           />
           <Route
-            path="/public/namesets/:id"
+            path="/namesets/:id"
             element={
               <PublicLayout>
                 <NamesetDetailPage />
@@ -129,9 +129,9 @@ const App: React.FC = () => {
             }
           />
 
-          {/* Protected routes - authentication required */}
+          {/* Protected admin routes - authentication required */}
           <Route
-            path="/*"
+            path="/admin/*"
             element={
               <AuthGuard>
                 <div className="app-container">
@@ -178,7 +178,7 @@ const App: React.FC = () => {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          window.location.href = '/orders';
+                          window.location.href = '/admin/orders';
                         }}
                         title="Orders"
                       >
@@ -202,7 +202,7 @@ const App: React.FC = () => {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          window.location.href = '/stats';
+                          window.location.href = '/admin/stats';
                         }}
                         title="Statistics"
                       >
@@ -226,22 +226,22 @@ const App: React.FC = () => {
 
                   <Suspense fallback={<LoadingFallback />}>
                     <Routes>
-                      <Route path="/" element={<Dashboard />} />
-                      <Route path="/products" element={<ProductsPage />} />
-                      <Route path="/products/:id" element={<ProductDetailPage />} />
-                      <Route path="/sales" element={<SalesPage />} />
-                      <Route path="/returns" element={<ReturnsPage />} />
-                      <Route path="/orders" element={<OrdersPage />} />
-                      <Route path="/namesets" element={<NamesetsPage />} />
-                      <Route path="/namesets/:id" element={<NamesetDetailPage />} />
-                      <Route path="/teams" element={<TeamsPage />} />
-                      <Route path="/badges" element={<BadgesPage />} />
-                      <Route path="/badges/:id" element={<BadgeDetailPage />} />
-                      <Route path="/kittypes" element={<KitTypesPage />} />
-                      {isAdmin && <Route path="/suppliers" element={<SuppliersPage />} />}
-                      {isAdmin && <Route path="/reservations" element={<ReservationsPage />} />}
-                      <Route path="/stats" element={<StatsDashboard />} />
-                      <Route path="/settings" element={<SystemSettings />} />
+                      <Route path="" element={<Dashboard />} />
+                      <Route path="products" element={<ProductsPage />} />
+                      <Route path="products/:id" element={<ProductDetailPage />} />
+                      <Route path="sales" element={<SalesPage />} />
+                      <Route path="returns" element={<ReturnsPage />} />
+                      <Route path="orders" element={<OrdersPage />} />
+                      <Route path="namesets" element={<NamesetsPage />} />
+                      <Route path="namesets/:id" element={<NamesetDetailPage />} />
+                      <Route path="teams" element={<TeamsPage />} />
+                      <Route path="badges" element={<BadgesPage />} />
+                      <Route path="badges/:id" element={<BadgeDetailPage />} />
+                      <Route path="kittypes" element={<KitTypesPage />} />
+                      {isAdmin && <Route path="suppliers" element={<SuppliersPage />} />}
+                      {isAdmin && <Route path="reservations" element={<ReservationsPage />} />}
+                      <Route path="stats" element={<StatsDashboard />} />
+                      <Route path="settings" element={<SystemSettings />} />
                     </Routes>
                   </Suspense>
 

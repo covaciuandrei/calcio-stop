@@ -18,7 +18,7 @@ const ArchivedBadges: React.FC<Props> = ({ archivedBadges, searchTerm = '', onCl
   const location = useLocation();
 
   // Check if we're in public context
-  const isPublicRoute = location.pathname.startsWith('/public');
+  const isPublicRoute = !location.pathname.startsWith('/admin');
 
   // Get badge images for all archived badges with debouncing to prevent request storms
   const badgeIds = archivedBadges.map((badge) => badge.id);
@@ -26,7 +26,7 @@ const ArchivedBadges: React.FC<Props> = ({ archivedBadges, searchTerm = '', onCl
 
   // Handle badge row click
   const handleBadgeClick = (badgeId: string) => {
-    navigate(isPublicRoute ? `/public/badges/${badgeId}` : `/badges/${badgeId}`);
+    navigate(isPublicRoute ? `/badges/${badgeId}` : `/admin/badges/${badgeId}`);
   };
   // Filter badges based on search term
   const filteredBadges = archivedBadges.filter(

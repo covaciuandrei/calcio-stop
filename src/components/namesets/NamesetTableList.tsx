@@ -24,7 +24,7 @@ const NamesetTableList: React.FC<Props> = ({
   const navigate = useNavigate();
   const location = useLocation();
   // Check if this is a public route
-  const isPublicRoute = location.pathname.startsWith('/public');
+  const isPublicRoute = !location.pathname.startsWith('/admin');
 
   // Get data from stores
   const kitTypes = useKitTypesList();
@@ -55,7 +55,7 @@ const NamesetTableList: React.FC<Props> = ({
 
   // Handle nameset row click
   const handleNamesetClick = (namesetId: string) => {
-    navigate(isPublicRoute ? `/public/namesets/${namesetId}` : `/namesets/${namesetId}`);
+    navigate(isPublicRoute ? `/namesets/${namesetId}` : `/admin/namesets/${namesetId}`);
   };
 
   // Filter namesets based on search term

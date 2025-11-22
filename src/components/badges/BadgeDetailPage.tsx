@@ -13,8 +13,8 @@ const BadgeDetailPage: React.FC = () => {
   const location = useLocation();
   const { user, isAuthenticated } = useAuth();
 
-  // Check if this is a public route or user is not authenticated/admin
-  const isPublicRoute = location.pathname.startsWith('/public');
+  // Check if this is a public route (not an admin route)
+  const isPublicRoute = !location.pathname.startsWith('/admin');
   const isAdmin = user?.role === 'admin' && isAuthenticated;
   const showAdminFeatures = isAdmin && !isPublicRoute;
 
@@ -27,11 +27,11 @@ const BadgeDetailPage: React.FC = () => {
 
   // Navigation handler - defined early to avoid hoisting issues
   const handleBack = () => {
-    // Stay in the same context (public or normal)
+    // Stay in the same context (public or admin)
     if (isPublicRoute) {
-      navigate('/public/badges');
-    } else {
       navigate('/badges');
+    } else {
+      navigate('/admin/badges');
     }
   };
 

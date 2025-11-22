@@ -30,8 +30,8 @@ const ProductDetailPage: React.FC = () => {
   const badgeDropdownRef = useRef<HTMLDivElement>(null);
   const namesetDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Check if this is a public route or user is not authenticated/admin
-  const isPublicRoute = location.pathname.startsWith('/public');
+  // Check if this is a public route (not an admin route)
+  const isPublicRoute = !location.pathname.startsWith('/admin');
   const isAdmin = user?.role === 'admin' && isAuthenticated;
   const showAdminFeatures = isAdmin && !isPublicRoute;
 
@@ -207,10 +207,7 @@ const ProductDetailPage: React.FC = () => {
     <div className={`product-detail-page ${isPublicRoute ? 'public-mode' : ''}`}>
       {/* Header */}
       <div className="product-detail-header">
-        <button
-          onClick={() => navigate(isPublicRoute ? '/public/products' : '/products')}
-          className="btn btn-secondary"
-        >
+        <button onClick={() => navigate(isPublicRoute ? '/products' : '/admin/products')} className="btn btn-secondary">
           ← Back to Products
         </button>
         {showAdminFeatures && (

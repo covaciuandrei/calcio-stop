@@ -27,8 +27,8 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
   const location = useLocation();
   const { user, isAuthenticated } = useAuth();
 
-  // Check if this is a public route
-  const isPublicRoute = location.pathname.startsWith('/public');
+  // Check if this is a public route (not an admin route)
+  const isPublicRoute = !location.pathname.startsWith('/admin');
 
   // Check if user is admin
   const isAdmin = user?.role === 'admin' && isAuthenticated;
@@ -76,8 +76,8 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
 
   // Handle product row click
   const handleProductClick = (productId: string) => {
-    const isPublicRoute = location.pathname.startsWith('/public');
-    navigate(isPublicRoute ? `/public/products/${productId}` : `/products/${productId}`);
+    const isPublicRoute = !location.pathname.startsWith('/admin');
+    navigate(isPublicRoute ? `/products/${productId}` : `/admin/products/${productId}`);
   };
 
   if (products.length === 0) {

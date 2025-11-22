@@ -23,7 +23,7 @@ const BadgeTableList: React.FC<Props> = ({
   const location = useLocation();
 
   // Check if we're in public context
-  const isPublicRoute = location.pathname.startsWith('/public');
+  const isPublicRoute = !location.pathname.startsWith('/admin');
 
   // Create images map from badges prop (images already included from optimized query)
   const imagesMap = useMemo(() => {
@@ -50,7 +50,7 @@ const BadgeTableList: React.FC<Props> = ({
 
   // Handle badge row click
   const handleBadgeClick = (badgeId: string) => {
-    navigate(isPublicRoute ? `/public/badges/${badgeId}` : `/badges/${badgeId}`);
+    navigate(isPublicRoute ? `/badges/${badgeId}` : `/admin/badges/${badgeId}`);
   };
 
   // Filter badges based on search term

@@ -11,9 +11,9 @@ import {
 
 // Navigation items for public view (only products and badges)
 const PUBLIC_NAVIGATION_ITEMS = {
-  home: { label: 'Home', path: '/public/', end: true },
-  products: { label: 'Products', path: '/public/products', end: false },
-  badges: { label: 'Badges', path: '/public/badges', end: false },
+  home: { label: 'Home', path: '/', end: true },
+  products: { label: 'Products', path: '/products', end: false },
+  badges: { label: 'Badges', path: '/badges', end: false },
 };
 
 interface PublicLayoutProps {

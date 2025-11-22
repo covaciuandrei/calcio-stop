@@ -107,6 +107,10 @@ export const useRouteData = () => {
   useEffect(() => {
     const path = location.pathname;
 
+    // Normalize path: remove /admin prefix for route matching
+    // This allows the same route logic to work for both /products and /admin/products
+    const normalizedPath = path.startsWith('/admin') ? path.replace('/admin', '') || '/' : path;
+
     // Skip if we already loaded data for this route (using global state)
     if (globalRouteState.hasLoaded.has(path)) {
       return;
@@ -153,7 +157,7 @@ export const useRouteData = () => {
         const actions = loadActionsRef.current;
 
         // Products page needs: products, teams, namesets, kit types, badges, leagues
-        if (path.startsWith('/products')) {
+        if (normalizedPath.startsWith('/products')) {
           addLoadIfNeeded(
             loadPromises,
             actions.loadProducts,
@@ -204,7 +208,7 @@ export const useRouteData = () => {
           );
         }
         // Sales page needs: products (for product picker), teams, namesets, kit types, badges (for display)
-        else if (path.startsWith('/sales')) {
+        else if (normalizedPath.startsWith('/sales')) {
           addLoadIfNeeded(
             loadPromises,
             actions.loadProducts,
@@ -248,7 +252,7 @@ export const useRouteData = () => {
           // Sales are loaded separately with date filters, so we don't load them here
         }
         // Badges page needs: badges
-        else if (path.startsWith('/badges')) {
+        else if (normalizedPath.startsWith('/badges')) {
           addLoadIfNeeded(
             loadPromises,
             actions.loadBadges,
@@ -259,7 +263,7 @@ export const useRouteData = () => {
           );
         }
         // Teams page needs: teams and leagues (teams page includes leagues management)
-        else if (path.startsWith('/teams')) {
+        else if (normalizedPath.startsWith('/teams')) {
           addLoadIfNeeded(
             loadPromises,
             actions.loadTeams,
@@ -278,7 +282,7 @@ export const useRouteData = () => {
           );
         }
         // Namesets page needs: namesets, teams, kit types
-        else if (path.startsWith('/namesets')) {
+        else if (normalizedPath.startsWith('/namesets')) {
           addLoadIfNeeded(
             loadPromises,
             actions.loadNamesets,
@@ -305,7 +309,7 @@ export const useRouteData = () => {
           );
         }
         // Kit Types page needs: kit types
-        else if (path.startsWith('/kittypes')) {
+        else if (normalizedPath.startsWith('/kittypes')) {
           addLoadIfNeeded(
             loadPromises,
             actions.loadKitTypes,
@@ -316,7 +320,7 @@ export const useRouteData = () => {
           );
         }
         // Leagues page needs: leagues
-        else if (path.startsWith('/leagues')) {
+        else if (normalizedPath.startsWith('/leagues')) {
           addLoadIfNeeded(
             loadPromises,
             actions.loadLeagues,
@@ -327,7 +331,7 @@ export const useRouteData = () => {
           );
         }
         // Suppliers page needs: sellers, product links, products (for product links)
-        else if (path.startsWith('/suppliers')) {
+        else if (normalizedPath.startsWith('/suppliers')) {
           addLoadIfNeeded(
             loadPromises,
             actions.loadSellers,
@@ -350,7 +354,7 @@ export const useRouteData = () => {
           );
         }
         // Dashboard needs everything (it shows all pages)
-        else if (path === '/' || path === '/dashboard') {
+        else if (normalizedPath === '/' || normalizedPath === '/dashboard') {
           addLoadIfNeeded(
             loadPromises,
             actions.loadProducts,
