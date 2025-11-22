@@ -70,7 +70,10 @@ CREATE TABLE IF NOT EXISTS products (
 CREATE TABLE IF NOT EXISTS product_images (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-    image_url TEXT NOT NULL,
+    image_url TEXT NOT NULL, -- Legacy field, kept for backwards compatibility
+    thumbnail_url TEXT NOT NULL,
+    medium_url TEXT NOT NULL,
+    large_url TEXT NOT NULL,
     alt_text VARCHAR(255),
     is_primary BOOLEAN DEFAULT FALSE,
     display_order INTEGER DEFAULT 0,
@@ -81,7 +84,10 @@ CREATE TABLE IF NOT EXISTS product_images (
 CREATE TABLE IF NOT EXISTS badge_images (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     badge_id UUID NOT NULL REFERENCES badges(id) ON DELETE CASCADE,
-    image_url TEXT NOT NULL,
+    image_url TEXT NOT NULL, -- Legacy field, kept for backwards compatibility
+    thumbnail_url TEXT NOT NULL,
+    medium_url TEXT NOT NULL,
+    large_url TEXT NOT NULL,
     alt_text VARCHAR(255),
     is_primary BOOLEAN DEFAULT FALSE,
     display_order INTEGER DEFAULT 0,
@@ -92,7 +98,10 @@ CREATE TABLE IF NOT EXISTS badge_images (
 CREATE TABLE IF NOT EXISTS nameset_images (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     nameset_id UUID NOT NULL REFERENCES namesets(id) ON DELETE CASCADE,
-    image_url TEXT NOT NULL,
+    image_url TEXT NOT NULL, -- Legacy field, kept for backwards compatibility
+    thumbnail_url TEXT NOT NULL,
+    medium_url TEXT NOT NULL,
+    large_url TEXT NOT NULL,
     alt_text VARCHAR(255),
     is_primary BOOLEAN DEFAULT FALSE,
     display_order INTEGER DEFAULT 0,

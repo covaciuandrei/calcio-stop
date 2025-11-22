@@ -39,10 +39,22 @@ const ProductImageManager: React.FC<ProductImageManagerProps> = ({ productId, is
       const imageToDelete = images.find((img) => img.id === imageId);
       if (!imageToDelete) return;
 
-      // Delete from storage
-      const fileName = imageToDelete.imageUrl.split('/').pop();
-      if (fileName) {
-        await supabase.storage.from('product-images').remove([`${productId}/${fileName}`]);
+      // Delete from storage - delete all three versions (thumbnail, medium, large)
+      // Extract base filename from large URL (e.g., "1234567890_0_large.webp" -> "1234567890_0")
+      const largeUrlParts = (imageToDelete.largeUrl || imageToDelete.imageUrl).split('/');
+      const largeFileName = largeUrlParts[largeUrlParts.length - 1];
+      const baseFileName = largeFileName.replace(/_large\.(webp|jpg|jpeg|png|gif)$/i, '');
+      const fileExt = largeFileName.split('.').pop() || 'webp';
+
+      if (baseFileName) {
+        // Delete all three versions
+        await supabase.storage
+          .from('product-images')
+          .remove([
+            `${productId}/${baseFileName}_thumbnail.${fileExt}`,
+            `${productId}/${baseFileName}_medium.${fileExt}`,
+            `${productId}/${baseFileName}_large.${fileExt}`,
+          ]);
       }
 
       // Delete from database
@@ -123,7 +135,7 @@ const ProductImageManager: React.FC<ProductImageManagerProps> = ({ productId, is
           {/* Main Image */}
           <div className="main-image-container">
             <img
-              src={primaryImage?.imageUrl}
+              src={primaryImage?.largeUrl || primaryImage?.imageUrl}
               alt={primaryImage?.altText || 'Product image'}
               className="main-product-image"
               onClick={() => handleImageClick(0)}
@@ -156,7 +168,7 @@ const ProductImageManager: React.FC<ProductImageManagerProps> = ({ productId, is
               {images.map((image, index) => (
                 <div key={image.id} className="thumbnail-container">
                   <img
-                    src={image.imageUrl}
+                    src={image.thumbnailUrl || image.imageUrl}
                     alt={image.altText || 'Product image'}
                     className={`thumbnail-image ${index === 0 ? 'active' : ''}`}
                     onClick={() => handleImageClick(index)}
@@ -220,7 +232,7 @@ const ProductImageManager: React.FC<ProductImageManagerProps> = ({ productId, is
               ‹
             </button>
             <img
-              src={images[selectedImageIndex].imageUrl}
+              src={images[selectedImageIndex].largeUrl || images[selectedImageIndex].imageUrl}
               alt={images[selectedImageIndex].altText || 'Product image'}
               className="image-modal-image"
             />

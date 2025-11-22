@@ -111,7 +111,11 @@ const ArchivedBadges: React.FC<Props> = ({ archivedBadges, searchTerm = '', onCl
                   title="Click to view badge details"
                 >
                   {primaryImage ? (
-                    <img src={primaryImage.imageUrl} alt={b.name || 'Badge image'} className="badge-thumbnail" />
+                    <img
+                      src={primaryImage.thumbnailUrl || primaryImage.imageUrl}
+                      alt={b.name || 'Badge image'}
+                      className="badge-thumbnail"
+                    />
                   ) : (
                     <div className="no-image-placeholder">📷</div>
                   )}

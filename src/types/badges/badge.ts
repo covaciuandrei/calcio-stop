@@ -11,7 +11,10 @@ export interface Badge {
 export interface BadgeImage {
   id: string;
   badgeId: string;
-  imageUrl: string;
+  imageUrl: string; // Legacy field, kept for backwards compatibility
+  thumbnailUrl: string;
+  mediumUrl: string;
+  largeUrl: string;
   altText: string;
   isPrimary: boolean;
   displayOrder: number;

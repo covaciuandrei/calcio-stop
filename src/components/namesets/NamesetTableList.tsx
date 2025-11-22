@@ -108,7 +108,7 @@ const NamesetTableList: React.FC<Props> = ({
                 >
                   {primaryImage ? (
                     <img
-                      src={primaryImage.imageUrl}
+                      src={primaryImage.thumbnailUrl || primaryImage.imageUrl}
                       alt={n.playerName || 'Nameset image'}
                       className="nameset-thumbnail"
                     />
@@ -177,7 +177,7 @@ const NamesetTableList: React.FC<Props> = ({
               <div className="mobile-card-header">
                 {primaryImage ? (
                   <img
-                    src={primaryImage.imageUrl}
+                    src={primaryImage.thumbnailUrl || primaryImage.imageUrl}
                     alt={n.playerName || 'Nameset image'}
                     className="mobile-card-image"
                   />

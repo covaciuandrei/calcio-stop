@@ -13,7 +13,10 @@ export interface Nameset {
 export interface NamesetImage {
   id: string;
   namesetId: string;
-  imageUrl: string;
+  imageUrl: string; // Legacy field, kept for backwards compatibility
+  thumbnailUrl: string;
+  mediumUrl: string;
+  largeUrl: string;
   altText?: string;
   isPrimary: boolean;
   displayOrder: number;

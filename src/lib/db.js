@@ -449,7 +449,10 @@ export async function getBadgeImages(badgeId) {
   return (data || []).map((item) => ({
     id: item.id,
     badgeId: item.badge_id,
-    imageUrl: item.image_url,
+    imageUrl: item.image_url || item.large_url, // Legacy field fallback
+    thumbnailUrl: item.thumbnail_url || item.image_url,
+    mediumUrl: item.medium_url || item.image_url,
+    largeUrl: item.large_url || item.image_url,
     altText: item.alt_text,
     isPrimary: item.is_primary,
     displayOrder: item.display_order,
@@ -697,7 +700,10 @@ export async function getNamesetImages(namesetId) {
   return (data || []).map((item) => ({
     id: item.id,
     namesetId: item.nameset_id,
-    imageUrl: item.image_url,
+    imageUrl: item.image_url || item.large_url, // Legacy field fallback
+    thumbnailUrl: item.thumbnail_url || item.image_url,
+    mediumUrl: item.medium_url || item.image_url,
+    largeUrl: item.large_url || item.image_url,
     altText: item.alt_text,
     isPrimary: item.is_primary,
     displayOrder: item.display_order,
@@ -823,6 +829,9 @@ export async function getProducts() {
         id,
         product_id,
         image_url,
+        thumbnail_url,
+        medium_url,
+        large_url,
         alt_text,
         is_primary,
         display_order,
@@ -854,7 +863,10 @@ export async function getProducts() {
     images: (item.product_images || []).map((img) => ({
       id: img.id,
       productId: img.product_id,
-      imageUrl: img.image_url,
+      imageUrl: img.image_url || img.large_url, // Legacy field fallback
+      thumbnailUrl: img.thumbnail_url || img.image_url,
+      mediumUrl: img.medium_url || img.image_url,
+      largeUrl: img.large_url || img.image_url,
       altText: img.alt_text,
       isPrimary: img.is_primary,
       displayOrder: img.display_order,
@@ -873,6 +885,9 @@ export async function getArchivedProducts() {
         id,
         product_id,
         image_url,
+        thumbnail_url,
+        medium_url,
+        large_url,
         alt_text,
         is_primary,
         display_order,
@@ -904,7 +919,10 @@ export async function getArchivedProducts() {
     images: (item.product_images || []).map((img) => ({
       id: img.id,
       productId: img.product_id,
-      imageUrl: img.image_url,
+      imageUrl: img.image_url || img.large_url, // Legacy field fallback
+      thumbnailUrl: img.thumbnail_url || img.image_url,
+      mediumUrl: img.medium_url || img.image_url,
+      largeUrl: img.large_url || img.image_url,
       altText: img.alt_text,
       isPrimary: img.is_primary,
       displayOrder: img.display_order,
@@ -996,7 +1014,10 @@ export async function updateProduct(id, updates) {
     images: (data.product_images || []).map((img) => ({
       id: img.id,
       productId: img.product_id,
-      imageUrl: img.image_url,
+      imageUrl: img.image_url || img.large_url, // Legacy field fallback
+      thumbnailUrl: img.thumbnail_url || img.image_url,
+      mediumUrl: img.medium_url || img.image_url,
+      largeUrl: img.large_url || img.image_url,
       altText: img.alt_text,
       isPrimary: img.is_primary,
       displayOrder: img.display_order,

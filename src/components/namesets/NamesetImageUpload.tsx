@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { NamesetImage } from '../../types';
-import { compressImage, getCompressionInfo } from '../../utils/imageCompression';
+import { createImageVersions } from '../../utils/imageResize';
 import './NamesetImageUpload.css';
 
 interface NamesetImageUploadProps {
@@ -20,7 +20,7 @@ const NamesetImageUpload: React.FC<NamesetImageUploadProps> = ({
   disabled = false,
 }) => {
   const [isUploading, setIsUploading] = useState(false);
-  const [isCompressing, setIsCompressing] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -34,48 +34,64 @@ const NamesetImageUpload: React.FC<NamesetImageUploadProps> = ({
         onError('Please select image files only.');
         continue;
       }
-      let fileToUpload = originalFile;
-      let compressionInfo = '';
       try {
-        // Compress image if it's larger than 1MB
-        if (originalFile.size > 1024 * 1024) {
-          setIsCompressing(true);
-          try {
-            fileToUpload = await compressImage(originalFile, {
-              maxWidth: 1920,
-              maxHeight: 1080,
-              quality: 0.8,
-              maxSizeMB: 5,
-            });
-            const compressionData = getCompressionInfo(originalFile.size, fileToUpload.size);
-            compressionInfo = ` (${compressionData.text})`;
-          } catch (compressionError) {
-            console.warn('Image compression failed, using original file:', compressionError);
-          } finally {
-            setIsCompressing(false);
-          }
-        }
-        // Final size check
-        if (fileToUpload.size > 5 * 1024 * 1024) {
-          onError(
-            `File ${originalFile.name} is still too large after compression (${(fileToUpload.size / 1024 / 1024).toFixed(1)}MB)`
-          );
+        // Create three versions of the image (thumbnail, medium, large)
+        setIsResizing(true);
+        const imageVersions = await createImageVersions(originalFile);
+        setIsResizing(false);
+
+        const timestamp = Date.now();
+        const fileExt = 'webp';
+
+        // Upload all three versions
+        const baseFileName = `${namesetId}/${timestamp}_${i}`;
+        const thumbnailFileName = `${baseFileName}_thumbnail.${fileExt}`;
+        const mediumFileName = `${baseFileName}_medium.${fileExt}`;
+        const largeFileName = `${baseFileName}_large.${fileExt}`;
+
+        // Upload thumbnail
+        const { error: thumbnailUploadError } = await supabase.storage
+          .from('nameset-images')
+          .upload(thumbnailFileName, imageVersions.thumbnail);
+        if (thumbnailUploadError) {
+          onError(`Upload failed for ${originalFile.name} (thumbnail): ${thumbnailUploadError.message}`);
           continue;
         }
-        const fileExt = 'jpg';
-        const fileName = `${namesetId}/${Date.now()}_${i}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage.from('nameset-images').upload(fileName, fileToUpload);
-        if (uploadError) {
-          onError(`Upload failed for ${originalFile.name}: ${uploadError.message}`);
+
+        // Upload medium
+        const { error: mediumUploadError } = await supabase.storage
+          .from('nameset-images')
+          .upload(mediumFileName, imageVersions.medium);
+        if (mediumUploadError) {
+          onError(`Upload failed for ${originalFile.name} (medium): ${mediumUploadError.message}`);
           continue;
         }
-        const { data: urlData } = supabase.storage.from('nameset-images').getPublicUrl(fileName);
+
+        // Upload large
+        const { error: largeUploadError } = await supabase.storage
+          .from('nameset-images')
+          .upload(largeFileName, imageVersions.large);
+        if (largeUploadError) {
+          onError(`Upload failed for ${originalFile.name} (large): ${largeUploadError.message}`);
+          continue;
+        }
+
+        // Get public URLs for all three versions
+        const { data: thumbnailUrlData } = supabase.storage.from('nameset-images').getPublicUrl(thumbnailFileName);
+        const { data: mediumUrlData } = supabase.storage.from('nameset-images').getPublicUrl(mediumFileName);
+        const { data: largeUrlData } = supabase.storage.from('nameset-images').getPublicUrl(largeFileName);
+
+        // Insert into database with all three URLs
+        // Using large_url as image_url for backwards compatibility
         const { data: imageData, error: dbError } = await supabase
           .from('nameset_images')
           .insert({
             nameset_id: namesetId,
-            image_url: urlData.publicUrl,
-            alt_text: originalFile.name + compressionInfo,
+            image_url: largeUrlData.publicUrl, // Legacy field, using large URL
+            thumbnail_url: thumbnailUrlData.publicUrl,
+            medium_url: mediumUrlData.publicUrl,
+            large_url: largeUrlData.publicUrl,
+            alt_text: originalFile.name,
             is_primary: false,
             display_order: 0,
           })
@@ -138,10 +154,10 @@ const NamesetImageUpload: React.FC<NamesetImageUploadProps> = ({
           disabled={disabled}
         />
 
-        {isUploading || isCompressing ? (
+        {isUploading || isResizing ? (
           <div className="upload-content">
             <div className="upload-spinner"></div>
-            <p>{isCompressing ? 'Compressing image...' : 'Uploading...'}</p>
+            <p>{isResizing ? 'Processing image...' : 'Uploading...'}</p>
           </div>
         ) : (
           <div className="upload-content">

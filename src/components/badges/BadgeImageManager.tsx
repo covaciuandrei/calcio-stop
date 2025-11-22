@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { supabase } from '../../lib/supabaseClient';
 import { useBadgeImages } from '../../hooks/useBadgeImages';
+import { supabase } from '../../lib/supabaseClient';
 import './BadgeImageManager.css';
 import BadgeImageUpload from './BadgeImageUpload';
 
@@ -39,10 +39,22 @@ const BadgeImageManager: React.FC<BadgeImageManagerProps> = ({ badgeId, isAdmin 
       const imageToDelete = images.find((img) => img.id === imageId);
       if (!imageToDelete) return;
 
-      // Delete from storage
-      const fileName = imageToDelete.imageUrl.split('/').pop();
-      if (fileName) {
-        await supabase.storage.from('badge-images').remove([`${badgeId}/${fileName}`]);
+      // Delete from storage - delete all three versions (thumbnail, medium, large)
+      // Extract base filename from large URL (e.g., "1234567890_0_large.webp" -> "1234567890_0")
+      const largeUrlParts = (imageToDelete.largeUrl || imageToDelete.imageUrl).split('/');
+      const largeFileName = largeUrlParts[largeUrlParts.length - 1];
+      const baseFileName = largeFileName.replace(/_large\.(webp|jpg|jpeg|png|gif)$/i, '');
+      const fileExt = largeFileName.split('.').pop() || 'webp';
+
+      if (baseFileName) {
+        // Delete all three versions
+        await supabase.storage
+          .from('badge-images')
+          .remove([
+            `${badgeId}/${baseFileName}_thumbnail.${fileExt}`,
+            `${badgeId}/${baseFileName}_medium.${fileExt}`,
+            `${badgeId}/${baseFileName}_large.${fileExt}`,
+          ]);
       }
 
       // Delete from database
@@ -123,7 +135,7 @@ const BadgeImageManager: React.FC<BadgeImageManagerProps> = ({ badgeId, isAdmin 
           {/* Main Image */}
           <div className="main-image-container">
             <img
-              src={primaryImage?.imageUrl}
+              src={primaryImage?.largeUrl || primaryImage?.imageUrl}
               alt={primaryImage?.altText || 'Badge image'}
               className="main-badge-image"
               onClick={() => handleImageClick(0)}
@@ -156,7 +168,7 @@ const BadgeImageManager: React.FC<BadgeImageManagerProps> = ({ badgeId, isAdmin 
               {images.map((image, index) => (
                 <div key={image.id} className="thumbnail-container">
                   <img
-                    src={image.imageUrl}
+                    src={image.thumbnailUrl || image.imageUrl}
                     alt={image.altText || 'Badge image'}
                     className={`thumbnail-image ${index === 0 ? 'active' : ''}`}
                     onClick={() => handleImageClick(index)}
@@ -220,7 +232,7 @@ const BadgeImageManager: React.FC<BadgeImageManagerProps> = ({ badgeId, isAdmin 
               ‹
             </button>
             <img
-              src={images[selectedImageIndex].imageUrl}
+              src={images[selectedImageIndex].largeUrl || images[selectedImageIndex].imageUrl}
               alt={images[selectedImageIndex].altText || 'Badge image'}
               className="image-modal-image"
             />

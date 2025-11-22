@@ -397,7 +397,7 @@ const ProductDetailPage: React.FC = () => {
                                     <div className="badge-option-content">
                                       {primaryImage && (
                                         <img
-                                          src={primaryImage.imageUrl}
+                                          src={primaryImage.thumbnailUrl || primaryImage.imageUrl}
                                           alt={badge.name || 'Badge image'}
                                           className="badge-option-image"
                                         />
@@ -465,7 +465,7 @@ const ProductDetailPage: React.FC = () => {
                                     <div className="badge-option-content">
                                       {primaryImage && (
                                         <img
-                                          src={primaryImage.imageUrl}
+                                          src={primaryImage.thumbnailUrl || primaryImage.imageUrl}
                                           alt={badge.name || 'Badge image'}
                                           className="badge-option-image"
                                         />

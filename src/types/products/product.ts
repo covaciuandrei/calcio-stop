@@ -17,7 +17,10 @@ export interface ProductSizeQuantity {
 export interface ProductImage {
   id: string;
   productId: string;
-  imageUrl: string;
+  imageUrl: string; // Legacy field, kept for backwards compatibility
+  thumbnailUrl: string;
+  mediumUrl: string;
+  largeUrl: string;
   altText?: string;
   isPrimary: boolean;
   displayOrder: number;

@@ -138,7 +138,12 @@ const ArchivedProducts: React.FC<Props> = ({ archivedProducts, searchTerm = '', 
               >
                 {p.images && p.images.length > 0 ? (
                   <img
-                    src={p.images.find((img) => img.isPrimary)?.imageUrl || p.images[0].imageUrl}
+                    src={
+                      p.images.find((img) => img.isPrimary)?.thumbnailUrl ||
+                      p.images[0].thumbnailUrl ||
+                      p.images.find((img) => img.isPrimary)?.imageUrl ||
+                      p.images[0].imageUrl
+                    }
                     alt={p.name || 'Product image'}
                     className="product-thumbnail"
                   />

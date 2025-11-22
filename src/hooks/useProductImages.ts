@@ -46,7 +46,10 @@ const getProductImagesCached = async (productId: string): Promise<ProductImage[]
       const mappedImages = (data || []).map((item) => ({
         id: item.id,
         productId: item.product_id,
-        imageUrl: item.image_url,
+        imageUrl: item.image_url || item.large_url, // Legacy field fallback
+        thumbnailUrl: item.thumbnail_url || item.image_url,
+        mediumUrl: item.medium_url || item.image_url,
+        largeUrl: item.large_url || item.image_url,
         altText: item.alt_text,
         isPrimary: item.is_primary,
         displayOrder: item.display_order,

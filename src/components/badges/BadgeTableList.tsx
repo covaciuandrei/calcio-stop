@@ -98,7 +98,11 @@ const BadgeTableList: React.FC<Props> = ({
                   title="Click to view badge details"
                 >
                   {primaryImage ? (
-                    <img src={primaryImage.imageUrl} alt={b.name || 'Badge image'} className="badge-thumbnail" />
+                    <img
+                      src={primaryImage.thumbnailUrl || primaryImage.imageUrl}
+                      alt={b.name || 'Badge image'}
+                      className="badge-thumbnail"
+                    />
                   ) : (
                     <div className="no-image-placeholder">📷</div>
                   )}
@@ -161,7 +165,11 @@ const BadgeTableList: React.FC<Props> = ({
             >
               <div className="mobile-card-header">
                 {primaryImage ? (
-                  <img src={primaryImage.imageUrl} alt={b.name || 'Badge image'} className="mobile-card-image" />
+                  <img
+                    src={primaryImage.thumbnailUrl || primaryImage.imageUrl}
+                    alt={b.name || 'Badge image'}
+                    className="mobile-card-image"
+                  />
                 ) : (
                   <div className="mobile-card-no-image">📷</div>
                 )}
