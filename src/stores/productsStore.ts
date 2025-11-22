@@ -4,6 +4,104 @@ import { devtools } from 'zustand/middleware';
 import * as db from '../lib/db';
 import { Product } from '../types';
 
+/**
+ * Extracts related data (teams, namesets, kit types, badges) from products
+ * and populates the respective stores to avoid redundant API requests.
+ * This runs asynchronously to avoid blocking the main load operation.
+ */
+function extractAndPopulateRelatedData(products: Product[], isArchived: boolean) {
+  // Run asynchronously to not block the main operation
+  Promise.resolve().then(async () => {
+    try {
+      // Dynamically import stores to avoid circular dependencies
+      const { useTeamsStore } = await import('./teamsStore');
+      const { useNamesetsStore } = await import('./namesetsStore');
+      const { useKitTypesStore } = await import('./kitTypesStore');
+      const { useBadgesStore } = await import('./badgesStore');
+
+      // Extract unique entities from products
+      const teamsMap = new Map<string, any>();
+      const namesetsMap = new Map<string, any>();
+      const kitTypesMap = new Map<string, any>();
+      const badgesMap = new Map<string, any>();
+
+      products.forEach((product) => {
+        if (product.team && product.team.id) {
+          teamsMap.set(product.team.id, product.team);
+        }
+        if (product.nameset && product.nameset.id) {
+          namesetsMap.set(product.nameset.id, product.nameset);
+        }
+        if (product.kitType && product.kitType.id) {
+          kitTypesMap.set(product.kitType.id, product.kitType);
+        }
+        if (product.badge && product.badge.id) {
+          badgesMap.set(product.badge.id, product.badge);
+        }
+      });
+
+      // Get current store states
+      const teamsState = useTeamsStore.getState();
+      const namesetsState = useNamesetsStore.getState();
+      const kitTypesState = useKitTypesStore.getState();
+      const badgesState = useBadgesStore.getState();
+
+      // Merge with existing data (only add if not already present)
+      const existingTeams = isArchived ? teamsState.archivedTeams : teamsState.teams;
+      const existingNamesets = isArchived ? namesetsState.archivedNamesets : namesetsState.namesets;
+      const existingKitTypes = isArchived ? kitTypesState.archivedKitTypes : kitTypesState.kitTypes;
+      const existingBadges = isArchived ? badgesState.archivedBadges : badgesState.badges;
+
+      const newTeams = Array.from(teamsMap.values()).filter((team) => !existingTeams.some((t) => t.id === team.id));
+      const newNamesets = Array.from(namesetsMap.values()).filter(
+        (nameset) => !existingNamesets.some((n) => n.id === nameset.id)
+      );
+      const newKitTypes = Array.from(kitTypesMap.values()).filter(
+        (kitType) => !existingKitTypes.some((kt) => kt.id === kitType.id)
+      );
+      const newBadges = Array.from(badgesMap.values()).filter(
+        (badge) => !existingBadges.some((b) => b.id === badge.id)
+      );
+
+      // Update stores only if we have new data
+      if (newTeams.length > 0) {
+        if (isArchived) {
+          useTeamsStore.getState().setArchivedTeams([...existingTeams, ...newTeams]);
+        } else {
+          useTeamsStore.getState().setTeams([...existingTeams, ...newTeams]);
+        }
+      }
+
+      if (newNamesets.length > 0) {
+        if (isArchived) {
+          useNamesetsStore.getState().setArchivedNamesets([...existingNamesets, ...newNamesets]);
+        } else {
+          useNamesetsStore.getState().setNamesets([...existingNamesets, ...newNamesets]);
+        }
+      }
+
+      if (newKitTypes.length > 0) {
+        if (isArchived) {
+          useKitTypesStore.getState().setArchivedKitTypes([...existingKitTypes, ...newKitTypes]);
+        } else {
+          useKitTypesStore.getState().setKitTypes([...existingKitTypes, ...newKitTypes]);
+        }
+      }
+
+      if (newBadges.length > 0) {
+        if (isArchived) {
+          useBadgesStore.getState().setArchivedBadges([...existingBadges, ...newBadges]);
+        } else {
+          useBadgesStore.getState().setBadges([...existingBadges, ...newBadges]);
+        }
+      }
+    } catch (error) {
+      // Silently fail - this is an optimization, not critical
+      console.warn('Failed to extract related data from products:', error);
+    }
+  });
+}
+
 interface ProductsState {
   // State
   products: Product[];
@@ -190,6 +288,9 @@ export const useProductsStore = create<ProductsState>()(
         try {
           const products = await db.getProducts();
           set({ products, isLoading: false });
+
+          // Extract related data from products and populate stores to avoid redundant requests
+          extractAndPopulateRelatedData(products, false);
         } catch (error) {
           set({
             error: error instanceof Error ? error.message : 'Failed to load products',
@@ -203,6 +304,9 @@ export const useProductsStore = create<ProductsState>()(
         try {
           const archivedProducts = await db.getArchivedProducts();
           set({ archivedProducts, isLoading: false });
+
+          // Extract related data from archived products and populate stores
+          extractAndPopulateRelatedData(archivedProducts, true);
         } catch (error) {
           set({
             error: error instanceof Error ? error.message : 'Failed to load archived products',

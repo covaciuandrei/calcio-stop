@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useRouteData } from '../hooks/useRouteData';
 import {
   useAuth,
   useBadgesList,
@@ -25,6 +26,8 @@ import styles from './shared/TableListCard.module.css';
 import TeamsPage from './teams/TeamsPage';
 
 const Dashboard: React.FC = () => {
+  // Load all data needed for dashboard (it shows all pages)
+  useRouteData();
   // Get data from stores
   const products = useProductsList();
   const sales = useSalesList();

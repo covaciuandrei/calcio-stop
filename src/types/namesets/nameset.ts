@@ -1,3 +1,5 @@
+import { KitType } from '../kittypes/kittype';
+
 export interface Nameset {
   id: string;
   playerName: string; // e.g. "Messi"
@@ -8,6 +10,8 @@ export interface Nameset {
   kitTypeId: string; // reference to kit type (required, defaults to '1st Kit')
   location?: string; // location where the nameset is stored
   createdAt: string; // ISO date string
+  images?: NamesetImage[]; // nameset images (fetched in same request)
+  kitType?: KitType | null; // full kit type object (fetched in same request)
 }
 
 export interface NamesetImage {

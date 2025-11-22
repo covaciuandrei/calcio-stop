@@ -6,6 +6,7 @@ export interface Badge {
   price: number; // price of the badge
   location?: string; // location where the badge is stored
   createdAt: string; // ISO date string
+  images?: BadgeImage[]; // badge images (fetched in same request)
 }
 
 export interface BadgeImage {

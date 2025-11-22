@@ -1,3 +1,8 @@
+import { Badge } from '../badges/badge';
+import { KitType } from '../kittypes/kittype';
+import { Nameset } from '../namesets/nameset';
+import { Team } from '../teams/team';
+
 export enum OrderStatus {
   TO_ORDER = 'to order',
   ORDERED = 'ordered',
@@ -23,4 +28,8 @@ export interface Order {
   customerName?: string; // Can be empty
   phoneNumber?: string; // Can be empty
   createdAt: string;
+  nameset?: Nameset | null; // full nameset object (fetched in same request)
+  team?: Team | null; // full team object (fetched in same request)
+  kitType?: KitType | null; // full kit type object (fetched in same request)
+  badge?: Badge | null; // full badge object (fetched in same request)
 }

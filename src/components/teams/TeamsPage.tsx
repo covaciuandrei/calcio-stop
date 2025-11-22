@@ -1,10 +1,14 @@
 import React from 'react';
+import { useRouteData } from '../../hooks/useRouteData';
 import LeaguesPage from '../leagues/LeaguesPage';
 import AddNewTeamCard from './AddNewTeamCard';
 import ArchivedTeamsCard from './ArchivedTeamsCard';
 import TeamsTableListCard from './TeamsTableListCard';
 
 const TeamsPage: React.FC = () => {
+  // Load only the data needed for the teams page (includes leagues)
+  useRouteData();
+
   return (
     <div>
       {/* Add New Team Card */}

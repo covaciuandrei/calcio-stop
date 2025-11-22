@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { useSuppliersActions } from '../../stores';
+import React from 'react';
+import { useRouteData } from '../../hooks/useRouteData';
 import AddNewProductLinkCard from './AddNewProductLinkCard';
 import AddNewSellerCard from './AddNewSellerCard';
 import ArchivedSellersCard from './ArchivedSellersCard';
@@ -7,14 +7,8 @@ import ProductLinksTableListCard from './ProductLinksTableListCard';
 import SellersTableListCard from './SellersTableListCard';
 
 const SuppliersPage: React.FC = () => {
-  const { loadSellers, loadArchivedSellers, loadProductLinks } = useSuppliersActions();
-
-  useEffect(() => {
-    // Load data when component mounts
-    loadSellers();
-    loadArchivedSellers();
-    loadProductLinks();
-  }, [loadSellers, loadArchivedSellers, loadProductLinks]);
+  // Load only the data needed for the suppliers page
+  useRouteData();
 
   return (
     <div>

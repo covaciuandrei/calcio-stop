@@ -1,3 +1,5 @@
+import { Product } from '../products/product';
+
 export type SaleType = 'OLX' | 'IN-PERSON';
 
 export interface SaleItem {
@@ -5,6 +7,7 @@ export interface SaleItem {
   size: string; // which size was sold
   quantity: number;
   priceSold: number;
+  product?: Product | null; // full product object (fetched in same request)
 }
 
 export interface Sale {
