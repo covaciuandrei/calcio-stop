@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -6,10 +6,7 @@
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico?v=1" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
+    <meta name="description" content="Web site created using create-react-app" />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <!--
       manifest.json provides metadata used when your web app is installed on a
@@ -26,6 +23,70 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>Calcio Stop</title>
+    <!-- Make CSS non-render-blocking -->
+    <script>
+      // This inline script runs immediately to prevent CSS from blocking render
+      // Uses the "print media trick" - CSS loads but doesn't block rendering
+      (function () {
+        function makeCSSNonBlocking(link) {
+          if (link.dataset.asyncLoaded) return; // Already processed
+          link.dataset.asyncLoaded = 'true';
+
+          var media = link.media || 'all';
+
+          // Preload the CSS for faster loading
+          var preloadLink = document.createElement('link');
+          preloadLink.rel = 'preload';
+          preloadLink.as = 'style';
+          preloadLink.href = link.href;
+          document.head.insertBefore(preloadLink, link);
+
+          // Use print media trick - browser loads CSS but doesn't block rendering
+          link.media = 'print';
+
+          // Switch back to original media once loaded
+          link.onload = function () {
+            this.media = media;
+            this.onload = null;
+          };
+
+          // Fallback for browsers that don't fire onload on link elements
+          setTimeout(function () {
+            link.media = media;
+          }, 0);
+        }
+
+        // Process existing stylesheets immediately
+        var links = document.querySelectorAll('link[rel="stylesheet"]');
+        for (var i = 0; i < links.length; i++) {
+          makeCSSNonBlocking(links[i]);
+        }
+
+        // Watch for dynamically added stylesheets (react-scripts injects CSS during build)
+        if (typeof MutationObserver !== 'undefined') {
+          var observer = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+              for (var i = 0; i < mutation.addedNodes.length; i++) {
+                var node = mutation.addedNodes[i];
+                if (
+                  node.nodeType === 1 &&
+                  node.tagName === 'LINK' &&
+                  node.rel === 'stylesheet' &&
+                  !node.dataset.asyncLoaded
+                ) {
+                  makeCSSNonBlocking(node);
+                }
+              }
+            });
+          });
+
+          observer.observe(document.head, {
+            childList: true,
+            subtree: true,
+          });
+        }
+      })();
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

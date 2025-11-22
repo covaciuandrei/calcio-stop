@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useNamesetImagesMapDebounced } from '../../hooks/useNamesetImages';
 import { useArchivedKitTypes, useKitTypesList } from '../../stores';
 import { Nameset } from '../../types';
 import { getKitTypeInfo } from '../../utils/utils';
@@ -31,9 +30,16 @@ const NamesetTableList: React.FC<Props> = ({
   const kitTypes = useKitTypesList();
   const archivedKitTypes = useArchivedKitTypes();
 
-  // Get nameset images for all namesets with debouncing to prevent request storms
-  const namesetIds = namesets.map((nameset) => nameset.id);
-  const { imagesMap } = useNamesetImagesMapDebounced(namesetIds, 500);
+  // Create images map from namesets prop (images already included from optimized query)
+  const imagesMap = useMemo(() => {
+    const map: Record<string, (typeof namesets)[0]['images']> = {};
+    namesets.forEach((nameset) => {
+      if (nameset.images && nameset.images.length > 0) {
+        map[nameset.id] = nameset.images;
+      }
+    });
+    return map;
+  }, [namesets]);
 
   // Check if nameset is out of stock
   const isOutOfStock = (nameset: { quantity: number }) => {
@@ -88,7 +94,8 @@ const NamesetTableList: React.FC<Props> = ({
         <tbody>
           {filteredNamesets.map((n) => {
             const isOutOfStockNameset = isOutOfStock(n);
-            const namesetImages = imagesMap[n.id] || [];
+            // Use images from nameset prop (already loaded from optimized query) or fallback to empty array
+            const namesetImages = n.images || imagesMap[n.id] || [];
             const primaryImage = namesetImages.find((img) => img.isPrimary) || namesetImages[0];
 
             return (
@@ -163,7 +170,8 @@ const NamesetTableList: React.FC<Props> = ({
       <div className="mobile-table-cards">
         {filteredNamesets.map((n) => {
           const isOutOfStockNameset = isOutOfStock(n);
-          const namesetImages = imagesMap[n.id] || [];
+          // Use images from nameset prop (already loaded from optimized query) or fallback to empty array
+          const namesetImages = n.images || imagesMap[n.id] || [];
           const primaryImage = namesetImages.find((img) => img.isPrimary) || namesetImages[0];
           const stockStatus = getStockStatus(n.quantity);
 

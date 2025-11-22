@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as db from '../lib/db';
+import { useBadgesStore } from '../stores/badgesStore';
 import { BadgeImage } from '../types';
 
 // Global cache to prevent duplicate requests
@@ -18,8 +19,18 @@ export const invalidateBadgeImageCache = (badgeId?: string) => {
 };
 
 // Helper function to get images with caching and deduplication
+// First checks the store (from optimized queries), then cache, then makes API call
 const getBadgeImagesCached = async (badgeId: string): Promise<BadgeImage[]> => {
-  // Check cache first
+  // First, check if badge exists in store with images (from optimized query)
+  const state = useBadgesStore.getState();
+  const badge = state.badges.find((b) => b.id === badgeId) || state.archivedBadges.find((b) => b.id === badgeId);
+  if (badge && badge.images && badge.images.length > 0) {
+    // Images already loaded from optimized query, cache them and return
+    imageCache.set(badgeId, badge.images);
+    return badge.images;
+  }
+
+  // Check cache second
   if (imageCache.has(badgeId)) {
     return imageCache.get(badgeId)!;
   }
@@ -29,7 +40,7 @@ const getBadgeImagesCached = async (badgeId: string): Promise<BadgeImage[]> => {
     return pendingRequests.get(badgeId)!;
   }
 
-  // Create new request
+  // Create new request (fallback if images not in store)
   const request = db
     .getBadgeImages(badgeId)
     .then((images) => {
@@ -117,25 +128,43 @@ export const useBadgeImagesMap = (badgeIds: string[]) => {
       try {
         setLoading(true);
 
-        // Use cached requests to prevent duplicates
-        const promises = badgeIds.map(async (badgeId) => {
-          try {
-            const images = await getBadgeImagesCached(badgeId);
-            return { badgeId, images };
-          } catch (err) {
-            // Only log error if not aborted
-            if (!abortControllerRef.current?.signal.aborted) {
-              console.error(`Error loading images for badge ${badgeId}:`, err);
-            }
-            return { badgeId, images: [] };
+        // First, check store for images (from optimized queries) - get current state inside effect
+        const state = useBadgesStore.getState();
+        const allBadges = [...state.badges, ...state.archivedBadges];
+        const map: Record<string, BadgeImage[]> = {};
+        const missingIds: string[] = [];
+
+        badgeIds.forEach((badgeId) => {
+          const badge = allBadges.find((b) => b.id === badgeId);
+          if (badge && badge.images && badge.images.length > 0) {
+            map[badgeId] = badge.images;
+            // Cache them
+            imageCache.set(badgeId, badge.images);
+          } else {
+            missingIds.push(badgeId);
           }
         });
 
-        const results = await Promise.all(promises);
-        const map: Record<string, BadgeImage[]> = {};
-        results.forEach(({ badgeId, images }) => {
-          map[badgeId] = images;
-        });
+        // Only fetch missing images via API
+        if (missingIds.length > 0 && !abortControllerRef.current?.signal.aborted) {
+          const promises = missingIds.map(async (badgeId) => {
+            try {
+              const images = await getBadgeImagesCached(badgeId);
+              return { badgeId, images };
+            } catch (err) {
+              // Only log error if not aborted
+              if (!abortControllerRef.current?.signal.aborted) {
+                console.error(`Error loading images for badge ${badgeId}:`, err);
+              }
+              return { badgeId, images: [] };
+            }
+          });
+
+          const results = await Promise.all(promises);
+          results.forEach(({ badgeId, images }) => {
+            map[badgeId] = images;
+          });
+        }
 
         // Only update state if request wasn't aborted
         if (!abortControllerRef.current?.signal.aborted) {
@@ -205,25 +234,43 @@ export const useBadgeImagesMapDebounced = (badgeIds: string[], delay: number = 3
       try {
         setLoading(true);
 
-        // Use cached requests to prevent duplicates
-        const promises = badgeIds.map(async (badgeId) => {
-          try {
-            const images = await getBadgeImagesCached(badgeId);
-            return { badgeId, images };
-          } catch (err) {
-            // Only log error if not aborted
-            if (!abortControllerRef.current?.signal.aborted) {
-              console.error(`Error loading images for badge ${badgeId}:`, err);
-            }
-            return { badgeId, images: [] };
+        // First, check store for images (from optimized queries) - get current state inside effect
+        const state = useBadgesStore.getState();
+        const allBadges = [...state.badges, ...state.archivedBadges];
+        const map: Record<string, BadgeImage[]> = {};
+        const missingIds: string[] = [];
+
+        badgeIds.forEach((badgeId) => {
+          const badge = allBadges.find((b) => b.id === badgeId);
+          if (badge && badge.images && badge.images.length > 0) {
+            map[badgeId] = badge.images;
+            // Cache them
+            imageCache.set(badgeId, badge.images);
+          } else {
+            missingIds.push(badgeId);
           }
         });
 
-        const results = await Promise.all(promises);
-        const map: Record<string, BadgeImage[]> = {};
-        results.forEach(({ badgeId, images }) => {
-          map[badgeId] = images;
-        });
+        // Only fetch missing images via API
+        if (missingIds.length > 0 && !abortControllerRef.current?.signal.aborted) {
+          const promises = missingIds.map(async (badgeId) => {
+            try {
+              const images = await getBadgeImagesCached(badgeId);
+              return { badgeId, images };
+            } catch (err) {
+              // Only log error if not aborted
+              if (!abortControllerRef.current?.signal.aborted) {
+                console.error(`Error loading images for badge ${badgeId}:`, err);
+              }
+              return { badgeId, images: [] };
+            }
+          });
+
+          const results = await Promise.all(promises);
+          results.forEach(({ badgeId, images }) => {
+            map[badgeId] = images;
+          });
+        }
 
         // Only update state if request wasn't aborted
         if (!abortControllerRef.current?.signal.aborted) {

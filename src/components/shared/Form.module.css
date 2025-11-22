@@ -27,7 +27,7 @@
 .onSaleCheckbox {
   width: 12px;
   height: 12px;
-  accent-color: var(--color-primary);
+  accent-color: var(--primary-600);
   border-color: var(--gray-300);
   border-radius: var(--radius-md);
   background: var(--gray-50);

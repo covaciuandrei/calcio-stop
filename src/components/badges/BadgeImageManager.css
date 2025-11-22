@@ -83,7 +83,7 @@
 
 .thumbnail-image:hover,
 .thumbnail-image.active {
-  border-color: var(--color-primary);
+  border-color: var(--primary-600);
 }
 
 .thumbnail-actions {
@@ -113,7 +113,7 @@
 .no-images {
   text-align: center;
   padding: var(--space-6);
-  color: var(--color-text-secondary);
+  color: var(--gray-600);
 }
 
 .no-images-icon {
@@ -125,7 +125,7 @@
 .loading {
   text-align: center;
   padding: var(--space-4);
-  color: var(--color-text-secondary);
+  color: var(--gray-600);
 }
 
 /* Image Modal */

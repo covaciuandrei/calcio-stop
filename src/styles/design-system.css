@@ -170,7 +170,7 @@ body {
 /* Main container */
 .app-container {
   max-width: 1600px;
-  width: 100%;
+  width: calc(100% - 2 * var(--space-6));
   margin: 0 auto;
   padding: var(--space-6);
   display: flex;
@@ -449,7 +449,7 @@ table .btn {
 .badge-name-link {
   background: none;
   border: none;
-  color: var(--color-primary);
+  color: var(--primary-600);
   text-decoration: none;
   cursor: pointer;
   font-size: inherit;
@@ -460,14 +460,14 @@ table .btn {
 }
 
 .badge-name-link:hover {
-  color: var(--color-primary-dark);
+  color: var(--primary-700);
   text-decoration: underline;
 }
 
 .badge-name-link:focus {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--primary-600);
   outline-offset: 2px;
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--radius-sm);
 }
 
 .navbar a {
@@ -516,16 +516,6 @@ table .btn {
     0 2px 8px rgba(168, 85, 247, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
   transform: translateY(-1px);
-}
-
-@keyframes techGlow {
-  0%,
-  100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
 }
 
 /* Navigation - Main Navbar Design */
@@ -1879,8 +1869,8 @@ textarea:invalid:focus {
   width: 50px;
   height: 50px;
   object-fit: cover;
-  border-radius: var(--border-radius-sm);
-  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--gray-300);
   transition: transform 0.2s ease;
 }
 
@@ -1901,8 +1891,8 @@ textarea:invalid:focus {
   width: 50px;
   height: 50px;
   object-fit: cover;
-  border-radius: var(--border-radius-sm);
-  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--gray-300);
   transition: transform 0.2s ease;
 }
 
@@ -1916,11 +1906,11 @@ textarea:invalid:focus {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-background-secondary);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-sm);
+  background-color: var(--gray-100);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-sm);
   font-size: 1.5rem;
-  color: var(--color-text-secondary);
+  color: var(--gray-500);
 }
 
 .badge-row {
@@ -1928,7 +1918,7 @@ textarea:invalid:focus {
 }
 
 .badge-row:hover {
-  background-color: var(--color-background-secondary);
+  background-color: var(--gray-50);
 }
 
 .badge-row.out-of-stock-row {
@@ -1944,7 +1934,7 @@ textarea:invalid:focus {
 }
 
 .nameset-row:hover {
-  background-color: var(--color-background-secondary);
+  background-color: var(--gray-50);
 }
 
 .nameset-row.out-of-stock-row {

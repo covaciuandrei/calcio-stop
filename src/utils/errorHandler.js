@@ -63,33 +63,3 @@ export function getErrorMessage(error, operation, entityType) {
 export function isForeignKeyConstraintError(error) {
   return error && error.code === '23503';
 }
-
-/**
- * Checks if an error is a unique constraint violation
- * @param {Error} error - The error to check
- * @returns {boolean} True if it's a unique constraint violation
- */
-export function isUniqueConstraintError(error) {
-  return error && error.code === '23505';
-}
-
-/**
- * Gets a detailed error message for foreign key constraint violations
- * @param {Error} error - The original error
- * @param {string} entityType - The type of entity being deleted
- * @returns {string} Detailed error message with suggestions
- */
-export function getForeignKeyErrorMessage(error, entityType) {
-  const entityName = entityType.charAt(0).toUpperCase() + entityType.slice(1);
-
-  return {
-    title: `Cannot Delete ${entityName}`,
-    message: `This ${entityType} cannot be deleted because it is currently being used by other items in your system.`,
-    suggestions: [
-      `Check if any products are using this ${entityType}`,
-      `Remove all references to this ${entityType} first`,
-      `Consider archiving instead of deleting`,
-    ],
-    action: 'Archive instead of delete',
-  };
-}

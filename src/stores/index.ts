@@ -1,7 +1,6 @@
 // Export all stores
 export * from './authStore';
 export * from './badgesStore';
-export * from './counterStore';
 export * from './kitTypesStore';
 export * from './leaguesStore';
 export * from './namesetsStore';
@@ -26,7 +25,6 @@ export {
   useBadgesStore,
   useSoldOutBadges,
 } from './badgesStore';
-export { useCounter, useCounterActions, useCounterConfig, useCounterStore, useCounterValue } from './counterStore';
 export {
   useArchivedKitTypes,
   useKitTypes,
@@ -97,7 +95,6 @@ export {
 // Export selectors for advanced usage
 export { authSelectors } from './authStore';
 export { badgesSelectors } from './badgesStore';
-export { counterSelectors } from './counterStore';
 export { kitTypesSelectors } from './kitTypesStore';
 export { leaguesSelectors } from './leaguesStore';
 export { namesetsSelectors } from './namesetsStore';

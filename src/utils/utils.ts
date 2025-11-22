@@ -181,26 +181,6 @@ export const getProductDisplayText = (
   return parts.join(' - ');
 };
 
-// Utility functions for sorting by creation date
-// Usage examples:
-// const sortedProducts = sortByCreatedAtDesc(products); // Newest first
-// const sortedTeams = sortByCreatedAtAsc(teams); // Oldest first
-export const sortByCreatedAt = <T extends { createdAt: string }>(items: T[], ascending: boolean = true): T[] => {
-  return [...items].sort((a, b) => {
-    const dateA = new Date(a.createdAt).getTime();
-    const dateB = new Date(b.createdAt).getTime();
-    return ascending ? dateA - dateB : dateB - dateA;
-  });
-};
-
-export const sortByCreatedAtDesc = <T extends { createdAt: string }>(items: T[]): T[] => {
-  return sortByCreatedAt(items, false);
-};
-
-export const sortByCreatedAtAsc = <T extends { createdAt: string }>(items: T[]): T[] => {
-  return sortByCreatedAt(items, true);
-};
-
 // Date formatting utilities for European format (DD/MM/YYYY)
 /**
  * Formats a date string or Date object to DD/MM/YYYY format
@@ -238,63 +218,4 @@ export const formatDateTime = (date: string | Date): string => {
   const minutes = String(dateObj.getMinutes()).padStart(2, '0');
   const seconds = String(dateObj.getSeconds()).padStart(2, '0');
   return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
-};
-
-/**
- * Converts a DD/MM/YYYY formatted string to a Date object
- * @param dateStr - Date string in DD/MM/YYYY format
- * @returns Date object or null if invalid
- * @example parseEuropeanDate('21/10/2001') => Date object
- */
-export const parseEuropeanDate = (dateStr: string): Date | null => {
-  const parts = dateStr.split('/');
-  if (parts.length !== 3) {
-    return null;
-  }
-  const day = parseInt(parts[0], 10);
-  const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed
-  const year = parseInt(parts[2], 10);
-  const date = new Date(year, month, day);
-  // Validate the date
-  if (date.getFullYear() !== year || date.getMonth() !== month || date.getDate() !== day) {
-    return null;
-  }
-  return date;
-};
-
-/**
- * Converts a DD/MM/YYYY string to YYYY-MM-DD format (for date input fields)
- * @param dateStr - Date string in DD/MM/YYYY format
- * @returns Date string in YYYY-MM-DD format or empty string if invalid
- * @example europeanToIsoDate('21/10/2001') => '2001-10-21'
- */
-export const europeanToIsoDate = (dateStr: string): string => {
-  const date = parseEuropeanDate(dateStr);
-  if (!date) {
-    return '';
-  }
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
-/**
- * Converts a YYYY-MM-DD string (from date input) to DD/MM/YYYY format
- * @param isoDateStr - Date string in YYYY-MM-DD format
- * @returns Date string in DD/MM/YYYY format or empty string if invalid
- * @example isoToEuropeanDate('2001-10-21') => '21/10/2001'
- */
-export const isoToEuropeanDate = (isoDateStr: string): string => {
-  if (!isoDateStr) {
-    return '';
-  }
-  const parts = isoDateStr.split('-');
-  if (parts.length !== 3) {
-    return '';
-  }
-  const year = parts[0];
-  const month = parts[1];
-  const day = parts[2];
-  return `${day}/${month}/${year}`;
 };

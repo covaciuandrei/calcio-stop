@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as db from '../lib/db';
+import { useNamesetsStore } from '../stores/namesetsStore';
 import { NamesetImage } from '../types';
 
 // Global cache to prevent duplicate requests
@@ -18,8 +19,19 @@ export const invalidateNamesetImageCache = (namesetId?: string) => {
 };
 
 // Helper function to get images with caching and deduplication
+// First checks the store (from optimized queries), then cache, then makes API call
 const getNamesetImagesCached = async (namesetId: string): Promise<NamesetImage[]> => {
-  // Check cache first
+  // First, check if nameset exists in store with images (from optimized query)
+  const state = useNamesetsStore.getState();
+  const nameset =
+    state.namesets.find((n) => n.id === namesetId) || state.archivedNamesets.find((n) => n.id === namesetId);
+  if (nameset && nameset.images && nameset.images.length > 0) {
+    // Images already loaded from optimized query, cache them and return
+    imageCache.set(namesetId, nameset.images);
+    return nameset.images;
+  }
+
+  // Check cache second
   if (imageCache.has(namesetId)) {
     return imageCache.get(namesetId)!;
   }
@@ -29,7 +41,7 @@ const getNamesetImagesCached = async (namesetId: string): Promise<NamesetImage[]
     return pendingRequests.get(namesetId)!;
   }
 
-  // Create new request
+  // Create new request (fallback if images not in store)
   const request = db
     .getNamesetImages(namesetId)
     .then((images) => {
@@ -117,25 +129,43 @@ export const useNamesetImagesMap = (namesetIds: string[]) => {
       try {
         setLoading(true);
 
-        // Use cached requests to prevent duplicates
-        const promises = namesetIds.map(async (namesetId) => {
-          try {
-            const images = await getNamesetImagesCached(namesetId);
-            return { namesetId, images };
-          } catch (err) {
-            // Only log error if not aborted
-            if (!abortControllerRef.current?.signal.aborted) {
-              console.error(`Error loading images for nameset ${namesetId}:`, err);
-            }
-            return { namesetId, images: [] };
+        // First, check store for images (from optimized queries) - get current state inside effect
+        const state = useNamesetsStore.getState();
+        const allNamesets = [...state.namesets, ...state.archivedNamesets];
+        const map: Record<string, NamesetImage[]> = {};
+        const missingIds: string[] = [];
+
+        namesetIds.forEach((namesetId) => {
+          const nameset = allNamesets.find((n) => n.id === namesetId);
+          if (nameset && nameset.images && nameset.images.length > 0) {
+            map[namesetId] = nameset.images;
+            // Cache them
+            imageCache.set(namesetId, nameset.images);
+          } else {
+            missingIds.push(namesetId);
           }
         });
 
-        const results = await Promise.all(promises);
-        const map: Record<string, NamesetImage[]> = {};
-        results.forEach(({ namesetId, images }) => {
-          map[namesetId] = images;
-        });
+        // Only fetch missing images via API
+        if (missingIds.length > 0 && !abortControllerRef.current?.signal.aborted) {
+          const promises = missingIds.map(async (namesetId) => {
+            try {
+              const images = await getNamesetImagesCached(namesetId);
+              return { namesetId, images };
+            } catch (err) {
+              // Only log error if not aborted
+              if (!abortControllerRef.current?.signal.aborted) {
+                console.error(`Error loading images for nameset ${namesetId}:`, err);
+              }
+              return { namesetId, images: [] };
+            }
+          });
+
+          const results = await Promise.all(promises);
+          results.forEach(({ namesetId, images }) => {
+            map[namesetId] = images;
+          });
+        }
 
         // Only update state if request wasn't aborted
         if (!abortControllerRef.current?.signal.aborted) {
@@ -205,25 +235,43 @@ export const useNamesetImagesMapDebounced = (namesetIds: string[], delay: number
       try {
         setLoading(true);
 
-        // Use cached requests to prevent duplicates
-        const promises = namesetIds.map(async (namesetId) => {
-          try {
-            const images = await getNamesetImagesCached(namesetId);
-            return { namesetId, images };
-          } catch (err) {
-            // Only log error if not aborted
-            if (!abortControllerRef.current?.signal.aborted) {
-              console.error(`Error loading images for nameset ${namesetId}:`, err);
-            }
-            return { namesetId, images: [] };
+        // First, check store for images (from optimized queries) - get current state inside effect
+        const state = useNamesetsStore.getState();
+        const allNamesets = [...state.namesets, ...state.archivedNamesets];
+        const map: Record<string, NamesetImage[]> = {};
+        const missingIds: string[] = [];
+
+        namesetIds.forEach((namesetId) => {
+          const nameset = allNamesets.find((n) => n.id === namesetId);
+          if (nameset && nameset.images && nameset.images.length > 0) {
+            map[namesetId] = nameset.images;
+            // Cache them
+            imageCache.set(namesetId, nameset.images);
+          } else {
+            missingIds.push(namesetId);
           }
         });
 
-        const results = await Promise.all(promises);
-        const map: Record<string, NamesetImage[]> = {};
-        results.forEach(({ namesetId, images }) => {
-          map[namesetId] = images;
-        });
+        // Only fetch missing images via API
+        if (missingIds.length > 0 && !abortControllerRef.current?.signal.aborted) {
+          const promises = missingIds.map(async (namesetId) => {
+            try {
+              const images = await getNamesetImagesCached(namesetId);
+              return { namesetId, images };
+            } catch (err) {
+              // Only log error if not aborted
+              if (!abortControllerRef.current?.signal.aborted) {
+                console.error(`Error loading images for nameset ${namesetId}:`, err);
+              }
+              return { namesetId, images: [] };
+            }
+          });
+
+          const results = await Promise.all(promises);
+          results.forEach(({ namesetId, images }) => {
+            map[namesetId] = images;
+          });
+        }
 
         // Only update state if request wasn't aborted
         if (!abortControllerRef.current?.signal.aborted) {

@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useBadgeImagesMapDebounced } from '../../hooks/useBadgeImages';
 import { Badge } from '../../types';
 
 interface Props {
@@ -26,9 +25,16 @@ const BadgeTableList: React.FC<Props> = ({
   // Check if we're in public context
   const isPublicRoute = location.pathname.startsWith('/public');
 
-  // Get badge images for all badges with debouncing to prevent request storms
-  const badgeIds = badges.map((badge) => badge.id);
-  const { imagesMap } = useBadgeImagesMapDebounced(badgeIds, 500);
+  // Create images map from badges prop (images already included from optimized query)
+  const imagesMap = useMemo(() => {
+    const map: Record<string, (typeof badges)[0]['images']> = {};
+    badges.forEach((badge) => {
+      if (badge.images && badge.images.length > 0) {
+        map[badge.id] = badge.images;
+      }
+    });
+    return map;
+  }, [badges]);
 
   // Check if badge is out of stock
   const isOutOfStock = (badge: { quantity: number }) => {
@@ -79,7 +85,8 @@ const BadgeTableList: React.FC<Props> = ({
         </thead>
         <tbody>
           {filteredBadges.map((b) => {
-            const badgeImages = imagesMap[b.id] || [];
+            // Use images from badge prop (already loaded from optimized query) or fallback to empty array
+            const badgeImages = b.images || imagesMap[b.id] || [];
             const primaryImage = badgeImages.find((img) => img.isPrimary) || badgeImages[0];
 
             return (
@@ -151,7 +158,8 @@ const BadgeTableList: React.FC<Props> = ({
       {/* Mobile Card Layout */}
       <div className="mobile-table-cards">
         {filteredBadges.map((b) => {
-          const badgeImages = imagesMap[b.id] || [];
+          // Use images from badge prop (already loaded from optimized query) or fallback to empty array
+          const badgeImages = b.images || imagesMap[b.id] || [];
           const primaryImage = badgeImages.find((img) => img.isPrimary) || badgeImages[0];
           const stockStatus = getStockStatus(b.quantity);
           const isOutOfStockBadge = isOutOfStock(b);
