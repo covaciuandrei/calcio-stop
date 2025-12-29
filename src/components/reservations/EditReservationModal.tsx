@@ -18,6 +18,8 @@ const EditReservationModal: React.FC<Props> = ({ editingReservation, setEditingR
   const [reservationItems, setReservationItems] = useState<ReservationItem[]>([]);
   const [customerName, setCustomerName] = useState<string>('');
   const [expiringDate, setExpiringDate] = useState<string>('');
+  const [location, setLocation] = useState<string>('');
+  const [dateTime, setDateTime] = useState<string>('');
   const [saleType, setSaleType] = useState<'OLX' | 'IN-PERSON' | 'VINTED'>('IN-PERSON');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -27,6 +29,8 @@ const EditReservationModal: React.FC<Props> = ({ editingReservation, setEditingR
       setReservationItems(editingReservation.items || []);
       setCustomerName(editingReservation.customerName);
       setExpiringDate(new Date(editingReservation.expiringDate).toISOString().slice(0, 10));
+      setLocation(editingReservation.location || '');
+      setDateTime(editingReservation.dateTime ? new Date(editingReservation.dateTime).toISOString().slice(0, 16) : '');
       setSaleType(editingReservation.saleType || 'IN-PERSON');
       setErrors({});
     }
@@ -98,9 +102,8 @@ const EditReservationModal: React.FC<Props> = ({ editingReservation, setEditingR
       newErrors.customerName = 'Customer name is required';
     }
 
-    if (!expiringDate) {
-      newErrors.expiringDate = 'Expiring date is required';
-    } else {
+    // Expiring date is now optional - if not provided, it will default to 7 days from now
+    if (expiringDate) {
       const expiring = new Date(expiringDate);
       const now = new Date();
       if (expiring <= now) {
@@ -144,13 +147,22 @@ const EditReservationModal: React.FC<Props> = ({ editingReservation, setEditingR
     }
 
     // Convert expiring date to ISO string with time
-    const expiringDateTime = new Date(expiringDate);
+    // If no expiring date provided, default to 7 days from now
+    const finalExpiringDate = expiringDate || (() => {
+      const sevenDaysFromNow = new Date();
+      sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+      return sevenDaysFromNow.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+    })();
+
+    const expiringDateTime = new Date(finalExpiringDate);
     expiringDateTime.setHours(23, 59, 59, 999); // Set to end of day
 
     updateReservation(editingReservation.id, {
       items: reservationItems,
       customerName: customerName.trim(),
       expiringDate: expiringDateTime.toISOString(),
+      location: location.trim() || undefined,
+      dateTime: dateTime || undefined,
       saleType,
     });
 
@@ -197,7 +209,7 @@ const EditReservationModal: React.FC<Props> = ({ editingReservation, setEditingR
           </div>
 
           <div style={{ marginBottom: 'var(--space-3)' }}>
-            <label htmlFor="edit-expiringDate">Expiring Date *</label>
+            <label htmlFor="edit-expiringDate">Expiring Date</label>
             <DateInput
               id="edit-expiringDate"
               value={expiringDate}
@@ -212,9 +224,31 @@ const EditReservationModal: React.FC<Props> = ({ editingReservation, setEditingR
                 }
               }}
               min={new Date().toISOString().split('T')[0]}
-              placeholder="dd/mm/yyyy"
+              placeholder="dd/mm/yyyy (optional - defaults to 7 days)"
             />
             {errors.expiringDate && <span className="error-text">{errors.expiringDate}</span>}
+          </div>
+
+          <div style={{ marginBottom: 'var(--space-3)' }}>
+            <label htmlFor="edit-location">Location</label>
+            <input
+              type="text"
+              id="edit-location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="Enter location (optional)"
+            />
+          </div>
+
+          <div style={{ marginBottom: 'var(--space-3)' }}>
+            <label htmlFor="edit-dateTime">Date and Time</label>
+            <input
+              type="datetime-local"
+              id="edit-dateTime"
+              value={dateTime}
+              onChange={(e) => setDateTime(e.target.value)}
+              min={new Date().toISOString().slice(0, 16)}
+            />
           </div>
 
           <div style={{ marginBottom: 'var(--space-3)' }}>

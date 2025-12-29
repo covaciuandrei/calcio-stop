@@ -101,6 +101,8 @@ const ReservationsTableList: React.FC<Props> = ({ reservations, onEdit, onDelete
             <th>Items</th>
             <th>Total (RON)</th>
             <th>Customer</th>
+            <th>Location</th>
+            <th>Date & Time</th>
             <th>Status</th>
             <th>Expiring Date</th>
             <th>Actions</th>
@@ -123,6 +125,8 @@ const ReservationsTableList: React.FC<Props> = ({ reservations, onEdit, onDelete
                 </td>
                 <td className="price-display">{getReservationTotal(r).toFixed(2)} RON</td>
                 <td>{r.customerName || 'N/A'}</td>
+                <td>{r.location || 'N/A'}</td>
+                <td>{r.dateTime ? formatDate(r.dateTime) : 'N/A'}</td>
                 <td>
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
                     <span
@@ -231,6 +235,14 @@ const ReservationsTableList: React.FC<Props> = ({ reservations, onEdit, onDelete
                 <div className="mobile-detail-item">
                   <span className="mobile-detail-label">Customer</span>
                   <span className="mobile-detail-value">{r.customerName || 'N/A'}</span>
+                </div>
+                <div className="mobile-detail-item">
+                  <span className="mobile-detail-label">Location</span>
+                  <span className="mobile-detail-value">{r.location || 'N/A'}</span>
+                </div>
+                <div className="mobile-detail-item">
+                  <span className="mobile-detail-label">Date & Time</span>
+                  <span className="mobile-detail-value">{r.dateTime ? formatDate(r.dateTime) : 'N/A'}</span>
                 </div>
                 <div className="mobile-detail-item">
                   <span className="mobile-detail-label">Expiring Date</span>

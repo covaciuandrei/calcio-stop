@@ -156,6 +156,8 @@ CREATE TABLE IF NOT EXISTS reservations (
     items JSONB NOT NULL DEFAULT '[]'::jsonb,
     customer_name VARCHAR(255) NOT NULL,
     expiring_date TIMESTAMP WITH TIME ZONE NOT NULL,
+    location VARCHAR(255) NULL,
+    date_time TIMESTAMP WITH TIME ZONE NULL,
     sale_type VARCHAR(20) NOT NULL DEFAULT 'IN-PERSON' CHECK (sale_type IN ('OLX', 'IN-PERSON', 'VINTED')),
     status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

@@ -14,6 +14,8 @@ const AddReservationForm: React.FC = () => {
   ]);
   const [customerName, setCustomerName] = useState('');
   const [expiringDate, setExpiringDate] = useState('');
+  const [location, setLocation] = useState('');
+  const [dateTime, setDateTime] = useState('');
   const [saleType, setSaleType] = useState<'OLX' | 'IN-PERSON' | 'VINTED'>('IN-PERSON');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -85,9 +87,8 @@ const AddReservationForm: React.FC = () => {
       newErrors.customerName = 'Customer name is required';
     }
 
-    if (!expiringDate) {
-      newErrors.expiringDate = 'Expiring date is required';
-    } else {
+    // Expiring date is now optional - if not provided, it will default to 7 days from now
+    if (expiringDate) {
       const expiring = new Date(expiringDate);
       const now = new Date();
       if (expiring <= now) {
@@ -131,7 +132,14 @@ const AddReservationForm: React.FC = () => {
     }
 
     // Convert expiring date to ISO string with time
-    const expiringDateTime = new Date(expiringDate);
+    // If no expiring date provided, default to 7 days from now
+    const finalExpiringDate = expiringDate || (() => {
+      const sevenDaysFromNow = new Date();
+      sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+      return sevenDaysFromNow.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+    })();
+
+    const expiringDateTime = new Date(finalExpiringDate);
     expiringDateTime.setHours(23, 59, 59, 999); // Set to end of day
 
     const newReservation = {
@@ -143,6 +151,8 @@ const AddReservationForm: React.FC = () => {
       })),
       customerName: customerName.trim(),
       expiringDate: expiringDateTime.toISOString(),
+      location: location.trim() || undefined,
+      dateTime: dateTime || undefined,
       saleType,
     };
 
@@ -152,6 +162,8 @@ const AddReservationForm: React.FC = () => {
     setReservationItems([{ productId: '', size: '', quantity: 1, priceSold: 0 }]);
     setCustomerName('');
     setExpiringDate('');
+    setLocation('');
+    setDateTime('');
     setSaleType('IN-PERSON');
     setErrors({});
   };
@@ -185,7 +197,7 @@ const AddReservationForm: React.FC = () => {
       </div>
 
       <div style={{ marginBottom: 'var(--space-3)' }}>
-        <label htmlFor="expiringDate">Expiring Date *</label>
+        <label htmlFor="expiringDate">Expiring Date</label>
         <DateInput
           id="expiringDate"
           value={expiringDate}
@@ -200,9 +212,31 @@ const AddReservationForm: React.FC = () => {
             }
           }}
           min={new Date().toISOString().split('T')[0]}
-          placeholder="dd/mm/yyyy"
+          placeholder="dd/mm/yyyy (optional - defaults to 7 days)"
         />
         {errors.expiringDate && <span className="error-text">{errors.expiringDate}</span>}
+      </div>
+
+      <div style={{ marginBottom: 'var(--space-3)' }}>
+        <label htmlFor="location">Location</label>
+        <input
+          type="text"
+          id="location"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          placeholder="Enter location (optional)"
+        />
+      </div>
+
+      <div style={{ marginBottom: 'var(--space-3)' }}>
+        <label htmlFor="dateTime">Date and Time</label>
+        <input
+          type="datetime-local"
+          id="dateTime"
+          value={dateTime}
+          onChange={(e) => setDateTime(e.target.value)}
+          min={new Date().toISOString().slice(0, 16)}
+        />
       </div>
 
       <div style={{ marginBottom: 'var(--space-3)' }}>

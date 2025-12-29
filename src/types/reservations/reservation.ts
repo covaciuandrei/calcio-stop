@@ -13,6 +13,8 @@ export interface Reservation {
   items: ReservationItem[];
   customerName: string;
   expiringDate: string; // ISO date string
+  location?: string;
+  dateTime?: string; // ISO datetime string
   status: ReservationStatus;
   saleType: ReservationSaleType;
   createdAt: string; // ISO date string

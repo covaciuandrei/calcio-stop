@@ -2205,6 +2205,8 @@ export async function createReservation(data) {
     items: itemsData,
     customer_name: data.customerName,
     expiring_date: data.expiringDate,
+    location: data.location || null,
+    date_time: data.dateTime || null,
     sale_type: data.saleType || 'IN-PERSON',
     status: 'pending',
     created_at: data.createdAt || new Date().toISOString(),
@@ -2291,6 +2293,8 @@ export async function getReservations() {
     items: reservation.items || [],
     customerName: reservation.customer_name,
     expiringDate: reservation.expiring_date,
+    location: reservation.location || undefined,
+    dateTime: reservation.date_time || undefined,
     saleType: reservation.sale_type || 'IN-PERSON',
     status: reservation.status,
     createdAt: reservation.created_at,
@@ -2320,6 +2324,12 @@ export async function updateReservation(id, updates) {
   if (updates.expiringDate !== undefined) {
     dbUpdates.expiring_date = updates.expiringDate;
   }
+  if (updates.location !== undefined) {
+    dbUpdates.location = updates.location;
+  }
+  if (updates.dateTime !== undefined) {
+    dbUpdates.date_time = updates.dateTime;
+  }
   if (updates.saleType !== undefined) {
     dbUpdates.sale_type = updates.saleType;
   }
@@ -2340,6 +2350,8 @@ export async function updateReservation(id, updates) {
     items: data.items || [],
     customerName: data.customer_name,
     expiringDate: data.expiring_date,
+    location: data.location || undefined,
+    dateTime: data.date_time || undefined,
     saleType: data.sale_type || 'IN-PERSON',
     status: data.status,
     createdAt: data.created_at,
@@ -3722,7 +3734,7 @@ export async function updateSeller(id, updates) {
   if (updates.websiteUrl !== undefined) dbUpdates.website_url = updates.websiteUrl || null;
   if (updates.specialNotes !== undefined) dbUpdates.special_notes = updates.specialNotes || null;
 
-  const { data, error } = await supabase.from('sellers').update(dbUpdates).eq('id', id).select().single();
+  const { error } = await supabase.from('sellers').update(dbUpdates).eq('id', id).select().single();
 
   if (error) throw error;
 
@@ -3773,7 +3785,7 @@ export async function deleteSeller(id) {
 }
 
 export async function archiveSeller(id) {
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from('sellers')
     .update({ archived_at: new Date().toISOString() })
     .eq('id', id)
@@ -3786,7 +3798,7 @@ export async function archiveSeller(id) {
 }
 
 export async function restoreSeller(id) {
-  const { data, error } = await supabase.from('sellers').update({ archived_at: null }).eq('id', id).select().single();
+  const { error } = await supabase.from('sellers').update({ archived_at: null }).eq('id', id).select().single();
 
   if (error) throw error;
 
