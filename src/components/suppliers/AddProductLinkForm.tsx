@@ -99,7 +99,7 @@ const AddProductLinkForm: React.FC<Props> = ({ onAdd }) => {
         {errors.url && <div className="error-message">{errors.url}</div>}
       </div>
       <div className="form-group">
-        <label>Label (optional)</label>
+        <label>Notes (optional)</label>
         <input type="text" placeholder="e.g. Official Store" value={label} onChange={(e) => setLabel(e.target.value)} />
       </div>
       <div className="form-button-container">

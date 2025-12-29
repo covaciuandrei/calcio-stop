@@ -1,15 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  useArchivedBadges,
-  useArchivedKitTypes,
-  useArchivedNamesets,
-  useArchivedTeams,
-  useBadgesList,
-  useKitTypesList,
-  useNamesetsList,
-  useTeamsList,
-} from '../../stores';
+import { useArchivedKitTypes, useArchivedTeams, useKitTypesList, useTeamsList } from '../../stores';
 import { ProductLink } from '../../types';
 import { getKitTypeInfo, getTeamInfo } from '../../utils/utils';
 
@@ -21,6 +12,12 @@ interface Props {
   isReadOnly?: boolean;
   products?: any[]; // Products list for displaying product names
   sellers?: any[]; // Sellers list for displaying seller names
+}
+
+function formatUrl(url: string) {
+  if (!url) return '';
+  if (/^https?:\/\//i.test(url)) return url;
+  return `https://${url}`;
 }
 
 const ProductLinksTableList: React.FC<Props> = ({
@@ -35,14 +32,10 @@ const ProductLinksTableList: React.FC<Props> = ({
   const navigate = useNavigate();
 
   // Get related data for product display
-  const namesets = useNamesetsList();
-  const archivedNamesets = useArchivedNamesets();
   const teams = useTeamsList();
   const archivedTeams = useArchivedTeams();
   const kitTypes = useKitTypesList();
   const archivedKitTypes = useArchivedKitTypes();
-  const badges = useBadgesList();
-  const archivedBadges = useArchivedBadges();
 
   // Filter product links based on search term
   const filteredProductLinks = productLinks.filter((pl) => {
@@ -67,10 +60,10 @@ const ProductLinksTableList: React.FC<Props> = ({
     return <p>No product links found matching "{searchTerm}".</p>;
   }
 
-  const getProductName = (productId: string) => {
-    const product = products.find((p) => p.id === productId);
-    return product ? product.name : 'Unknown Product';
-  };
+  // const getProductName = (productId: string) => {
+  //   const product = products.find((p) => p.id === productId);
+  //   return product ? product.name : 'Unknown Product';
+  // };
 
   const getProductDetails = (productId: string) => {
     const product = products.find((p) => p.id === productId);
@@ -109,7 +102,7 @@ const ProductLinksTableList: React.FC<Props> = ({
           <tr>
             <th>Product</th>
             <th>Seller</th>
-            <th>Label</th>
+            <th>Notes</th>
             <th>URL</th>
             {!isReadOnly && <th>Actions</th>}
           </tr>
@@ -121,16 +114,22 @@ const ProductLinksTableList: React.FC<Props> = ({
               <tr key={pl.id}>
                 <td style={{ maxWidth: '300px', wordBreak: 'break-word' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-1)' }}>
-                    <a
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleProductClick(pl.productId);
+                    <button
+                      type="button"
+                      onClick={() => handleProductClick(pl.productId)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'var(--primary-600)',
+                        textDecoration: 'underline',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        padding: 0,
+                        textAlign: 'left',
                       }}
-                      style={{ color: 'var(--primary-600)', textDecoration: 'underline', fontWeight: 500 }}
                     >
                       {productDetails.notes}
-                    </a>
+                    </button>
                     <div
                       style={{
                         fontSize: '0.875rem',
@@ -164,7 +163,12 @@ const ProductLinksTableList: React.FC<Props> = ({
                 <td>{getSellerName(pl.sellerId) || '-'}</td>
                 <td>{pl.label || '-'}</td>
                 <td>
-                  <a href={pl.url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                  <a
+                    href={formatUrl(pl.url)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     {pl.url}
                   </a>
                 </td>
@@ -196,16 +200,21 @@ const ProductLinksTableList: React.FC<Props> = ({
               <div className="mobile-card-header">
                 <div className="mobile-card-title">
                   <h4>
-                    <a
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleProductClick(pl.productId);
+                    <button
+                      type="button"
+                      onClick={() => handleProductClick(pl.productId)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'var(--primary-600)',
+                        textDecoration: 'underline',
+                        cursor: 'pointer',
+                        padding: 0,
+                        textAlign: 'left',
                       }}
-                      style={{ color: 'var(--primary-600)', textDecoration: 'underline' }}
                     >
                       {productDetails.notes}
-                    </a>
+                    </button>
                   </h4>
                   {pl.label && <p className="mobile-card-subtitle">{pl.label}</p>}
                 </div>
@@ -243,7 +252,7 @@ const ProductLinksTableList: React.FC<Props> = ({
                 <div className="mobile-detail-item">
                   <span className="mobile-detail-label">URL</span>
                   <span className="mobile-detail-value">
-                    <a href={pl.url} target="_blank" rel="noopener noreferrer">
+                    <a href={formatUrl(pl.url)} target="_blank" rel="noopener noreferrer">
                       {pl.url}
                     </a>
                   </span>
