@@ -50,12 +50,32 @@ const SellersTableList: React.FC<Props> = ({
   const archivedKitTypes = useArchivedKitTypes();
 
   // Filter sellers based on search term
-  const filteredSellers = sellers.filter(
-    (seller) =>
-      (seller.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (seller.websiteUrl || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (seller.specialNotes || '').toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const normalizedSearch = searchTerm.toLowerCase();
+  const filteredSellers = sellers.filter((seller) => {
+    if ((seller.name || '').toLowerCase().includes(normalizedSearch)) return true;
+    if ((seller.websiteUrl || '').toLowerCase().includes(normalizedSearch)) return true;
+    if ((seller.specialNotes || '').toLowerCase().includes(normalizedSearch)) return true;
+    if (seller.productIds && seller.productIds.length > 0) {
+      const hasMatchingProduct = seller.productIds.some((id) => {
+        const product = products.find((p) => p.id === id);
+        if (!product) return false;
+        const displayText = getProductDisplayText(
+          product,
+          namesets,
+          archivedNamesets,
+          teams,
+          archivedTeams,
+          badges,
+          archivedBadges,
+          kitTypes,
+          archivedKitTypes
+        );
+        return displayText.toLowerCase().includes(normalizedSearch);
+      });
+      if (hasMatchingProduct) return true;
+    }
+    return false;
+  });
 
   if (sellers.length === 0) {
     return <p>No sellers available.</p>;
