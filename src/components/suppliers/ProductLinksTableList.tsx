@@ -45,13 +45,19 @@ const ProductLinksTableList: React.FC<Props> = ({
   const archivedBadges = useArchivedBadges();
 
   // Filter product links based on search term
-  const filteredProductLinks = productLinks.filter(
-    (pl) =>
-      (products.find((p) => p.id === pl.productId)?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (sellers.find((s) => s.id === pl.sellerId)?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredProductLinks = productLinks.filter((pl) => {
+    const product = products.find((p) => p.id === pl.productId);
+    const seller = sellers.find((s) => s.id === pl.sellerId);
+    const teamName = getTeamInfo(product?.teamId || null, teams, archivedTeams);
+
+    return (
+      (product?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (seller?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (pl.label || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (pl.url || '').toLowerCase().includes(searchTerm.toLowerCase())
-  );
+      (pl.url || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      teamName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
 
   if (productLinks.length === 0) {
     return <p>No product links available.</p>;
