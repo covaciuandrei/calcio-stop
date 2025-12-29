@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import {
-  useArchivedBadges,
-  useArchivedKitTypes,
   useArchivedNamesets,
   useBadgesList,
   useKitTypesList,
@@ -64,9 +62,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
   const namesets = useNamesetsList();
   const archivedNamesets = useArchivedNamesets();
   const kitTypes = useKitTypesList();
-  const archivedKitTypes = useArchivedKitTypes();
   const badges = useBadgesList();
-  const archivedBadges = useArchivedBadges();
   const leagues = useLeaguesList();
 
   // Get unique values for filter options
@@ -182,11 +178,6 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
                     {kitType.name}
                   </option>
                 ))}
-                {archivedKitTypes.map((kitType) => (
-                  <option key={kitType.id} value={kitType.name}>
-                    {kitType.name} (Archived)
-                  </option>
-                ))}
               </select>
             </div>
 
@@ -269,11 +260,6 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
                 {badges.map((badge) => (
                   <option key={badge.id} value={badge.name}>
                     {badge.name}
-                  </option>
-                ))}
-                {archivedBadges.map((badge) => (
-                  <option key={badge.id} value={badge.name}>
-                    {badge.name} (Archived)
                   </option>
                 ))}
               </select>
