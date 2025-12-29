@@ -63,6 +63,12 @@ export interface ShirtStockStats {
   breakdownBySize: Array<{ size: string; quantity: number }>;
 }
 
+export interface ShirtStockByTeam {
+  teamId: string;
+  teamName: string;
+  totalStock: number;
+}
+
 class StatsService {
   // Track a product view
   async trackProductView(productId: string): Promise<void> {
@@ -721,6 +727,67 @@ class StatsService {
         lowStockCount: 0,
         noStockCount: 0,
       };
+    }
+  }
+
+  // Get total stock of shirts broken down by team
+  async getShirtStockByTeam(): Promise<ShirtStockByTeam[]> {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('sizes, team_id, teams(id, name)')
+        .in('type', ['shirt', 'kid kit'])
+        .is('archived_at', null);
+
+      if (error) {
+        throw error;
+      }
+
+      // Aggregate stock by team
+      const teamMap = new Map<string, { teamName: string; totalStock: number }>();
+
+      data?.forEach((product) => {
+        // Calculate total stock for this product
+        const productStock = product.sizes && Array.isArray(product.sizes)
+          ? product.sizes.reduce((sum: number, sizeItem: any) => sum + (sizeItem.quantity || 0), 0)
+          : 0;
+
+        // Get team info
+        const teamId = product.team_id || 'no-team';
+        const team: any = product.teams;
+        let teamName = 'No Team';
+        
+        if (team) {
+          if (Array.isArray(team)) {
+            if (team.length > 0 && team[0]?.name) {
+              teamName = team[0].name;
+            }
+          } else if (team && typeof team === 'object' && 'name' in team) {
+            teamName = team.name || 'No Team';
+          }
+        }
+
+        if (!teamMap.has(teamId)) {
+          teamMap.set(teamId, { teamName, totalStock: 0 });
+        }
+
+        const teamData = teamMap.get(teamId)!;
+        teamData.totalStock += productStock;
+      });
+
+      // Convert to array and sort by total stock (descending)
+      const result = Array.from(teamMap.entries())
+        .map(([teamId, data]) => ({
+          teamId,
+          teamName: data.teamName,
+          totalStock: data.totalStock,
+        }))
+        .sort((a, b) => b.totalStock - a.totalStock);
+
+      return result;
+    } catch (error) {
+      console.error('Error fetching shirt stock by team:', error);
+      return [];
     }
   }
 }

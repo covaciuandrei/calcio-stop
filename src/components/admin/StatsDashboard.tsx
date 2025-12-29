@@ -8,6 +8,7 @@ import {
   LowStockProduct,
   NoStockProduct,
   SalesStats,
+  ShirtStockByTeam,
   ShirtStockStats,
   TopSoldProduct,
   TopViewedShirt,
@@ -28,6 +29,9 @@ const StatsDashboard: React.FC = () => {
     totalStock: 0,
     breakdownBySize: [],
   });
+  const [showTeamStockModal, setShowTeamStockModal] = useState(false);
+  const [shirtStockByTeam, setShirtStockByTeam] = useState<ShirtStockByTeam[]>([]);
+  const [isLoadingTeamStock, setIsLoadingTeamStock] = useState(false);
   const [dashboardStats, setDashboardStats] = useState<DashboardStats>({
     totalSales: 0,
     totalProductsSold: 0,
@@ -308,6 +312,24 @@ const StatsDashboard: React.FC = () => {
                   <span className="trend-icon">📦</span>
                   <span>Shirts in stock</span>
                 </div>
+                <button
+                  className="stock-details-btn"
+                  onClick={async () => {
+                    setShowTeamStockModal(true);
+                    setIsLoadingTeamStock(true);
+                    try {
+                      const teamStock = await statsService.getShirtStockByTeam();
+                      setShirtStockByTeam(teamStock);
+                    } catch (error) {
+                      console.error('Error loading team stock:', error);
+                    } finally {
+                      setIsLoadingTeamStock(false);
+                    }
+                  }}
+                  title="View stock breakdown by team"
+                >
+                  Ranking
+                </button>
               </div>
               {shirtStockStats.breakdownBySize.length > 0 && (
                 <div className="stock-sizes-breakdown">
@@ -607,6 +629,52 @@ const StatsDashboard: React.FC = () => {
                     <div className="item-arrow">→</div>
                   </div>
                 ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Team Stock Breakdown Modal */}
+      {showTeamStockModal && (
+        <div className="stock-modal-overlay" onClick={() => setShowTeamStockModal(false)}>
+          <div className="stock-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="stock-modal-header">
+              <h2>Shirt Stock by Team</h2>
+              <button className="stock-modal-close" onClick={() => setShowTeamStockModal(false)}>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <path
+                    d="M15.5 4.5l-11 11m0-11l11 11"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div className="stock-modal-content">
+              {isLoadingTeamStock ? (
+                <div className="stock-modal-loading">
+                  <div className="loading-spinner">
+                    <div className="spinner-ring"></div>
+                    <div className="spinner-ring"></div>
+                    <div className="spinner-ring"></div>
+                  </div>
+                  <p>Loading team stock data...</p>
+                </div>
+              ) : shirtStockByTeam.length === 0 ? (
+                <div className="no-stock-data">
+                  <p>No team stock data available</p>
+                </div>
+              ) : (
+                <div className="team-stock-list">
+                  {shirtStockByTeam.map((team) => (
+                    <div key={team.teamId} className="team-stock-item">
+                      <div className="team-stock-name">{team.teamName}</div>
+                      <div className="team-stock-quantity">{team.totalStock}</div>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </div>
