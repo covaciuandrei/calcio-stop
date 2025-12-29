@@ -58,6 +58,11 @@ export interface DashboardStats {
   noStockCount: number;
 }
 
+export interface ShirtStockStats {
+  totalStock: number;
+  breakdownBySize: Array<{ size: string; quantity: number }>;
+}
+
 class StatsService {
   // Track a product view
   async trackProductView(productId: string): Promise<void> {
@@ -615,6 +620,69 @@ class StatsService {
     }
 
     return query;
+  }
+
+  // Get total stock of shirts and breakdown by sizes
+  async getShirtStockStats(): Promise<ShirtStockStats> {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('sizes')
+        .in('type', ['shirt', 'kid kit'])
+        .is('archived_at', null);
+
+      if (error) {
+        throw error;
+      }
+
+      // Aggregate stock by size across all shirts
+      const sizeMap = new Map<string, number>();
+
+      data?.forEach((product) => {
+        if (product.sizes && Array.isArray(product.sizes)) {
+          product.sizes.forEach((sizeItem: any) => {
+            const size = sizeItem.size;
+            const quantity = sizeItem.quantity || 0;
+            if (size) {
+              const currentQuantity = sizeMap.get(size) || 0;
+              sizeMap.set(size, currentQuantity + quantity);
+            }
+          });
+        }
+      });
+
+      // Convert to array and sort by size
+      const breakdownBySize = Array.from(sizeMap.entries())
+        .map(([size, quantity]) => ({ size, quantity }))
+        .sort((a, b) => {
+          // Sort sizes: numeric first (ascending), then letters (S, M, L, XL, XXL)
+          const aIsNumeric = !isNaN(Number(a.size));
+          const bIsNumeric = !isNaN(Number(b.size));
+
+          if (aIsNumeric && bIsNumeric) {
+            return Number(a.size) - Number(b.size);
+          }
+          if (aIsNumeric) return -1;
+          if (bIsNumeric) return 1;
+
+          // Sort letters: S, M, L, XL, XXL
+          const sizeOrder: { [key: string]: number } = { S: 1, M: 2, L: 3, XL: 4, XXL: 5 };
+          return (sizeOrder[a.size] || 99) - (sizeOrder[b.size] || 99);
+        });
+
+      const totalStock = breakdownBySize.reduce((sum, item) => sum + item.quantity, 0);
+
+      return {
+        totalStock,
+        breakdownBySize,
+      };
+    } catch (error) {
+      console.error('Error fetching shirt stock stats:', error);
+      return {
+        totalStock: 0,
+        breakdownBySize: [],
+      };
+    }
   }
 
   // Get overall dashboard statistics

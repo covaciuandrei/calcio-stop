@@ -8,6 +8,7 @@ import {
   LowStockProduct,
   NoStockProduct,
   SalesStats,
+  ShirtStockStats,
   TopSoldProduct,
   TopViewedShirt,
   statsService,
@@ -23,6 +24,10 @@ const StatsDashboard: React.FC = () => {
   const [topSoldProducts, setTopSoldProducts] = useState<TopSoldProduct[]>([]);
   const [lowStockProducts, setLowStockProducts] = useState<LowStockProduct[]>([]);
   const [noStockProducts, setNoStockProducts] = useState<NoStockProduct[]>([]);
+  const [shirtStockStats, setShirtStockStats] = useState<ShirtStockStats>({
+    totalStock: 0,
+    breakdownBySize: [],
+  });
   const [dashboardStats, setDashboardStats] = useState<DashboardStats>({
     totalSales: 0,
     totalProductsSold: 0,
@@ -59,7 +64,7 @@ const StatsDashboard: React.FC = () => {
       setIsLoading(true);
       setError(null);
 
-      const [sales, yearlySales, topProducts, topSold, lowStock, noStock, dashboard] = await Promise.all([
+      const [sales, yearlySales, topProducts, topSold, lowStock, noStock, dashboard, shirtStock] = await Promise.all([
         statsService.getSalesStats(12, currentDateRange),
         statsService.getYearlySalesStats(5),
         statsService.getTopViewedProducts(10, currentDateRange),
@@ -67,6 +72,7 @@ const StatsDashboard: React.FC = () => {
         statsService.getLowStockProducts(5),
         statsService.getNoStockProducts(),
         statsService.getDashboardStats(currentDateRange),
+        statsService.getShirtStockStats(),
       ]);
 
       setSalesStats(sales);
@@ -76,6 +82,7 @@ const StatsDashboard: React.FC = () => {
       setLowStockProducts(lowStock);
       setNoStockProducts(noStock);
       setDashboardStats(dashboard);
+      setShirtStockStats(shirtStock);
     } catch (err) {
       setError('Failed to load statistics');
       console.error('Error loading stats:', err);
@@ -288,6 +295,39 @@ const StatsDashboard: React.FC = () => {
               <button className="metric-reset-btn" onClick={handleResetViews} title="Reset all views">
                 🔄
               </button>
+            </div>
+
+            <div className="metric-card stock">
+              <div className="metric-icon">
+                <div className="icon-bg">👕</div>
+              </div>
+              <div className="metric-content">
+                <h3>Total Shirt Stock</h3>
+                <div className="metric-value">{shirtStockStats.totalStock}</div>
+                <div className="metric-trend">
+                  <span className="trend-icon">📦</span>
+                  <span>Shirts in stock</span>
+                </div>
+              </div>
+              {shirtStockStats.breakdownBySize.length > 0 && (
+                <div className="stock-sizes-breakdown">
+                  {shirtStockStats.breakdownBySize.map((item, index) => {
+                    const isNumeric = !isNaN(Number(item.size));
+                    const prevItem = index > 0 ? shirtStockStats.breakdownBySize[index - 1] : null;
+                    const prevIsNumeric = prevItem ? !isNaN(Number(prevItem.size)) : false;
+                    const showSeparator = prevItem && prevIsNumeric && !isNumeric;
+
+                    return (
+                      <React.Fragment key={item.size}>
+                        {showSeparator && <div className="stock-sizes-separator" />}
+                        <span className="stock-size-badge">
+                          {item.size}: {item.quantity}
+                        </span>
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
 
