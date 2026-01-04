@@ -1,152 +1,209 @@
+/* Modern, Clean Sales Filters - Matching Product Filters Design */
 .sales-filters-container {
   position: relative;
+  margin-bottom: 16px;
+  display: inline-block;
 }
 
 .sales-filter-controls {
   display: flex;
-  gap: var(--space-2);
-  align-items: center;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+  width: fit-content;
 }
 
+/* Clean Filter Button */
 .sales-filter-toggle-btn {
-  background: var(--accent-green-200);
-  color: var(--accent-green-700);
-  border: 1px solid var(--accent-green-200);
-  padding: 0 var(--space-3);
-  border-radius: var(--radius-md);
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: var(--font-size-sm);
+  font-size: 14px;
   font-weight: 500;
   transition: all 0.2s ease;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-1);
-  box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
-  height: calc(38px * 1.2);
-  box-sizing: border-box;
-  line-height: 1;
-  margin: 0;
+  gap: 6px;
+  white-space: nowrap;
 }
 
 .sales-filter-toggle-btn:hover {
-  background: var(--accent-green-500);
-  color: white;
-  border-color: var(--accent-green-500);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(34, 197, 94, 0.3);
-}
-
-.sales-filter-toggle-btn.active {
-  background: var(--accent-green-500);
-  color: white;
-  border-color: var(--accent-green-500);
+  background: #2563eb;
 }
 
 .sales-filter-toggle-btn.has-filters {
-  background: var(--accent-orange-500);
-  color: white;
-  border-color: var(--accent-orange-500);
-  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
+  background: #ef4444;
 }
 
 .sales-filter-toggle-btn.has-filters:hover {
-  background: var(--accent-orange-600);
-  border-color: var(--accent-orange-600);
-  box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
+  background: #dc2626;
 }
 
+/* Reset Button */
 .sales-reset-filters-btn {
-  background: var(--gray-100);
-  color: var(--gray-700);
-  border: 1px solid var(--gray-300);
-  padding: 0 var(--space-3);
-  border-radius: var(--radius-md);
+  background: white;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  padding: 8px 16px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: var(--font-size-sm);
+  font-size: 14px;
+  font-weight: 500;
   transition: all 0.2s ease;
-  height: calc(38px * 1.2);
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  margin: 0;
+  white-space: nowrap;
 }
 
 .sales-reset-filters-btn:hover {
-  background: var(--gray-200);
-  border-color: var(--gray-400);
+  background: #f9fafb;
+  border-color: #9ca3af;
 }
 
+/* Filters Container */
 .sales-filters-inline {
-  margin-top: var(--space-4);
-  padding: var(--space-4);
-  background: var(--gray-50);
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-lg);
+  margin-top: 16px;
+  padding: 20px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
 }
 
 .sales-filter-section {
-  margin-bottom: var(--space-4);
+  margin-bottom: 16px;
 }
 
 .sales-filter-section:last-of-type {
-  margin-bottom: var(--space-3);
+  margin-bottom: 0;
 }
 
+/* Labels */
 .sales-filter-section > label {
   display: block;
-  font-size: var(--font-size-sm);
+  font-size: 12px;
   font-weight: 600;
-  color: var(--gray-700);
-  margin-bottom: var(--space-2);
+  color: #374151;
+  margin-bottom: 8px;
 }
 
-.sales-filter-input {
+/* Input Fields */
+.sales-filter-input,
+.sales-filter-section select,
+.sales-filter-section input[type='text'],
+.sales-filter-section input[type='number'] {
   width: 100%;
-  padding: calc(var(--space-2) * 1.2) var(--space-2);
-  border: 1px solid var(--gray-300);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-xs);
-  background: rgba(255, 255, 255, 0.9);
-  transition: all var(--transition-normal);
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  transition: all 0.2s ease;
+  color: #111827;
 }
 
-.sales-filter-input:focus {
+.sales-filter-input:hover,
+.sales-filter-section select:hover,
+.sales-filter-section input[type='text']:hover,
+.sales-filter-section input[type='number']:hover {
+  border-color: #9ca3af;
+}
+
+.sales-filter-input:focus,
+.sales-filter-section select:focus,
+.sales-filter-section input:focus {
   outline: none;
-  border-color: var(--primary-500);
-  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+/* Radio buttons styling */
+.sales-filter-section input[type='radio'] {
+  cursor: pointer;
+  accent-color: #3b82f6;
+}
+
+/* Sale Type Grid - 2x2 Layout */
+.sale-type-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.sale-type-option {
+  padding: 10px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.sale-type-option:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.sale-type-option.selected {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.sale-type-option.selected:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+/* Actions Section */
 .sales-filters-actions {
-  margin-top: var(--space-3);
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--gray-200);
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
 }
 
 .sales-filter-reset-btn {
   width: 100%;
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--gray-300);
-  border-radius: var(--radius-md);
-  background: var(--gray-100);
-  color: var(--gray-700);
-  font-size: var(--font-size-xs);
+  padding: 8px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all var(--transition-normal);
+  transition: all 0.2s ease;
 }
 
 .sales-filter-reset-btn:hover {
-  background: var(--gray-200);
-  border-color: var(--gray-400);
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sales-filters-inline {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sales-filters-inline {
+    padding: 12px;
+  }
 }
 
 /* Returns filters - display all items in a row */
 .sales-filters {
   display: flex;
   flex-direction: row;
-  gap: var(--space-2);
+  gap: 8px;
   align-items: flex-end;
   flex-wrap: nowrap;
 }
@@ -154,52 +211,46 @@
 .sales-filters .filter-group {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 6px;
   flex-shrink: 0;
   justify-content: flex-end;
 }
 
 .sales-filters .filter-group label {
-  font-size: var(--font-size-xs);
+  font-size: 12px;
   font-weight: 600;
-  color: var(--gray-700);
+  color: #374151;
   margin: 0;
   line-height: 1.2;
-  height: 16px;
-  display: flex;
-  align-items: center;
 }
 
 .sales-filters .filter-group input,
 .sales-filters .filter-group select {
-  padding: calc(var(--space-2) * 1.2) var(--space-2);
-  border: 1px solid var(--gray-300);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  background: rgba(255, 255, 255, 0.9);
-  transition: all var(--transition-normal);
-  height: calc(38px * 1.2);
-  box-sizing: border-box;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  transition: all 0.2s ease;
   min-width: 150px;
   margin: 0;
+  color: #111827;
 }
 
 .sales-filters .filter-group input:focus,
 .sales-filters .filter-group select:focus {
   outline: none;
-  border-color: var(--primary-500);
-  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .sales-filters .btn {
-  height: calc(38px * 1.2) !important;
-  padding: 0 var(--space-3) !important;
-  border: 1px solid var(--gray-300) !important;
-  border-radius: var(--radius-md) !important;
-  font-size: var(--font-size-sm) !important;
+  padding: 8px 16px !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
   cursor: pointer;
-  transition: all var(--transition-normal);
-  box-sizing: border-box;
+  transition: all 0.2s ease;
   flex-shrink: 0;
   white-space: nowrap;
   margin: 0 !important;
@@ -207,11 +258,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: calc(38px * 1.2) !important;
   line-height: 1 !important;
-  background: linear-gradient(135deg, var(--gray-500), var(--gray-600)) !important;
+  background: #6b7280 !important;
   color: white !important;
   box-shadow: none !important;
+  font-weight: 500;
 }
 
 .sales-filters .btn::before {
@@ -219,9 +270,9 @@
 }
 
 .sales-filters .btn:hover {
-  background: linear-gradient(135deg, var(--gray-600), var(--gray-700)) !important;
+  background: #4b5563 !important;
   transform: translateY(-1px);
-  box-shadow: var(--shadow-sm) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
 }
 
 .sales-filters .btn:active {

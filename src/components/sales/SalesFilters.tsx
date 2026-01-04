@@ -233,51 +233,35 @@ const SalesFilters: React.FC<SalesFiltersProps> = ({ startDate, endDate, saleTyp
 
           <div className="sales-filter-section">
             <label>Sale Type</label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                <input
-                  type="radio"
-                  name="saleType"
-                  value=""
-                  checked={localFilters.saleType === ''}
-                  onChange={(e) => handleFilterChange('saleType', e.target.value)}
-                  style={{ width: '14px', height: '14px', margin: 0, flexShrink: 0 }}
-                />
-                <span style={{ fontSize: '0.875rem' }}>All</span>
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                <input
-                  type="radio"
-                  name="saleType"
-                  value="IN-PERSON"
-                  checked={localFilters.saleType === 'IN-PERSON'}
-                  onChange={(e) => handleFilterChange('saleType', e.target.value)}
-                  style={{ width: '14px', height: '14px', margin: 0, flexShrink: 0 }}
-                />
-                <span style={{ fontSize: '0.875rem' }}>In-Person</span>
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                <input
-                  type="radio"
-                  name="saleType"
-                  value="OLX"
-                  checked={localFilters.saleType === 'OLX'}
-                  onChange={(e) => handleFilterChange('saleType', e.target.value)}
-                  style={{ width: '14px', height: '14px', margin: 0, flexShrink: 0 }}
-                />
-                <span style={{ fontSize: '0.875rem' }}>OLX</span>
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                <input
-                  type="radio"
-                  name="saleType"
-                  value="VINTED"
-                  checked={localFilters.saleType === 'VINTED'}
-                  onChange={(e) => handleFilterChange('saleType', e.target.value)}
-                  style={{ width: '14px', height: '14px', margin: 0, flexShrink: 0 }}
-                />
-                <span style={{ fontSize: '0.875rem' }}>Vinted</span>
-              </label>
+            <div className="sale-type-grid">
+              <button
+                type="button"
+                className={`sale-type-option ${localFilters.saleType === '' ? 'selected' : ''}`}
+                onClick={() => handleFilterChange('saleType', '')}
+              >
+                All
+              </button>
+              <button
+                type="button"
+                className={`sale-type-option ${localFilters.saleType === 'IN-PERSON' ? 'selected' : ''}`}
+                onClick={() => handleFilterChange('saleType', 'IN-PERSON')}
+              >
+                In-Person
+              </button>
+              <button
+                type="button"
+                className={`sale-type-option ${localFilters.saleType === 'OLX' ? 'selected' : ''}`}
+                onClick={() => handleFilterChange('saleType', 'OLX')}
+              >
+                OLX
+              </button>
+              <button
+                type="button"
+                className={`sale-type-option ${localFilters.saleType === 'VINTED' ? 'selected' : ''}`}
+                onClick={() => handleFilterChange('saleType', 'VINTED')}
+              >
+                Vinted
+              </button>
             </div>
           </div>
 
