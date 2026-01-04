@@ -1,43 +1,23 @@
 import React, { useState } from 'react';
-import { useRouteData } from '../hooks/useRouteData';
+import { useAuth, useDashboardOrder } from '../stores';
+import { useLazyDashboardData } from '../hooks/useLazyDashboardData';
 import {
-  useAuth,
-  useBadgesList,
-  useDashboardOrder,
-  useKitTypesList,
-  useLeaguesList,
-  useNamesetsList,
-  useProductsList,
-  useReservationsList,
-  useReturnsList,
-  useSalesList,
-  useTeamsList,
-} from '../stores';
-import BadgesPage from './badges/BadgesPage';
-import KitTypesPage from './kittypes/KitTypesPage';
-import LeaguesPage from './leagues/LeaguesPage';
-import NamesetsPage from './namesets/NamesetsPage';
-import ProductsPage from './products/ProductsPage';
-import ReservationsPage from './reservations/ReservationsPage';
-import ReturnsPage from './returns/ReturnsPage';
-import SalesPage from './sales/SalesPage';
+  LazyBadgesPage,
+  LazyKitTypesPage,
+  LazyLeaguesPage,
+  LazyNamesetsPage,
+  LazyProductsPage,
+  LazyReservationsPage,
+  LazyReturnsPage,
+  LazySalesPage,
+  LazyTeamsPage,
+} from './Dashboard.lazy';
 import CollapsibleHeader from './shared/CollapsibleHeader';
 import styles from './shared/TableListCard.module.css';
-import TeamsPage from './teams/TeamsPage';
 
 const Dashboard: React.FC = () => {
-  // Load all data needed for dashboard (it shows all pages)
-  useRouteData();
-  // Get data from stores
-  const products = useProductsList();
-  const sales = useSalesList();
-  const returns = useReturnsList();
-  const namesets = useNamesetsList();
-  const teams = useTeamsList();
-  const badges = useBadgesList();
-  const kitTypes = useKitTypesList();
-  const leagues = useLeaguesList();
-  const reservations = useReservationsList();
+  // Use lazy loading hook for data
+  const { data, loadingStates, loadCardData, isCardDataReady } = useLazyDashboardData();
   const dashboardOrder = useDashboardOrder();
   const { user, isAuthenticated } = useAuth();
   const isAdmin = user?.role === 'admin' && isAuthenticated;
@@ -55,14 +35,21 @@ const Dashboard: React.FC = () => {
     reservations: false,
   });
 
-  const toggleCard = (cardName: keyof typeof collapsedCards) => {
+  const toggleCard = async (cardName: keyof typeof collapsedCards) => {
+    const willBeExpanded = collapsedCards[cardName];
+
     setCollapsedCards((prev) => ({
       ...prev,
       [cardName]: !prev[cardName],
     }));
+
+    // Load data when expanding a card for the first time
+    if (willBeExpanded && !isCardDataReady(cardName as any)) {
+      await loadCardData(cardName as any);
+    }
   };
 
-  // Dashboard cards configuration
+  // Dashboard cards configuration with lazy components
   const dashboardCards: {
     [key: string]: {
       title: string;
@@ -70,62 +57,72 @@ const Dashboard: React.FC = () => {
       count: number;
       component: React.ReactElement;
       adminOnly?: boolean;
+      isLoading?: boolean;
     };
   } = {
     products: {
       title: 'Manage Products',
       description: 'Stock, prices, and inventory management',
-      count: products.length,
-      component: <ProductsPage />,
+      count: data.products.length,
+      component: <LazyProductsPage />,
+      isLoading: loadingStates.products,
     },
     sales: {
       title: 'Manage Sales',
       description: 'Track and record your sales transactions',
-      count: sales.length,
-      component: <SalesPage />,
+      count: data.sales.length,
+      component: <LazySalesPage />,
+      isLoading: loadingStates.sales,
     },
     returns: {
       title: 'Manage Returns',
       description: 'View and manage returned sales',
-      count: returns.length,
-      component: <ReturnsPage />,
+      count: data.returns.length,
+      component: <LazyReturnsPage />,
+      isLoading: loadingStates.returns,
     },
     namesets: {
       title: 'Manage Namesets',
       description: 'Customize team and player name collections',
-      count: namesets.length,
-      component: <NamesetsPage />,
+      count: data.namesets.length,
+      component: <LazyNamesetsPage />,
+      isLoading: loadingStates.namesets,
     },
     teams: {
       title: 'Manage Teams',
       description: 'Organize your teams and player rosters',
-      count: teams.length,
-      component: <TeamsPage />,
+      count: data.teams.length,
+      component: <LazyTeamsPage />,
+      isLoading: loadingStates.teams,
     },
     badges: {
       title: 'Manage Badges',
       description: 'Create and manage badges for shirts',
-      count: badges.length,
-      component: <BadgesPage />,
+      count: data.badges.length,
+      component: <LazyBadgesPage />,
+      isLoading: loadingStates.badges,
     },
     kitTypes: {
       title: 'Manage Kit Types',
       description: 'Define kit types like 1st Kit, 2nd Kit, etc.',
-      count: kitTypes.length,
-      component: <KitTypesPage />,
+      count: data.kitTypes.length,
+      component: <LazyKitTypesPage />,
+      isLoading: loadingStates.kitTypes,
     },
     leagues: {
       title: 'Manage Leagues',
       description: 'Manage championships and competitions',
-      count: leagues.length,
-      component: <LeaguesPage />,
+      count: data.leagues.length,
+      component: <LazyLeaguesPage />,
+      isLoading: loadingStates.leagues,
     },
     reservations: {
       title: 'Manage Reservations',
       description: 'Track and manage product reservations',
-      count: reservations.length,
-      component: <ReservationsPage />,
+      count: data.reservations.length,
+      component: <LazyReservationsPage />,
       adminOnly: true,
+      isLoading: loadingStates.reservations,
     },
   };
 
@@ -144,6 +141,7 @@ const Dashboard: React.FC = () => {
               isExpanded={!collapsedCards[cardId as keyof typeof collapsedCards]}
               onToggle={() => toggleCard(cardId as keyof typeof collapsedCards)}
               count={card.count}
+              isLoading={card.isLoading}
             />
             {collapsedCards[cardId as keyof typeof collapsedCards] && (
               <div className={styles.collapsedContent}>{card.description}</div>
@@ -151,7 +149,7 @@ const Dashboard: React.FC = () => {
             <div
               className={`${styles.collapsibleContent} ${collapsedCards[cardId as keyof typeof collapsedCards] ? styles.collapsed : ''}`}
             >
-              {card.component}
+              {!collapsedCards[cardId as keyof typeof collapsedCards] && card.component}
             </div>
           </div>
         );

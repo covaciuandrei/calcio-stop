@@ -7,6 +7,7 @@ interface CollapsibleHeaderProps {
   onToggle: () => void;
   className?: string;
   count?: number;
+  isLoading?: boolean;
 }
 
 const CollapsibleHeader: React.FC<CollapsibleHeaderProps> = ({
@@ -15,8 +16,13 @@ const CollapsibleHeader: React.FC<CollapsibleHeaderProps> = ({
   onToggle,
   className = '',
   count,
+  isLoading = false,
 }) => {
-  const displayTitle = count !== undefined ? `${title} (${count})` : title;
+  const displayTitle = isLoading
+    ? `${title} (Loading...)`
+    : count !== undefined
+    ? `${title} (${count})`
+    : title;
 
   return (
     <div
