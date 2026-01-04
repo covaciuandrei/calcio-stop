@@ -308,51 +308,34 @@ class StatsService {
     }
   }
 
-  // Get top 10 viewed products (all types)
+  // Get top viewed products (all types) - Optimized to reduce N+1 queries
   async getTopViewedProducts(limit: number = 10, dateRange?: DateRange): Promise<TopViewedShirt[]> {
     try {
-      // First, get all products from the database with team information
-      const { data: allProducts, error: productsError } = await supabase
-        .from('products')
-        .select(
-          `
-          id, 
-          name, 
-          type,
-          teams!inner(id, name)
-        `
-        )
-        .is('archived_at', null);
-
-      if (productsError) {
-        console.error('Error fetching products:', productsError);
-        throw productsError;
-      }
-
-      // Initialize all products with 0 views
-      const productViews = new Map<string, { name: string; teamName: string; views: number }>();
-      allProducts?.forEach((product) => {
-        // Handle teams as array from inner join
-        const team = Array.isArray(product.teams) ? product.teams[0] : product.teams;
-        const teamName = team?.name || 'No Team';
-        productViews.set(product.id, {
-          name: product.name,
-          teamName: teamName,
-          views: 0,
-        });
-      });
-
-      // Get all views with product info
+      // Single query to get all views with product and team info
+      // This eliminates the need to fetch ALL products first
       let viewsQuery = supabase
         .from('views')
-        .select('product_id, timestamp, products!inner(id, name, type)')
+        .select(
+          `
+          product_id,
+          timestamp,
+          products!inner(
+            id,
+            name,
+            type,
+            archived_at,
+            teams(id, name)
+          )
+        `
+        )
+        .is('products.archived_at', null)
         .order('timestamp', { ascending: false });
 
       // Apply date range filter if provided
       if (dateRange) {
         viewsQuery = viewsQuery
           .gte('timestamp', dateRange.startDate)
-          .lte('timestamp', dateRange.endDate + 'T23:59:59.999Z'); // Include the entire end date
+          .lte('timestamp', dateRange.endDate + 'T23:59:59.999Z');
       }
 
       const { data: viewsData, error: viewsError } = await viewsQuery;
@@ -362,62 +345,63 @@ class StatsService {
         throw viewsError;
       }
 
-      // Count views for each product
+      // Aggregate views by product in memory (much more efficient than the original approach)
+      const productViews = new Map<string, { name: string; teamName: string; views: number }>();
+
       viewsData?.forEach((view) => {
         const product = view.products;
+        if (!product) return;
 
-        if (!product) {
-          console.warn('No product data in view:', view);
-          return;
-        }
-
-        // Handle both object and array cases (in case Supabase returns differently)
         const actualProduct = Array.isArray(product) ? product[0] : product;
+        if (!actualProduct) return;
 
-        if (!actualProduct) {
-          return; // Skip invalid products
-        }
+        const team = actualProduct.teams;
+        const teamName = (Array.isArray(team) ? (team[0] as any)?.name : (team as any)?.name) || 'No Team';
 
         const productId = view.product_id;
 
-        if (productViews.has(productId)) {
-          productViews.get(productId)!.views += 1;
+        if (!productViews.has(productId)) {
+          productViews.set(productId, {
+            name: actualProduct.name,
+            teamName: teamName,
+            views: 0,
+          });
         }
+
+        productViews.get(productId)!.views += 1;
       });
 
-      // Get product images for all products that have views
-      const productsWithViews = Array.from(productViews.entries())
-        .filter(([, data]) => data.views > 0)
-        .map(([productId]) => productId);
+      // Get top products by view count
+      const topProducts = Array.from(productViews.entries())
+        .sort(([, a], [, b]) => b.views - a.views)
+        .slice(0, limit);
 
-      // Fetch images for all products with views
+      // Single query to fetch images for only the top products
+      const productIds = topProducts.map(([productId]) => productId);
+
       const { data: imagesData } = await supabase
         .from('product_images')
-        .select('product_id, image_url, is_primary, display_order')
-        .in('product_id', productsWithViews)
+        .select('product_id, medium_url, is_primary, display_order')
+        .in('product_id', productIds)
         .order('is_primary', { ascending: false })
         .order('display_order', { ascending: true });
 
-      // Create a map of productId -> main image URL
+      // Create image map for efficient lookup
       const productImageMap = new Map<string, string>();
       imagesData?.forEach((img) => {
         if (!productImageMap.has(img.product_id)) {
-          productImageMap.set(img.product_id, img.image_url);
+          productImageMap.set(img.product_id, img.medium_url);
         }
       });
 
-      // Convert to array, filter out products with 0 views, and sort by views
-      const result: TopViewedShirt[] = Array.from(productViews.entries())
-        .map(([productId, data]) => ({
-          productId,
-          productName: data.name,
-          teamName: data.teamName,
-          views: data.views,
-          mainImageUrl: productImageMap.get(productId),
-        }))
-        .filter((product) => product.views > 0) // Only show products with views
-        .sort((a, b) => b.views - a.views)
-        .slice(0, limit);
+      // Build final result
+      const result: TopViewedShirt[] = topProducts.map(([productId, data]) => ({
+        productId,
+        productName: data.name,
+        teamName: data.teamName,
+        views: data.views,
+        mainImageUrl: productImageMap.get(productId),
+      }));
 
       return result;
     } catch (error) {
@@ -426,49 +410,36 @@ class StatsService {
     }
   }
 
-  // Get top 10 sold products (all types)
+  // Get top sold products (all types) - Optimized to reduce N+1 queries
   async getTopSoldProducts(limit: number = 10, dateRange?: DateRange): Promise<TopSoldProduct[]> {
     try {
-      // First, get all products from the database with team information
-      const { data: allProducts, error: productsError } = await supabase
-        .from('products')
-        .select(
-          `
-          id, 
-          name, 
-          type,
-          teams!inner(id, name)
-        `
-        )
-        .is('archived_at', null);
-
-      if (productsError) {
-        console.error('Error fetching products:', productsError);
-        throw productsError;
-      }
-
-      // Initialize all products with 0 sales
-      const productSales = new Map<string, { name: string; teamName: string; quantitySold: number }>();
-      allProducts?.forEach((product) => {
-        // Handle teams as array from inner join
-        const team = Array.isArray(product.teams) ? product.teams[0] : product.teams;
-        const teamName = team?.name || 'No Team';
-        productSales.set(product.id, {
-          name: product.name,
-          teamName: teamName,
-          quantitySold: 0,
-        });
-      });
-
-      // Get all sales with items array and product info
+      // Single query to get all sales with product and team info
+      // This eliminates the need to fetch ALL products first
       let salesQuery = supabase
         .from('sales')
-        .select('items, product_id, quantity, size, price_sold, products!inner(id, name, type)')
+        .select(
+          `
+          items,
+          product_id,
+          quantity,
+          size,
+          price_sold,
+          date,
+          products!inner(
+            id,
+            name,
+            type,
+            archived_at,
+            teams(id, name)
+          )
+        `
+        )
+        .is('products.archived_at', null)
         .order('date', { ascending: false });
 
       // Apply date range filter if provided
       if (dateRange) {
-        salesQuery = salesQuery.gte('date', dateRange.startDate).lte('date', dateRange.endDate + 'T23:59:59.999Z'); // Include the entire end date
+        salesQuery = salesQuery.gte('date', dateRange.startDate).lte('date', dateRange.endDate + 'T23:59:59.999Z');
       }
 
       const { data: salesData, error: salesError } = await salesQuery;
@@ -478,7 +449,9 @@ class StatsService {
         throw salesError;
       }
 
-      // Count sales for each product
+      // Aggregate sales by product in memory (much more efficient than the original approach)
+      const productSales = new Map<string, { name: string; teamName: string; quantitySold: number }>();
+
       salesData?.forEach((sale) => {
         // Support both new (items) and old (product_id, quantity) formats
         const items = sale.items || [
@@ -491,49 +464,65 @@ class StatsService {
         ];
 
         items.forEach((item: any) => {
-          // Try to get product info from the sale's products join or use productId directly
           const productId = item.productId || sale.product_id;
           const quantity = item.quantity || sale.quantity || 0;
 
-          if (productId && productSales.has(productId)) {
+          if (productId) {
+            // Get product info from the joined data
+            const product = sale.products;
+            if (!product) return;
+
+            const actualProduct = Array.isArray(product) ? product[0] : product;
+            if (!actualProduct) return;
+
+            const team = actualProduct.teams;
+            const teamName = (Array.isArray(team) ? (team[0] as any)?.name : (team as any)?.name) || 'No Team';
+
+            if (!productSales.has(productId)) {
+              productSales.set(productId, {
+                name: actualProduct.name,
+                teamName: teamName,
+                quantitySold: 0,
+              });
+            }
+
             productSales.get(productId)!.quantitySold += quantity;
           }
         });
       });
 
-      // Get product images for all products that have sales
-      const productsWithSales = Array.from(productSales.entries())
+      // Get top products by sales count
+      const topProducts = Array.from(productSales.entries())
         .filter(([, data]) => data.quantitySold > 0)
-        .map(([productId]) => productId);
+        .sort(([, a], [, b]) => b.quantitySold - a.quantitySold)
+        .slice(0, limit);
 
-      // Fetch images for all products with sales
+      // Single query to fetch images for only the top products
+      const productIds = topProducts.map(([productId]) => productId);
+
       const { data: imagesData } = await supabase
         .from('product_images')
-        .select('product_id, image_url, is_primary, display_order')
-        .in('product_id', productsWithSales)
+        .select('product_id, medium_url, is_primary, display_order')
+        .in('product_id', productIds)
         .order('is_primary', { ascending: false })
         .order('display_order', { ascending: true });
 
-      // Create a map of productId -> main image URL
+      // Create image map for efficient lookup
       const productImageMap = new Map<string, string>();
       imagesData?.forEach((img) => {
         if (!productImageMap.has(img.product_id)) {
-          productImageMap.set(img.product_id, img.image_url);
+          productImageMap.set(img.product_id, img.medium_url);
         }
       });
 
-      // Convert to array, filter out products with 0 sales, and sort by sales
-      const result: TopSoldProduct[] = Array.from(productSales.entries())
-        .map(([productId, data]) => ({
-          productId,
-          productName: data.name,
-          teamName: data.teamName,
-          quantitySold: data.quantitySold,
-          mainImageUrl: productImageMap.get(productId),
-        }))
-        .filter((product) => product.quantitySold > 0) // Only show products with sales
-        .sort((a, b) => b.quantitySold - a.quantitySold)
-        .slice(0, limit);
+      // Build final result
+      const result: TopSoldProduct[] = topProducts.map(([productId, data]) => ({
+        productId,
+        productName: data.name,
+        teamName: data.teamName,
+        quantitySold: data.quantitySold,
+        mainImageUrl: productImageMap.get(productId),
+      }));
 
       return result;
     } catch (error) {
@@ -691,31 +680,23 @@ class StatsService {
     }
   }
 
-  // Get overall dashboard statistics
+  // Get overall dashboard statistics - Optimized to reduce query count
   async getDashboardStats(dateRange?: DateRange): Promise<DashboardStats> {
     try {
-      const [allSalesData, viewsData, lowStockData, noStockData, salesCountData] = await Promise.all([
-        this.getSalesStats(12, dateRange), // All months for total calculation
-        this.getViewsCount(dateRange), // Get views count with date filtering
-        this.getLowStockProducts(5),
-        this.getNoStockProducts(),
-        this.getSalesCount(dateRange), // Get actual count of sales transactions
+      // Run optimized queries in parallel
+      const [salesAggregates, viewsCount, stockCounts] = await Promise.all([
+        this.getSalesAggregates(dateRange), // Combined sales stats and count
+        this.getViewsAggregates(dateRange), // Optimized views count
+        this.getStockCounts(), // Combined low and no stock counts
       ]);
 
-      const totalSales = salesCountData.data?.length || 0; // Count actual sales transactions
-      const totalProductsSold = allSalesData.reduce((sum, month) => sum + month.sales, 0); // Total quantity sold
-      const totalRevenue = allSalesData.reduce((sum, month) => sum + month.revenue, 0);
-      const totalViews = viewsData.data?.length || 0;
-      const lowStockCount = lowStockData.length;
-      const noStockCount = noStockData.length;
-
       return {
-        totalSales,
-        totalProductsSold,
-        totalRevenue,
-        totalViews,
-        lowStockCount,
-        noStockCount,
+        totalSales: salesAggregates.totalTransactions,
+        totalProductsSold: salesAggregates.totalQuantity,
+        totalRevenue: salesAggregates.totalRevenue,
+        totalViews: viewsCount,
+        lowStockCount: stockCounts.lowStockCount,
+        noStockCount: stockCounts.noStockCount,
       };
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
@@ -727,6 +708,97 @@ class StatsService {
         lowStockCount: 0,
         noStockCount: 0,
       };
+    }
+  }
+
+  // Optimized helper method for sales aggregates
+  private async getSalesAggregates(dateRange?: DateRange) {
+    try {
+      let query = supabase.from('sales').select('items, quantity, price_sold, date');
+
+      if (dateRange) {
+        query = query.gte('date', dateRange.startDate).lte('date', dateRange.endDate);
+      }
+
+      const { data: salesData, error } = await query;
+
+      if (error) throw error;
+
+      let totalTransactions = 0;
+      let totalQuantity = 0;
+      let totalRevenue = 0;
+
+      salesData?.forEach((sale) => {
+        totalTransactions += 1;
+
+        // Support both new (items) and old formats
+        const items = sale.items || [
+          {
+            quantity: sale.quantity || 0,
+            priceSold: sale.price_sold || 0,
+          },
+        ];
+
+        items.forEach((item: any) => {
+          const quantity = item.quantity || sale.quantity || 0;
+          const priceSold = item.priceSold || sale.price_sold || 0;
+
+          totalQuantity += quantity;
+          totalRevenue += quantity * priceSold;
+        });
+      });
+
+      return { totalTransactions, totalQuantity, totalRevenue };
+    } catch (error) {
+      console.error('Error in getSalesAggregates:', error);
+      return { totalTransactions: 0, totalQuantity: 0, totalRevenue: 0 };
+    }
+  }
+
+  // Optimized helper method for views count
+  private async getViewsAggregates(dateRange?: DateRange) {
+    try {
+      let query = supabase.from('views').select('id', { count: 'exact', head: true });
+
+      if (dateRange) {
+        query = query.gte('timestamp', dateRange.startDate).lte('timestamp', dateRange.endDate + 'T23:59:59.999Z');
+      }
+
+      const { count, error } = await query;
+
+      if (error) throw error;
+
+      return count || 0;
+    } catch (error) {
+      console.error('Error in getViewsAggregates:', error);
+      return 0;
+    }
+  }
+
+  // Optimized helper method for stock counts
+  private async getStockCounts(threshold: number = 5) {
+    try {
+      const { data: products, error } = await supabase.from('products').select('sizes').is('archived_at', null);
+
+      if (error) throw error;
+
+      let lowStockCount = 0;
+      let noStockCount = 0;
+
+      products?.forEach((product) => {
+        const totalQuantity = product.sizes?.reduce((sum: number, size: any) => sum + (size.quantity || 0), 0) || 0;
+
+        if (totalQuantity === 0) {
+          noStockCount += 1;
+        } else if (totalQuantity < threshold) {
+          lowStockCount += 1;
+        }
+      });
+
+      return { lowStockCount, noStockCount };
+    } catch (error) {
+      console.error('Error in getStockCounts:', error);
+      return { lowStockCount: 0, noStockCount: 0 };
     }
   }
 
@@ -748,15 +820,16 @@ class StatsService {
 
       data?.forEach((product) => {
         // Calculate total stock for this product
-        const productStock = product.sizes && Array.isArray(product.sizes)
-          ? product.sizes.reduce((sum: number, sizeItem: any) => sum + (sizeItem.quantity || 0), 0)
-          : 0;
+        const productStock =
+          product.sizes && Array.isArray(product.sizes)
+            ? product.sizes.reduce((sum: number, sizeItem: any) => sum + (sizeItem.quantity || 0), 0)
+            : 0;
 
         // Get team info
         const teamId = product.team_id || 'no-team';
         const team: any = product.teams;
         let teamName = 'No Team';
-        
+
         if (team) {
           if (Array.isArray(team)) {
             if (team.length > 0 && team[0]?.name) {
