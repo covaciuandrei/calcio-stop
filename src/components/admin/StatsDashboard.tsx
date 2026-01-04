@@ -569,9 +569,15 @@ const StatsDashboard: React.FC = () => {
                     className="inventory-item low-stock"
                     onClick={() => handleLowStockProductClick(product.id)}
                   >
-                    <div className="item-icon">⚠️</div>
+                    <div className="item-image-container">
+                      {product.mainImageUrl ? (
+                        <img src={product.mainImageUrl} alt={product.name} className="item-image" />
+                      ) : (
+                        <div className="item-icon">⚠️</div>
+                      )}
+                    </div>
                     <div className="item-details">
-                      <h4>{product.name}</h4>
+                      <h4>{product.teamName ? `${product.teamName} - ${product.name}` : product.name}</h4>
                       <p className="item-type">{product.type}</p>
                       <div className="stock-breakdown">
                         {product.sizes.map((size) => (
@@ -611,9 +617,15 @@ const StatsDashboard: React.FC = () => {
                     className="inventory-item out-of-stock"
                     onClick={() => handleNoStockProductClick(product.id)}
                   >
-                    <div className="item-icon">🚫</div>
+                    <div className="item-image-container">
+                      {product.mainImageUrl ? (
+                        <img src={product.mainImageUrl} alt={product.name} className="item-image" />
+                      ) : (
+                        <div className="item-icon">🚫</div>
+                      )}
+                    </div>
                     <div className="item-details">
-                      <h4>{product.name}</h4>
+                      <h4>{product.teamName ? `${product.teamName} - ${product.name}` : product.name}</h4>
                       <p className="item-type">{product.type}</p>
                       <div className="stock-breakdown">
                         {product.sizes.map((size) => (

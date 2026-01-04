@@ -34,6 +34,8 @@ export interface LowStockProduct {
   type: string;
   totalQuantity: number;
   sizes: Array<{ size: string; quantity: number }>;
+  mainImageUrl?: string;
+  teamName?: string;
 }
 
 export interface NoStockProduct {
@@ -42,6 +44,8 @@ export interface NoStockProduct {
   type: string;
   totalQuantity: number;
   sizes: Array<{ size: string; quantity: number }>;
+  mainImageUrl?: string;
+  teamName?: string;
 }
 
 export interface DateRange {
@@ -534,7 +538,10 @@ class StatsService {
   // Get low stock products
   async getLowStockProducts(threshold: number = 5): Promise<LowStockProduct[]> {
     try {
-      const { data, error } = await supabase.from('products').select('id, name, type, sizes').is('archived_at', null);
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, name, type, sizes, teams(id, name)')
+        .is('archived_at', null);
 
       if (error) {
         throw error;
@@ -546,17 +553,50 @@ class StatsService {
         const totalQuantity = product.sizes.reduce((sum: number, size: any) => sum + size.quantity, 0);
 
         if (totalQuantity < threshold) {
+          // Extract team name from joined data
+          const team = product.teams;
+          const teamName = team ? (Array.isArray(team) ? (team[0] as any)?.name : (team as any).name) : undefined;
+
           lowStockProducts.push({
             id: product.id,
             name: product.name,
             type: product.type,
             totalQuantity,
             sizes: product.sizes,
+            teamName,
           });
         }
       });
 
-      return lowStockProducts.sort((a, b) => a.totalQuantity - b.totalQuantity);
+      // Sort by total quantity (ascending - most urgent first)
+      const sortedLowStockProducts = lowStockProducts.sort((a, b) => a.totalQuantity - b.totalQuantity);
+
+      // Get product images for all low stock products
+      if (sortedLowStockProducts.length > 0) {
+        const productIds = sortedLowStockProducts.map((product) => product.id);
+
+        const { data: imagesData } = await supabase
+          .from('product_images')
+          .select('product_id, medium_url, is_primary, display_order')
+          .in('product_id', productIds)
+          .order('is_primary', { ascending: false })
+          .order('display_order', { ascending: true });
+
+        // Create image map for efficient lookup
+        const productImageMap = new Map<string, string>();
+        imagesData?.forEach((img) => {
+          if (!productImageMap.has(img.product_id)) {
+            productImageMap.set(img.product_id, img.medium_url);
+          }
+        });
+
+        // Add images to products
+        sortedLowStockProducts.forEach((product) => {
+          product.mainImageUrl = productImageMap.get(product.id);
+        });
+      }
+
+      return sortedLowStockProducts;
     } catch (error) {
       console.error('Error fetching low stock products:', error);
       return [];
@@ -566,7 +606,10 @@ class StatsService {
   // Get no stock products
   async getNoStockProducts(): Promise<NoStockProduct[]> {
     try {
-      const { data, error } = await supabase.from('products').select('id, name, type, sizes').is('archived_at', null);
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, name, type, sizes, teams(id, name)')
+        .is('archived_at', null);
 
       if (error) {
         throw error;
@@ -578,17 +621,50 @@ class StatsService {
         const totalQuantity = product.sizes.reduce((sum: number, size: any) => sum + size.quantity, 0);
 
         if (totalQuantity === 0) {
+          // Extract team name from joined data
+          const team = product.teams;
+          const teamName = team ? (Array.isArray(team) ? (team[0] as any)?.name : (team as any).name) : undefined;
+
           noStockProducts.push({
             id: product.id,
             name: product.name,
             type: product.type,
             totalQuantity,
             sizes: product.sizes,
+            teamName,
           });
         }
       });
 
-      return noStockProducts.sort((a, b) => a.name.localeCompare(b.name));
+      // Sort alphabetically by name
+      const sortedNoStockProducts = noStockProducts.sort((a, b) => a.name.localeCompare(b.name));
+
+      // Get product images for all out of stock products
+      if (sortedNoStockProducts.length > 0) {
+        const productIds = sortedNoStockProducts.map((product) => product.id);
+
+        const { data: imagesData } = await supabase
+          .from('product_images')
+          .select('product_id, medium_url, is_primary, display_order')
+          .in('product_id', productIds)
+          .order('is_primary', { ascending: false })
+          .order('display_order', { ascending: true });
+
+        // Create image map for efficient lookup
+        const productImageMap = new Map<string, string>();
+        imagesData?.forEach((img) => {
+          if (!productImageMap.has(img.product_id)) {
+            productImageMap.set(img.product_id, img.medium_url);
+          }
+        });
+
+        // Add images to products
+        sortedNoStockProducts.forEach((product) => {
+          product.mainImageUrl = productImageMap.get(product.id);
+        });
+      }
+
+      return sortedNoStockProducts;
     } catch (error) {
       console.error('Error fetching no stock products:', error);
       return [];
