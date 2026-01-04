@@ -655,12 +655,7 @@ const StatsDashboard: React.FC = () => {
               <h2>Shirt Stock by Team</h2>
               <button className="stock-modal-close" onClick={() => setShowTeamStockModal(false)}>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                  <path
-                    d="M15.5 4.5l-11 11m0-11l11 11"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
+                  <path d="M15.5 4.5l-11 11m0-11l11 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
               </button>
             </div>
