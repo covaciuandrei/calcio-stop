@@ -95,18 +95,6 @@ const SalesFilters: React.FC<SalesFiltersProps> = ({ startDate, endDate, saleTyp
     }
   };
 
-  // Handle blur events for date inputs (apply immediately when user leaves the field)
-  const handleDateBlur = () => {
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-    onFiltersChange({
-      startDate: localFilters.startDate,
-      endDate: localFilters.endDate,
-      saleType: localFilters.saleType as 'OLX' | 'IN-PERSON' | 'VINTED' | '',
-    });
-  };
-
   const handleReset = () => {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -124,23 +112,23 @@ const SalesFilters: React.FC<SalesFiltersProps> = ({ startDate, endDate, saleTyp
 
   return (
     <div className="sales-filters-container" ref={containerRef}>
-      <div className="filter-controls">
+      <div className="sales-filter-controls">
         <button
-          className={`filter-toggle-btn ${isOpen ? 'active' : ''} ${activeFiltersCount > 0 ? 'has-filters' : ''}`}
+          className={`sales-filter-toggle-btn ${isOpen ? 'active' : ''} ${activeFiltersCount > 0 ? 'has-filters' : ''}`}
           onClick={() => setIsOpen(!isOpen)}
           title="Filter sales"
         >
           Filter {activeFiltersCount > 0 && `(${activeFiltersCount})`}
         </button>
         {activeFiltersCount > 0 && (
-          <button className="reset-filters-btn" onClick={handleReset}>
+          <button className="sales-reset-filters-btn" onClick={handleReset}>
             Reset
           </button>
         )}
       </div>
 
       {isOpen && (
-        <div className="filters-inline">
+        <div className="sales-filters-inline">
           <div className="sales-filter-section">
             <label>Date Range</label>
 

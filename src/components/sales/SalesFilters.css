@@ -2,13 +2,13 @@
   position: relative;
 }
 
-.filter-controls {
+.sales-filter-controls {
   display: flex;
   gap: var(--space-2);
   align-items: center;
 }
 
-.filter-toggle-btn {
+.sales-filter-toggle-btn {
   background: var(--accent-green-200);
   color: var(--accent-green-700);
   border: 1px solid var(--accent-green-200);
@@ -29,7 +29,7 @@
   margin: 0;
 }
 
-.filter-toggle-btn:hover {
+.sales-filter-toggle-btn:hover {
   background: var(--accent-green-500);
   color: white;
   border-color: var(--accent-green-500);
@@ -37,26 +37,26 @@
   box-shadow: 0 4px 8px rgba(34, 197, 94, 0.3);
 }
 
-.filter-toggle-btn.active {
+.sales-filter-toggle-btn.active {
   background: var(--accent-green-500);
   color: white;
   border-color: var(--accent-green-500);
 }
 
-.filter-toggle-btn.has-filters {
+.sales-filter-toggle-btn.has-filters {
   background: var(--accent-orange-500);
   color: white;
   border-color: var(--accent-orange-500);
   box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
 }
 
-.filter-toggle-btn.has-filters:hover {
+.sales-filter-toggle-btn.has-filters:hover {
   background: var(--accent-orange-600);
   border-color: var(--accent-orange-600);
   box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
 }
 
-.reset-filters-btn {
+.sales-reset-filters-btn {
   background: var(--gray-100);
   color: var(--gray-700);
   border: 1px solid var(--gray-300);
@@ -74,12 +74,12 @@
   margin: 0;
 }
 
-.reset-filters-btn:hover {
+.sales-reset-filters-btn:hover {
   background: var(--gray-200);
   border-color: var(--gray-400);
 }
 
-.filters-inline {
+.sales-filters-inline {
   margin-top: var(--space-4);
   padding: var(--space-4);
   background: var(--gray-50);

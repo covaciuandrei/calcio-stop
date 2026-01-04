@@ -26,7 +26,7 @@ export interface ProductFiltersState {
   priceMax: string;
   totalMin: string;
   totalMax: string;
-  onSale: string; // 'all', 'on-sale', 'not-on-sale'
+  onSale: boolean; // true = show only on sale products, false = show all products
 }
 
 interface ProductFiltersProps {
@@ -54,7 +54,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
     priceMax: '',
     totalMin: '',
     totalMax: '',
-    onSale: 'all',
+    onSale: false,
   });
 
   // Get data from stores
@@ -79,7 +79,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
     )
   );
 
-  const handleFilterChange = (key: keyof ProductFiltersState, value: string | string[]) => {
+  const handleFilterChange = (key: keyof ProductFiltersState, value: string | string[] | boolean) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
     onFiltersChange(newFilters);
@@ -112,15 +112,18 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
       priceMax: '',
       totalMin: '',
       totalMax: '',
-      onSale: 'all',
+      onSale: false,
     };
     setFilters(resetFilters);
     onReset();
   };
 
-  const hasActiveFilters = Object.values(filters).some((value) =>
-    Array.isArray(value) ? value.length > 0 : value !== ''
-  );
+  const hasActiveFilters = Object.entries(filters).some(([key, value]) => {
+    if (key === 'onSale') {
+      return value === true; // Only count as active when checkbox is checked
+    }
+    return Array.isArray(value) ? value.length > 0 : value !== '';
+  });
 
   return (
     <div className="product-filters">
@@ -131,7 +134,12 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
         >
           Filter{' '}
           {hasActiveFilters &&
-            `(${Object.values(filters).filter((v) => (Array.isArray(v) ? v.length > 0 : v !== '')).length})`}
+            `(${Object.entries(filters).filter(([key, value]) => {
+              if (key === 'onSale') {
+                return value === true;
+              }
+              return Array.isArray(value) ? value.length > 0 : value !== '';
+            }).length})`}
         </button>
         {hasActiveFilters && (
           <button className="reset-filters-btn" onClick={handleReset}>
@@ -319,29 +327,15 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ products, onFiltersChan
               />
             </div>
 
-            {/* Row 8: On Sale Filter - Radio Buttons */}
+            {/* Row 8: On Sale Filter - Checkbox */}
             <div className="filter-group">
               <label className="sale-status-label">Sale Status</label>
-              <div className="sale-status-options">
-                <label className="sale-status-radio-label">
+              <div className="sizes-checkboxes">
+                <label className="size-checkbox">
                   <input
-                    type="radio"
-                    name="onSale"
-                    value="all"
-                    checked={filters.onSale === 'all'}
-                    onChange={(e) => handleFilterChange('onSale', e.target.value)}
-                    className="sale-status-radio"
-                  />
-                  <span>All Products</span>
-                </label>
-                <label className="sale-status-radio-label">
-                  <input
-                    type="radio"
-                    name="onSale"
-                    value="on-sale"
-                    checked={filters.onSale === 'on-sale'}
-                    onChange={(e) => handleFilterChange('onSale', e.target.value)}
-                    className="sale-status-radio"
+                    type="checkbox"
+                    checked={filters.onSale}
+                    onChange={(e) => handleFilterChange('onSale', e.target.checked)}
                   />
                   <span>On Sale</span>
                 </label>

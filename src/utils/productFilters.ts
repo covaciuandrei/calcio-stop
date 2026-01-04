@@ -119,14 +119,13 @@ export const applyProductFilters = (
     }
 
     // On Sale filter
-    if (filters.onSale && filters.onSale !== 'all') {
-      if (filters.onSale === 'on-sale' && !product.isOnSale) {
-        return false;
-      }
-      if (filters.onSale === 'not-on-sale' && product.isOnSale) {
+    if (filters.onSale) {
+      // When checkbox is checked, show only on-sale products
+      if (!product.isOnSale) {
         return false;
       }
     }
+    // When checkbox is unchecked (false), show all products (no filtering)
 
     // Total quantity range filter
     if (filters.totalMin || filters.totalMax) {

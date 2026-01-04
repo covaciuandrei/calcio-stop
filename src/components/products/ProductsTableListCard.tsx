@@ -1,15 +1,15 @@
 import React, { useMemo, useState } from 'react';
 import {
-  useArchivedBadges,
-  useArchivedKitTypes,
-  useArchivedNamesets,
-  useArchivedTeams,
-  useBadgesList,
-  useKitTypesList,
-  useNamesetsList,
-  useProductsActions,
-  useProductsList,
-  useTeamsList,
+    useArchivedBadges,
+    useArchivedKitTypes,
+    useArchivedNamesets,
+    useArchivedTeams,
+    useBadgesList,
+    useKitTypesList,
+    useNamesetsList,
+    useProductsActions,
+    useProductsList,
+    useTeamsList,
 } from '../../stores';
 import { useAuth } from '../../stores/authStore';
 import { Product } from '../../types';
@@ -69,7 +69,7 @@ const ProductsTableListCard: React.FC<ProductsTableListCardProps> = ({
     priceMax: '',
     totalMin: '',
     totalMax: '',
-    onSale: 'all',
+    onSale: false,
   });
 
   // Use prop products if provided, otherwise use store products
@@ -151,7 +151,7 @@ const ProductsTableListCard: React.FC<ProductsTableListCardProps> = ({
       priceMax: '',
       totalMin: '',
       totalMax: '',
-      onSale: 'all',
+      onSale: false,
     });
   };
 
@@ -215,7 +215,8 @@ const ProductsTableListCard: React.FC<ProductsTableListCardProps> = ({
         {(isReadOnly || isProductsExpanded) && (
           <>
             <h3 className="card-section-header">Product List</h3>
-            <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap', alignItems: 'center' }}>
+            <div style={{ position: 'relative' }}>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'flex-start' }}>
               <ProductFilters products={products} onFiltersChange={handleFiltersChange} onReset={handleResetFilters} />
               <ProductSort onSortChange={setSortOption} />
               {isAdmin && !isReadOnly && displayProducts.length > 0 && (
@@ -232,6 +233,7 @@ const ProductsTableListCard: React.FC<ProductsTableListCardProps> = ({
                   </div>
                 </div>
               )}
+            </div>
             </div>
             {displayProducts.length >= 2 && (
               <div className={styles.searchContainer}>

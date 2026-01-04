@@ -1,118 +1,83 @@
-/* Product Filters Styles */
+/* Modern, Clean Product Filters */
 .product-filters {
   position: relative;
-  margin-bottom: var(--space-4);
+  margin-bottom: 16px;
+  display: inline-block;
 }
 
 .filter-controls {
   display: flex;
-  gap: var(--space-2);
-  align-items: center;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+  width: fit-content;
 }
 
+/* Clean Filter Button */
 .filter-toggle-btn {
-  background: var(--accent-green-200);
-  color: var(--accent-green-700);
-  border: 1px solid var(--accent-green-200);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: var(--font-size-sm);
+  font-size: 14px;
   font-weight: 500;
   transition: all 0.2s ease;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
-  box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
-  box-sizing: border-box;
-  line-height: 1;
-}
-
-.filter-toggle-btn svg {
-  flex-shrink: 0;
-}
-
-.filter-toggle-btn:hover {
-  background: var(--accent-green-500);
-  color: white;
-  border-color: var(--accent-green-500);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(34, 197, 94, 0.3);
-}
-
-.filter-toggle-btn.has-filters {
-  background: var(--accent-orange-500);
-  color: white;
-  border-color: var(--accent-orange-500);
-  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
-}
-
-.filter-toggle-btn.has-filters:hover {
-  background: var(--accent-orange-600);
-  border-color: var(--accent-orange-600);
-  box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
-}
-
-.reset-filters-btn {
-  background: var(--gray-100);
-  color: var(--gray-700);
-  border: 1px solid var(--gray-300);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  box-sizing: border-box;
-  line-height: 1;
-}
-
-.reset-filters-btn:hover {
-  background: var(--gray-200);
-  border-color: var(--gray-400);
-}
-
-.export-btn {
-  background: var(--primary-500);
-  color: white;
-  border: 1px solid var(--primary-500);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  box-sizing: border-box;
-  line-height: 1;
+  justify-content: center;
+  gap: 6px;
   white-space: nowrap;
 }
 
-.export-btn:hover {
-  background: var(--primary-600);
-  border-color: var(--primary-600);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(14, 165, 233, 0.2);
+.filter-toggle-btn:hover {
+  background: #2563eb;
 }
 
+.filter-toggle-btn.has-filters {
+  background: #ef4444;
+}
+
+.filter-toggle-btn.has-filters:hover {
+  background: #dc2626;
+}
+
+/* Reset Button */
+.reset-filters-btn {
+  background: white;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.reset-filters-btn:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+/* Filters Container */
 .filters-inline {
-  margin-top: var(--space-4);
-  padding: var(--space-4);
-  background: var(--gray-50);
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-lg);
+  margin-top: 16px;
+  padding: 20px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
 }
 
 .filters-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--space-4);
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
 }
 
-/* Make sizes filter span full width */
+/* Sizes and Leagues span full width */
 .filter-group:has(.sizes-checkboxes) {
   grid-column: 1 / -1;
 }
@@ -120,97 +85,98 @@
 .filter-group {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 6px;
 }
 
-.filter-group label {
-  font-size: var(--font-size-sm);
+/* Labels */
+.filter-group label,
+.sale-status-label {
+  font-size: 12px;
   font-weight: 600;
-  color: var(--gray-700);
-  margin-bottom: var(--space-1);
+  color: #374151;
+  margin-bottom: 2px;
 }
 
+/* Input Fields */
 .filter-group select,
 .filter-group input[type='text'],
 .filter-group input[type='number'] {
-  padding: var(--space-2);
-  border: 1px solid var(--gray-300);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  transition: border-color 0.2s ease;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  transition: all 0.2s ease;
+  color: #111827;
+}
+
+.filter-group select:hover,
+.filter-group input[type='text']:hover,
+.filter-group input[type='number']:hover {
+  border-color: #9ca3af;
 }
 
 .filter-group select:focus,
 .filter-group input:focus {
   outline: none;
-  border-color: var(--primary-600);
-  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* Sizes Checkboxes */
+/* Sizes Container */
 .sizes-checkboxes {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-1);
-  max-height: 150px;
-  overflow-y: auto;
-  padding: var(--space-2);
-  border: 1px solid var(--gray-300);
-  border-radius: var(--radius-md);
-  background: var(--gray-50);
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
 }
 
+/* Size Pills */
 .size-checkbox {
-  display: inline-block;
+  display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
-  cursor: pointer;
-  font-size: var(--font-size-sm);
-  padding: var(--space-1);
-  border-radius: var(--radius-sm);
-  transition: all 0.2s ease;
-  min-width: 20px;
-  min-height: 16px;
   justify-content: center;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
   background: white;
-  border: 1px solid var(--gray-200);
+  border: 1px solid #d1d5db;
+  font-weight: 500;
+  color: #374151;
+  user-select: none;
+  min-width: 40px;
 }
 
 .size-checkbox:hover {
-  background: var(--gray-100);
-  border-color: var(--primary-600);
-  transform: translateY(-1px);
+  background: #f3f4f6;
+  border-color: #9ca3af;
 }
 
 .size-checkbox:has(input:checked) {
-  background: var(--primary-600);
+  background: #3b82f6;
   color: white;
-  border-color: var(--primary-600);
-}
-
-.size-checkbox:has(input:checked):hover {
-  background: var(--primary-700);
+  border-color: #3b82f6;
 }
 
 .size-checkbox input[type='checkbox'] {
-  margin: 0;
-  cursor: pointer;
-  width: 12px;
-  height: 12px;
-  accent-color: var(--primary-600);
+  display: none;
 }
 
 .size-checkbox span {
-  user-select: none;
-  font-weight: 600;
-  font-size: var(--font-size-sm);
+  font-weight: 500;
+  font-size: 13px;
 }
 
 /* Price Range */
 .price-range .price-inputs {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 8px;
 }
 
 .price-range .price-inputs input {
@@ -219,231 +185,95 @@
 }
 
 .price-range .price-inputs span {
-  color: var(--gray-500);
-  font-size: var(--font-size-sm);
-  white-space: nowrap;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 500;
 }
 
-/* Responsive Design */
+/* Responsive */
+@media (max-width: 1024px) {
+  .filters-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .filters-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-2);
-  }
-
-  /* Make specific filter groups span full width */
-  .filter-group:has(.sizes-checkboxes),
-  .filter-group.price-range {
-    grid-column: 1 / -1;
-  }
-
-  .filter-controls {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .filter-toggle-btn,
-  .reset-filters-btn {
-    width: 100%;
-    justify-content: center;
-    padding: var(--space-2);
-    font-size: var(--font-size-sm);
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
 
   .filters-inline {
-    padding: var(--space-3);
-    margin-top: var(--space-3);
-  }
-
-  .filter-group {
-    gap: var(--space-1);
-  }
-
-  .filter-group label {
-    font-size: var(--font-size-xs);
-    margin-bottom: 2px;
-  }
-
-  .filter-group select,
-  .filter-group input[type='text'],
-  .filter-group input[type='number'] {
-    padding: var(--space-1) var(--space-2);
-    font-size: var(--font-size-sm);
-    min-height: 36px;
-  }
-
-  .sizes-checkboxes {
-    max-height: 100px;
-    padding: 4px;
-    gap: 1px;
-  }
-
-  .size-checkbox {
-    min-width: 8px;
-    min-height: 8px;
-    padding: 2px;
-    font-size: 0.7rem;
-  }
-
-  .size-checkbox span {
-    font-size: var(--font-size-xs);
-  }
-
-  .price-range .price-inputs {
-    gap: var(--space-1);
-    flex-direction: row;
-    align-items: center;
-  }
-
-  .price-range .price-inputs input {
-    padding: 6px 8px;
-    font-size: var(--font-size-xs);
-    min-height: 32px;
-    flex: 1;
-  }
-
-  .price-range .price-inputs span {
-    font-size: var(--font-size-xs);
-    white-space: nowrap;
-    padding: 0 4px;
+    padding: 16px;
   }
 }
 
 @media (max-width: 480px) {
-  .filters-inline {
-    padding: var(--space-2);
-    margin-top: var(--space-2);
-  }
-
   .filters-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-1);
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 
-  /* Make specific filter groups span full width on extra small mobile */
-  .filter-group:has(.sizes-checkboxes),
-  .filter-group.price-range {
-    grid-column: 1 / -1;
-  }
-
-  .filter-group {
-    gap: 2px;
-  }
-
-  .filter-group label {
-    font-size: 0.7rem;
-    margin-bottom: 1px;
-  }
-
-  .filter-group select,
-  .filter-group input[type='text'],
-  .filter-group input[type='number'] {
-    padding: 6px 8px;
-    font-size: var(--font-size-xs);
-    min-height: 32px;
-  }
-
-  .filter-toggle-btn,
-  .reset-filters-btn {
-    padding: var(--space-1) var(--space-2);
-    font-size: var(--font-size-xs);
-  }
-
-  .price-range .price-inputs {
-    flex-direction: row;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .price-range .price-inputs input {
-    padding: 4px 6px;
-    font-size: 0.7rem;
-    min-height: 28px;
-    flex: 1;
-  }
-
-  .price-range .price-inputs span {
-    font-size: 0.7rem;
-    white-space: nowrap;
-    padding: 0 2px;
-  }
-
-  .sizes-checkboxes {
-    max-height: 150px;
-    padding: 2px;
-    gap: 1px;
+  .filters-inline {
+    padding: 12px;
   }
 
   .size-checkbox {
-    min-width: 24px;
-    min-height: 24px;
-    padding: 2px;
-    font-size: 0.6rem;
-  }
-
-  .size-checkbox span {
-    font-size: 0.7rem;
+    padding: 5px 10px;
+    font-size: 12px;
+    min-width: 36px;
   }
 }
 
-/* Sort Options */
+/* Sort Button */
 .sort-option-btn {
-  padding: var(--space-2) var(--space-3);
+  padding: 8px 16px;
   background: white;
-  color: var(--gray-700);
-  border: 1px solid var(--gray-300);
-  border-radius: var(--radius-md);
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: var(--font-size-sm);
+  font-size: 14px;
   font-weight: 500;
   transition: all 0.2s ease;
-  text-align: center;
 }
 
 .sort-option-btn:hover {
-  background: var(--gray-50);
-  border-color: var(--primary-600);
-  transform: translateY(-1px);
+  background: #f9fafb;
+  border-color: #9ca3af;
 }
 
 .sort-option-btn.active {
-  background: linear-gradient(135deg, var(--accent-green-500), var(--accent-green-600));
+  background: #10b981;
   color: white;
-  border-color: var(--accent-green-600);
-  box-shadow: 0 2px 4px rgba(34, 197, 94, 0.3);
-  font-weight: 600;
+  border-color: #10b981;
 }
 
 .sort-option-btn.active:hover {
-  background: linear-gradient(135deg, var(--accent-green-600), var(--accent-green-700));
-  border-color: var(--accent-green-700);
-  box-shadow: 0 4px 8px rgba(34, 197, 94, 0.4);
-  transform: translateY(-1px);
+  background: #059669;
 }
 
-/* Sale Status Filter - Radio Buttons */
-.sale-status-label {
-  font-size: 0.85rem;
-}
-
+/* Sale Status */
 .sale-status-options {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   align-items: center;
-  margin-top: 2px;
 }
 
 .sale-status-radio-label {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 14px;
+  font-weight: 400;
+  color: #374151;
 }
 
 .sale-status-radio {
   cursor: pointer;
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   margin: 0;
+  accent-color: #3b82f6;
 }

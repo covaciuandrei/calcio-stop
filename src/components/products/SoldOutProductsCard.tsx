@@ -1,15 +1,15 @@
 import React, { useMemo, useState } from 'react';
 import {
-  useArchivedBadges,
-  useArchivedKitTypes,
-  useArchivedNamesets,
-  useArchivedTeams,
-  useBadgesList,
-  useKitTypesList,
-  useNamesetsList,
-  useProductsActions,
-  useSoldOutProducts,
-  useTeamsList,
+    useArchivedBadges,
+    useArchivedKitTypes,
+    useArchivedNamesets,
+    useArchivedTeams,
+    useBadgesList,
+    useKitTypesList,
+    useNamesetsList,
+    useProductsActions,
+    useSoldOutProducts,
+    useTeamsList,
 } from '../../stores';
 import { Product } from '../../types';
 import { applyProductFilters } from '../../utils/productFilters';
@@ -63,7 +63,7 @@ const SoldOutProductsCard: React.FC<SoldOutProductsCardProps> = ({ isReadOnly = 
     priceMax: '',
     totalMin: '',
     totalMax: '',
-    onSale: 'all',
+    onSale: false,
   });
 
   // Apply filters and sorting to sold-out products
@@ -142,7 +142,7 @@ const SoldOutProductsCard: React.FC<SoldOutProductsCardProps> = ({ isReadOnly = 
       priceMax: '',
       totalMin: '',
       totalMax: '',
-      onSale: 'all',
+      onSale: false,
     });
   };
 
