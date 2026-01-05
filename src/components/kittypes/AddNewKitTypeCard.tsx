@@ -1,16 +1,12 @@
 import React from 'react';
+import CollapsibleCardWrapper from '../shared/CollapsibleCardWrapper';
 import AddKitTypeForm from './AddKitTypeForm';
 
 const AddNewKitTypeCard: React.FC = () => {
   return (
-    <div className="card">
-      <div className="card-header mini-header mini-header-green">
-        <span>Add New Kit Type</span>
-      </div>
-      <div className="card-content">
-        <AddKitTypeForm />
-      </div>
-    </div>
+    <CollapsibleCardWrapper title="Add New Kit Type" headerColor="green" defaultExpanded={true}>
+      <AddKitTypeForm />
+    </CollapsibleCardWrapper>
   );
 };
 

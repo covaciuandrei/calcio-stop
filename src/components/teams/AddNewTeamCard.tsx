@@ -1,16 +1,12 @@
 import React from 'react';
+import CollapsibleCardWrapper from '../shared/CollapsibleCardWrapper';
 import AddTeamForm from './AddTeamForm';
 
 const AddNewTeamCard: React.FC = () => {
   return (
-    <div className="card">
-      <div className="card-header mini-header mini-header-green">
-        <span>Add New Team</span>
-      </div>
-      <div className="card-content">
-        <AddTeamForm />
-      </div>
-    </div>
+    <CollapsibleCardWrapper title="Add New Team" headerColor="green" defaultExpanded={true}>
+      <AddTeamForm />
+    </CollapsibleCardWrapper>
   );
 };
 

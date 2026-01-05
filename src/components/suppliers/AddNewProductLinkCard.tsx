@@ -1,16 +1,12 @@
 import React from 'react';
+import CollapsibleCardWrapper from '../shared/CollapsibleCardWrapper';
 import AddProductLinkForm from './AddProductLinkForm';
 
 const AddNewProductLinkCard: React.FC = () => {
   return (
-    <div className="card">
-      <div className="card-header mini-header mini-header-green">
-        <span>Add New Product Link</span>
-      </div>
-      <div className="card-content">
-        <AddProductLinkForm />
-      </div>
-    </div>
+    <CollapsibleCardWrapper title="Add New Product Link" headerColor="green" defaultExpanded={true}>
+      <AddProductLinkForm />
+    </CollapsibleCardWrapper>
   );
 };
 

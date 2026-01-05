@@ -1,16 +1,12 @@
 import React from 'react';
+import CollapsibleCardWrapper from '../shared/CollapsibleCardWrapper';
 import AddReservationForm from './AddReservationForm';
 
 const AddNewReservationCard: React.FC = () => {
   return (
-    <div className="card">
-      <div className="card-header mini-header mini-header-green">
-        <span>Create New Reservation</span>
-      </div>
-      <div className="card-content">
-        <AddReservationForm />
-      </div>
-    </div>
+    <CollapsibleCardWrapper title="Create New Reservation" headerColor="green" defaultExpanded={true}>
+      <AddReservationForm />
+    </CollapsibleCardWrapper>
   );
 };
 

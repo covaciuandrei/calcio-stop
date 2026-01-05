@@ -1,16 +1,12 @@
 import React from 'react';
+import CollapsibleCardWrapper from '../shared/CollapsibleCardWrapper';
 import AddNamesetForm from './AddNamesetForm';
 
 const AddNewNamesetCard: React.FC = () => {
   return (
-    <div className="card">
-      <div className="card-header mini-header mini-header-green">
-        <span>Add New Nameset</span>
-      </div>
-      <div className="card-content">
-        <AddNamesetForm />
-      </div>
-    </div>
+    <CollapsibleCardWrapper title="Add New Nameset" headerColor="green" defaultExpanded={true}>
+      <AddNamesetForm />
+    </CollapsibleCardWrapper>
   );
 };
 
