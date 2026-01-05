@@ -1,10 +1,10 @@
 import React from 'react';
-import { useAllProducts, useBadgesList } from '../../stores';
+import { useBadgesList, useProductsList } from '../../stores';
 import BadgeTableListCard from '../badges/BadgeTableListCard';
 import ProductsTableListCard from '../products/ProductsTableListCard';
 
 const PublicDashboard: React.FC = () => {
-  const products = useAllProducts();
+  const products = useProductsList();
   const badges = useBadgesList();
 
   return (
