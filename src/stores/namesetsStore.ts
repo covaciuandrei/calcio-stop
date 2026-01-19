@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
 import * as db from '../lib/db';
-import { Nameset } from '../types';
+import { Nameset, NamesetImage } from '../types';
 import { getErrorMessage, isForeignKeyConstraintError } from '../utils/errorHandler';
 
 interface NamesetsState {
@@ -24,6 +24,11 @@ interface NamesetsState {
   loadNamesets: () => Promise<void>;
   loadArchivedNamesets: () => Promise<void>;
   clearError: () => void;
+  // Image management actions
+  updateNamesetImages: (namesetId: string, images: NamesetImage[]) => void;
+  addNamesetImage: (namesetId: string, image: NamesetImage) => void;
+  removeNamesetImage: (namesetId: string, imageId: string) => void;
+  refreshNameset: (namesetId: string) => Promise<void>;
 }
 
 // Selectors
@@ -180,6 +185,47 @@ export const useNamesetsStore = create<NamesetsState>()(
       clearError: () => {
         set({ error: null });
       },
+
+      // Image management actions
+      updateNamesetImages: (namesetId: string, images: NamesetImage[]) => {
+        set((state) => ({
+          namesets: state.namesets.map((n) => (n.id === namesetId ? { ...n, images } : n)),
+          archivedNamesets: state.archivedNamesets.map((n) => (n.id === namesetId ? { ...n, images } : n)),
+        }));
+      },
+
+      addNamesetImage: (namesetId: string, image: NamesetImage) => {
+        set((state) => ({
+          namesets: state.namesets.map((n) =>
+            n.id === namesetId ? { ...n, images: [...(n.images || []), image] } : n
+          ),
+          archivedNamesets: state.archivedNamesets.map((n) =>
+            n.id === namesetId ? { ...n, images: [...(n.images || []), image] } : n
+          ),
+        }));
+      },
+
+      removeNamesetImage: (namesetId: string, imageId: string) => {
+        set((state) => ({
+          namesets: state.namesets.map((n) =>
+            n.id === namesetId ? { ...n, images: (n.images || []).filter((img) => img.id !== imageId) } : n
+          ),
+          archivedNamesets: state.archivedNamesets.map((n) =>
+            n.id === namesetId ? { ...n, images: (n.images || []).filter((img) => img.id !== imageId) } : n
+          ),
+        }));
+      },
+
+      refreshNameset: async (namesetId: string) => {
+        try {
+          // Reload all namesets to get the latest data
+          const namesets = await db.getNamesets();
+          const archivedNamesets = await db.getArchivedNamesets();
+          set({ namesets, archivedNamesets });
+        } catch (error) {
+          console.error('Failed to refresh nameset:', error);
+        }
+      },
     }),
     {
       name: 'namesets-store',
@@ -198,6 +244,7 @@ export const useSoldOutNamesets = () => {
     [namesets]
   );
 };
+export const useNamesetsLoading = () => useNamesetsStore((state) => state.isLoading);
 export const useNamesetsActions = () => ({
   addNameset: useNamesetsStore.getState().addNameset,
   updateNameset: useNamesetsStore.getState().updateNameset,
@@ -208,4 +255,9 @@ export const useNamesetsActions = () => ({
   setArchivedNamesets: useNamesetsStore.getState().setArchivedNamesets,
   loadNamesets: useNamesetsStore.getState().loadNamesets,
   loadArchivedNamesets: useNamesetsStore.getState().loadArchivedNamesets,
+  // Image management actions
+  updateNamesetImages: useNamesetsStore.getState().updateNamesetImages,
+  addNamesetImage: useNamesetsStore.getState().addNamesetImage,
+  removeNamesetImage: useNamesetsStore.getState().removeNamesetImage,
+  refreshNameset: useNamesetsStore.getState().refreshNameset,
 });

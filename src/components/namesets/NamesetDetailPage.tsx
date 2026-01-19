@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useArchivedKitTypes, useArchivedNamesets, useKitTypesList, useNamesetsList } from '../../stores';
+import { useRouteData } from '../../hooks/useRouteData';
+import { useArchivedKitTypes, useArchivedNamesets, useKitTypesList, useNamesetsList, useNamesetsLoading } from '../../stores';
 import { useAuth } from '../../stores/authStore';
 import { Nameset } from '../../types';
 import { getKitTypeInfo } from '../../utils/utils';
@@ -9,6 +10,9 @@ import './NamesetDetailPage.css';
 import NamesetImageManager from './NamesetImageManager';
 
 const NamesetDetailPage: React.FC = () => {
+  // Load data for this route (essential for direct page access/refresh)
+  useRouteData();
+  
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,6 +28,7 @@ const NamesetDetailPage: React.FC = () => {
   const archivedNamesets = useArchivedNamesets();
   const kitTypes = useKitTypesList();
   const archivedKitTypes = useArchivedKitTypes();
+  const isLoading = useNamesetsLoading();
 
   const [nameset, setNameset] = useState<Nameset | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -45,6 +50,18 @@ const NamesetDetailPage: React.FC = () => {
       setNameset(foundNameset || null);
     }
   }, [id, activeNamesets, archivedNamesets]);
+
+  // Show loading state if data is loading and nameset is not yet found
+  if (isLoading && !nameset) {
+    return (
+      <div className="nameset-detail-page">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading nameset details...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!nameset) {
     return (

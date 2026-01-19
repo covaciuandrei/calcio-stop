@@ -234,6 +234,7 @@ export const useBadgesStore = create<BadgesState>()(
 export const useBadges = () => useBadgesStore();
 export const useBadgesList = () => useBadgesStore((state) => state.badges);
 export const useArchivedBadges = () => useBadgesStore((state) => state.archivedBadges);
+export const useBadgesLoading = () => useBadgesStore((state) => state.isLoading);
 export const useSoldOutBadges = () => useBadgesStore((state) => state.badges);
 export const useBadgesActions = () => ({
   addBadge: useBadgesStore.getState().addBadge,

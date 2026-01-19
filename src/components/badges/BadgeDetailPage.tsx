@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useArchivedBadges, useBadgesList } from '../../stores';
+import { useRouteData } from '../../hooks/useRouteData';
+import { useArchivedBadges, useBadgesList, useBadgesLoading } from '../../stores';
 import { useAuth } from '../../stores/authStore';
 import { Badge } from '../../types';
 import './BadgeDetailPage.css';
@@ -8,6 +9,9 @@ import BadgeImageManager from './BadgeImageManager';
 import EditBadgeModal from './EditBadgeModal';
 
 const BadgeDetailPage: React.FC = () => {
+  // Load data for this route (essential for direct page access/refresh)
+  useRouteData();
+  
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -21,6 +25,7 @@ const BadgeDetailPage: React.FC = () => {
   // Get data from stores
   const activeBadges = useBadgesList();
   const archivedBadges = useArchivedBadges();
+  const isLoading = useBadgesLoading();
 
   const [badge, setBadge] = useState<Badge | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -42,6 +47,18 @@ const BadgeDetailPage: React.FC = () => {
       setBadge(foundBadge || null);
     }
   }, [id, activeBadges, archivedBadges]);
+
+  // Show loading state if data is loading and badge is not yet found
+  if (isLoading && !badge) {
+    return (
+      <div className="badge-detail-page">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading badge details...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!badge) {
     return (

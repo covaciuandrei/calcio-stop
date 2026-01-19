@@ -27,12 +27,12 @@ const BadgeImageManager: React.FC<BadgeImageManagerProps> = ({ badgeId, isAdmin 
   };
 
   const handleAllUploadsComplete = async () => {
-    // Refetch images to show all newly uploaded images
-    refetch();
-    // Refresh the badge in the store to update its images array
+    // FIRST: Refresh the badge in the store to update its images array
     await refreshBadge(badgeId);
-    // Invalidate route cache so badges list reloads with new images
+    // THEN: Invalidate route cache so badges list reloads with new images
     invalidateRouteCache('/badges');
+    // FINALLY: Refetch local images to show all newly uploaded images
+    refetch();
   };
 
   const handleUploadError = (errorMessage: string) => {

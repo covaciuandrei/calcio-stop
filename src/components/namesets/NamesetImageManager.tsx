@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNamesetImages } from '../../hooks/useNamesetImages';
+import { invalidateRouteCache } from '../../hooks/useRouteData';
 import { supabase } from '../../lib/supabaseClient';
+import { useNamesetsActions } from '../../stores/namesetsStore';
 import './NamesetImageManager.css';
 import NamesetImageUpload from './NamesetImageUpload';
 
@@ -16,13 +18,20 @@ const NamesetImageManager: React.FC<NamesetImageManagerProps> = ({ namesetId, is
 
   // Use cached hook for images
   const { images, loading, error, refetch } = useNamesetImages(namesetId);
+  
+  // Get store actions for syncing state
+  const { removeNamesetImage, refreshNameset } = useNamesetsActions();
 
   const handleImageUploaded = (newImage: any) => {
     // Individual image uploaded (can be ignored if using onAllUploadsComplete)
   };
 
-  const handleAllUploadsComplete = () => {
-    // Refetch images to show all newly uploaded images
+  const handleAllUploadsComplete = async () => {
+    // FIRST: Refresh the nameset in the store to update its images array
+    await refreshNameset(namesetId);
+    // THEN: Invalidate route cache so namesets list reloads with new images
+    invalidateRouteCache('/namesets');
+    // FINALLY: Refetch local images to show all newly uploaded images
     refetch();
   };
 
@@ -64,6 +73,10 @@ const NamesetImageManager: React.FC<NamesetImageManagerProps> = ({ namesetId, is
         throw error;
       }
 
+      // Update store immediately to reflect the deletion
+      removeNamesetImage(namesetId, imageId);
+      // Invalidate route cache so namesets list reloads
+      invalidateRouteCache('/namesets');
       // Refetch images to show updated list
       refetch();
     } catch (error) {
@@ -84,6 +97,10 @@ const NamesetImageManager: React.FC<NamesetImageManagerProps> = ({ namesetId, is
         throw error;
       }
 
+      // Refresh the nameset in the store to update its images array
+      await refreshNameset(namesetId);
+      // Invalidate route cache so namesets list reloads
+      invalidateRouteCache('/namesets');
       // Refetch images to show updated list
       refetch();
     } catch (error) {

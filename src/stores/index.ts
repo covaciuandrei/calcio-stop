@@ -18,78 +18,81 @@ export * from './uiStore';
 // Re-export commonly used hooks for convenience
 export { useAuth, useAuthStatus, useAuthStore, useAuthUser } from './authStore';
 export {
-  useArchivedBadges,
-  useBadges,
-  useBadgesActions,
-  useBadgesList,
-  useBadgesStore,
-  useSoldOutBadges,
+    useArchivedBadges,
+    useBadges,
+    useBadgesActions,
+    useBadgesList,
+    useBadgesLoading,
+    useBadgesStore,
+    useSoldOutBadges
 } from './badgesStore';
 export {
-  useArchivedKitTypes,
-  useKitTypes,
-  useKitTypesActions,
-  useKitTypesList,
-  useKitTypesStore,
+    useArchivedKitTypes,
+    useKitTypes,
+    useKitTypesActions,
+    useKitTypesList,
+    useKitTypesStore
 } from './kitTypesStore';
 export { useArchivedLeagues, useLeagues, useLeaguesActions, useLeaguesList, useLeaguesStore } from './leaguesStore';
 export {
-  useArchivedNamesets,
-  useNamesets,
-  useNamesetsActions,
-  useNamesetsList,
-  useNamesetsStore,
-  useSoldOutNamesets,
+    useArchivedNamesets,
+    useNamesets,
+    useNamesetsActions,
+    useNamesetsList,
+    useNamesetsLoading,
+    useNamesetsStore,
+    useSoldOutNamesets
 } from './namesetsStore';
 export { useArchivedOrders, useOrdersActions, useOrdersList, useOrdersStore } from './ordersStore';
 export {
-  useAllProducts,
-  useArchivedProducts,
-  useProducts,
-  useProductsActions,
-  useProductsList,
-  useProductsStore,
-  useSoldOutProducts,
+    useAllProducts,
+    useArchivedProducts,
+    useProducts,
+    useProductsActions,
+    useProductsList,
+    useProductsLoading,
+    useProductsStore,
+    useSoldOutProducts
 } from './productsStore';
 export {
-  useReservations,
-  useReservationsActions,
-  useReservationsList,
-  useReservationsStore,
+    useReservations,
+    useReservationsActions,
+    useReservationsList,
+    useReservationsStore
 } from './reservationsStore';
 export { useReturns, useReturnsActions, useReturnsFilters, useReturnsList, useReturnsStore } from './returnsStore';
 export { useSales, useSalesActions, useSalesFilters, useSalesList, useSalesStore } from './salesStore';
 export { useAppBarOrder, useDashboardOrder, useSettings, useSettingsActions } from './settingsStore';
 export {
-  useArchivedSellers,
-  useProductLinksList,
-  useSellersList,
-  useSuppliers,
-  useSuppliersActions,
+    useArchivedSellers,
+    useProductLinksList,
+    useSellersList,
+    useSuppliers,
+    useSuppliersActions
 } from './suppliersStore';
 export { useArchivedTeams, useTeams, useTeamsActions, useTeamsList, useTeamsStore } from './teamsStore';
 export {
-  useArchivedBadgesSearch,
-  useArchivedKitTypesSearch,
-  useArchivedLeaguesSearch,
-  useArchivedNamesetsSearch,
-  useArchivedProductsSearch,
-  useArchivedTeamsSearch,
-  useBadgesSearch,
-  useKitTypesSearch,
-  useLeaguesSearch,
-  useModal,
-  useNamesetsSearch,
-  useNotifications,
-  useProductsSearch,
-  useSalesSearch,
-  useSearchActions,
-  useSearchTerms,
-  useSidebar,
-  useTeamsSearch,
-  useTheme,
-  useUI,
-  useUIStore,
+    useArchivedBadgesSearch,
+    useArchivedKitTypesSearch,
+    useArchivedLeaguesSearch,
+    useArchivedNamesetsSearch,
+    useArchivedProductsSearch,
+    useArchivedTeamsSearch,
+    useBadgesSearch,
+    useKitTypesSearch,
+    useLeaguesSearch,
+    useModal,
+    useNamesetsSearch,
+    useNotifications,
+    useProductsSearch,
+    useSalesSearch,
+    useSearchActions,
+    useSearchTerms,
+    useSidebar,
+    useTeamsSearch,
+    useTheme,
+    useUI,
+    useUIStore
 } from './uiStore';
 
 // Export selectors for advanced usage
@@ -106,3 +109,4 @@ export { settingsSelectors } from './settingsStore';
 export { suppliersSelectors } from './suppliersStore';
 export { teamsSelectors } from './teamsStore';
 export { uiSelectors } from './uiStore';
+

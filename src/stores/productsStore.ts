@@ -121,6 +121,10 @@ interface ProductsState {
   loadProducts: () => Promise<void>;
   loadArchivedProducts: () => Promise<void>;
   clearError: () => void;
+  // Image management actions
+  updateProductImages: (productId: string, images: any[]) => void;
+  removeProductImage: (productId: string, imageId: string) => void;
+  refreshProduct: (productId: string) => Promise<void>;
 }
 
 // Selectors
@@ -319,6 +323,40 @@ export const useProductsStore = create<ProductsState>()(
       clearError: () => {
         set({ error: null });
       },
+
+      // Image management actions
+      updateProductImages: (productId: string, images: any[]) => {
+        set((state) => ({
+          products: state.products.map((p) =>
+            p.id === productId ? { ...p, images } : p
+          ),
+          archivedProducts: state.archivedProducts.map((p) =>
+            p.id === productId ? { ...p, images } : p
+          ),
+        }));
+      },
+
+      removeProductImage: (productId: string, imageId: string) => {
+        set((state) => ({
+          products: state.products.map((p) =>
+            p.id === productId ? { ...p, images: (p.images || []).filter((img) => img.id !== imageId) } : p
+          ),
+          archivedProducts: state.archivedProducts.map((p) =>
+            p.id === productId ? { ...p, images: (p.images || []).filter((img) => img.id !== imageId) } : p
+          ),
+        }));
+      },
+
+      refreshProduct: async (productId: string) => {
+        try {
+          // Reload all products to get the latest data (same approach as badges)
+          const products = await db.getProducts();
+          const archivedProducts = await db.getArchivedProducts();
+          set({ products, archivedProducts });
+        } catch (error) {
+          console.error('Error refreshing product:', error);
+        }
+      },
     }),
     {
       name: 'products-store',
@@ -330,6 +368,7 @@ export const useProductsStore = create<ProductsState>()(
 export const useProducts = () => useProductsStore();
 export const useProductsList = () => useProductsStore((state) => state.products);
 export const useArchivedProducts = () => useProductsStore((state) => state.archivedProducts);
+export const useProductsLoading = () => useProductsStore((state) => state.isLoading);
 export const useAllProducts = () => {
   const products = useProductsStore((state) => state.products);
   const archivedProducts = useProductsStore((state) => state.archivedProducts);
@@ -363,4 +402,8 @@ export const useProductsActions = () => ({
   setArchivedProducts: useProductsStore.getState().setArchivedProducts,
   loadProducts: useProductsStore.getState().loadProducts,
   loadArchivedProducts: useProductsStore.getState().loadArchivedProducts,
+  // Image management actions
+  updateProductImages: useProductsStore.getState().updateProductImages,
+  removeProductImage: useProductsStore.getState().removeProductImage,
+  refreshProduct: useProductsStore.getState().refreshProduct,
 });

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useProductImages } from '../../hooks/useProductImages';
+import { invalidateRouteCache } from '../../hooks/useRouteData';
 import { supabase } from '../../lib/supabaseClient';
+import { useProductsActions } from '../../stores/productsStore';
 import './ProductImageManager.css';
 import ProductImageUpload from './ProductImageUpload';
 
@@ -17,12 +19,20 @@ const ProductImageManager: React.FC<ProductImageManagerProps> = ({ productId, is
   // Use cached hook for images
   const { images, loading, error, refetch } = useProductImages(productId);
 
+  // Get store actions for syncing state
+  const { removeProductImage, refreshProduct } = useProductsActions();
+
   const handleImageUploaded = (newImage: any) => {
     // Individual image uploaded (can be ignored if using onAllUploadsComplete)
   };
 
-  const handleAllUploadsComplete = () => {
-    // Refetch images to show all newly uploaded images
+  const handleAllUploadsComplete = async () => {
+    // FIRST: Refresh the product in the store to update its images array
+    await refreshProduct(productId);
+    // THEN: Invalidate route cache so products list reloads with new images
+    invalidateRouteCache('/products');
+    invalidateRouteCache('/admin/products');
+    // FINALLY: Refetch local images to show all newly uploaded images
     refetch();
   };
 
@@ -64,6 +74,11 @@ const ProductImageManager: React.FC<ProductImageManagerProps> = ({ productId, is
         throw error;
       }
 
+      // Update store immediately to reflect the deletion
+      removeProductImage(productId, imageId);
+      // Invalidate route cache so products list reloads
+      invalidateRouteCache('/products');
+      invalidateRouteCache('/admin/products');
       // Refetch images to show updated list
       refetch();
     } catch (error) {
@@ -84,6 +99,11 @@ const ProductImageManager: React.FC<ProductImageManagerProps> = ({ productId, is
         throw error;
       }
 
+      // Refresh the product in the store to update its images array
+      await refreshProduct(productId);
+      // Invalidate route cache so products list reloads
+      invalidateRouteCache('/products');
+      invalidateRouteCache('/admin/products');
       // Refetch images to show updated list
       refetch();
     } catch (error) {

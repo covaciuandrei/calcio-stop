@@ -2,18 +2,20 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useBadgeImagesMapDebounced } from '../../hooks/useBadgeImages';
 import { useNamesetImagesMapDebounced } from '../../hooks/useNamesetImages';
+import { useRouteData } from '../../hooks/useRouteData';
 import { statsService } from '../../lib/statsService';
 import {
-  useArchivedBadges,
-  useArchivedKitTypes,
-  useArchivedNamesets,
-  useArchivedProducts,
-  useArchivedTeams,
-  useBadgesList,
-  useKitTypesList,
-  useNamesetsList,
-  useProductsList,
-  useTeamsList,
+    useArchivedBadges,
+    useArchivedKitTypes,
+    useArchivedNamesets,
+    useArchivedProducts,
+    useArchivedTeams,
+    useBadgesList,
+    useKitTypesList,
+    useNamesetsList,
+    useProductsList,
+    useProductsLoading,
+    useTeamsList,
 } from '../../stores';
 import { useAuth } from '../../stores/authStore';
 import { Product } from '../../types';
@@ -23,6 +25,9 @@ import './ProductDetailPage.css';
 import ProductImageManager from './ProductImageManager';
 
 const ProductDetailPage: React.FC = () => {
+  // Load data for this route (essential for direct page access/refresh)
+  useRouteData();
+
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -46,6 +51,7 @@ const ProductDetailPage: React.FC = () => {
   const archivedKitTypes = useArchivedKitTypes();
   const badges = useBadgesList();
   const archivedBadges = useArchivedBadges();
+  const isLoading = useProductsLoading();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -157,6 +163,18 @@ const ProductDetailPage: React.FC = () => {
   const namesetPrice =
     selectedNameset && selectedNameset.price && selectedNamesetId !== product?.namesetId ? selectedNameset.price : 0;
   const totalPrice = product ? product.price + badgePrice + namesetPrice : 0;
+
+  // Show loading state if data is loading and product is not yet found
+  if (isLoading && !product) {
+    return (
+      <div className="product-detail-page">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading product details...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
