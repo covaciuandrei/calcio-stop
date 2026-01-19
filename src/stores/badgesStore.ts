@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import * as db from '../lib/db';
-import { Badge } from '../types';
+import { Badge, BadgeImage } from '../types';
 import { getErrorMessage, isForeignKeyConstraintError } from '../utils/errorHandler';
 
 interface BadgesState {
@@ -22,6 +22,11 @@ interface BadgesState {
   loadBadges: () => Promise<void>;
   loadArchivedBadges: () => Promise<void>;
   clearError: () => void;
+  // Image management actions
+  updateBadgeImages: (badgeId: string, images: BadgeImage[]) => void;
+  addBadgeImage: (badgeId: string, image: BadgeImage) => void;
+  removeBadgeImage: (badgeId: string, imageId: string) => void;
+  refreshBadge: (badgeId: string) => Promise<void>;
 }
 
 // Selectors
@@ -177,6 +182,47 @@ export const useBadgesStore = create<BadgesState>()(
       clearError: () => {
         set({ error: null });
       },
+
+      // Image management actions
+      updateBadgeImages: (badgeId: string, images: BadgeImage[]) => {
+        set((state) => ({
+          badges: state.badges.map((b) => (b.id === badgeId ? { ...b, images } : b)),
+          archivedBadges: state.archivedBadges.map((b) => (b.id === badgeId ? { ...b, images } : b)),
+        }));
+      },
+
+      addBadgeImage: (badgeId: string, image: BadgeImage) => {
+        set((state) => ({
+          badges: state.badges.map((b) =>
+            b.id === badgeId ? { ...b, images: [...(b.images || []), image] } : b
+          ),
+          archivedBadges: state.archivedBadges.map((b) =>
+            b.id === badgeId ? { ...b, images: [...(b.images || []), image] } : b
+          ),
+        }));
+      },
+
+      removeBadgeImage: (badgeId: string, imageId: string) => {
+        set((state) => ({
+          badges: state.badges.map((b) =>
+            b.id === badgeId ? { ...b, images: (b.images || []).filter((img) => img.id !== imageId) } : b
+          ),
+          archivedBadges: state.archivedBadges.map((b) =>
+            b.id === badgeId ? { ...b, images: (b.images || []).filter((img) => img.id !== imageId) } : b
+          ),
+        }));
+      },
+
+      refreshBadge: async (badgeId: string) => {
+        try {
+          // Reload all badges to get the latest data
+          const badges = await db.getBadges();
+          const archivedBadges = await db.getArchivedBadges();
+          set({ badges, archivedBadges });
+        } catch (error) {
+          console.error('Failed to refresh badge:', error);
+        }
+      },
     }),
     {
       name: 'badges-store',
@@ -199,4 +245,9 @@ export const useBadgesActions = () => ({
   setArchivedBadges: useBadgesStore.getState().setArchivedBadges,
   loadBadges: useBadgesStore.getState().loadBadges,
   loadArchivedBadges: useBadgesStore.getState().loadArchivedBadges,
+  // Image management actions
+  updateBadgeImages: useBadgesStore.getState().updateBadgeImages,
+  addBadgeImage: useBadgesStore.getState().addBadgeImage,
+  removeBadgeImage: useBadgesStore.getState().removeBadgeImage,
+  refreshBadge: useBadgesStore.getState().refreshBadge,
 });

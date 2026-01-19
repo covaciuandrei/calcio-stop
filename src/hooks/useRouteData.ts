@@ -1,21 +1,21 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
-  useBadgesActions,
-  useBadgesStore,
-  useKitTypesActions,
-  useKitTypesStore,
-  useLeaguesActions,
-  useLeaguesStore,
-  useNamesetsActions,
-  useNamesetsStore,
-  useProductsActions,
-  useProductsStore,
-  useSalesActions,
-  useSuppliersActions,
-  useSuppliersStore,
-  useTeamsActions,
-  useTeamsStore,
+    useBadgesActions,
+    useBadgesStore,
+    useKitTypesActions,
+    useKitTypesStore,
+    useLeaguesActions,
+    useLeaguesStore,
+    useNamesetsActions,
+    useNamesetsStore,
+    useProductsActions,
+    useProductsStore,
+    useSalesActions,
+    useSuppliersActions,
+    useSuppliersStore,
+    useTeamsActions,
+    useTeamsStore,
 } from '../stores';
 
 /**
@@ -26,6 +26,23 @@ import {
 const globalRouteState = {
   hasLoaded: new Set<string>(),
   loadingPaths: new Set<string>(),
+};
+
+/**
+ * Invalidate the route cache to force data reload on next navigation.
+ * @param route - Optional specific route to invalidate. If not provided, clears all routes.
+ */
+export const invalidateRouteCache = (route?: string) => {
+  if (route) {
+    // Invalidate specific route and any matching sub-routes
+    globalRouteState.hasLoaded.forEach((path) => {
+      if (path.includes(route) || route.includes(path)) {
+        globalRouteState.hasLoaded.delete(path);
+      }
+    });
+  } else {
+    globalRouteState.hasLoaded.clear();
+  }
 };
 
 /**

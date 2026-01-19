@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useBadgeImages } from '../../hooks/useBadgeImages';
+import { invalidateRouteCache } from '../../hooks/useRouteData';
 import { supabase } from '../../lib/supabaseClient';
+import { useBadgesActions } from '../../stores/badgesStore';
 import './BadgeImageManager.css';
 import BadgeImageUpload from './BadgeImageUpload';
 
@@ -16,14 +18,21 @@ const BadgeImageManager: React.FC<BadgeImageManagerProps> = ({ badgeId, isAdmin 
 
   // Use cached hook for images
   const { images, loading, error, refetch } = useBadgeImages(badgeId);
+  
+  // Get store actions for syncing state
+  const { removeBadgeImage, refreshBadge } = useBadgesActions();
 
   const handleImageUploaded = (newImage: any) => {
     // Individual image uploaded (can be ignored if using onAllUploadsComplete)
   };
 
-  const handleAllUploadsComplete = () => {
+  const handleAllUploadsComplete = async () => {
     // Refetch images to show all newly uploaded images
     refetch();
+    // Refresh the badge in the store to update its images array
+    await refreshBadge(badgeId);
+    // Invalidate route cache so badges list reloads with new images
+    invalidateRouteCache('/badges');
   };
 
   const handleUploadError = (errorMessage: string) => {
@@ -64,6 +73,10 @@ const BadgeImageManager: React.FC<BadgeImageManagerProps> = ({ badgeId, isAdmin 
         throw error;
       }
 
+      // Update store immediately to reflect the deletion
+      removeBadgeImage(badgeId, imageId);
+      // Invalidate route cache so badges list reloads
+      invalidateRouteCache('/badges');
       // Refetch images to show updated list
       refetch();
     } catch (error) {
@@ -84,6 +97,10 @@ const BadgeImageManager: React.FC<BadgeImageManagerProps> = ({ badgeId, isAdmin 
         throw error;
       }
 
+      // Refresh the badge in the store to update its images array
+      await refreshBadge(badgeId);
+      // Invalidate route cache so badges list reloads
+      invalidateRouteCache('/badges');
       // Refetch images to show updated list
       refetch();
     } catch (error) {
