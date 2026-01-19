@@ -28,6 +28,7 @@ export interface Order {
   customerName?: string; // Can be empty
   phoneNumber?: string; // Can be empty
   createdAt: string;
+  archivedAt?: string; // Set when order is archived
   nameset?: Nameset | null; // full nameset object (fetched in same request)
   team?: Team | null; // full team object (fetched in same request)
   kitType?: KitType | null; // full kit type object (fetched in same request)

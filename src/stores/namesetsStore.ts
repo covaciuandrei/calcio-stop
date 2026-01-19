@@ -1,5 +1,7 @@
+import { useMemo } from 'react';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 import * as db from '../lib/db';
 import { Nameset } from '../types';
 import { getErrorMessage, isForeignKeyConstraintError } from '../utils/errorHandler';
@@ -189,7 +191,13 @@ export const useNamesetsStore = create<NamesetsState>()(
 export const useNamesets = () => useNamesetsStore();
 export const useNamesetsList = () => useNamesetsStore((state) => state.namesets);
 export const useArchivedNamesets = () => useNamesetsStore((state) => state.archivedNamesets);
-export const useSoldOutNamesets = () => useNamesetsStore((state) => state.namesets);
+export const useSoldOutNamesets = () => {
+  const namesets = useNamesetsStore(useShallow((state) => state.namesets));
+  return useMemo(
+    () => namesets.filter((n) => n.quantity === 0),
+    [namesets]
+  );
+};
 export const useNamesetsActions = () => ({
   addNameset: useNamesetsStore.getState().addNameset,
   updateNameset: useNamesetsStore.getState().updateNameset,

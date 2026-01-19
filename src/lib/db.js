@@ -184,14 +184,28 @@ export async function archiveTeam(id) {
     .single();
 
   if (error) throw error;
-  return data;
+
+  // Map database response to frontend format
+  return {
+    id: data.id,
+    name: data.name,
+    leagues: data.leagues || [],
+    createdAt: data.created_at,
+  };
 }
 
 export async function restoreTeam(id) {
   const { data, error } = await supabase.from('teams').update({ archived_at: null }).eq('id', id).select().single();
 
   if (error) throw error;
-  return data;
+
+  // Map database response to frontend format
+  return {
+    id: data.id,
+    name: data.name,
+    leagues: data.leagues || [],
+    createdAt: data.created_at,
+  };
 }
 
 // ============================================================================
@@ -520,14 +534,34 @@ export async function archiveBadge(id) {
     .single();
 
   if (error) throw error;
-  return data;
+
+  // Map database response to frontend format
+  return {
+    id: data.id,
+    name: data.name,
+    season: data.season,
+    quantity: data.quantity,
+    price: data.price,
+    location: data.location || undefined,
+    createdAt: data.created_at,
+  };
 }
 
 export async function restoreBadge(id) {
   const { data, error } = await supabase.from('badges').update({ archived_at: null }).eq('id', id).select().single();
 
   if (error) throw error;
-  return data;
+
+  // Map database response to frontend format
+  return {
+    id: data.id,
+    name: data.name,
+    season: data.season,
+    quantity: data.quantity,
+    price: data.price,
+    location: data.location || undefined,
+    createdAt: data.created_at,
+  };
 }
 
 // ============================================================================
@@ -958,14 +992,38 @@ export async function archiveNameset(id) {
     .single();
 
   if (error) throw error;
-  return data;
+
+  // Map database response to frontend format
+  return {
+    id: data.id,
+    playerName: data.player_name,
+    number: data.number,
+    season: data.season,
+    quantity: data.quantity,
+    price: data.price,
+    kitTypeId: data.kit_type_id,
+    location: data.location || undefined,
+    createdAt: data.created_at,
+  };
 }
 
 export async function restoreNameset(id) {
   const { data, error } = await supabase.from('namesets').update({ archived_at: null }).eq('id', id).select().single();
 
   if (error) throw error;
-  return data;
+
+  // Map database response to frontend format
+  return {
+    id: data.id,
+    playerName: data.player_name,
+    number: data.number,
+    season: data.season,
+    quantity: data.quantity,
+    price: data.price,
+    kitTypeId: data.kit_type_id,
+    location: data.location || undefined,
+    createdAt: data.created_at,
+  };
 }
 
 // ============================================================================
@@ -2564,14 +2622,32 @@ export async function createUser(data) {
   const { data: result, error } = await supabase.from('users').insert([data]).select().single();
 
   if (error) throw error;
-  return result;
+  
+  // Map database response to frontend format
+  return {
+    id: result.id,
+    name: result.name,
+    email: result.email,
+    role: result.role,
+    createdAt: result.created_at,
+  };
 }
 
 export async function getUserByEmail(email) {
   const { data, error } = await supabase.from('users').select('*').eq('email', email).single();
 
   if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows found
-  return data;
+  
+  if (!data) return null;
+
+  // Map database response to frontend format
+  return {
+    id: data.id,
+    name: data.name,
+    email: data.email,
+    role: data.role,
+    createdAt: data.created_at,
+  };
 }
 
 export async function updateUser(id, updates) {
@@ -2979,14 +3055,47 @@ export async function archiveOrder(id) {
     .single();
 
   if (error) throw error;
-  return data;
+
+  // Map database response to frontend format
+  return {
+    id: data.id,
+    name: data.name,
+    type: data.type,
+    sizes: data.sizes,
+    namesetId: data.nameset_id,
+    teamId: data.team_id,
+    kitTypeId: data.kit_type_id,
+    badgeId: data.badge_id,
+    price: data.price,
+    status: data.status,
+    customerName: data.customer_name,
+    phoneNumber: data.phone_number,
+    createdAt: data.created_at,
+    archivedAt: data.archived_at,
+  };
 }
 
 export async function unarchiveOrder(id) {
   const { data, error } = await supabase.from('orders').update({ archived_at: null }).eq('id', id).select().single();
 
   if (error) throw error;
-  return data;
+
+  // Map database response to frontend format
+  return {
+    id: data.id,
+    name: data.name,
+    type: data.type,
+    sizes: data.sizes,
+    namesetId: data.nameset_id,
+    teamId: data.team_id,
+    kitTypeId: data.kit_type_id,
+    badgeId: data.badge_id,
+    price: data.price,
+    status: data.status,
+    customerName: data.customer_name,
+    phoneNumber: data.phone_number,
+    createdAt: data.created_at,
+  };
 }
 
 // ============================================================================
@@ -3185,7 +3294,12 @@ export async function archiveLeague(id) {
     throw new Error('League not found');
   }
 
-  return data;
+  // Map database response to frontend format
+  return {
+    id: data.id,
+    name: data.name,
+    createdAt: data.created_at,
+  };
 }
 
 export async function restoreLeague(id) {
@@ -3208,7 +3322,12 @@ export async function restoreLeague(id) {
     throw new Error('League not found');
   }
 
-  return data;
+  // Map database response to frontend format
+  return {
+    id: data.id,
+    name: data.name,
+    createdAt: data.created_at,
+  };
 }
 
 // ============================================================================

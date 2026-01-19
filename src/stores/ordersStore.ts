@@ -101,10 +101,17 @@ export const useOrdersStore = create<OrdersState>()(
           await db.archiveOrder(id);
           set((state) => {
             const orderToArchive = state.orders.find((order) => order.id === id);
+            if (!orderToArchive) {
+              // Order not found - just reset loading state
+              return { isLoading: false, error: null };
+            }
+            // Add archivedAt to the order being archived
+            const archivedOrder = { ...orderToArchive, archivedAt: new Date().toISOString() };
             return {
               orders: state.orders.filter((order) => order.id !== id),
-              archivedOrders: orderToArchive ? [...state.archivedOrders, orderToArchive] : state.archivedOrders,
+              archivedOrders: [...state.archivedOrders, archivedOrder],
               isLoading: false,
+              error: null,
             };
           });
         } catch (error) {
@@ -122,10 +129,17 @@ export const useOrdersStore = create<OrdersState>()(
           await db.unarchiveOrder(id);
           set((state) => {
             const orderToUnarchive = state.archivedOrders.find((order) => order.id === id);
+            if (!orderToUnarchive) {
+              // Order not found - just reset loading state
+              return { isLoading: false, error: null };
+            }
+            // Remove archivedAt from the order being unarchived (properly typed)
+            const { archivedAt: _, ...restoredOrder } = orderToUnarchive;
             return {
-              orders: orderToUnarchive ? [...state.orders, orderToUnarchive] : state.orders,
+              orders: [...state.orders, restoredOrder],
               archivedOrders: state.archivedOrders.filter((order) => order.id !== id),
               isLoading: false,
+              error: null,
             };
           });
         } catch (error) {
@@ -184,17 +198,14 @@ export const useArchivedOrders = () => useOrdersStore((state) => state.archivedO
 export const useOrdersLoading = () => useOrdersStore((state) => state.isLoading);
 export const useOrdersError = () => useOrdersStore((state) => state.error);
 
-// Actions
-export const useOrdersActions = () => {
-  const store = useOrdersStore();
-  return {
-    loadOrders: store.loadOrders,
-    loadArchivedOrders: store.loadArchivedOrders,
-    addOrder: store.addOrder,
-    updateOrder: store.updateOrder,
-    archiveOrder: store.archiveOrder,
-    unarchiveOrder: store.unarchiveOrder,
-    deleteOrder: store.deleteOrder,
-    updateOrderStatus: store.updateOrderStatus,
-  };
-};
+// Actions - use getState() to avoid re-renders
+export const useOrdersActions = () => ({
+  loadOrders: useOrdersStore.getState().loadOrders,
+  loadArchivedOrders: useOrdersStore.getState().loadArchivedOrders,
+  addOrder: useOrdersStore.getState().addOrder,
+  updateOrder: useOrdersStore.getState().updateOrder,
+  archiveOrder: useOrdersStore.getState().archiveOrder,
+  unarchiveOrder: useOrdersStore.getState().unarchiveOrder,
+  deleteOrder: useOrdersStore.getState().deleteOrder,
+  updateOrderStatus: useOrdersStore.getState().updateOrderStatus,
+});

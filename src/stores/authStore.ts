@@ -149,9 +149,8 @@ export const useAuthStore = create<AuthState>()(
             console.error('Error signing out:', error);
           }
 
-          // Clear localStorage FIRST to prevent persistence from restoring state
-          localStorage.removeItem('auth-store');
-          localStorage.clear(); // Clear all localStorage to be sure
+          // Clear only auth-related localStorage (not all settings)
+          localStorage.removeItem('auth-persist');
 
           // Then clear the state
           set({
@@ -191,13 +190,8 @@ export const useAuthStore = create<AuthState>()(
 
         initializeAuth: async () => {
           try {
-            // First, clear any stale local state
-            set({
-              user: null,
-              isAuthenticated: false,
-              isLoading: true,
-              error: null,
-            });
+            // Set loading without clearing user state to avoid auth flash
+            set({ isLoading: true, error: null });
 
             // Check if user is already authenticated with Supabase
             const {
@@ -238,15 +232,15 @@ export const useAuthStore = create<AuthState>()(
         },
       }),
       {
-        name: 'auth-store', // DevTools name
+        name: 'auth-persist',
+        partialize: (state: AuthState) => ({
+          user: state.user,
+          isAuthenticated: state.isAuthenticated,
+        }),
       }
     ),
     {
-      name: 'auth-persist', // Persist name
-      partialize: (state: AuthState) => ({
-        user: state.user,
-        isAuthenticated: state.isAuthenticated,
-      }),
+      name: 'auth-store',
     }
   )
 );

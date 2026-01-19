@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 import * as db from '../lib/db';
 import { Product } from '../types';
 
@@ -335,7 +336,13 @@ export const useAllProducts = () => {
 
   return useMemo(() => [...products, ...archivedProducts], [products, archivedProducts]);
 };
-export const useSoldOutProducts = () => useProductsStore((state) => state.products);
+export const useSoldOutProducts = () => {
+  const products = useProductsStore(useShallow((state) => state.products));
+  return useMemo(
+    () => products.filter((p) => p.sizes.every((s) => s.quantity === 0)),
+    [products]
+  );
+};
 // Individual action hooks to avoid object recreation
 export const useAddProduct = () => useProductsStore((state) => state.addProduct);
 export const useUpdateProduct = () => useProductsStore((state) => state.updateProduct);
