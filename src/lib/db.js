@@ -1,3 +1,4 @@
+import { logInventoryChange, logInventoryChanges } from './inventoryLog';
 import { supabase } from './supabaseClient';
 
 // ============================================================================
@@ -478,21 +479,82 @@ export async function getArchivedBadges() {
   }));
 }
 
+// ... (previous content)
+
 export async function updateBadge(id, updates) {
-  // Map frontend updates to database schema
+  // If quantity is being updated, fetch current badge to log the change
+  let oldQuantity = null;
+  let badgeName = null;
+  
+  // Extract custom log context if provided, not part of DB update
+  const logContext = updates._logContext || {};
+  // Create a clean updates object without internal flags
   const dbUpdates = {};
+  
+  // Copy valid fields
   if (updates.name !== undefined) dbUpdates.name = updates.name;
   if (updates.season !== undefined) dbUpdates.season = updates.season;
   if (updates.quantity !== undefined) dbUpdates.quantity = updates.quantity;
   if (updates.price !== undefined) dbUpdates.price = updates.price;
   if (updates.location !== undefined) dbUpdates.location = updates.location || null;
   if (updates.createdAt !== undefined) dbUpdates.created_at = updates.createdAt;
+  
+  if (updates.quantity !== undefined) {
+    const { data: currentBadge, error: fetchError } = await supabase
+      .from('badges')
+      .select('quantity, name')
+      .eq('id', id)
+      .single();
+    
+    if (!fetchError && currentBadge) {
+      oldQuantity = currentBadge.quantity;
+      badgeName = currentBadge.name;
+    }
+  }
 
-  const { data, error } = await supabase.from('badges').update(dbUpdates).eq('id', id).select().single();
+  const { data, error } = await supabase.from('badges').update(dbUpdates).eq('id', id).select(`
+    *,
+    badge_images (
+      id,
+      badge_id,
+      image_url,
+      thumbnail_url,
+      medium_url,
+      large_url,
+      alt_text,
+      is_primary,
+      display_order,
+      created_at
+    )
+  `).single();
 
   if (error) throw error;
 
-  // Map database response to frontend format
+  // Log inventory change if quantity changed
+  if (oldQuantity !== null && updates.quantity !== undefined && oldQuantity !== updates.quantity) {
+    const quantityChange = updates.quantity - oldQuantity;
+    
+    // Determine reason
+    let reason = quantityChange > 0 ? 'Manual restock' : 'Manual adjustment';
+    if (logContext.reason) {
+      reason = logContext.reason;
+    }
+
+    logInventoryChange({
+      entityType: 'badge',
+      entityId: id,
+      entityName: badgeName || data.name,
+      changeType: 'manual_adjustment',
+      quantityBefore: oldQuantity,
+      quantityChange: quantityChange,
+      quantityAfter: updates.quantity,
+      reason: reason,
+      referenceId: logContext.referenceId,
+      referenceType: logContext.referenceType
+    });
+  }
+
+  // Map database response back to frontend format
   return {
     id: data.id,
     name: data.name,
@@ -501,8 +563,22 @@ export async function updateBadge(id, updates) {
     price: data.price,
     location: data.location || undefined,
     createdAt: data.created_at,
+    images: (data.badge_images || []).map((img) => ({
+      id: img.id,
+      badgeId: img.badge_id,
+      imageUrl: img.image_url || img.large_url,
+      thumbnailUrl: img.thumbnail_url || img.image_url,
+      mediumUrl: img.medium_url || img.image_url,
+      largeUrl: img.large_url || img.image_url,
+      altText: img.alt_text,
+      isPrimary: img.is_primary,
+      displayOrder: img.display_order,
+      createdAt: img.created_at,
+    })),
   };
 }
+
+
 
 export async function deleteBadge(id) {
   // First check if there are any references to this badge
@@ -831,34 +907,84 @@ export async function getArchivedNamesets() {
 }
 
 export async function updateNameset(id, updates) {
-  // Map frontend data to database schema
+  // If quantity is being updated, fetch current nameset to log the change
+  let oldQuantity = null;
+  let namesetName = null;
+
+  // Extract custom log context if provided, not part of DB update
+  const logContext = updates._logContext || {};
+  // Create a clean updates object without internal flags
   const dbUpdates = {};
+  
+  // Copy valid fields (mapping frontend camelCase to DB snake_case)
+  if (updates.playerName !== undefined) dbUpdates.player_name = updates.playerName;
+  if (updates.number !== undefined) dbUpdates.number = parseInt(updates.number);
+  if (updates.season !== undefined) dbUpdates.season = updates.season;
+  if (updates.quantity !== undefined) dbUpdates.quantity = parseInt(updates.quantity);
+  if (updates.price !== undefined) dbUpdates.price = parseFloat(updates.price);
+  if (updates.kitTypeId !== undefined) dbUpdates.kit_type_id = updates.kitTypeId;
+  if (updates.location !== undefined) dbUpdates.location = updates.location || null;
+  if (updates.createdAt !== undefined) dbUpdates.created_at = updates.createdAt;
 
-  if (updates.playerName !== undefined) {
-    dbUpdates.player_name = updates.playerName;
-  }
-  if (updates.number !== undefined) {
-    dbUpdates.number = parseInt(updates.number);
-  }
-  if (updates.season !== undefined) {
-    dbUpdates.season = updates.season;
-  }
   if (updates.quantity !== undefined) {
-    dbUpdates.quantity = parseInt(updates.quantity);
-  }
-  if (updates.price !== undefined) {
-    dbUpdates.price = parseFloat(updates.price);
-  }
-  if (updates.kitTypeId !== undefined) {
-    dbUpdates.kit_type_id = updates.kitTypeId;
-  }
-  if (updates.location !== undefined) {
-    dbUpdates.location = updates.location || null;
+    const { data: currentNameset, error: fetchError } = await supabase
+      .from('namesets')
+      .select('quantity, player_name, number')
+      .eq('id', id)
+      .single();
+    
+    if (!fetchError && currentNameset) {
+      oldQuantity = currentNameset.quantity;
+      namesetName = `${currentNameset.player_name} #${currentNameset.number}`;
+    }
   }
 
-  const { data, error } = await supabase.from('namesets').update(dbUpdates).eq('id', id).select().single();
+  const { data, error } = await supabase.from('namesets').update(dbUpdates).eq('id', id).select(`
+    *,
+    nameset_images (
+      id,
+      nameset_id,
+      image_url,
+      thumbnail_url,
+      medium_url,
+      large_url,
+      alt_text,
+      is_primary,
+      display_order,
+      created_at
+    ),
+    kit_types (
+      id,
+      name,
+      created_at
+    )
+  `).single();
 
   if (error) throw error;
+
+  // Log inventory change if quantity changed
+  if (oldQuantity !== null && updates.quantity !== undefined && oldQuantity !== updates.quantity) {
+    const quantityChange = updates.quantity - oldQuantity;
+    
+    // Determine reason
+    let reason = quantityChange > 0 ? 'Manual restock' : 'Manual adjustment';
+    if (logContext.reason) {
+      reason = logContext.reason;
+    }
+
+    logInventoryChange({
+      entityType: 'nameset',
+      entityId: id,
+      entityName: namesetName || `${data.player_name} #${data.number}`,
+      changeType: 'manual_adjustment',
+      quantityBefore: oldQuantity,
+      quantityChange: quantityChange,
+      quantityAfter: updates.quantity,
+      reason: reason,
+      referenceId: logContext.referenceId,
+      referenceType: logContext.referenceType
+    });
+  }
 
   // Map database response back to frontend format
   return {
@@ -871,6 +997,25 @@ export async function updateNameset(id, updates) {
     kitTypeId: data.kit_type_id,
     location: data.location || undefined,
     createdAt: data.created_at,
+    images: (data.nameset_images || []).map((img) => ({
+      id: img.id,
+      namesetId: img.nameset_id,
+      imageUrl: img.image_url || img.large_url,
+      thumbnailUrl: img.thumbnail_url || img.image_url,
+      mediumUrl: img.medium_url || img.image_url,
+      largeUrl: img.large_url || img.image_url,
+      altText: img.alt_text,
+      isPrimary: img.is_primary,
+      displayOrder: img.display_order,
+      createdAt: img.created_at,
+    })),
+    kitType: data.kit_types
+      ? {
+          id: data.kit_types.id,
+          name: data.kit_types.name,
+          createdAt: data.kit_types.created_at,
+        }
+      : null,
   };
 }
 
@@ -1338,6 +1483,28 @@ export async function getArchivedProducts() {
 }
 
 export async function updateProduct(id, updates) {
+  // If sizes are being updated, fetch current product to log quantity changes
+  let oldSizes = null;
+  let productName = null;
+  
+  // Check if we should log this change (skip if it's part of a sale creation that handles its own logging)
+  const shouldLog = !updates._skipInventoryLog && updates.sizes !== undefined;
+
+  if (shouldLog) {
+    const { data: currentProduct, error: fetchError } = await supabase
+      .from('products')
+      .select('sizes, name, team_id, teams(name)')
+      .eq('id', id)
+      .single();
+    
+    if (!fetchError && currentProduct) {
+      oldSizes = currentProduct.sizes || [];
+      productName = currentProduct.teams?.name 
+        ? `${currentProduct.teams.name} - ${currentProduct.name}`
+        : currentProduct.name;
+    }
+  }
+
   // Map frontend data to database schema
   const dbUpdates = {};
 
@@ -1401,6 +1568,37 @@ export async function updateProduct(id, updates) {
 
   if (error) throw error;
 
+  // Log inventory changes if needed
+  if (shouldLog && oldSizes && updates.sizes) {
+    const changes = [];
+    
+    // Check for size quantity changes
+    updates.sizes.forEach(newSize => {
+      const oldSizeObj = oldSizes.find(s => s.size === newSize.size);
+      const oldQuantity = oldSizeObj ? (oldSizeObj.quantity || 0) : 0;
+      const newQuantity = newSize.quantity || 0;
+      
+      if (oldQuantity !== newQuantity) {
+        const quantityChange = newQuantity - oldQuantity;
+        changes.push({
+          entityType: 'product',
+          entityId: id,
+          entityName: productName || data.name, // Fallback if team fetch failed
+          size: newSize.size,
+          changeType: 'manual_adjustment',
+          quantityBefore: oldQuantity,
+          quantityChange: quantityChange,
+          quantityAfter: newQuantity,
+          reason: quantityChange > 0 ? 'Manual restock' : 'Manual adjustment',
+        });
+      }
+    });
+
+    if (changes.length > 0) {
+      logInventoryChanges(changes);
+    }
+  }
+
   // Map database response back to frontend format
   return {
     id: data.id,
@@ -1429,6 +1627,18 @@ export async function updateProduct(id, updates) {
       displayOrder: img.display_order,
       createdAt: img.created_at,
     })),
+    nameset: data.nameset_id // We don't fetch relations here to save perf, caller usually reloads list
+      ? { id: data.nameset_id } // minimal stub
+      : null,
+    team: data.team_id
+      ? { id: data.team_id }
+      : null,
+    kitType: data.kit_type_id
+      ? { id: data.kit_type_id }
+      : null,
+    badge: data.badge_id
+      ? { id: data.badge_id }
+      : null,
   };
 }
 
@@ -1541,6 +1751,49 @@ export async function createSale(data) {
   const { data: result, error } = await supabase.from('sales').insert([dbData]).select().single();
 
   if (error) throw error;
+
+  // Log inventory changes
+  try {
+    const productIds = [...new Set(data.items.map(i => i.productId))];
+    const { data: products } = await supabase
+      .from('products')
+      .select('id, name, sizes, teams(name)')
+      .in('id', productIds);
+    
+    if (products) {
+      const logs = [];
+      data.items.forEach(item => {
+        const product = products.find(p => p.id === item.productId);
+        if (product) {
+          const productName = product.teams?.name ? `${product.teams.name} - ${product.name}` : product.name;
+          // Current quantity in DB (after decrement)
+          const sizeObj = product.sizes?.find(s => s.size === item.size);
+          const currentQuantity = sizeObj ? (sizeObj.quantity || 0) : 0;
+          
+          logs.push({
+            entityType: 'product',
+            entityId: item.productId,
+            entityName: productName,
+            size: item.size,
+            changeType: 'sale',
+            quantityBefore: currentQuantity + item.quantity,
+            quantityChange: -item.quantity,
+            quantityAfter: currentQuantity,
+            reason: `Sale (${data.saleType}) to ${data.customerName}`,
+            referenceId: result.id,
+            referenceType: 'sale'
+          });
+        }
+      });
+      
+      if (logs.length > 0) {
+        await logInventoryChanges(logs);
+      }
+    }
+  } catch (logError) {
+    console.error('Failed to log inventory changes for sale:', logError);
+    // Don't fail the sale creation
+  }
 
   // Map database response back to frontend format
   // Support both new (items) and old (product_id, etc.) formats for backward compatibility
@@ -1948,7 +2201,7 @@ export async function reverseSale(id) {
     // Get the product once
     const { data: product, error: productError } = await supabase
       .from('products')
-      .select('sizes')
+      .select('sizes, name, team_id, teams(name)')
       .eq('id', productId)
       .single();
 
@@ -1963,6 +2216,9 @@ export async function reverseSale(id) {
       continue;
     }
 
+    const productName = product.teams?.name ? `${product.teams.name} - ${product.name}` : product.name;
+    const inventoryChanges = [];
+
     // Restore quantities for all sizes of this product in one update
     const updatedSizes = (product.sizes || []).map((sizeObj) => {
       // Find all items for this size
@@ -1970,6 +2226,22 @@ export async function reverseSale(id) {
       if (itemsForThisSize.length > 0) {
         // Sum up all quantities to restore for this size
         const totalQuantityToRestore = itemsForThisSize.reduce((sum, item) => sum + item.quantity, 0);
+        
+        // Prepare log entry
+        inventoryChanges.push({
+          entityType: 'product',
+          entityId: productId,
+          entityName: productName,
+          size: sizeObj.size,
+          changeType: 'sale_reversal',
+          quantityBefore: sizeObj.quantity || 0,
+          quantityChange: totalQuantityToRestore,
+          quantityAfter: (sizeObj.quantity || 0) + totalQuantityToRestore,
+          reason: `Reversal of sale (${sale.sale_type}) for ${sale.customer_name}`,
+          referenceId: id,
+          referenceType: 'sale'
+        });
+
         return {
           ...sizeObj,
           quantity: (sizeObj.quantity || 0) + totalQuantityToRestore,
@@ -1985,6 +2257,9 @@ export async function reverseSale(id) {
       console.error(`Error updating product ${productId}:`, updateError);
       // Continue with other products even if one fails
       continue;
+    } else if (inventoryChanges.length > 0) {
+      // Log successful inventory changes
+      await logInventoryChanges(inventoryChanges);
     }
   }
 
@@ -2141,7 +2416,7 @@ export async function returnSale(saleId) {
     // Get the product once
     const { data: product, error: productError } = await supabase
       .from('products')
-      .select('sizes')
+      .select('sizes, name, team_id, teams(name)')
       .eq('id', productId)
       .single();
 
@@ -2156,6 +2431,9 @@ export async function returnSale(saleId) {
       continue;
     }
 
+    const productName = product.teams?.name ? `${product.teams.name} - ${product.name}` : product.name;
+    const inventoryChanges = [];
+
     // Restore quantities for all sizes of this product in one update
     const updatedSizes = (product.sizes || []).map((sizeObj) => {
       // Find all items for this size
@@ -2163,6 +2441,22 @@ export async function returnSale(saleId) {
       if (itemsForThisSize.length > 0) {
         // Sum up all quantities to restore for this size
         const totalQuantityToRestore = itemsForThisSize.reduce((sum, item) => sum + item.quantity, 0);
+        
+        // Prepare log entry
+        inventoryChanges.push({
+          entityType: 'product',
+          entityId: productId,
+          entityName: productName,
+          size: sizeObj.size,
+          changeType: 'return',
+          quantityBefore: sizeObj.quantity || 0,
+          quantityChange: totalQuantityToRestore,
+          quantityAfter: (sizeObj.quantity || 0) + totalQuantityToRestore,
+          reason: `Return of sale (${sale.sale_type}) for ${sale.customer_name}`,
+          referenceId: saleId,
+          referenceType: 'sale'
+        });
+
         return {
           ...sizeObj,
           quantity: (sizeObj.quantity || 0) + totalQuantityToRestore,
@@ -2178,6 +2472,9 @@ export async function returnSale(saleId) {
       console.error(`Error updating product ${productId}:`, updateError);
       // Continue with other products even if one fails
       continue;
+    } else if (inventoryChanges.length > 0) {
+      // Log successful inventory changes
+      await logInventoryChanges(inventoryChanges);
     }
   }
 
@@ -2288,15 +2585,16 @@ export async function createReservation(data) {
   for (const productId in itemsByProduct) {
     const productItems = itemsByProduct[productId];
 
-    // Get the product
+    // Get the product once
     const { data: product, error: productError } = await supabase
       .from('products')
-      .select('sizes')
+      .select('sizes, name, team_id, teams(name)')
       .eq('id', productId)
       .single();
 
     if (productError) {
       console.error(`Error fetching product ${productId}:`, productError);
+      // Continue with other products even if one fails
       continue;
     }
 
@@ -2305,25 +2603,50 @@ export async function createReservation(data) {
       continue;
     }
 
-    // Update all sizes for this product in one operation
+    const productName = product.teams?.name ? `${product.teams.name} - ${product.name}` : product.name;
+    const inventoryChanges = [];
+
+    // Reduce quantities for all sizes of this product in one update
     const updatedSizes = (product.sizes || []).map((sizeObj) => {
+      // Find all items for this size
       const itemsForThisSize = productItems.filter((item) => item.size === sizeObj.size);
       if (itemsForThisSize.length > 0) {
-        const totalQuantityToSubtract = itemsForThisSize.reduce((sum, item) => sum + item.quantity, 0);
+        // Sum up all quantities to reduce for this size
+        const totalQuantityToReduce = itemsForThisSize.reduce((sum, item) => sum + item.quantity, 0);
+        
+        // Prepare log entry
+        inventoryChanges.push({
+          entityType: 'product',
+          entityId: productId,
+          entityName: productName,
+          size: sizeObj.size,
+          changeType: 'reservation',
+          quantityBefore: sizeObj.quantity || 0,
+          quantityChange: -totalQuantityToReduce,
+          quantityAfter: (sizeObj.quantity || 0) - totalQuantityToReduce,
+          reason: `Reservation created for ${data.customerName}`,
+          referenceId: result.id,
+          referenceType: 'reservation'
+        });
+
         return {
           ...sizeObj,
-          quantity: Math.max(0, (sizeObj.quantity || 0) - totalQuantityToSubtract),
+          quantity: Math.max(0, (sizeObj.quantity || 0) - totalQuantityToReduce),
         };
       }
       return sizeObj;
     });
 
-    // Update the product
+    // Update the product with all reduced quantities at once
     const { error: updateError } = await supabase.from('products').update({ sizes: updatedSizes }).eq('id', productId);
 
     if (updateError) {
       console.error(`Error updating product ${productId}:`, updateError);
+      // Continue with other products even if one fails
       continue;
+    } else if (inventoryChanges.length > 0) {
+      // Log successful inventory changes
+      await logInventoryChanges(inventoryChanges);
     }
   }
 

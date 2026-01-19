@@ -7,9 +7,10 @@ import { generateSeasons } from '../../utils/utils';
 interface Props {
   editingBadge: Badge | null;
   setEditingBadge: React.Dispatch<React.SetStateAction<Badge | null>>;
+  onSuccess?: () => void;
 }
 
-const EditBadgeModal: React.FC<Props> = ({ editingBadge, setEditingBadge }) => {
+const EditBadgeModal: React.FC<Props> = ({ editingBadge, setEditingBadge, onSuccess }) => {
   // Get store actions
   const { updateBadge } = useBadgesActions();
   const [name, setName] = useState(editingBadge?.name || '');
@@ -62,6 +63,7 @@ const EditBadgeModal: React.FC<Props> = ({ editingBadge, setEditingBadge }) => {
       location: location.trim() || undefined,
     });
     setEditingBadge(null);
+    if (onSuccess) onSuccess();
   };
 
   if (!editingBadge) return null;

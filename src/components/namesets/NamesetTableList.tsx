@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useArchivedKitTypes, useKitTypesList } from '../../stores';
 import { Nameset } from '../../types';
 import { getKitTypeInfo } from '../../utils/utils';
+import InventoryHistoryButton from '../inventory/InventoryHistoryButton';
 
 interface Props {
   namesets: Nameset[];
@@ -146,7 +147,7 @@ const NamesetTableList: React.FC<Props> = ({
                 <td className="price-display">{n.price.toFixed(2)} RON</td>
                 {!isPublicRoute && <td>{n.location || '-'}</td>}
                 {!isReadOnly && (
-                  <td onClick={(e) => e.stopPropagation()}>
+                  <td onClick={(e) => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <button onClick={() => onEdit(n)} className="btn btn-icon btn-success" title="Edit">
                       ✏️
                     </button>
@@ -158,6 +159,7 @@ const NamesetTableList: React.FC<Props> = ({
                         🗑️
                       </button>
                     )}
+                    <InventoryHistoryButton entityType="nameset" entityId={n.id} entityName={n.playerName} />
                   </td>
                 )}
               </tr>
@@ -245,6 +247,7 @@ const NamesetTableList: React.FC<Props> = ({
                         Delete
                       </button>
                     )}
+                    <InventoryHistoryButton entityType="nameset" entityId={n.id} entityName={n.playerName} />
                   </div>
                 )}
               </div>

@@ -102,7 +102,11 @@ const SoldOutBadgesCard: React.FC<SoldOutBadgesCardProps> = ({ isReadOnly = fals
         )}
       </div>
 
-      <EditBadgeModal editingBadge={editingBadge} setEditingBadge={setEditingBadge} />
+      <EditBadgeModal 
+        editingBadge={editingBadge} 
+        setEditingBadge={setEditingBadge} 
+        onSuccess={() => setSoldOutSearchTerm('')}
+      />
     </>
   );
 };

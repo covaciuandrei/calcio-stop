@@ -31,6 +31,7 @@ const SystemSettings = lazy(() =>
   import('./components/admin/SystemSettings').then((module) => ({ default: module.SystemSettings }))
 );
 const PublicBadgesPage = lazy(() => import('./components/public/PublicBadgesPage'));
+const InventoryLogsPage = lazy(() => import('./components/inventory/InventoryLogsPage'));
 
 // Loading component for Suspense fallback
 const LoadingFallback: React.FC = () => (
@@ -61,6 +62,7 @@ const NAVIGATION_ITEMS = {
   kittypes: { label: 'Kit Types', path: '/admin/kittypes', end: false },
   suppliers: { label: 'Suppliers', path: '/admin/suppliers', end: false },
   settings: { label: 'System Settings', path: '/admin/settings', end: false },
+  logs: { label: 'Inventory Logs', path: '/admin/inventory-logs', end: false },
 };
 
 const App: React.FC = () => {
@@ -142,7 +144,7 @@ const App: React.FC = () => {
                       if (!item) return null;
 
                       // Hide suppliers and reservations navigation items for non-admin users
-                      if ((itemId === 'suppliers' || itemId === 'reservations') && !isAdmin) return null;
+                      if ((itemId === 'suppliers' || itemId === 'reservations' || itemId === 'logs') && !isAdmin) return null;
 
                       return (
                         <NavLink key={itemId} to={item.path} end={item.end}>
@@ -241,6 +243,7 @@ const App: React.FC = () => {
                       <Route path="kittypes" element={<KitTypesPage />} />
                       {isAdmin && <Route path="suppliers" element={<SuppliersPage />} />}
                       {isAdmin && <Route path="reservations" element={<ReservationsPage />} />}
+                      {isAdmin && <Route path="inventory-logs" element={<InventoryLogsPage />} />}
                       <Route path="stats" element={<StatsDashboard />} />
                       <Route path="settings" element={<SystemSettings />} />
                     </Routes>

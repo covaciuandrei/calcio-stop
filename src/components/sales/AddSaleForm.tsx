@@ -143,7 +143,7 @@ const AddSaleForm: React.FC = () => {
           }
           return sq;
         });
-        await updateProduct(productId, { sizes: updatedSizes });
+        await updateProduct(productId, { sizes: updatedSizes, _skipInventoryLog: true } as any);
       }
     }
 

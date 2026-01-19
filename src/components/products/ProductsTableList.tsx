@@ -1,18 +1,19 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  useArchivedBadges,
-  useArchivedKitTypes,
-  useArchivedNamesets,
-  useArchivedTeams,
-  useBadgesList,
-  useKitTypesList,
-  useNamesetsList,
-  useTeamsList,
+    useArchivedBadges,
+    useArchivedKitTypes,
+    useArchivedNamesets,
+    useArchivedTeams,
+    useBadgesList,
+    useKitTypesList,
+    useNamesetsList,
+    useTeamsList,
 } from '../../stores';
 import { useAuth } from '../../stores/authStore';
 import { Product } from '../../types';
 import { getBadgeInfo, getKitTypeInfo, getNamesetInfo, getTeamInfo } from '../../utils/utils';
+import InventoryHistoryButton from '../inventory/InventoryHistoryButton';
 
 interface Props {
   products: Product[];
@@ -249,14 +250,15 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
               </td>
               {!isPublicRoute && <td>{p.location || '-'}</td>}
               {!isReadOnly && (
-                <td onClick={(e) => e.stopPropagation()}>
-                  <button onClick={() => onEdit(p)} className="btn btn-icon btn-success" title="Edit">
-                    ✏️
-                  </button>
-                  <button onClick={() => onDelete(p.id)} className="btn btn-icon btn-secondary" title="Archive">
-                    📦
-                  </button>
-                </td>
+                  <td onClick={(e) => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <button onClick={() => onEdit(p)} className="btn btn-icon btn-success" title="Edit">
+                      ✏️
+                    </button>
+                    <button onClick={() => onDelete(p.id)} className="btn btn-icon btn-secondary" title="Archive">
+                      📦
+                    </button>
+                    <InventoryHistoryButton entityType="product" entityId={p.id} entityName={p.name} />
+                  </td>
               )}
             </tr>
           ))}
@@ -450,6 +452,7 @@ const ProductsTableList: React.FC<Props> = ({ products, onEdit, onDelete, search
                     <button onClick={() => onDelete(p.id)} className="btn btn-secondary" title="Archive">
                       Archive
                     </button>
+                    <InventoryHistoryButton entityType="product" entityId={p.id} entityName={p.name} />
                   </div>
                 )}
               </div>

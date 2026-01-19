@@ -111,7 +111,7 @@ interface ProductsState {
   error: string | null;
 
   // Actions
-  addProduct: (product: Omit<Product, 'id' | 'createdAt'>) => Promise<void>;
+  addProduct: (product: Omit<Product, 'id' | 'createdAt'>, options?: { skipInventoryDeduction?: boolean }) => Promise<void>;
   updateProduct: (id: string, updates: Partial<Product>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
   archiveProduct: (id: string) => Promise<void>;
@@ -151,7 +151,7 @@ export const useProductsStore = create<ProductsState>()(
       error: null,
 
       // Actions
-      addProduct: async (productData: Omit<Product, 'id' | 'createdAt'>) => {
+      addProduct: async (productData: Omit<Product, 'id' | 'createdAt'>, options?: { skipInventoryDeduction?: boolean }) => {
         set({ isLoading: true, error: null });
         try {
           const newProduct = await db.createProduct({
@@ -162,41 +162,62 @@ export const useProductsStore = create<ProductsState>()(
           // Calculate total quantity of all sizes in the product
           const totalProductQuantity = productData.sizes.reduce((total, sizeQty) => total + sizeQty.quantity, 0);
 
-          // Update nameset quantity if a nameset was selected
-          if (productData.namesetId && totalProductQuantity > 0) {
-            try {
-              // Get current nameset from the namesets store
-              const { useNamesetsStore } = await import('./namesetsStore');
-              const namesetsState = useNamesetsStore.getState();
-              const selectedNameset = namesetsState.namesets.find((n) => n.id === productData.namesetId);
-
-              if (selectedNameset) {
-                await namesetsState.updateNameset(productData.namesetId, {
-                  quantity: Math.max(0, selectedNameset.quantity - totalProductQuantity),
-                });
-              }
-            } catch (namesetError) {
-              console.error('Error updating nameset quantity:', namesetError);
-              // Don't fail the product creation if nameset update fails
-            }
+          let teamName = '';
+          if (productData.teamId) {
+             const { useTeamsStore } = await import('./teamsStore');
+             const team = useTeamsStore.getState().teams.find(t => t.id === productData.teamId);
+             if (team) teamName = team.name;
           }
+          const productDisplayName = teamName ? `${teamName} - ${productData.name}` : productData.name;
 
-          // Update badge quantity if a badge was selected
-          if (productData.badgeId && totalProductQuantity > 0) {
-            try {
-              // Get current badge from the badges store
-              const { useBadgesStore } = await import('./badgesStore');
-              const badgesState = useBadgesStore.getState();
-              const selectedBadge = badgesState.badges.find((b) => b.id === productData.badgeId);
+          // Only proceed with inventory deduction if NOT skipping
+          if (!options?.skipInventoryDeduction) {
+            // Update nameset quantity if a nameset was selected
+            if (productData.namesetId && totalProductQuantity > 0) {
+              try {
+                // Get current nameset from the namesets store
+                const { useNamesetsStore } = await import('./namesetsStore');
+                const namesetsState = useNamesetsStore.getState();
+                const selectedNameset = namesetsState.namesets.find((n) => n.id === productData.namesetId);
 
-              if (selectedBadge) {
-                await badgesState.updateBadge(productData.badgeId, {
-                  quantity: Math.max(0, selectedBadge.quantity - totalProductQuantity),
-                });
+                if (selectedNameset) {
+                  await namesetsState.updateNameset(productData.namesetId, {
+                    quantity: Math.max(0, selectedNameset.quantity - totalProductQuantity),
+                    _logContext: {
+                      reason: `Used in product: ${productDisplayName}`,
+                      referenceId: newProduct.id,
+                      referenceType: 'product'
+                    }
+                  } as any); // Cast because _logContext is not in Nameset type
+                }
+              } catch (namesetError) {
+                console.error('Error updating nameset quantity:', namesetError);
+                // Don't fail the product creation if nameset update fails
               }
-            } catch (badgeError) {
-              console.error('Error updating badge quantity:', badgeError);
-              // Don't fail the product creation if badge update fails
+            }
+
+            // Update badge quantity if a badge was selected
+            if (productData.badgeId && totalProductQuantity > 0) {
+              try {
+                // Get current badge from the badges store
+                const { useBadgesStore } = await import('./badgesStore');
+                const badgesState = useBadgesStore.getState();
+                const selectedBadge = badgesState.badges.find((b) => b.id === productData.badgeId);
+
+                if (selectedBadge) {
+                  await badgesState.updateBadge(productData.badgeId, {
+                    quantity: Math.max(0, selectedBadge.quantity - totalProductQuantity),
+                     _logContext: {
+                      reason: `Used in product: ${productDisplayName}`,
+                      referenceId: newProduct.id,
+                      referenceType: 'product'
+                    }
+                  } as any); // Cast because _logContext is not in Badge type
+                }
+              } catch (badgeError) {
+                console.error('Error updating badge quantity:', badgeError);
+                // Don't fail the product creation if badge update fails
+              }
             }
           }
 
@@ -215,7 +236,7 @@ export const useProductsStore = create<ProductsState>()(
       updateProduct: async (id: string, updates: Partial<Product>) => {
         set({ isLoading: true, error: null });
         try {
-          const updatedProduct = await db.updateProduct(id, updates);
+          const updatedProduct = (await db.updateProduct(id, updates)) as unknown as Product;
           set((state) => ({
             products: state.products.map((p) => (p.id === id ? updatedProduct : p)),
             archivedProducts: state.archivedProducts.map((p) => (p.id === id ? updatedProduct : p)),

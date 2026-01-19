@@ -225,6 +225,38 @@ CREATE TABLE IF NOT EXISTS product_links (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Inventory Logs table - tracks all inventory changes for products, namesets, and badges
+CREATE TABLE IF NOT EXISTS inventory_logs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    
+    -- Entity being tracked
+    entity_type VARCHAR(50) NOT NULL CHECK (entity_type IN ('product', 'nameset', 'badge')),
+    entity_id UUID NOT NULL,
+    entity_name VARCHAR(255) NOT NULL,
+    
+    -- Size (for products only, NULL for namesets/badges)
+    size VARCHAR(50) NULL,
+    
+    -- The inventory change
+    change_type VARCHAR(50) NOT NULL CHECK (change_type IN (
+        'sale', 'sale_edit', 'sale_reversal',
+        'return', 'return_reversal',
+        'manual_adjustment', 
+        'initial_stock', 'restock'
+    )),
+    quantity_before INTEGER NOT NULL,
+    quantity_change INTEGER NOT NULL,
+    quantity_after INTEGER NOT NULL,
+    
+    -- Context
+    reason TEXT NULL,
+    reference_id UUID NULL,
+    reference_type VARCHAR(50) NULL CHECK (reference_type IN ('sale', 'return', 'reservation', 'product')),
+    
+    -- Timestamps
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Insert default kit types (UUID auto-generated)
 INSERT INTO kit_types (name, created_at) VALUES 
     ('1st Kit', '2024-01-01T00:00:00.000Z'),
@@ -280,6 +312,10 @@ CREATE INDEX IF NOT EXISTS idx_seller_products_seller_id ON seller_products(sell
 CREATE INDEX IF NOT EXISTS idx_seller_products_product_id ON seller_products(product_id);
 CREATE INDEX IF NOT EXISTS idx_product_links_product_id ON product_links(product_id);
 CREATE INDEX IF NOT EXISTS idx_product_links_seller_id ON product_links(seller_id);
+CREATE INDEX IF NOT EXISTS idx_inventory_logs_entity ON inventory_logs(entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_inventory_logs_created_at ON inventory_logs(created_at);
+CREATE INDEX IF NOT EXISTS idx_inventory_logs_change_type ON inventory_logs(change_type);
+CREATE INDEX IF NOT EXISTS idx_inventory_logs_reference ON inventory_logs(reference_type, reference_id);
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE teams ENABLE ROW LEVEL SECURITY;
@@ -301,6 +337,7 @@ ALTER TABLE leagues ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sellers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE seller_products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE product_links ENABLE ROW LEVEL SECURITY;
+ALTER TABLE inventory_logs ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for public access (adjust based on your security requirements)
 CREATE POLICY "Allow all operations for authenticated users" ON teams FOR ALL USING (true);
@@ -327,6 +364,7 @@ CREATE POLICY "Allow all operations for authenticated users" ON leagues FOR ALL 
 CREATE POLICY "Allow all operations for authenticated users" ON sellers FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON seller_products FOR ALL USING (true);
 CREATE POLICY "Allow all operations for authenticated users" ON product_links FOR ALL USING (true);
+CREATE POLICY "Allow all operations for authenticated users" ON inventory_logs FOR ALL USING (true);
 -- Allow inserts for everyone (including unauthenticated users) for view tracking
 CREATE POLICY "Allow inserts for view tracking" ON views 
 FOR INSERT 

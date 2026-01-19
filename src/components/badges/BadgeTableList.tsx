@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Badge } from '../../types';
+import InventoryHistoryButton from '../inventory/InventoryHistoryButton';
 
 interface Props {
   badges: Badge[];
@@ -135,7 +136,7 @@ const BadgeTableList: React.FC<Props> = ({
                 <td className="price-display">${b.price.toFixed(2)}</td>
                 {!isPublicRoute && <td>{b.location || '-'}</td>}
                 {!isReadOnly && (
-                  <td onClick={(e) => e.stopPropagation()}>
+                  <td onClick={(e) => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <button onClick={() => onEdit(b)} className="btn btn-icon btn-success" title="Edit">
                       ✏️
                     </button>
@@ -147,6 +148,7 @@ const BadgeTableList: React.FC<Props> = ({
                         🗑️
                       </button>
                     )}
+                    <InventoryHistoryButton entityType="badge" entityId={b.id} entityName={b.name} />
                   </td>
                 )}
               </tr>
@@ -228,6 +230,7 @@ const BadgeTableList: React.FC<Props> = ({
                         Delete
                       </button>
                     )}
+                    <InventoryHistoryButton entityType="badge" entityId={b.id} entityName={b.name} />
                   </div>
                 )}
               </div>

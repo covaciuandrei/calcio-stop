@@ -27,6 +27,7 @@ const AddProductForm: React.FC = () => {
   const [olxLink, setOlxLink] = useState<string>('');
   const [location, setLocation] = useState<string>('');
   const [isOnSale, setIsOnSale] = useState<boolean>(false);
+  const [isNewModel, setIsNewModel] = useState<boolean>(false);
   const [salePrice, setSalePrice] = useState<number | ''>('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -123,7 +124,7 @@ const AddProductForm: React.FC = () => {
     };
 
     try {
-      await addProduct(newProduct);
+      await addProduct(newProduct, { skipInventoryDeduction: isNewModel });
     } catch (error) {
       console.error('Error adding product:', error);
       setErrors({ submit: 'Failed to add product. Please try again.' });
@@ -143,6 +144,7 @@ const AddProductForm: React.FC = () => {
     setOlxLink('');
     setLocation('');
     setIsOnSale(false);
+    setIsNewModel(false);
     setSalePrice('');
     setErrors({}); // Clear any errors
 
@@ -284,18 +286,31 @@ const AddProductForm: React.FC = () => {
         />
       </div>
 
-      <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <input
-          type="checkbox"
-          checked={isOnSale}
-          onChange={(e) => {
-            setIsOnSale(e.target.checked);
-            if (!e.target.checked) {
-              setSalePrice('');
-            }
-          }}
-        />
-        <label style={{ margin: 0 }}>On Sale</label>
+      <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <input
+            id="new-model-checkbox"
+            type="checkbox"
+            checked={isNewModel}
+            onChange={(e) => setIsNewModel(e.target.checked)}
+          />
+          <label htmlFor="new-model-checkbox" style={{ margin: 0, fontWeight: 'bold' }}>New Model</label>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <input
+            id="on-sale-checkbox"
+            type="checkbox"
+            checked={isOnSale}
+            onChange={(e) => {
+              setIsOnSale(e.target.checked);
+              if (!e.target.checked) {
+                setSalePrice('');
+              }
+            }}
+          />
+          <label htmlFor="on-sale-checkbox" style={{ margin: 0 }}>On Sale</label>
+        </div>
       </div>
 
       {isOnSale && (

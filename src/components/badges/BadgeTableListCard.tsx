@@ -107,7 +107,11 @@ const BadgeTableListCard: React.FC<BadgeTableListCardProps> = ({
         )}
       </div>
 
-      <EditBadgeModal editingBadge={editingBadge} setEditingBadge={setEditingBadge} />
+      <EditBadgeModal 
+        editingBadge={editingBadge} 
+        setEditingBadge={setEditingBadge} 
+        onSuccess={() => clearSearchTerm('badges')}
+      />
     </>
   );
 };
