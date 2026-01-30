@@ -485,12 +485,12 @@ export async function updateBadge(id, updates) {
   // If quantity is being updated, fetch current badge to log the change
   let oldQuantity = null;
   let badgeName = null;
-  
+
   // Extract custom log context if provided, not part of DB update
   const logContext = updates._logContext || {};
   // Create a clean updates object without internal flags
   const dbUpdates = {};
-  
+
   // Copy valid fields
   if (updates.name !== undefined) dbUpdates.name = updates.name;
   if (updates.season !== undefined) dbUpdates.season = updates.season;
@@ -498,14 +498,14 @@ export async function updateBadge(id, updates) {
   if (updates.price !== undefined) dbUpdates.price = updates.price;
   if (updates.location !== undefined) dbUpdates.location = updates.location || null;
   if (updates.createdAt !== undefined) dbUpdates.created_at = updates.createdAt;
-  
+
   if (updates.quantity !== undefined) {
     const { data: currentBadge, error: fetchError } = await supabase
       .from('badges')
       .select('quantity, name')
       .eq('id', id)
       .single();
-    
+
     if (!fetchError && currentBadge) {
       oldQuantity = currentBadge.quantity;
       badgeName = currentBadge.name;
@@ -533,7 +533,7 @@ export async function updateBadge(id, updates) {
   // Log inventory change if quantity changed
   if (oldQuantity !== null && updates.quantity !== undefined && oldQuantity !== updates.quantity) {
     const quantityChange = updates.quantity - oldQuantity;
-    
+
     // Determine reason
     let reason = quantityChange > 0 ? 'Manual restock' : 'Manual adjustment';
     if (logContext.reason) {
@@ -835,10 +835,10 @@ export async function getNamesets() {
     })),
     kitType: item.kit_types
       ? {
-          id: item.kit_types.id,
-          name: item.kit_types.name,
-          createdAt: item.kit_types.created_at,
-        }
+        id: item.kit_types.id,
+        name: item.kit_types.name,
+        createdAt: item.kit_types.created_at,
+      }
       : null,
   }));
 }
@@ -898,10 +898,10 @@ export async function getArchivedNamesets() {
     })),
     kitType: item.kit_types
       ? {
-          id: item.kit_types.id,
-          name: item.kit_types.name,
-          createdAt: item.kit_types.created_at,
-        }
+        id: item.kit_types.id,
+        name: item.kit_types.name,
+        createdAt: item.kit_types.created_at,
+      }
       : null,
   }));
 }
@@ -915,7 +915,7 @@ export async function updateNameset(id, updates) {
   const logContext = updates._logContext || {};
   // Create a clean updates object without internal flags
   const dbUpdates = {};
-  
+
   // Copy valid fields (mapping frontend camelCase to DB snake_case)
   if (updates.playerName !== undefined) dbUpdates.player_name = updates.playerName;
   if (updates.number !== undefined) dbUpdates.number = parseInt(updates.number);
@@ -932,7 +932,7 @@ export async function updateNameset(id, updates) {
       .select('quantity, player_name, number')
       .eq('id', id)
       .single();
-    
+
     if (!fetchError && currentNameset) {
       oldQuantity = currentNameset.quantity;
       namesetName = `${currentNameset.player_name} #${currentNameset.number}`;
@@ -965,7 +965,7 @@ export async function updateNameset(id, updates) {
   // Log inventory change if quantity changed
   if (oldQuantity !== null && updates.quantity !== undefined && oldQuantity !== updates.quantity) {
     const quantityChange = updates.quantity - oldQuantity;
-    
+
     // Determine reason
     let reason = quantityChange > 0 ? 'Manual restock' : 'Manual adjustment';
     if (logContext.reason) {
@@ -1011,10 +1011,10 @@ export async function updateNameset(id, updates) {
     })),
     kitType: data.kit_types
       ? {
-          id: data.kit_types.id,
-          name: data.kit_types.name,
-          createdAt: data.kit_types.created_at,
-        }
+        id: data.kit_types.id,
+        name: data.kit_types.name,
+        createdAt: data.kit_types.created_at,
+      }
       : null,
   };
 }
@@ -1316,42 +1316,42 @@ export async function getProducts() {
     })),
     nameset: item.namesets
       ? {
-          id: item.namesets.id,
-          playerName: item.namesets.player_name,
-          number: item.namesets.number,
-          season: item.namesets.season,
-          quantity: item.namesets.quantity,
-          price: item.namesets.price,
-          kitTypeId: item.namesets.kit_type_id,
-          location: item.namesets.location || undefined,
-          createdAt: item.namesets.created_at,
-        }
+        id: item.namesets.id,
+        playerName: item.namesets.player_name,
+        number: item.namesets.number,
+        season: item.namesets.season,
+        quantity: item.namesets.quantity,
+        price: item.namesets.price,
+        kitTypeId: item.namesets.kit_type_id,
+        location: item.namesets.location || undefined,
+        createdAt: item.namesets.created_at,
+      }
       : null,
     team: item.teams
       ? {
-          id: item.teams.id,
-          name: item.teams.name,
-          leagues: item.teams.leagues || [],
-          createdAt: item.teams.created_at,
-        }
+        id: item.teams.id,
+        name: item.teams.name,
+        leagues: item.teams.leagues || [],
+        createdAt: item.teams.created_at,
+      }
       : null,
     kitType: item.kit_types
       ? {
-          id: item.kit_types.id,
-          name: item.kit_types.name,
-          createdAt: item.kit_types.created_at,
-        }
+        id: item.kit_types.id,
+        name: item.kit_types.name,
+        createdAt: item.kit_types.created_at,
+      }
       : null,
     badge: item.badges
       ? {
-          id: item.badges.id,
-          name: item.badges.name,
-          season: item.badges.season,
-          quantity: item.badges.quantity,
-          price: item.badges.price,
-          location: item.badges.location || undefined,
-          createdAt: item.badges.created_at,
-        }
+        id: item.badges.id,
+        name: item.badges.name,
+        season: item.badges.season,
+        quantity: item.badges.quantity,
+        price: item.badges.price,
+        location: item.badges.location || undefined,
+        createdAt: item.badges.created_at,
+      }
       : null,
   }));
 }
@@ -1442,42 +1442,42 @@ export async function getArchivedProducts() {
     })),
     nameset: item.namesets
       ? {
-          id: item.namesets.id,
-          playerName: item.namesets.player_name,
-          number: item.namesets.number,
-          season: item.namesets.season,
-          quantity: item.namesets.quantity,
-          price: item.namesets.price,
-          kitTypeId: item.namesets.kit_type_id,
-          location: item.namesets.location || undefined,
-          createdAt: item.namesets.created_at,
-        }
+        id: item.namesets.id,
+        playerName: item.namesets.player_name,
+        number: item.namesets.number,
+        season: item.namesets.season,
+        quantity: item.namesets.quantity,
+        price: item.namesets.price,
+        kitTypeId: item.namesets.kit_type_id,
+        location: item.namesets.location || undefined,
+        createdAt: item.namesets.created_at,
+      }
       : null,
     team: item.teams
       ? {
-          id: item.teams.id,
-          name: item.teams.name,
-          leagues: item.teams.leagues || [],
-          createdAt: item.teams.created_at,
-        }
+        id: item.teams.id,
+        name: item.teams.name,
+        leagues: item.teams.leagues || [],
+        createdAt: item.teams.created_at,
+      }
       : null,
     kitType: item.kit_types
       ? {
-          id: item.kit_types.id,
-          name: item.kit_types.name,
-          createdAt: item.kit_types.created_at,
-        }
+        id: item.kit_types.id,
+        name: item.kit_types.name,
+        createdAt: item.kit_types.created_at,
+      }
       : null,
     badge: item.badges
       ? {
-          id: item.badges.id,
-          name: item.badges.name,
-          season: item.badges.season,
-          quantity: item.badges.quantity,
-          price: item.badges.price,
-          location: item.badges.location || undefined,
-          createdAt: item.badges.created_at,
-        }
+        id: item.badges.id,
+        name: item.badges.name,
+        season: item.badges.season,
+        quantity: item.badges.quantity,
+        price: item.badges.price,
+        location: item.badges.location || undefined,
+        createdAt: item.badges.created_at,
+      }
       : null,
   }));
 }
@@ -1486,7 +1486,7 @@ export async function updateProduct(id, updates) {
   // If sizes are being updated, fetch current product to log quantity changes
   let oldSizes = null;
   let productName = null;
-  
+
   // Check if we should log this change (skip if it's part of a sale creation that handles its own logging)
   const shouldLog = !updates._skipInventoryLog && updates.sizes !== undefined;
 
@@ -1496,10 +1496,10 @@ export async function updateProduct(id, updates) {
       .select('sizes, name, team_id, teams(name)')
       .eq('id', id)
       .single();
-    
+
     if (!fetchError && currentProduct) {
       oldSizes = currentProduct.sizes || [];
-      productName = currentProduct.teams?.name 
+      productName = currentProduct.teams?.name
         ? `${currentProduct.teams.name} - ${currentProduct.name}`
         : currentProduct.name;
     }
@@ -1571,13 +1571,13 @@ export async function updateProduct(id, updates) {
   // Log inventory changes if needed
   if (shouldLog && oldSizes && updates.sizes) {
     const changes = [];
-    
+
     // Check for size quantity changes
     updates.sizes.forEach(newSize => {
       const oldSizeObj = oldSizes.find(s => s.size === newSize.size);
       const oldQuantity = oldSizeObj ? (oldSizeObj.quantity || 0) : 0;
       const newQuantity = newSize.quantity || 0;
-      
+
       if (oldQuantity !== newQuantity) {
         const quantityChange = newQuantity - oldQuantity;
         changes.push({
@@ -1664,7 +1664,21 @@ export async function archiveProduct(id) {
     .from('products')
     .update({ archived_at: new Date().toISOString() })
     .eq('id', id)
-    .select()
+    .select(`
+      *,
+      product_images (
+        id,
+        product_id,
+        image_url,
+        thumbnail_url,
+        medium_url,
+        large_url,
+        alt_text,
+        is_primary,
+        display_order,
+        created_at
+      )
+    `)
     .single();
 
   if (error) throw error;
@@ -1685,11 +1699,42 @@ export async function archiveProduct(id) {
     isOnSale: data.is_on_sale || false,
     salePrice: data.sale_price || undefined,
     createdAt: data.created_at,
+    images: (data.product_images || []).map((img) => ({
+      id: img.id,
+      productId: img.product_id,
+      imageUrl: img.image_url || img.large_url,
+      thumbnailUrl: img.thumbnail_url || img.image_url,
+      mediumUrl: img.medium_url || img.image_url,
+      largeUrl: img.large_url || img.image_url,
+      altText: img.alt_text,
+      isPrimary: img.is_primary,
+      displayOrder: img.display_order,
+      createdAt: img.created_at,
+    })),
   };
 }
 
 export async function restoreProduct(id) {
-  const { data, error } = await supabase.from('products').update({ archived_at: null }).eq('id', id).select().single();
+  const { data, error } = await supabase
+    .from('products')
+    .update({ archived_at: null })
+    .eq('id', id)
+    .select(`
+      *,
+      product_images (
+        id,
+        product_id,
+        image_url,
+        thumbnail_url,
+        medium_url,
+        large_url,
+        alt_text,
+        is_primary,
+        display_order,
+        created_at
+      )
+    `)
+    .single();
 
   if (error) throw error;
 
@@ -1709,6 +1754,18 @@ export async function restoreProduct(id) {
     isOnSale: data.is_on_sale || false,
     salePrice: data.sale_price || undefined,
     createdAt: data.created_at,
+    images: (data.product_images || []).map((img) => ({
+      id: img.id,
+      productId: img.product_id,
+      imageUrl: img.image_url || img.large_url,
+      thumbnailUrl: img.thumbnail_url || img.image_url,
+      mediumUrl: img.medium_url || img.image_url,
+      largeUrl: img.large_url || img.image_url,
+      altText: img.alt_text,
+      isPrimary: img.is_primary,
+      displayOrder: img.display_order,
+      createdAt: img.created_at,
+    })),
   };
 }
 
@@ -1759,7 +1816,7 @@ export async function createSale(data) {
       .from('products')
       .select('id, name, sizes, teams(name)')
       .in('id', productIds);
-    
+
     if (products) {
       const logs = [];
       data.items.forEach(item => {
@@ -1769,7 +1826,7 @@ export async function createSale(data) {
           // Current quantity in DB (after decrement)
           const sizeObj = product.sizes?.find(s => s.size === item.size);
           const currentQuantity = sizeObj ? (sizeObj.quantity || 0) : 0;
-          
+
           logs.push({
             entityType: 'product',
             entityId: item.productId,
@@ -1785,7 +1842,7 @@ export async function createSale(data) {
           });
         }
       });
-      
+
       if (logs.length > 0) {
         await logInventoryChanges(logs);
       }
@@ -1960,42 +2017,42 @@ export async function getSales(filters = {}) {
         })),
         nameset: item.namesets
           ? {
-              id: item.namesets.id,
-              playerName: item.namesets.player_name,
-              number: item.namesets.number,
-              season: item.namesets.season,
-              quantity: item.namesets.quantity,
-              price: item.namesets.price,
-              kitTypeId: item.namesets.kit_type_id,
-              location: item.namesets.location || undefined,
-              createdAt: item.namesets.created_at,
-            }
+            id: item.namesets.id,
+            playerName: item.namesets.player_name,
+            number: item.namesets.number,
+            season: item.namesets.season,
+            quantity: item.namesets.quantity,
+            price: item.namesets.price,
+            kitTypeId: item.namesets.kit_type_id,
+            location: item.namesets.location || undefined,
+            createdAt: item.namesets.created_at,
+          }
           : null,
         team: item.teams
           ? {
-              id: item.teams.id,
-              name: item.teams.name,
-              leagues: item.teams.leagues || [],
-              createdAt: item.teams.created_at,
-            }
+            id: item.teams.id,
+            name: item.teams.name,
+            leagues: item.teams.leagues || [],
+            createdAt: item.teams.created_at,
+          }
           : null,
         kitType: item.kit_types
           ? {
-              id: item.kit_types.id,
-              name: item.kit_types.name,
-              createdAt: item.kit_types.created_at,
-            }
+            id: item.kit_types.id,
+            name: item.kit_types.name,
+            createdAt: item.kit_types.created_at,
+          }
           : null,
         badge: item.badges
           ? {
-              id: item.badges.id,
-              name: item.badges.name,
-              season: item.badges.season,
-              quantity: item.badges.quantity,
-              price: item.badges.price,
-              location: item.badges.location || undefined,
-              createdAt: item.badges.created_at,
-            }
+            id: item.badges.id,
+            name: item.badges.name,
+            season: item.badges.season,
+            quantity: item.badges.quantity,
+            price: item.badges.price,
+            location: item.badges.location || undefined,
+            createdAt: item.badges.created_at,
+          }
           : null,
       });
     });
@@ -2226,7 +2283,7 @@ export async function reverseSale(id) {
       if (itemsForThisSize.length > 0) {
         // Sum up all quantities to restore for this size
         const totalQuantityToRestore = itemsForThisSize.reduce((sum, item) => sum + item.quantity, 0);
-        
+
         // Prepare log entry
         inventoryChanges.push({
           entityType: 'product',
@@ -2441,7 +2498,7 @@ export async function returnSale(saleId) {
       if (itemsForThisSize.length > 0) {
         // Sum up all quantities to restore for this size
         const totalQuantityToRestore = itemsForThisSize.reduce((sum, item) => sum + item.quantity, 0);
-        
+
         // Prepare log entry
         inventoryChanges.push({
           entityType: 'product',
@@ -2613,7 +2670,7 @@ export async function createReservation(data) {
       if (itemsForThisSize.length > 0) {
         // Sum up all quantities to reduce for this size
         const totalQuantityToReduce = itemsForThisSize.reduce((sum, item) => sum + item.quantity, 0);
-        
+
         // Prepare log entry
         inventoryChanges.push({
           entityType: 'product',
@@ -2945,7 +3002,7 @@ export async function createUser(data) {
   const { data: result, error } = await supabase.from('users').insert([data]).select().single();
 
   if (error) throw error;
-  
+
   // Map database response to frontend format
   return {
     id: result.id,
@@ -2960,7 +3017,7 @@ export async function getUserByEmail(email) {
   const { data, error } = await supabase.from('users').select('*').eq('email', email).single();
 
   if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows found
-  
+
   if (!data) return null;
 
   // Map database response to frontend format
@@ -3162,42 +3219,42 @@ export async function getOrders() {
     createdAt: item.created_at,
     nameset: item.namesets
       ? {
-          id: item.namesets.id,
-          playerName: item.namesets.player_name,
-          number: item.namesets.number,
-          season: item.namesets.season,
-          quantity: item.namesets.quantity,
-          price: item.namesets.price,
-          kitTypeId: item.namesets.kit_type_id,
-          location: item.namesets.location || undefined,
-          createdAt: item.namesets.created_at,
-        }
+        id: item.namesets.id,
+        playerName: item.namesets.player_name,
+        number: item.namesets.number,
+        season: item.namesets.season,
+        quantity: item.namesets.quantity,
+        price: item.namesets.price,
+        kitTypeId: item.namesets.kit_type_id,
+        location: item.namesets.location || undefined,
+        createdAt: item.namesets.created_at,
+      }
       : null,
     team: item.teams
       ? {
-          id: item.teams.id,
-          name: item.teams.name,
-          leagues: item.teams.leagues || [],
-          createdAt: item.teams.created_at,
-        }
+        id: item.teams.id,
+        name: item.teams.name,
+        leagues: item.teams.leagues || [],
+        createdAt: item.teams.created_at,
+      }
       : null,
     kitType: item.kit_types
       ? {
-          id: item.kit_types.id,
-          name: item.kit_types.name,
-          createdAt: item.kit_types.created_at,
-        }
+        id: item.kit_types.id,
+        name: item.kit_types.name,
+        createdAt: item.kit_types.created_at,
+      }
       : null,
     badge: item.badges
       ? {
-          id: item.badges.id,
-          name: item.badges.name,
-          season: item.badges.season,
-          quantity: item.badges.quantity,
-          price: item.badges.price,
-          location: item.badges.location || undefined,
-          createdAt: item.badges.created_at,
-        }
+        id: item.badges.id,
+        name: item.badges.name,
+        season: item.badges.season,
+        quantity: item.badges.quantity,
+        price: item.badges.price,
+        location: item.badges.location || undefined,
+        createdAt: item.badges.created_at,
+      }
       : null,
   }));
 }
@@ -3263,42 +3320,42 @@ export async function getArchivedOrders() {
     createdAt: item.created_at,
     nameset: item.namesets
       ? {
-          id: item.namesets.id,
-          playerName: item.namesets.player_name,
-          number: item.namesets.number,
-          season: item.namesets.season,
-          quantity: item.namesets.quantity,
-          price: item.namesets.price,
-          kitTypeId: item.namesets.kit_type_id,
-          location: item.namesets.location || undefined,
-          createdAt: item.namesets.created_at,
-        }
+        id: item.namesets.id,
+        playerName: item.namesets.player_name,
+        number: item.namesets.number,
+        season: item.namesets.season,
+        quantity: item.namesets.quantity,
+        price: item.namesets.price,
+        kitTypeId: item.namesets.kit_type_id,
+        location: item.namesets.location || undefined,
+        createdAt: item.namesets.created_at,
+      }
       : null,
     team: item.teams
       ? {
-          id: item.teams.id,
-          name: item.teams.name,
-          leagues: item.teams.leagues || [],
-          createdAt: item.teams.created_at,
-        }
+        id: item.teams.id,
+        name: item.teams.name,
+        leagues: item.teams.leagues || [],
+        createdAt: item.teams.created_at,
+      }
       : null,
     kitType: item.kit_types
       ? {
-          id: item.kit_types.id,
-          name: item.kit_types.name,
-          createdAt: item.kit_types.created_at,
-        }
+        id: item.kit_types.id,
+        name: item.kit_types.name,
+        createdAt: item.kit_types.created_at,
+      }
       : null,
     badge: item.badges
       ? {
-          id: item.badges.id,
-          name: item.badges.name,
-          season: item.badges.season,
-          quantity: item.badges.quantity,
-          price: item.badges.price,
-          location: item.badges.location || undefined,
-          createdAt: item.badges.created_at,
-        }
+        id: item.badges.id,
+        name: item.badges.name,
+        season: item.badges.season,
+        quantity: item.badges.quantity,
+        price: item.badges.price,
+        location: item.badges.location || undefined,
+        createdAt: item.badges.created_at,
+      }
       : null,
   }));
 }
@@ -3949,42 +4006,42 @@ export async function getSellers() {
         })),
         nameset: product.namesets
           ? {
-              id: product.namesets.id,
-              playerName: product.namesets.player_name,
-              number: product.namesets.number,
-              season: product.namesets.season,
-              quantity: product.namesets.quantity,
-              price: product.namesets.price,
-              kitTypeId: product.namesets.kit_type_id,
-              location: product.namesets.location || undefined,
-              createdAt: product.namesets.created_at,
-            }
+            id: product.namesets.id,
+            playerName: product.namesets.player_name,
+            number: product.namesets.number,
+            season: product.namesets.season,
+            quantity: product.namesets.quantity,
+            price: product.namesets.price,
+            kitTypeId: product.namesets.kit_type_id,
+            location: product.namesets.location || undefined,
+            createdAt: product.namesets.created_at,
+          }
           : null,
         team: product.teams
           ? {
-              id: product.teams.id,
-              name: product.teams.name,
-              leagues: product.teams.leagues || [],
-              createdAt: product.teams.created_at,
-            }
+            id: product.teams.id,
+            name: product.teams.name,
+            leagues: product.teams.leagues || [],
+            createdAt: product.teams.created_at,
+          }
           : null,
         kitType: product.kit_types
           ? {
-              id: product.kit_types.id,
-              name: product.kit_types.name,
-              createdAt: product.kit_types.created_at,
-            }
+            id: product.kit_types.id,
+            name: product.kit_types.name,
+            createdAt: product.kit_types.created_at,
+          }
           : null,
         badge: product.badges
           ? {
-              id: product.badges.id,
-              name: product.badges.name,
-              season: product.badges.season,
-              quantity: product.badges.quantity,
-              price: product.badges.price,
-              location: product.badges.location || undefined,
-              createdAt: product.badges.created_at,
-            }
+            id: product.badges.id,
+            name: product.badges.name,
+            season: product.badges.season,
+            quantity: product.badges.quantity,
+            price: product.badges.price,
+            location: product.badges.location || undefined,
+            createdAt: product.badges.created_at,
+          }
           : null,
       }));
 
@@ -4118,42 +4175,42 @@ export async function getArchivedSellers() {
         })),
         nameset: product.namesets
           ? {
-              id: product.namesets.id,
-              playerName: product.namesets.player_name,
-              number: product.namesets.number,
-              season: product.namesets.season,
-              quantity: product.namesets.quantity,
-              price: product.namesets.price,
-              kitTypeId: product.namesets.kit_type_id,
-              location: product.namesets.location || undefined,
-              createdAt: product.namesets.created_at,
-            }
+            id: product.namesets.id,
+            playerName: product.namesets.player_name,
+            number: product.namesets.number,
+            season: product.namesets.season,
+            quantity: product.namesets.quantity,
+            price: product.namesets.price,
+            kitTypeId: product.namesets.kit_type_id,
+            location: product.namesets.location || undefined,
+            createdAt: product.namesets.created_at,
+          }
           : null,
         team: product.teams
           ? {
-              id: product.teams.id,
-              name: product.teams.name,
-              leagues: product.teams.leagues || [],
-              createdAt: product.teams.created_at,
-            }
+            id: product.teams.id,
+            name: product.teams.name,
+            leagues: product.teams.leagues || [],
+            createdAt: product.teams.created_at,
+          }
           : null,
         kitType: product.kit_types
           ? {
-              id: product.kit_types.id,
-              name: product.kit_types.name,
-              createdAt: product.kit_types.created_at,
-            }
+            id: product.kit_types.id,
+            name: product.kit_types.name,
+            createdAt: product.kit_types.created_at,
+          }
           : null,
         badge: product.badges
           ? {
-              id: product.badges.id,
-              name: product.badges.name,
-              season: product.badges.season,
-              quantity: product.badges.quantity,
-              price: product.badges.price,
-              location: product.badges.location || undefined,
-              createdAt: product.badges.created_at,
-            }
+            id: product.badges.id,
+            name: product.badges.name,
+            season: product.badges.season,
+            quantity: product.badges.quantity,
+            price: product.badges.price,
+            location: product.badges.location || undefined,
+            createdAt: product.badges.created_at,
+          }
           : null,
       }));
 
@@ -4345,83 +4402,83 @@ export async function getProductLinks() {
   return (data || []).map((item) => {
     const product = item.products
       ? {
-          id: item.products.id,
-          name: item.products.name,
-          type: item.products.type,
-          sizes: item.products.sizes,
-          namesetId: item.products.nameset_id,
-          teamId: item.products.team_id,
-          kitTypeId: item.products.kit_type_id,
-          badgeId: item.products.badge_id,
-          price: item.products.price,
-          olxLink: item.products.olx_link,
-          location: item.products.location || undefined,
-          isOnSale: item.products.is_on_sale || false,
-          salePrice: item.products.sale_price || undefined,
-          createdAt: item.products.created_at,
-          images: (item.products.product_images || []).map((img) => ({
-            id: img.id,
-            productId: img.product_id,
-            imageUrl: img.image_url || img.large_url,
-            thumbnailUrl: img.thumbnail_url || img.image_url,
-            mediumUrl: img.medium_url || img.image_url,
-            largeUrl: img.large_url || img.image_url,
-            altText: img.alt_text,
-            isPrimary: img.is_primary,
-            displayOrder: img.display_order,
-            createdAt: img.created_at,
-          })),
-          nameset: item.products.namesets
-            ? {
-                id: item.products.namesets.id,
-                playerName: item.products.namesets.player_name,
-                number: item.products.namesets.number,
-                season: item.products.namesets.season,
-                quantity: item.products.namesets.quantity,
-                price: item.products.namesets.price,
-                kitTypeId: item.products.namesets.kit_type_id,
-                location: item.products.namesets.location || undefined,
-                createdAt: item.products.namesets.created_at,
-              }
-            : null,
-          team: item.products.teams
-            ? {
-                id: item.products.teams.id,
-                name: item.products.teams.name,
-                leagues: item.products.teams.leagues || [],
-                createdAt: item.products.teams.created_at,
-              }
-            : null,
-          kitType: item.products.kit_types
-            ? {
-                id: item.products.kit_types.id,
-                name: item.products.kit_types.name,
-                createdAt: item.products.kit_types.created_at,
-              }
-            : null,
-          badge: item.products.badges
-            ? {
-                id: item.products.badges.id,
-                name: item.products.badges.name,
-                season: item.products.badges.season,
-                quantity: item.products.badges.quantity,
-                price: item.products.badges.price,
-                location: item.products.badges.location || undefined,
-                createdAt: item.products.badges.created_at,
-              }
-            : null,
-        }
+        id: item.products.id,
+        name: item.products.name,
+        type: item.products.type,
+        sizes: item.products.sizes,
+        namesetId: item.products.nameset_id,
+        teamId: item.products.team_id,
+        kitTypeId: item.products.kit_type_id,
+        badgeId: item.products.badge_id,
+        price: item.products.price,
+        olxLink: item.products.olx_link,
+        location: item.products.location || undefined,
+        isOnSale: item.products.is_on_sale || false,
+        salePrice: item.products.sale_price || undefined,
+        createdAt: item.products.created_at,
+        images: (item.products.product_images || []).map((img) => ({
+          id: img.id,
+          productId: img.product_id,
+          imageUrl: img.image_url || img.large_url,
+          thumbnailUrl: img.thumbnail_url || img.image_url,
+          mediumUrl: img.medium_url || img.image_url,
+          largeUrl: img.large_url || img.image_url,
+          altText: img.alt_text,
+          isPrimary: img.is_primary,
+          displayOrder: img.display_order,
+          createdAt: img.created_at,
+        })),
+        nameset: item.products.namesets
+          ? {
+            id: item.products.namesets.id,
+            playerName: item.products.namesets.player_name,
+            number: item.products.namesets.number,
+            season: item.products.namesets.season,
+            quantity: item.products.namesets.quantity,
+            price: item.products.namesets.price,
+            kitTypeId: item.products.namesets.kit_type_id,
+            location: item.products.namesets.location || undefined,
+            createdAt: item.products.namesets.created_at,
+          }
+          : null,
+        team: item.products.teams
+          ? {
+            id: item.products.teams.id,
+            name: item.products.teams.name,
+            leagues: item.products.teams.leagues || [],
+            createdAt: item.products.teams.created_at,
+          }
+          : null,
+        kitType: item.products.kit_types
+          ? {
+            id: item.products.kit_types.id,
+            name: item.products.kit_types.name,
+            createdAt: item.products.kit_types.created_at,
+          }
+          : null,
+        badge: item.products.badges
+          ? {
+            id: item.products.badges.id,
+            name: item.products.badges.name,
+            season: item.products.badges.season,
+            quantity: item.products.badges.quantity,
+            price: item.products.badges.price,
+            location: item.products.badges.location || undefined,
+            createdAt: item.products.badges.created_at,
+          }
+          : null,
+      }
       : null;
 
     const seller = item.sellers
       ? {
-          id: item.sellers.id,
-          name: item.sellers.name,
-          websiteUrl: item.sellers.website_url || undefined,
-          specialNotes: item.sellers.special_notes || undefined,
-          createdAt: item.sellers.created_at,
-          productIds: [], // Will be populated separately if needed
-        }
+        id: item.sellers.id,
+        name: item.sellers.name,
+        websiteUrl: item.sellers.website_url || undefined,
+        specialNotes: item.sellers.special_notes || undefined,
+        createdAt: item.sellers.created_at,
+        productIds: [], // Will be populated separately if needed
+      }
       : null;
 
     return {
@@ -4507,83 +4564,83 @@ export async function getProductLinksByProductId(productId) {
   return (data || []).map((item) => {
     const product = item.products
       ? {
-          id: item.products.id,
-          name: item.products.name,
-          type: item.products.type,
-          sizes: item.products.sizes,
-          namesetId: item.products.nameset_id,
-          teamId: item.products.team_id,
-          kitTypeId: item.products.kit_type_id,
-          badgeId: item.products.badge_id,
-          price: item.products.price,
-          olxLink: item.products.olx_link,
-          location: item.products.location || undefined,
-          isOnSale: item.products.is_on_sale || false,
-          salePrice: item.products.sale_price || undefined,
-          createdAt: item.products.created_at,
-          images: (item.products.product_images || []).map((img) => ({
-            id: img.id,
-            productId: img.product_id,
-            imageUrl: img.image_url || img.large_url,
-            thumbnailUrl: img.thumbnail_url || img.image_url,
-            mediumUrl: img.medium_url || img.image_url,
-            largeUrl: img.large_url || img.image_url,
-            altText: img.alt_text,
-            isPrimary: img.is_primary,
-            displayOrder: img.display_order,
-            createdAt: img.created_at,
-          })),
-          nameset: item.products.namesets
-            ? {
-                id: item.products.namesets.id,
-                playerName: item.products.namesets.player_name,
-                number: item.products.namesets.number,
-                season: item.products.namesets.season,
-                quantity: item.products.namesets.quantity,
-                price: item.products.namesets.price,
-                kitTypeId: item.products.namesets.kit_type_id,
-                location: item.products.namesets.location || undefined,
-                createdAt: item.products.namesets.created_at,
-              }
-            : null,
-          team: item.products.teams
-            ? {
-                id: item.products.teams.id,
-                name: item.products.teams.name,
-                leagues: item.products.teams.leagues || [],
-                createdAt: item.products.teams.created_at,
-              }
-            : null,
-          kitType: item.products.kit_types
-            ? {
-                id: item.products.kit_types.id,
-                name: item.products.kit_types.name,
-                createdAt: item.products.kit_types.created_at,
-              }
-            : null,
-          badge: item.products.badges
-            ? {
-                id: item.products.badges.id,
-                name: item.products.badges.name,
-                season: item.products.badges.season,
-                quantity: item.products.badges.quantity,
-                price: item.products.badges.price,
-                location: item.products.badges.location || undefined,
-                createdAt: item.products.badges.created_at,
-              }
-            : null,
-        }
+        id: item.products.id,
+        name: item.products.name,
+        type: item.products.type,
+        sizes: item.products.sizes,
+        namesetId: item.products.nameset_id,
+        teamId: item.products.team_id,
+        kitTypeId: item.products.kit_type_id,
+        badgeId: item.products.badge_id,
+        price: item.products.price,
+        olxLink: item.products.olx_link,
+        location: item.products.location || undefined,
+        isOnSale: item.products.is_on_sale || false,
+        salePrice: item.products.sale_price || undefined,
+        createdAt: item.products.created_at,
+        images: (item.products.product_images || []).map((img) => ({
+          id: img.id,
+          productId: img.product_id,
+          imageUrl: img.image_url || img.large_url,
+          thumbnailUrl: img.thumbnail_url || img.image_url,
+          mediumUrl: img.medium_url || img.image_url,
+          largeUrl: img.large_url || img.image_url,
+          altText: img.alt_text,
+          isPrimary: img.is_primary,
+          displayOrder: img.display_order,
+          createdAt: img.created_at,
+        })),
+        nameset: item.products.namesets
+          ? {
+            id: item.products.namesets.id,
+            playerName: item.products.namesets.player_name,
+            number: item.products.namesets.number,
+            season: item.products.namesets.season,
+            quantity: item.products.namesets.quantity,
+            price: item.products.namesets.price,
+            kitTypeId: item.products.namesets.kit_type_id,
+            location: item.products.namesets.location || undefined,
+            createdAt: item.products.namesets.created_at,
+          }
+          : null,
+        team: item.products.teams
+          ? {
+            id: item.products.teams.id,
+            name: item.products.teams.name,
+            leagues: item.products.teams.leagues || [],
+            createdAt: item.products.teams.created_at,
+          }
+          : null,
+        kitType: item.products.kit_types
+          ? {
+            id: item.products.kit_types.id,
+            name: item.products.kit_types.name,
+            createdAt: item.products.kit_types.created_at,
+          }
+          : null,
+        badge: item.products.badges
+          ? {
+            id: item.products.badges.id,
+            name: item.products.badges.name,
+            season: item.products.badges.season,
+            quantity: item.products.badges.quantity,
+            price: item.products.badges.price,
+            location: item.products.badges.location || undefined,
+            createdAt: item.products.badges.created_at,
+          }
+          : null,
+      }
       : null;
 
     const seller = item.sellers
       ? {
-          id: item.sellers.id,
-          name: item.sellers.name,
-          websiteUrl: item.sellers.website_url || undefined,
-          specialNotes: item.sellers.special_notes || undefined,
-          createdAt: item.sellers.created_at,
-          productIds: [],
-        }
+        id: item.sellers.id,
+        name: item.sellers.name,
+        websiteUrl: item.sellers.website_url || undefined,
+        specialNotes: item.sellers.special_notes || undefined,
+        createdAt: item.sellers.created_at,
+        productIds: [],
+      }
       : null;
 
     return {
@@ -4669,83 +4726,83 @@ export async function getProductLinksBySellerId(sellerId) {
   return (data || []).map((item) => {
     const product = item.products
       ? {
-          id: item.products.id,
-          name: item.products.name,
-          type: item.products.type,
-          sizes: item.products.sizes,
-          namesetId: item.products.nameset_id,
-          teamId: item.products.team_id,
-          kitTypeId: item.products.kit_type_id,
-          badgeId: item.products.badge_id,
-          price: item.products.price,
-          olxLink: item.products.olx_link,
-          location: item.products.location || undefined,
-          isOnSale: item.products.is_on_sale || false,
-          salePrice: item.products.sale_price || undefined,
-          createdAt: item.products.created_at,
-          images: (item.products.product_images || []).map((img) => ({
-            id: img.id,
-            productId: img.product_id,
-            imageUrl: img.image_url || img.large_url,
-            thumbnailUrl: img.thumbnail_url || img.image_url,
-            mediumUrl: img.medium_url || img.image_url,
-            largeUrl: img.large_url || img.image_url,
-            altText: img.alt_text,
-            isPrimary: img.is_primary,
-            displayOrder: img.display_order,
-            createdAt: img.created_at,
-          })),
-          nameset: item.products.namesets
-            ? {
-                id: item.products.namesets.id,
-                playerName: item.products.namesets.player_name,
-                number: item.products.namesets.number,
-                season: item.products.namesets.season,
-                quantity: item.products.namesets.quantity,
-                price: item.products.namesets.price,
-                kitTypeId: item.products.namesets.kit_type_id,
-                location: item.products.namesets.location || undefined,
-                createdAt: item.products.namesets.created_at,
-              }
-            : null,
-          team: item.products.teams
-            ? {
-                id: item.products.teams.id,
-                name: item.products.teams.name,
-                leagues: item.products.teams.leagues || [],
-                createdAt: item.products.teams.created_at,
-              }
-            : null,
-          kitType: item.products.kit_types
-            ? {
-                id: item.products.kit_types.id,
-                name: item.products.kit_types.name,
-                createdAt: item.products.kit_types.created_at,
-              }
-            : null,
-          badge: item.products.badges
-            ? {
-                id: item.products.badges.id,
-                name: item.products.badges.name,
-                season: item.products.badges.season,
-                quantity: item.products.badges.quantity,
-                price: item.products.badges.price,
-                location: item.products.badges.location || undefined,
-                createdAt: item.products.badges.created_at,
-              }
-            : null,
-        }
+        id: item.products.id,
+        name: item.products.name,
+        type: item.products.type,
+        sizes: item.products.sizes,
+        namesetId: item.products.nameset_id,
+        teamId: item.products.team_id,
+        kitTypeId: item.products.kit_type_id,
+        badgeId: item.products.badge_id,
+        price: item.products.price,
+        olxLink: item.products.olx_link,
+        location: item.products.location || undefined,
+        isOnSale: item.products.is_on_sale || false,
+        salePrice: item.products.sale_price || undefined,
+        createdAt: item.products.created_at,
+        images: (item.products.product_images || []).map((img) => ({
+          id: img.id,
+          productId: img.product_id,
+          imageUrl: img.image_url || img.large_url,
+          thumbnailUrl: img.thumbnail_url || img.image_url,
+          mediumUrl: img.medium_url || img.image_url,
+          largeUrl: img.large_url || img.image_url,
+          altText: img.alt_text,
+          isPrimary: img.is_primary,
+          displayOrder: img.display_order,
+          createdAt: img.created_at,
+        })),
+        nameset: item.products.namesets
+          ? {
+            id: item.products.namesets.id,
+            playerName: item.products.namesets.player_name,
+            number: item.products.namesets.number,
+            season: item.products.namesets.season,
+            quantity: item.products.namesets.quantity,
+            price: item.products.namesets.price,
+            kitTypeId: item.products.namesets.kit_type_id,
+            location: item.products.namesets.location || undefined,
+            createdAt: item.products.namesets.created_at,
+          }
+          : null,
+        team: item.products.teams
+          ? {
+            id: item.products.teams.id,
+            name: item.products.teams.name,
+            leagues: item.products.teams.leagues || [],
+            createdAt: item.products.teams.created_at,
+          }
+          : null,
+        kitType: item.products.kit_types
+          ? {
+            id: item.products.kit_types.id,
+            name: item.products.kit_types.name,
+            createdAt: item.products.kit_types.created_at,
+          }
+          : null,
+        badge: item.products.badges
+          ? {
+            id: item.products.badges.id,
+            name: item.products.badges.name,
+            season: item.products.badges.season,
+            quantity: item.products.badges.quantity,
+            price: item.products.badges.price,
+            location: item.products.badges.location || undefined,
+            createdAt: item.products.badges.created_at,
+          }
+          : null,
+      }
       : null;
 
     const seller = item.sellers
       ? {
-          id: item.sellers.id,
-          name: item.sellers.name,
-          websiteUrl: item.sellers.website_url || undefined,
-          specialNotes: item.sellers.special_notes || undefined,
-          createdAt: item.sellers.created_at,
-          productIds: [],
-        }
+        id: item.sellers.id,
+        name: item.sellers.name,
+        websiteUrl: item.sellers.website_url || undefined,
+        specialNotes: item.sellers.special_notes || undefined,
+        createdAt: item.sellers.created_at,
+        productIds: [],
+      }
       : null;
 
     return {
