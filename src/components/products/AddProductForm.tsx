@@ -286,8 +286,8 @@ const AddProductForm: React.FC = () => {
         />
       </div>
 
-      <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div className="sale-options-row">
+        <div className="sale-option-item">
           <input
             id="new-model-checkbox"
             type="checkbox"
@@ -297,7 +297,7 @@ const AddProductForm: React.FC = () => {
           <label htmlFor="new-model-checkbox" style={{ margin: 0, fontWeight: 'bold' }}>New Model</label>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div className="sale-option-item">
           <input
             id="on-sale-checkbox"
             type="checkbox"
@@ -311,30 +311,31 @@ const AddProductForm: React.FC = () => {
           />
           <label htmlFor="on-sale-checkbox" style={{ margin: 0 }}>On Sale</label>
         </div>
-      </div>
 
-      {isOnSale && (
-        <div className={`form-group ${errors.salePrice ? 'has-error' : ''}`}>
-          <label>Sale Price (RON)</label>
-          <input
-            type="number"
-            min={0}
-            max={price > 0 ? price - 0.01 : undefined}
-            step={0.01}
-            placeholder="Enter sale price"
-            value={salePrice}
-            onChange={(e) => {
-              const val = e.target.value;
-              setSalePrice(val === '' ? '' : parseFloat(val));
-              // Clear error when user starts typing
-              if (errors.salePrice) {
-                setErrors((prev) => ({ ...prev, salePrice: '' }));
-              }
-            }}
-          />
-          {errors.salePrice && <div className="error-message">{errors.salePrice}</div>}
-        </div>
-      )}
+        {isOnSale && (
+          <div className={`sale-option-item sale-price-input ${errors.salePrice ? 'has-error' : ''}`}>
+            <label htmlFor="sale-price-input">Sale Price (RON)</label>
+            <input
+              id="sale-price-input"
+              type="number"
+              min={0}
+              max={price > 0 ? price - 0.01 : undefined}
+              step={0.01}
+              placeholder="Enter sale price"
+              value={salePrice}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSalePrice(val === '' ? '' : parseFloat(val));
+                // Clear error when user starts typing
+                if (errors.salePrice) {
+                  setErrors((prev) => ({ ...prev, salePrice: '' }));
+                }
+              }}
+            />
+            {errors.salePrice && <div className="error-message">{errors.salePrice}</div>}
+          </div>
+        )}
+      </div>
 
       <div className="form-button-container">
         <button onClick={handleAddProduct} className="btn btn-success">

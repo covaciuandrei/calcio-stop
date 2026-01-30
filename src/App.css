@@ -526,3 +526,66 @@ body.nameset-dropdown-open .add-product-card {
     max-height: 60vh;
   }
 }
+
+/* Sale Options Row - Responsive layout for checkboxes and sale price */
+.sale-options-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.sale-option-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.sale-option-item.sale-price-input {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+}
+
+.sale-option-item.sale-price-input label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--gray-700);
+}
+
+.sale-option-item.sale-price-input input {
+  min-width: 150px;
+  height: calc(38px * 1.2);
+  box-sizing: border-box;
+}
+
+.sale-option-item.sale-price-input input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--gray-100);
+}
+
+.sale-option-item.has-error input {
+  border-color: var(--accent-red-500);
+}
+
+/* Mobile styles for sale options */
+@media (max-width: 768px) {
+  .sale-options-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  .sale-option-item.sale-price-input {
+    width: 100%;
+  }
+
+  .sale-option-item.sale-price-input input {
+    width: 100%;
+    min-width: auto;
+  }
+}
+
