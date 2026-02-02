@@ -3102,327 +3102,331 @@ export async function setRegistrationEnabled(enabled) {
 // ORDERS CRUD OPERATIONS
 // ============================================================================
 
+// Status transition rules
+const ORDER_STATUS_TRANSITIONS = {
+  'to order': ['ordered'],
+  'ordered': ['to order', 'received'],
+  'received': ['ordered', 'message sent'],
+  'message sent': ['finished'],
+  'finished': [],
+};
+
+function isValidStatusTransition(fromStatus, toStatus) {
+  const allowed = ORDER_STATUS_TRANSITIONS[fromStatus] || [];
+  return allowed.includes(toStatus);
+}
+
+// Helper to map order from DB to frontend format
+function mapOrderFromDb(item) {
+  return {
+    id: item.id,
+    items: item.items || [],
+    status: item.status,
+    saleType: item.sale_type || 'OLX',
+    customerName: item.customer_name,
+    phoneNumber: item.phone_number,
+    createdAt: item.created_at,
+    archivedAt: item.archived_at,
+    finishedAt: item.finished_at,
+    saleId: item.sale_id,
+  };
+}
+
+// Helper to resolve product details for order items
+async function resolveOrderItemProducts(items) {
+  if (!items || items.length === 0) return [];
+
+  const productIds = [...new Set(items.map(item => item.productId))];
+
+  const { data: products, error } = await supabase
+    .from('products')
+    .select(`
+      id, name, type, sizes, price, olx_link, location, is_on_sale, sale_price, created_at,
+      teams (id, name, leagues, created_at),
+      kit_types (id, name, created_at)
+    `)
+    .in('id', productIds);
+
+  if (error) throw error;
+
+  const productMap = {};
+  (products || []).forEach(p => {
+    productMap[p.id] = {
+      id: p.id,
+      name: p.name,
+      type: p.type,
+      sizes: p.sizes,
+      price: p.price,
+      olxLink: p.olx_link,
+      location: p.location,
+      isOnSale: p.is_on_sale,
+      salePrice: p.sale_price,
+      createdAt: p.created_at,
+      team: p.teams ? { id: p.teams.id, name: p.teams.name, leagues: p.teams.leagues || [] } : null,
+      kitType: p.kit_types ? { id: p.kit_types.id, name: p.kit_types.name } : null,
+    };
+  });
+
+  return items.map(item => ({
+    ...item,
+    product: productMap[item.productId] || null,
+  }));
+}
+
 export async function addOrder(data) {
-  // Validate required fields
-  if (!data.name && !data.teamId) {
-    throw new Error('Order name or team is required');
-  }
-  if (!data.type) {
-    throw new Error('Order type is required');
-  }
-  if (!data.kitTypeId) {
-    throw new Error('Kit type is required');
-  }
-  if (!data.status) {
-    throw new Error('Order status is required');
+  if (!data.items || data.items.length === 0) {
+    throw new Error('At least one item is required');
   }
 
-  // Map frontend data to database schema
+  const validItems = data.items.filter(item => item.productId && item.quantity > 0);
+  if (validItems.length === 0) {
+    throw new Error('At least one item with product and quantity is required');
+  }
+
   const dbData = {
-    name: data.name,
-    type: data.type,
-    sizes: data.sizes || [],
-    nameset_id: data.namesetId || null,
-    team_id: data.teamId,
-    kit_type_id: data.kitTypeId,
-    badge_id: data.badgeId || null,
-    price: parseFloat(data.price) || 0.0,
-    status: data.status,
+    items: validItems.map(item => ({
+      productId: item.productId,
+      size: item.size,
+      quantity: item.quantity,
+      price: item.price || 0,
+    })),
+    status: data.status || 'to order',
+    sale_type: data.saleType || 'OLX',
     customer_name: data.customerName || null,
     phone_number: data.phoneNumber || null,
     created_at: data.createdAt || new Date().toISOString(),
     archived_at: null,
+    finished_at: null,
+    sale_id: null,
   };
 
   const { data: result, error } = await supabase.from('orders').insert([dbData]).select().single();
 
-  if (error) {
-    throw error;
-  }
+  if (error) throw error;
 
-  // Map database response back to frontend format
-  return {
-    id: result.id,
-    name: result.name,
-    type: result.type,
-    sizes: result.sizes,
-    namesetId: result.nameset_id,
-    teamId: result.team_id,
-    kitTypeId: result.kit_type_id,
-    badgeId: result.badge_id,
-    price: result.price,
-    status: result.status,
-    customerName: result.customer_name,
-    phoneNumber: result.phone_number,
-    createdAt: result.created_at,
-  };
+  const order = mapOrderFromDb(result);
+  order.items = await resolveOrderItemProducts(order.items);
+  return order;
 }
 
 export async function getOrders() {
   const { data, error } = await supabase
     .from('orders')
-    .select(
-      `
-      *,
-      namesets (
-        id,
-        player_name,
-        number,
-        season,
-        quantity,
-        price,
-        kit_type_id,
-        location,
-        created_at
-      ),
-      teams (
-        id,
-        name,
-        leagues,
-        created_at
-      ),
-      kit_types (
-        id,
-        name,
-        created_at
-      ),
-      badges (
-        id,
-        name,
-        season,
-        quantity,
-        price,
-        location,
-        created_at
-      )
-    `
-    )
+    .select('*')
     .is('archived_at', null)
     .order('created_at', { ascending: false });
 
   if (error) throw error;
 
-  // Map database response to frontend format
-  return (data || []).map((item) => ({
-    id: item.id,
-    name: item.name,
-    type: item.type,
-    sizes: item.sizes,
-    namesetId: item.nameset_id,
-    teamId: item.team_id,
-    kitTypeId: item.kit_type_id,
-    badgeId: item.badge_id,
-    price: item.price,
-    status: item.status,
-    customerName: item.customer_name,
-    phoneNumber: item.phone_number,
-    createdAt: item.created_at,
-    nameset: item.namesets
-      ? {
-        id: item.namesets.id,
-        playerName: item.namesets.player_name,
-        number: item.namesets.number,
-        season: item.namesets.season,
-        quantity: item.namesets.quantity,
-        price: item.namesets.price,
-        kitTypeId: item.namesets.kit_type_id,
-        location: item.namesets.location || undefined,
-        createdAt: item.namesets.created_at,
-      }
-      : null,
-    team: item.teams
-      ? {
-        id: item.teams.id,
-        name: item.teams.name,
-        leagues: item.teams.leagues || [],
-        createdAt: item.teams.created_at,
-      }
-      : null,
-    kitType: item.kit_types
-      ? {
-        id: item.kit_types.id,
-        name: item.kit_types.name,
-        createdAt: item.kit_types.created_at,
-      }
-      : null,
-    badge: item.badges
-      ? {
-        id: item.badges.id,
-        name: item.badges.name,
-        season: item.badges.season,
-        quantity: item.badges.quantity,
-        price: item.badges.price,
-        location: item.badges.location || undefined,
-        createdAt: item.badges.created_at,
-      }
-      : null,
-  }));
+  const orders = (data || []).map(mapOrderFromDb);
+
+  // Resolve products for all orders
+  for (const order of orders) {
+    order.items = await resolveOrderItemProducts(order.items);
+  }
+
+  return orders;
 }
 
 export async function getArchivedOrders() {
   const { data, error } = await supabase
     .from('orders')
-    .select(
-      `
-      *,
-      namesets (
-        id,
-        player_name,
-        number,
-        season,
-        quantity,
-        price,
-        kit_type_id,
-        location,
-        created_at
-      ),
-      teams (
-        id,
-        name,
-        leagues,
-        created_at
-      ),
-      kit_types (
-        id,
-        name,
-        created_at
-      ),
-      badges (
-        id,
-        name,
-        season,
-        quantity,
-        price,
-        location,
-        created_at
-      )
-    `
-    )
+    .select('*')
     .not('archived_at', 'is', null)
     .order('archived_at', { ascending: false });
 
   if (error) throw error;
 
-  // Map database response to frontend format
-  return (data || []).map((item) => ({
-    id: item.id,
-    name: item.name,
-    type: item.type,
-    sizes: item.sizes,
-    namesetId: item.nameset_id,
-    teamId: item.team_id,
-    kitTypeId: item.kit_type_id,
-    badgeId: item.badge_id,
-    price: item.price,
-    status: item.status,
-    customerName: item.customer_name,
-    phoneNumber: item.phone_number,
-    createdAt: item.created_at,
-    nameset: item.namesets
-      ? {
-        id: item.namesets.id,
-        playerName: item.namesets.player_name,
-        number: item.namesets.number,
-        season: item.namesets.season,
-        quantity: item.namesets.quantity,
-        price: item.namesets.price,
-        kitTypeId: item.namesets.kit_type_id,
-        location: item.namesets.location || undefined,
-        createdAt: item.namesets.created_at,
-      }
-      : null,
-    team: item.teams
-      ? {
-        id: item.teams.id,
-        name: item.teams.name,
-        leagues: item.teams.leagues || [],
-        createdAt: item.teams.created_at,
-      }
-      : null,
-    kitType: item.kit_types
-      ? {
-        id: item.kit_types.id,
-        name: item.kit_types.name,
-        createdAt: item.kit_types.created_at,
-      }
-      : null,
-    badge: item.badges
-      ? {
-        id: item.badges.id,
-        name: item.badges.name,
-        season: item.badges.season,
-        quantity: item.badges.quantity,
-        price: item.badges.price,
-        location: item.badges.location || undefined,
-        createdAt: item.badges.created_at,
-      }
-      : null,
-  }));
+  const orders = (data || []).map(mapOrderFromDb);
+
+  for (const order of orders) {
+    order.items = await resolveOrderItemProducts(order.items);
+  }
+
+  return orders;
 }
 
 export async function updateOrder(id, updates) {
-  // Map frontend data to database schema
+  const { data: currentOrder, error: fetchError } = await supabase
+    .from('orders')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (fetchError) throw fetchError;
+
+  if (currentOrder.finished_at) {
+    throw new Error('Cannot update a finished order');
+  }
+
+  const currentStatus = currentOrder.status;
+  const newStatus = updates.status;
+
+  if (newStatus && newStatus !== currentStatus) {
+    if (!isValidStatusTransition(currentStatus, newStatus)) {
+      throw new Error(`Cannot transition from '${currentStatus}' to '${newStatus}'`);
+    }
+
+    if (newStatus === 'finished') {
+      const customerName = updates.customerName !== undefined ? updates.customerName : currentOrder.customer_name;
+      const phoneNumber = updates.phoneNumber !== undefined ? updates.phoneNumber : currentOrder.phone_number;
+
+      if (!customerName?.trim()) throw new Error('Customer name is required to finish order');
+      if (!phoneNumber?.trim()) throw new Error('Phone number is required to finish order');
+    }
+  }
+
   const dbUpdates = {};
+  if (updates.items !== undefined) dbUpdates.items = updates.items;
+  if (updates.status !== undefined) dbUpdates.status = updates.status;
+  if (updates.saleType !== undefined) dbUpdates.sale_type = updates.saleType;
+  if (updates.customerName !== undefined) dbUpdates.customer_name = updates.customerName;
+  if (updates.phoneNumber !== undefined) dbUpdates.phone_number = updates.phoneNumber;
 
-  if (updates.name !== undefined) {
-    dbUpdates.name = updates.name;
-  }
-  if (updates.type !== undefined) {
-    dbUpdates.type = updates.type;
-  }
-  if (updates.sizes !== undefined) {
-    dbUpdates.sizes = updates.sizes;
-  }
-  if (updates.namesetId !== undefined) {
-    dbUpdates.nameset_id = updates.namesetId;
-  }
-  if (updates.teamId !== undefined) {
-    dbUpdates.team_id = updates.teamId;
-  }
-  if (updates.kitTypeId !== undefined) {
-    dbUpdates.kit_type_id = updates.kitTypeId;
-  }
-  if (updates.badgeId !== undefined) {
-    dbUpdates.badge_id = updates.badgeId;
-  }
-  if (updates.price !== undefined) {
-    dbUpdates.price = parseFloat(updates.price);
-  }
-  if (updates.status !== undefined) {
-    dbUpdates.status = updates.status;
-  }
-  if (updates.customerName !== undefined) {
-    dbUpdates.customer_name = updates.customerName;
-  }
-  if (updates.phoneNumber !== undefined) {
-    dbUpdates.phone_number = updates.phoneNumber;
+  const orderItems = updates.items || currentOrder.items;
+
+  // Transitioning TO received: ADD stock for all items
+  if (newStatus === 'received' && currentStatus !== 'received') {
+    for (const item of orderItems) {
+      if (!item.productId || item.quantity <= 0) continue;
+
+      const { data: product, error: productError } = await supabase
+        .from('products')
+        .select('sizes, name, teams(name)')
+        .eq('id', item.productId)
+        .single();
+
+      if (productError) continue;
+
+      const updatedSizes = product.sizes.map(ps => {
+        if (ps.size === item.size) {
+          return { ...ps, quantity: ps.quantity + item.quantity };
+        }
+        return ps;
+      });
+
+      // Add size if it doesn't exist
+      if (!product.sizes.find(ps => ps.size === item.size)) {
+        updatedSizes.push({ size: item.size, quantity: item.quantity });
+      }
+
+      await supabase.from('products').update({ sizes: updatedSizes }).eq('id', item.productId);
+
+      const productName = product.teams?.name ? `${product.teams.name} - ${product.name}` : product.name;
+      const oldSize = product.sizes.find(ps => ps.size === item.size);
+      const oldQty = oldSize ? oldSize.quantity : 0;
+
+      await logInventoryChanges([{
+        entityType: 'product',
+        entityId: item.productId,
+        entityName: productName,
+        size: item.size,
+        changeType: 'order_received',
+        quantityBefore: oldQty,
+        quantityChange: item.quantity,
+        quantityAfter: oldQty + item.quantity,
+        reason: 'Order received',
+        referenceId: id,
+        referenceType: 'order'
+      }]);
+    }
   }
 
-  const { data, error } = await supabase.from('orders').update(dbUpdates).eq('id', id).select('*').single();
+  // Transitioning FROM received backwards: SUBTRACT stock
+  if (currentStatus === 'received' && newStatus && newStatus !== 'received' && newStatus !== 'message sent' && newStatus !== 'finished') {
+    for (const item of orderItems) {
+      if (!item.productId || item.quantity <= 0) continue;
+
+      const { data: product, error: productError } = await supabase
+        .from('products')
+        .select('sizes, name, teams(name)')
+        .eq('id', item.productId)
+        .single();
+
+      if (productError) continue;
+
+      const updatedSizes = product.sizes.map(ps => {
+        if (ps.size === item.size) {
+          return { ...ps, quantity: Math.max(0, ps.quantity - item.quantity) };
+        }
+        return ps;
+      });
+
+      await supabase.from('products').update({ sizes: updatedSizes }).eq('id', item.productId);
+
+      const productName = product.teams?.name ? `${product.teams.name} - ${product.name}` : product.name;
+      const oldSize = product.sizes.find(ps => ps.size === item.size);
+      const oldQty = oldSize ? oldSize.quantity : 0;
+
+      await logInventoryChanges([{
+        entityType: 'product',
+        entityId: item.productId,
+        entityName: productName,
+        size: item.size,
+        changeType: 'order_reversed',
+        quantityBefore: oldQty,
+        quantityChange: -item.quantity,
+        quantityAfter: Math.max(0, oldQty - item.quantity),
+        reason: 'Order status reversed',
+        referenceId: id,
+        referenceType: 'order'
+      }]);
+    }
+  }
+
+  // Handle FINISHED: create sale
+  if (newStatus === 'finished') {
+    dbUpdates.finished_at = new Date().toISOString();
+
+    const saleType = updates.saleType || currentOrder.sale_type || 'OLX';
+    const customerName = updates.customerName || currentOrder.customer_name;
+
+    const saleItems = orderItems
+      .filter(item => item.productId && item.quantity > 0)
+      .map(item => ({
+        productId: item.productId,
+        size: item.size,
+        quantity: item.quantity,
+        priceSold: item.price || 0,
+      }));
+
+    const sale = await createSale({
+      items: saleItems,
+      customerName: customerName,
+      date: new Date().toISOString(),
+      saleType: saleType,
+    });
+
+    dbUpdates.sale_id = sale.id;
+  }
+
+  const { data, error } = await supabase
+    .from('orders')
+    .update(dbUpdates)
+    .eq('id', id)
+    .select()
+    .single();
 
   if (error) throw error;
 
-  // Map database response back to frontend format
-  return {
-    id: data.id,
-    name: data.name,
-    type: data.type,
-    sizes: data.sizes,
-    namesetId: data.nameset_id,
-    teamId: data.team_id,
-    kitTypeId: data.kit_type_id,
-    badgeId: data.badge_id,
-    price: data.price,
-    status: data.status,
-    customerName: data.customer_name,
-    phoneNumber: data.phone_number,
-    createdAt: data.created_at,
-  };
+  const order = mapOrderFromDb(data);
+  order.items = await resolveOrderItemProducts(order.items);
+  return order;
 }
 
 export async function deleteOrder(id) {
-  const { error } = await supabase.from('orders').delete().eq('id', id);
+  const { data: order, error: fetchError } = await supabase
+    .from('orders')
+    .select('finished_at, sale_id')
+    .eq('id', id)
+    .single();
 
+  if (fetchError) throw fetchError;
+
+  if (order.finished_at) throw new Error('Cannot delete a finished order');
+  if (order.sale_id) throw new Error('Cannot delete order: it has a linked sale');
+
+  const { error } = await supabase.from('orders').delete().eq('id', id);
   if (error) throw error;
 }
 
@@ -3436,47 +3440,26 @@ export async function archiveOrder(id) {
 
   if (error) throw error;
 
-  // Map database response to frontend format
-  return {
-    id: data.id,
-    name: data.name,
-    type: data.type,
-    sizes: data.sizes,
-    namesetId: data.nameset_id,
-    teamId: data.team_id,
-    kitTypeId: data.kit_type_id,
-    badgeId: data.badge_id,
-    price: data.price,
-    status: data.status,
-    customerName: data.customer_name,
-    phoneNumber: data.phone_number,
-    createdAt: data.created_at,
-    archivedAt: data.archived_at,
-  };
+  const order = mapOrderFromDb(data);
+  order.items = await resolveOrderItemProducts(order.items);
+  return order;
 }
 
 export async function unarchiveOrder(id) {
-  const { data, error } = await supabase.from('orders').update({ archived_at: null }).eq('id', id).select().single();
+  const { data, error } = await supabase
+    .from('orders')
+    .update({ archived_at: null })
+    .eq('id', id)
+    .select()
+    .single();
 
   if (error) throw error;
 
-  // Map database response to frontend format
-  return {
-    id: data.id,
-    name: data.name,
-    type: data.type,
-    sizes: data.sizes,
-    namesetId: data.nameset_id,
-    teamId: data.team_id,
-    kitTypeId: data.kit_type_id,
-    badgeId: data.badge_id,
-    price: data.price,
-    status: data.status,
-    customerName: data.customer_name,
-    phoneNumber: data.phone_number,
-    createdAt: data.created_at,
-  };
+  const order = mapOrderFromDb(data);
+  order.items = await resolveOrderItemProducts(order.items);
+  return order;
 }
+
 
 // ============================================================================
 // LEAGUES CRUD OPERATIONS

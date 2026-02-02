@@ -97,16 +97,16 @@ const ProductPicker: React.FC<Props> = ({ selectedProductId, onProductSelect, pl
 
   const displayText = selectedProduct
     ? getProductDisplayText(
-        selectedProduct,
-        namesets,
-        archivedNamesets,
-        teams,
-        archivedTeams,
-        badges,
-        archivedBadges,
-        kitTypes,
-        archivedKitTypes
-      )
+      selectedProduct,
+      namesets,
+      archivedNamesets,
+      teams,
+      archivedTeams,
+      badges,
+      archivedBadges,
+      kitTypes,
+      archivedKitTypes
+    )
     : placeholder;
 
   return (
@@ -127,6 +127,7 @@ const ProductPicker: React.FC<Props> = ({ selectedProductId, onProductSelect, pl
               maxHeight: '400px',
               left: pickerRef.current?.getBoundingClientRect().left,
               top: pickerRef.current?.getBoundingClientRect().bottom,
+              zIndex: 999999,
             }}
             onMouseDown={(e) => e.stopPropagation()}
           >

@@ -19,7 +19,6 @@ const OrdersTableListCard: React.FC<OrdersTableListCardProps> = ({
 }) => {
   // Get data and actions from stores
   const storeOrders = useOrdersList();
-  const { archiveOrder } = useOrdersActions();
 
   const [isOrdersExpanded, setIsOrdersExpanded] = useState(true);
   const [ordersSearchTerm, setOrdersSearchTerm] = useState('');
@@ -29,13 +28,6 @@ const OrdersTableListCard: React.FC<OrdersTableListCardProps> = ({
 
   // Apply limit if specified
   const displayOrders = limit ? orders.slice(0, limit) : orders;
-
-  const deleteOrder = (id: string) => {
-    if (!isReadOnly) {
-      archiveOrder(id);
-      setOrdersSearchTerm(''); // Clear search after action
-    }
-  };
 
   return (
     <div className="card">
@@ -75,16 +67,11 @@ const OrdersTableListCard: React.FC<OrdersTableListCardProps> = ({
             </div>
           )}
           <div className={styles.tableContainer}>
-            {displayOrders.length > 0 ? (
-              <OrdersTableList
-                orders={displayOrders}
-                onDelete={deleteOrder}
-                searchTerm={ordersSearchTerm}
-                isReadOnly={isReadOnly}
-              />
-            ) : (
-              <div className={styles.emptyState}>No orders found matching your search criteria.</div>
-            )}
+            <OrdersTableList
+              orders={displayOrders}
+              searchTerm={ordersSearchTerm}
+              onClearSearch={() => setOrdersSearchTerm('')}
+            />
           </div>
         </>
       )}

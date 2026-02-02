@@ -13,7 +13,7 @@ interface OrdersState {
   // Actions
   loadOrders: () => Promise<void>;
   loadArchivedOrders: () => Promise<void>;
-  addOrder: (order: Omit<Order, 'id' | 'createdAt'>) => Promise<void>;
+  addOrder: (order: Omit<Order, 'id' | 'createdAt' | 'status'> & { status?: Order['status'] }) => Promise<void>;
   updateOrder: (id: string, updates: Partial<Order>) => Promise<void>;
   archiveOrder: (id: string) => Promise<void>;
   unarchiveOrder: (id: string) => Promise<void>;

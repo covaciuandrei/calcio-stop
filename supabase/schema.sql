@@ -124,19 +124,15 @@ CREATE TABLE IF NOT EXISTS sales (
 -- Orders table
 CREATE TABLE IF NOT EXISTS orders (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name VARCHAR(255) NOT NULL,
-    type VARCHAR(50) NOT NULL CHECK (type IN ('shirt', 'shorts', 'kid kit', 'adult kit')),
-    sizes JSONB NOT NULL DEFAULT '[]'::jsonb,
-    nameset_id UUID NULL REFERENCES namesets(id),
-    team_id UUID NULL REFERENCES teams(id),
-    kit_type_id UUID NOT NULL REFERENCES kit_types(id),
-    badge_id UUID NULL REFERENCES badges(id),
-    price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    items JSONB NOT NULL DEFAULT '[]'::jsonb, -- Array of {productId, size, quantity, price}
     status VARCHAR(50) NOT NULL DEFAULT 'to order' CHECK (status IN ('to order', 'ordered', 'received', 'message sent', 'finished')),
+    sale_type VARCHAR(20) NOT NULL DEFAULT 'OLX' CHECK (sale_type IN ('OLX', 'IN-PERSON', 'VINTED')),
     customer_name VARCHAR(255) NULL,
     phone_number VARCHAR(20) NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    archived_at TIMESTAMP WITH TIME ZONE NULL
+    archived_at TIMESTAMP WITH TIME ZONE NULL,
+    finished_at TIMESTAMP WITH TIME ZONE NULL,
+    sale_id UUID NULL REFERENCES sales(id)
 );
 
 -- Returns table
@@ -242,7 +238,8 @@ CREATE TABLE IF NOT EXISTS inventory_logs (
         'sale', 'sale_edit', 'sale_reversal',
         'return', 'return_reversal',
         'manual_adjustment', 
-        'initial_stock', 'restock'
+        'initial_stock', 'restock',
+        'order_received', 'order_reversed'
     )),
     quantity_before INTEGER NOT NULL,
     quantity_change INTEGER NOT NULL,
@@ -251,7 +248,7 @@ CREATE TABLE IF NOT EXISTS inventory_logs (
     -- Context
     reason TEXT NULL,
     reference_id UUID NULL,
-    reference_type VARCHAR(50) NULL CHECK (reference_type IN ('sale', 'return', 'reservation', 'product')),
+    reference_type VARCHAR(50) NULL CHECK (reference_type IN ('sale', 'return', 'reservation', 'product', 'order')),
     
     -- Timestamps
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -288,11 +285,9 @@ CREATE INDEX IF NOT EXISTS idx_products_team_id ON products(team_id);
 CREATE INDEX IF NOT EXISTS idx_products_nameset_id ON products(nameset_id);
 CREATE INDEX IF NOT EXISTS idx_products_kit_type_id ON products(kit_type_id);
 CREATE INDEX IF NOT EXISTS idx_products_badge_id ON products(badge_id);
-CREATE INDEX IF NOT EXISTS idx_orders_team_id ON orders(team_id);
-CREATE INDEX IF NOT EXISTS idx_orders_nameset_id ON orders(nameset_id);
-CREATE INDEX IF NOT EXISTS idx_orders_kit_type_id ON orders(kit_type_id);
-CREATE INDEX IF NOT EXISTS idx_orders_badge_id ON orders(badge_id);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_orders_sale_id ON orders(sale_id);
+CREATE INDEX IF NOT EXISTS idx_orders_archived_at ON orders(archived_at);
 CREATE INDEX IF NOT EXISTS idx_reservations_status ON reservations(status);
 CREATE INDEX IF NOT EXISTS idx_reservations_expiring_date ON reservations(expiring_date);
 CREATE INDEX IF NOT EXISTS idx_reservations_created_at ON reservations(created_at);
