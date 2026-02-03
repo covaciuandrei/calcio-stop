@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useErrorToast } from '../../hooks/useErrorToast';
 import { useOrdersActions } from '../../stores';
-import { Order, OrderStatus, ORDER_STATUS_TRANSITIONS, OrderItem } from '../../types';
+import { Order, ORDER_STATUS_TRANSITIONS, OrderItem, OrderStatus } from '../../types';
 import AddOrderForm from './AddOrderForm';
 
 interface OrdersTableListProps {
@@ -257,7 +257,7 @@ const OrdersTableList: React.FC<OrdersTableListProps> = ({ orders, searchTerm, o
                         <div style={{ fontSize: '0.65rem', color: 'var(--success-color)', marginTop: '2px' }}>✓ Sale created</div>
                       )}
                     </td>
-                    <td>{new Date(order.createdAt).toLocaleDateString()}</td>
+                    <td>{new Date(order.createdAt).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}</td>
                     <td>
                       {!isFinished && (
                         <button onClick={() => setEditingOrder(order)} className="btn btn-secondary btn-sm" style={{ marginRight: '4px' }}>
