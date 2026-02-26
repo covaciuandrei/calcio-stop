@@ -56,7 +56,7 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, onReverse, o
 
   // Calculate total for a sale
   const getSaleTotal = (sale: Sale): number => {
-    return sale.items.reduce((total, item) => total + (item.priceSold || 0) * item.quantity, 0);
+    return sale.items.reduce((total, item) => total + (item.priceSold || 0) * (item.quantity || 0), 0);
   };
 
   // Filter sales based on search term
@@ -106,7 +106,7 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, onReverse, o
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   {s.items.map((item, idx) => (
                     <div key={idx} style={{ fontSize: '0.875rem' }}>
-                      {getProductDetails(item.productId)} - Size: {item.size} - Qty: {item.quantity} -{' '}
+                      {getProductDetails(item.productId)} - Size: {item.size} - Qty: {item.quantity || 0} -{' '}
                       {(item.priceSold || 0).toFixed(2)} RON
                     </div>
                   ))}
@@ -155,7 +155,7 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, onReverse, o
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
                   {s.items.map((item, idx) => (
                     <div key={idx} style={{ fontSize: '0.875rem' }}>
-                      {getProductDetails(item.productId)} - {item.size} x{item.quantity} - {(item.priceSold || 0).toFixed(2)}{' '}
+                      {getProductDetails(item.productId)} - {item.size} x{item.quantity || 0} - {(item.priceSold || 0).toFixed(2)}{' '}
                       RON
                     </div>
                   ))}
