@@ -65,9 +65,9 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, onReverse, o
       const productDetails = getProductDetails(item.productId);
       return (
         productDetails.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.size.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.quantity.toString().includes(searchTerm) ||
-        item.priceSold.toString().includes(searchTerm)
+        (item.size || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.quantity || 0).toString().includes(searchTerm) ||
+        (item.priceSold || 0).toString().includes(searchTerm)
       );
     });
     return (
