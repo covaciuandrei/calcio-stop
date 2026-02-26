@@ -5,17 +5,17 @@ import { useNamesetImagesMapDebounced } from '../../hooks/useNamesetImages';
 import { useRouteData } from '../../hooks/useRouteData';
 import { statsService } from '../../lib/statsService';
 import {
-    useArchivedBadges,
-    useArchivedKitTypes,
-    useArchivedNamesets,
-    useArchivedProducts,
-    useArchivedTeams,
-    useBadgesList,
-    useKitTypesList,
-    useNamesetsList,
-    useProductsList,
-    useProductsLoading,
-    useTeamsList,
+  useArchivedBadges,
+  useArchivedKitTypes,
+  useArchivedNamesets,
+  useArchivedProducts,
+  useArchivedTeams,
+  useBadgesList,
+  useKitTypesList,
+  useNamesetsList,
+  useProductsList,
+  useProductsLoading,
+  useTeamsList,
 } from '../../stores';
 import { useAuth } from '../../stores/authStore';
 import { Product } from '../../types';
@@ -59,6 +59,7 @@ const ProductDetailPage: React.FC = () => {
   const [isBadgeDropdownOpen, setIsBadgeDropdownOpen] = useState(false);
   const [selectedNamesetId, setSelectedNamesetId] = useState<string | null>(null);
   const [isNamesetDropdownOpen, setIsNamesetDropdownOpen] = useState(false);
+  const [popupImageUrl, setPopupImageUrl] = useState<string | null>(null);
 
   // Find the product (check both active and archived)
   useEffect(() => {
@@ -318,7 +319,8 @@ const ProductDetailPage: React.FC = () => {
                           <img
                             src={currentNamesetPrimaryImage.imageUrl}
                             alt={namesetInfo.playerName || 'Nameset image'}
-                            className="detail-item-image"
+                            className="detail-item-image clickable-image"
+                            onClick={() => setPopupImageUrl(currentNamesetPrimaryImage.imageUrl)}
                           />
                         )}
                         <div className="detail-item-text">
@@ -339,7 +341,8 @@ const ProductDetailPage: React.FC = () => {
                         <img
                           src={currentBadgePrimaryImage.imageUrl}
                           alt={badgeInfo || 'Badge image'}
-                          className="detail-item-image"
+                          className="detail-item-image clickable-image"
+                          onClick={() => setPopupImageUrl(currentBadgePrimaryImage.imageUrl)}
                         />
                       )}
                       <div className="detail-item-text">
@@ -591,7 +594,8 @@ const ProductDetailPage: React.FC = () => {
                         <img
                           src={selectedBadgePrimaryImage.imageUrl}
                           alt={selectedBadge.name || 'Badge image'}
-                          className="total-price-image"
+                          className="total-price-image clickable-image"
+                          onClick={() => setPopupImageUrl(selectedBadgePrimaryImage.imageUrl)}
                         />
                       )}
                       <span className="total-price-label">Badge ({selectedBadge.name}):</span>
@@ -606,7 +610,8 @@ const ProductDetailPage: React.FC = () => {
                         <img
                           src={selectedNamesetPrimaryImage.imageUrl}
                           alt={selectedNameset.playerName || 'Nameset image'}
-                          className="total-price-image"
+                          className="total-price-image clickable-image"
+                          onClick={() => setPopupImageUrl(selectedNamesetPrimaryImage.imageUrl)}
                         />
                       )}
                       <span className="total-price-label">
@@ -671,6 +676,22 @@ const ProductDetailPage: React.FC = () => {
 
       {/* Edit Modal */}
       {isEditing && <EditProductModal editingProduct={product} setEditingProduct={handleEditClose} />}
+
+      {/* Image Popup Modal for badge/nameset images */}
+      {popupImageUrl && (
+        <div className="image-popup-overlay" onClick={() => setPopupImageUrl(null)}>
+          <div className="image-popup-content" onClick={(e) => e.stopPropagation()}>
+            <button className="image-popup-close" onClick={() => setPopupImageUrl(null)}>
+              ×
+            </button>
+            <img
+              src={popupImageUrl}
+              alt="Full size preview"
+              className="image-popup-image"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
