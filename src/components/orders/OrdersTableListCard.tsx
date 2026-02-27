@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useOrdersActions, useOrdersList } from '../../stores';
+import { useOrdersList } from '../../stores';
 import { Order } from '../../types';
 import styles from '../shared/TableListCard.module.css';
 import OrdersTableList from './OrdersTableList';

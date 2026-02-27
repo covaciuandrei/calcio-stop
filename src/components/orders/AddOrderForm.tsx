@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useProductsActions, useProductsList, useOrdersActions } from '../../stores';
+import { useProductsList, useOrdersActions } from '../../stores';
 import { Order, OrderItem, SaleType } from '../../types';
 import ProductPicker from '../products/ProductPicker';
 
@@ -10,7 +10,6 @@ interface AddOrderFormProps {
 
 const AddOrderForm: React.FC<AddOrderFormProps> = ({ onClose, initialOrder }) => {
   const products = useProductsList();
-  const { loadProducts } = useProductsActions();
   const { addOrder, updateOrder } = useOrdersActions();
 
   // Initialize state from initialOrder if provided, otherwise default
@@ -26,34 +25,6 @@ const AddOrderForm: React.FC<AddOrderFormProps> = ({ onClose, initialOrder }) =>
   const [loading, setLoading] = useState(false);
 
   const isEditing = !!initialOrder;
-
-  // Handle product change for an item
-  const handleItemProductChange = (index: number, productId: string) => {
-    const updatedItems = [...orderItems];
-    const product = products.find((p) => p.id === productId);
-
-    if (product) {
-      // Get first available size
-      const firstSize = product.sizes && product.sizes.length > 0 ? product.sizes[0].size : '';
-      // Use sale price if on sale, otherwise regular price
-      const price = product.isOnSale && product.salePrice ? product.salePrice : product.price || 0;
-
-      updatedItems[index] = {
-        ...updatedItems[index],
-        productId,
-        size: firstSize,
-        price,
-      };
-    } else {
-      updatedItems[index] = {
-        ...updatedItems[index],
-        productId,
-        size: '',
-        price: 0,
-      };
-    }
-    setOrderItems(updatedItems);
-  };
 
   const handleItemChange = (index: number, field: keyof OrderItem, value: string | number) => {
     const updatedItems = [...orderItems];
@@ -146,16 +117,6 @@ const AddOrderForm: React.FC<AddOrderFormProps> = ({ onClose, initialOrder }) =>
   const getProductSizes = (productId: string) => {
     const product = products.find((p) => p.id === productId);
     return product?.sizes || [];
-  };
-
-  // Get product name for display
-  const getProductDisplayName = (productId: string) => {
-    const product = products.find((p) => p.id === productId);
-    if (!product) return '';
-    const teamName = product.team?.name || '';
-    const kitTypeName = product.kitType?.name || '';
-    const parts = [teamName, product.name, kitTypeName].filter(Boolean);
-    return parts.join(' - ');
   };
 
   // Calculate total price

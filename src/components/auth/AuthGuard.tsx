@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useAuthStore } from '../../stores/authStore';
+import '../../App.css';
 import { AuthPage } from './AuthPage';
 
 interface AuthGuardProps {
@@ -17,18 +18,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   // Show loading state while checking authentication
   if (isLoading) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-          fontSize: '18px',
-          color: '#666',
-        }}
-      >
-        Loading...
-      </div>
+      <div className="loading-fallback">Loading...</div>
     );
   }
 

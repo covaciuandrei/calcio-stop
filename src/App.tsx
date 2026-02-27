@@ -1,5 +1,5 @@
-import React, { lazy, Suspense, useState } from 'react';
-import { NavLink, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
+import { NavLink, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
 import './App.css';
 import { AuthGuard } from './components/auth/AuthGuard';
 import { UserMenu } from './components/auth/UserMenu';
@@ -35,18 +35,7 @@ const InventoryLogsPage = lazy(() => import('./components/inventory/InventoryLog
 
 // Loading component for Suspense fallback
 const LoadingFallback: React.FC = () => (
-  <div
-    style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: '100vh',
-      fontSize: '18px',
-      color: '#666',
-    }}
-  >
-    Loading...
-  </div>
+  <div className="loading-fallback">Loading...</div>
 );
 
 // Navigation items configuration for admin routes
@@ -65,6 +54,40 @@ const NAVIGATION_ITEMS = {
   logs: { label: 'Inventory Logs', path: '/admin/inventory-logs', end: false },
 };
 
+// Route title mapping for dynamic browser tab titles
+const ROUTE_TITLES: Record<string, string> = {
+  '/admin': 'Dashboard',
+  '/admin/products': 'Products',
+  '/admin/sales': 'Sales',
+  '/admin/returns': 'Returns',
+  '/admin/orders': 'Orders',
+  '/admin/namesets': 'Namesets',
+  '/admin/teams': 'Teams',
+  '/admin/badges': 'Badges',
+  '/admin/kittypes': 'Kit Types',
+  '/admin/suppliers': 'Suppliers',
+  '/admin/reservations': 'Reservations',
+  '/admin/stats': 'Statistics',
+  '/admin/settings': 'System Settings',
+  '/admin/inventory-logs': 'Inventory Logs',
+  '/': 'Home',
+  '/products': 'Products',
+  '/badges': 'Badges',
+};
+
+// Component to update document title based on route
+const PageTitleUpdater: React.FC = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    const path = location.pathname;
+    const title = ROUTE_TITLES[path];
+    document.title = title ? `${title} — Calcio Stop` : 'Calcio Stop';
+  }, [location.pathname]);
+
+  return null;
+};
+
 const App: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const appBarOrder = useAppBarOrder();
@@ -80,6 +103,7 @@ const App: React.FC = () => {
 
   return (
     <Router>
+      <PageTitleUpdater />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           {/* Public routes - no authentication required (root path) */}
@@ -161,6 +185,7 @@ const App: React.FC = () => {
                           openSettings();
                         }}
                         title="Customize Layout"
+                        aria-label="Customize Layout"
                       >
                         <svg
                           width="20"
@@ -184,6 +209,7 @@ const App: React.FC = () => {
                           window.location.href = '/admin/orders';
                         }}
                         title="Orders"
+                        aria-label="Orders"
                       >
                         <svg
                           width="20"
@@ -208,6 +234,7 @@ const App: React.FC = () => {
                           window.location.href = '/admin/stats';
                         }}
                         title="Statistics"
+                        aria-label="Statistics"
                       >
                         <svg
                           width="20"
