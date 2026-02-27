@@ -81,6 +81,11 @@ export const useOrdersStore = create<OrdersState>()(
         set({ isLoading: true, error: null });
         try {
           const updatedOrder = await db.updateOrder(id, updates);
+          // Reload products if status changed (received/reversed/finished can modify stock)
+          if (updates.status) {
+            const { useProductsStore } = await import('./productsStore');
+            await useProductsStore.getState().loadProducts();
+          }
           set((state) => ({
             orders: state.orders.map((order) => (order.id === id ? updatedOrder : order)),
             archivedOrders: state.archivedOrders.map((order) => (order.id === id ? updatedOrder : order)),
@@ -173,6 +178,9 @@ export const useOrdersStore = create<OrdersState>()(
         set({ isLoading: true, error: null });
         try {
           const updatedOrder = await db.updateOrder(id, { status });
+          // Reload products if status changed (received/reversed/finished can modify stock)
+          const { useProductsStore } = await import('./productsStore');
+          await useProductsStore.getState().loadProducts();
           set((state) => ({
             orders: state.orders.map((order) => (order.id === id ? updatedOrder : order)),
             archivedOrders: state.archivedOrders.map((order) => (order.id === id ? updatedOrder : order)),

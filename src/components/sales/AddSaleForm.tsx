@@ -172,7 +172,7 @@ const AddSaleForm: React.FC = () => {
       saleType,
     };
 
-    addSale(newSale);
+    await addSale(newSale);
 
     // Reset form
     setSaleItems([{ productId: '', size: '', quantity: 1, priceSold: 0 }]);

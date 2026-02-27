@@ -95,11 +95,18 @@ const OrdersTableList: React.FC<OrdersTableListProps> = ({ orders, searchTerm, o
     return 'Unknown Product';
   };
 
+  // Get display string for an item including size
+  const getItemDisplayWithSize = (item: OrderItem): string => {
+    const name = getItemDisplayName(item);
+    const sizeInfo = item.size ? ` (${item.size} × ${item.quantity})` : '';
+    return `${name}${sizeInfo}`;
+  };
+
   // Get order summary (first item + count)
   const getOrderSummary = (order: Order): string => {
     if (!order.items || order.items.length === 0) return 'No items';
     const firstItem = order.items[0];
-    const name = getItemDisplayName(firstItem);
+    const name = getItemDisplayWithSize(firstItem);
     if (order.items.length > 1) {
       return `${name} (+${order.items.length - 1} more)`;
     }

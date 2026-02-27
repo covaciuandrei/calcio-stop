@@ -2831,7 +2831,7 @@ export async function deleteReservation(id) {
       // Get the product
       const { data: product, error: productError } = await supabase
         .from('products')
-        .select('sizes')
+        .select('sizes, name, team_id, teams(name)')
         .eq('id', productId)
         .single();
 
@@ -2845,11 +2845,30 @@ export async function deleteReservation(id) {
         continue;
       }
 
+      const productName = product.teams?.name ? `${product.teams.name} - ${product.name}` : product.name;
+      const inventoryChanges = [];
+
       // Restore quantities for all sizes
       const updatedSizes = (product.sizes || []).map((sizeObj) => {
         const itemsForThisSize = productItems.filter((item) => item.size === sizeObj.size);
         if (itemsForThisSize.length > 0) {
           const totalQuantityToRestore = itemsForThisSize.reduce((sum, item) => sum + item.quantity, 0);
+
+          // Prepare log entry
+          inventoryChanges.push({
+            entityType: 'product',
+            entityId: productId,
+            entityName: productName,
+            size: sizeObj.size,
+            changeType: 'reservation_cancelled',
+            quantityBefore: sizeObj.quantity || 0,
+            quantityChange: totalQuantityToRestore,
+            quantityAfter: (sizeObj.quantity || 0) + totalQuantityToRestore,
+            reason: `Reservation cancelled for ${reservation.customer_name}`,
+            referenceId: id,
+            referenceType: 'reservation'
+          });
+
           return {
             ...sizeObj,
             quantity: (sizeObj.quantity || 0) + totalQuantityToRestore,
@@ -2867,6 +2886,9 @@ export async function deleteReservation(id) {
       if (updateError) {
         console.error(`Error updating product ${productId}:`, updateError);
         continue;
+      } else if (inventoryChanges.length > 0) {
+        // Log successful inventory changes
+        await logInventoryChanges(inventoryChanges);
       }
     }
   }
@@ -3374,7 +3396,7 @@ export async function updateOrder(id, updates) {
     }
   }
 
-  // Handle FINISHED: create sale
+  // Handle FINISHED: decrement stock and create sale
   if (newStatus === 'finished') {
     dbUpdates.finished_at = new Date().toISOString();
 
@@ -3390,6 +3412,40 @@ export async function updateOrder(id, updates) {
         priceSold: item.price || 0,
       }));
 
+    // Decrement product stock BEFORE creating the sale
+    // (mirrors AddSaleForm behavior — stock is reduced first, then createSale logs the change)
+    const itemsByProduct = {};
+    for (const item of saleItems) {
+      if (!itemsByProduct[item.productId]) {
+        itemsByProduct[item.productId] = [];
+      }
+      itemsByProduct[item.productId].push({ size: item.size, quantity: item.quantity });
+    }
+
+    for (const productId in itemsByProduct) {
+      const productItems = itemsByProduct[productId];
+
+      const { data: product, error: productError } = await supabase
+        .from('products')
+        .select('sizes')
+        .eq('id', productId)
+        .single();
+
+      if (productError || !product) continue;
+
+      const updatedSizes = (product.sizes || []).map(sizeObj => {
+        const itemsForThisSize = productItems.filter(item => item.size === sizeObj.size);
+        if (itemsForThisSize.length > 0) {
+          const totalToSubtract = itemsForThisSize.reduce((sum, item) => sum + item.quantity, 0);
+          return { ...sizeObj, quantity: Math.max(0, (sizeObj.quantity || 0) - totalToSubtract) };
+        }
+        return sizeObj;
+      });
+
+      await supabase.from('products').update({ sizes: updatedSizes }).eq('id', productId);
+    }
+
+    // Now create the sale (createSale will log the inventory change with correct post-decrement quantities)
     const sale = await createSale({
       items: saleItems,
       customerName: customerName,
