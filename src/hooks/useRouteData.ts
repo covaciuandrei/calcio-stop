@@ -1,21 +1,21 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
-    useBadgesActions,
-    useBadgesStore,
-    useKitTypesActions,
-    useKitTypesStore,
-    useLeaguesActions,
-    useLeaguesStore,
-    useNamesetsActions,
-    useNamesetsStore,
-    useProductsActions,
-    useProductsStore,
-    useSalesActions,
-    useSuppliersActions,
-    useSuppliersStore,
-    useTeamsActions,
-    useTeamsStore,
+  useBadgesActions,
+  useBadgesStore,
+  useKitTypesActions,
+  useKitTypesStore,
+  useLeaguesActions,
+  useLeaguesStore,
+  useNamesetsActions,
+  useNamesetsStore,
+  useProductsActions,
+  useProductsStore,
+  useSalesActions,
+  useSuppliersActions,
+  useSuppliersStore,
+  useTeamsActions,
+  useTeamsStore,
 } from '../stores';
 
 /**

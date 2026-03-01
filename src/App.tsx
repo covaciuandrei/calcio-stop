@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { NavLink, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
 import './App.css';
 import { AuthGuard } from './components/auth/AuthGuard';
@@ -8,30 +8,28 @@ import { useAppBarOrder, useAuth } from './stores';
 
 // Eager load critical routes that are accessed most frequently
 import Dashboard from './components/Dashboard';
+import NamesetsPage from './components/namesets/NamesetsPage';
 import ProductDetailPage from './components/products/ProductDetailPage';
 import ProductsPage from './components/products/ProductsPage';
 import PublicDashboard from './components/public/PublicDashboard';
 import { PublicLayout } from './components/public/PublicLayout';
 import PublicProductsPage from './components/public/PublicProductsPage';
+import ReturnsPage from './components/returns/ReturnsPage';
+import SalesPage from './components/sales/SalesPage';
 
-// Lazy load less frequently accessed routes for code splitting
-const SalesPage = lazy(() => import('./components/sales/SalesPage'));
-const ReturnsPage = lazy(() => import('./components/returns/ReturnsPage'));
-const OrdersPage = lazy(() => import('./components/orders/OrdersPage'));
-const NamesetsPage = lazy(() => import('./components/namesets/NamesetsPage'));
-const NamesetDetailPage = lazy(() => import('./components/namesets/NamesetDetailPage'));
-const TeamsPage = lazy(() => import('./components/teams/TeamsPage'));
-const BadgesPage = lazy(() => import('./components/badges/BadgesPage'));
-const BadgeDetailPage = lazy(() => import('./components/badges/BadgeDetailPage'));
-const KitTypesPage = lazy(() => import('./components/kittypes/KitTypesPage'));
-const SuppliersPage = lazy(() => import('./components/suppliers/SuppliersPage'));
-const ReservationsPage = lazy(() => import('./components/reservations/ReservationsPage'));
-const StatsDashboard = lazy(() => import('./components/admin/StatsDashboard'));
-const SystemSettings = lazy(() =>
-  import('./components/admin/SystemSettings').then((module) => ({ default: module.SystemSettings }))
-);
-const PublicBadgesPage = lazy(() => import('./components/public/PublicBadgesPage'));
-const InventoryLogsPage = lazy(() => import('./components/inventory/InventoryLogsPage'));
+// Standard imports for all routes to prevent adblock/chunk-loading hangs
+import StatsDashboard from './components/admin/StatsDashboard';
+import { SystemSettings } from './components/admin/SystemSettings';
+import BadgeDetailPage from './components/badges/BadgeDetailPage';
+import BadgesPage from './components/badges/BadgesPage';
+import InventoryLogsPage from './components/inventory/InventoryLogsPage';
+import KitTypesPage from './components/kittypes/KitTypesPage';
+import NamesetDetailPage from './components/namesets/NamesetDetailPage';
+import OrdersPage from './components/orders/OrdersPage';
+import PublicBadgesPage from './components/public/PublicBadgesPage';
+import ReservationsPage from './components/reservations/ReservationsPage';
+import SuppliersPage from './components/suppliers/SuppliersPage';
+import TeamsPage from './components/teams/TeamsPage';
 
 // Loading component for Suspense fallback
 const LoadingFallback: React.FC = () => (

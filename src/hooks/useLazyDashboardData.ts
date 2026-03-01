@@ -1,23 +1,23 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
-  useProductsList,
-  useSalesList,
-  useReturnsList,
-  useNamesetsList,
-  useTeamsList,
-  useBadgesList,
-  useKitTypesList,
-  useLeaguesList,
-  useReservationsList,
-  useProductsActions,
-  useSalesActions,
-  useReturnsActions,
-  useNamesetsActions,
-  useTeamsActions,
   useBadgesActions,
+  useBadgesList,
   useKitTypesActions,
+  useKitTypesList,
   useLeaguesActions,
+  useLeaguesList,
+  useNamesetsActions,
+  useNamesetsList,
+  useProductsActions,
+  useProductsList,
   useReservationsActions,
+  useReservationsList,
+  useReturnsActions,
+  useReturnsList,
+  useSalesActions,
+  useSalesList,
+  useTeamsActions,
+  useTeamsList,
 } from '../stores';
 
 type DashboardCardType =
@@ -209,7 +209,6 @@ export const useLazyDashboardData = () => {
         };
       });
     } catch (error) {
-      console.error(`Error loading ${cardType} data:`, error);
       // Remove from loading state on error
       setLazyState(prev => {
         const newLoadingCards = new Set(prev.loadingCards);
