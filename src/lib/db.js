@@ -1533,7 +1533,7 @@ export async function updateProduct(id, updates) {
     dbUpdates.price = parseFloat(updates.price);
   }
   if (updates.olxLink !== undefined) {
-    dbUpdates.olx_link = updates.olxLink;
+    dbUpdates.olx_link = updates.olxLink || null;
   }
   if (updates.location !== undefined) {
     dbUpdates.location = updates.location || null;
