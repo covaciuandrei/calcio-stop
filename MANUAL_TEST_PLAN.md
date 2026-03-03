@@ -90,12 +90,7 @@ Each section covers a functional area. Tests are numbered `AREA-NNN`. For each t
 1. Click on a badge from `/badges`.
 **Expected**: Badge detail page shows name, season, quantity, price, images.
 
-### PUB-006: Public nameset detail 🟢
-**Steps**:
-1. Navigate to `/namesets/:id` directly (linked from a product detail).
-**Expected**: Nameset detail page shows player name, number, season, kit type, images.
-
-### PUB-007: Public site has no auth requirement 🔴
+### PUB-006: Public site has no auth requirement 🔴
 **Steps**:
 1. Clear all cookies/localStorage.
 2. Navigate to `/`, `/products`, `/badges`.
