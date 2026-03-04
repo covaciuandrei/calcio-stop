@@ -11,7 +11,7 @@ import {
   useProductsList,
   useTeamsList,
 } from '../../stores';
-import { Sale } from '../../types';
+import { Sale, Product } from '../../types';
 import { formatDate, formatDateTime, getProductDisplayText, getProductInfo } from '../../utils/utils';
 
 interface Props {
@@ -36,8 +36,10 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, onReverse, o
   const kitTypes = useKitTypesList();
   const archivedKitTypes = useArchivedKitTypes();
 
-  const getProductDetails = (productId: string) => {
-    const product = getProductInfo(productId, products, archivedProducts);
+  const getProductDetails = (productId: string, embeddedProduct?: Product | null) => {
+    // Prefer the product object already fetched by getSales (avoids "Unknown product" for products
+    // not yet loaded in the store, e.g. archived products)
+    const product = embeddedProduct || getProductInfo(productId, products, archivedProducts);
 
     if (!product) return 'Unknown product';
 
@@ -62,7 +64,7 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, onReverse, o
   // Filter sales based on search term
   const filteredSales = sales.filter((sale) => {
     const matchesItems = sale.items.some((item) => {
-      const productDetails = getProductDetails(item.productId);
+      const productDetails = getProductDetails(item.productId, item.product);
       return (
         productDetails.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (item.size || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -106,7 +108,7 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, onReverse, o
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   {s.items.map((item, idx) => (
                     <div key={idx} style={{ fontSize: '0.875rem' }}>
-                      {getProductDetails(item.productId)} - Size: {item.size} - Qty: {item.quantity || 0} -{' '}
+                      {getProductDetails(item.productId, item.product)} - Size: {item.size} - Qty: {item.quantity || 0} -{' '}
                       {(item.priceSold || 0).toFixed(2)} RON
                     </div>
                   ))}
@@ -155,7 +157,7 @@ const SalesTableList: React.FC<Props> = ({ sales, onEdit, onDelete, onReverse, o
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
                   {s.items.map((item, idx) => (
                     <div key={idx} style={{ fontSize: '0.875rem' }}>
-                      {getProductDetails(item.productId)} - {item.size} x{item.quantity || 0} - {(item.priceSold || 0).toFixed(2)}{' '}
+                      {getProductDetails(item.productId, item.product)} - {item.size} x{item.quantity || 0} - {(item.priceSold || 0).toFixed(2)}{' '}
                       RON
                     </div>
                   ))}

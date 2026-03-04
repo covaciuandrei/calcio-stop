@@ -91,10 +91,12 @@ export const getBadgeInfo = (badgeId: string | null, badges: Badge[], archivedBa
 };
 
 export const getProductInfo = (
-  productId: string,
+  productId: string | null | undefined,
   products: Product[],
   archivedProducts: Product[] = []
 ): Product | null => {
+  if (!productId) return null;
+
   // First check in active products
   let product = products.find((p) => p.id === productId);
 
@@ -113,6 +115,10 @@ export const getProductDisplayText = (
     namesetId: string | null;
     badgeId: string | null;
     kitTypeId?: string;
+    team?: Team | null;
+    nameset?: Nameset | null;
+    badge?: Badge | null;
+    kitType?: KitType | null;
   },
   namesets: Nameset[],
   archivedNamesets: Nameset[],
@@ -125,8 +131,10 @@ export const getProductDisplayText = (
 ): string => {
   const parts: string[] = [];
 
-  // Team (if exists)
-  if (product.teamId) {
+  // Team (embedded or lookup)
+  if (product.team && product.team.name) {
+    parts.push(product.team.name);
+  } else if (product.teamId) {
     const teamName = getTeamInfo(product.teamId, teams, archivedTeams);
     if (teamName !== '-') {
       parts.push(teamName);
@@ -138,47 +146,44 @@ export const getProductDisplayText = (
     parts.push(product.name.trim());
   }
 
-  // Kit Type (if exists)
-  if (product.kitTypeId && kitTypes && archivedKitTypes) {
+  // Kit Type (embedded or lookup)
+  if (product.kitType && product.kitType.name) {
+    parts.push(product.kitType.name);
+  } else if (product.kitTypeId && kitTypes && archivedKitTypes) {
     const kitTypeName = getKitTypeInfo(product.kitTypeId, kitTypes, archivedKitTypes);
     if (kitTypeName !== '-') {
       parts.push(kitTypeName);
     }
   }
 
-  // Nameset info (season, player, number)
-  if (product.namesetId) {
-    const namesetInfo = getNamesetInfo(product.namesetId, namesets, archivedNamesets);
-    if (namesetInfo.playerName !== '-' || namesetInfo.season !== '-' || namesetInfo.number > 0) {
-      const namesetParts: string[] = [];
+  // Nameset info (season, player, number) - embedded or lookup
+  const nameset = product.nameset || (product.namesetId ? namesets.find(n => n.id === product.namesetId) || archivedNamesets.find(n => n.id === product.namesetId) : null);
 
-      // Season (if exists)
-      if (namesetInfo.season !== '-') {
-        namesetParts.push(namesetInfo.season);
-      }
+  if (nameset) {
+    const namesetParts: string[] = [];
+    if (nameset.season) namesetParts.push(nameset.season);
+    if (nameset.playerName) {
+      const playerPart = nameset.number > 0 ? `${nameset.playerName} #${nameset.number}` : nameset.playerName;
+      namesetParts.push(playerPart);
+    }
 
-      // Player and number (if exists)
-      if (namesetInfo.playerName !== '-') {
-        const playerPart =
-          namesetInfo.number > 0 ? `${namesetInfo.playerName} #${namesetInfo.number}` : namesetInfo.playerName;
-        namesetParts.push(playerPart);
-      }
-
-      if (namesetParts.length > 0) {
-        parts.push(`(${namesetParts.join(' - ')})`);
-      }
+    if (namesetParts.length > 0) {
+      parts.push(`(${namesetParts.join(' - ')})`);
     }
   }
 
-  // Badge (if exists)
-  if (product.badgeId) {
+  // Badge (embedded or lookup)
+  if (product.badge && product.badge.name) {
+    parts.push(product.badge.name);
+  } else if (product.badgeId) {
     const badgeName = getBadgeInfo(product.badgeId, badges, archivedBadges);
     if (badgeName !== '-') {
       parts.push(badgeName);
     }
   }
 
-  return parts.join(' - ');
+  const result = parts.join(' - ');
+  return result || product.name || 'Unnamed Product';
 };
 
 // Date formatting utilities for European format (DD/MM/YYYY)

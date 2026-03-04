@@ -81,7 +81,7 @@ const EditNamesetModal: React.FC<Props> = ({ editingNameset, setEditingNameset }
       quantity: Number(quantity),
       price: Number(price),
       kitTypeId: selectedKitTypeId,
-      location: location.trim() || undefined,
+      location: location.trim(),
     });
     setEditingNameset(null);
   };

@@ -52,8 +52,8 @@ const EditSellerModal: React.FC<Props> = ({ editingSeller, setEditingSeller }) =
 
     updateSeller(editingSeller.id, {
       name: name.trim(),
-      websiteUrl: websiteUrl.trim() || undefined,
-      specialNotes: specialNotes.trim() || undefined,
+      websiteUrl: websiteUrl.trim(),
+      specialNotes: specialNotes.trim(),
       productIds: productIds,
     });
     setEditingSeller(null);

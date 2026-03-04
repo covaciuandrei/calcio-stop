@@ -116,10 +116,10 @@ const AddProductForm: React.FC = () => {
       kitTypeId: selectedKitTypeId,
       badgeId: selectedBadgeId,
       price: Number(price) || 0,
-      olxLink: olxLink.trim() || undefined,
-      location: location.trim() || undefined,
+      olxLink: olxLink.trim() || null,
+      location: location.trim() || null,
       isOnSale: isOnSale,
-      salePrice: isOnSale && salePrice !== '' ? Number(salePrice) : undefined,
+      salePrice: isOnSale && salePrice !== '' ? Number(salePrice) : null,
       createdAt: new Date().toISOString(),
     };
 

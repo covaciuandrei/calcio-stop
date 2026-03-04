@@ -1533,7 +1533,7 @@ export async function updateProduct(id, updates) {
     dbUpdates.price = parseFloat(updates.price);
   }
   if (updates.olxLink !== undefined) {
-    dbUpdates.olx_link = updates.olxLink;
+    dbUpdates.olx_link = updates.olxLink || null;
   }
   if (updates.location !== undefined) {
     dbUpdates.location = updates.location || null;
@@ -1643,14 +1643,44 @@ export async function updateProduct(id, updates) {
 }
 
 export async function deleteProduct(id) {
-  // First check if there are any references to this product
-  const { data: sales, error: salesError } = await supabase.from('sales').select('id').eq('product_id', id).limit(1);
+  // 1. Check sales by old product_id column
+  const { data: salesByCol, error: salesColError } = await supabase.from('sales').select('id').eq('product_id', id).limit(1);
+  if (salesColError) throw salesColError;
 
-  if (salesError) throw salesError;
-
-  // If there are references, throw an error
-  if (sales && sales.length > 0) {
+  if (salesByCol && salesByCol.length > 0) {
     throw new Error('Cannot delete product: it is referenced by sales');
+  }
+
+  // 2. Check sales by items JSONB (contains)
+  const { data: salesByItems, error: salesItemsError } = await supabase
+    .from('sales')
+    .select('id')
+    .contains('items', [{ productId: id }])
+    .limit(1);
+
+  if (salesItemsError) {
+    // Fallback if contains is unsupported
+    const { data: allSales } = await supabase.from('sales').select('id, items');
+    const inSales = allSales?.some(s => s.items?.some(i => i.productId === id));
+    if (inSales) throw new Error('Cannot delete product: it is referenced by sales');
+  } else if (salesByItems && salesByItems.length > 0) {
+    throw new Error('Cannot delete product: it is referenced by sales');
+  }
+
+  // 3. Check reservations by items JSONB
+  const { data: resByItems, error: resItemsError } = await supabase
+    .from('reservations')
+    .select('id')
+    .contains('items', [{ productId: id }])
+    .limit(1);
+
+  if (resItemsError) {
+    // Fallback if contains is unsupported
+    const { data: allRes } = await supabase.from('reservations').select('id, items');
+    const inRes = allRes?.some(r => r.items?.some(i => i.productId === id));
+    if (inRes) throw new Error('Cannot delete product: it is referenced by reservations');
+  } else if (resByItems && resByItems.length > 0) {
+    throw new Error('Cannot delete product: it is referenced by reservations');
   }
 
   // If no references, proceed with deletion
@@ -1773,152 +1803,13 @@ export async function restoreProduct(id) {
 // SALES CRUD OPERATIONS
 // ============================================================================
 
-export async function createSale(data) {
-  // Validate input
-  if (!data.items || !Array.isArray(data.items) || data.items.length === 0) {
-    throw new Error('Sale must have at least one item');
-  }
-
-  // Map frontend items to database JSONB format
-  const itemsData = data.items.map((item) => ({
-    productId: item.productId,
-    size: item.size,
-    quantity: item.quantity,
-    priceSold: item.priceSold,
-  }));
-
-  // Map frontend data to database schema
-  const dbData = {
-    items: itemsData,
-    customer_name: data.customerName,
-    date: data.date, // This will now store the full timestamp
-    sale_type: data.saleType,
-    created_at: data.createdAt || new Date().toISOString(),
-  };
-
-  // Backward compatibility: if old columns exist, also populate them from first item
-  if (data.items.length > 0) {
-    const firstItem = data.items[0];
-    dbData.product_id = firstItem.productId;
-    dbData.size = firstItem.size;
-    dbData.quantity = firstItem.quantity;
-    dbData.price_sold = firstItem.priceSold;
-  }
-
-  const { data: result, error } = await supabase.from('sales').insert([dbData]).select().single();
-
-  if (error) throw error;
-
-  // Log inventory changes
-  try {
-    const productIds = [...new Set(data.items.map(i => i.productId))];
-    const { data: products } = await supabase
-      .from('products')
-      .select('id, name, sizes, teams(name)')
-      .in('id', productIds);
-
-    if (products) {
-      const logs = [];
-      data.items.forEach(item => {
-        const product = products.find(p => p.id === item.productId);
-        if (product) {
-          const productName = product.teams?.name ? `${product.teams.name} - ${product.name}` : product.name;
-          // Current quantity in DB (after decrement)
-          const sizeObj = product.sizes?.find(s => s.size === item.size);
-          const currentQuantity = sizeObj ? (sizeObj.quantity || 0) : 0;
-
-          logs.push({
-            entityType: 'product',
-            entityId: item.productId,
-            entityName: productName,
-            size: item.size,
-            changeType: 'sale',
-            quantityBefore: currentQuantity + item.quantity,
-            quantityChange: -item.quantity,
-            quantityAfter: currentQuantity,
-            reason: `Sale (${data.saleType}) to ${data.customerName}`,
-            referenceId: result.id,
-            referenceType: 'sale'
-          });
-        }
-      });
-
-      if (logs.length > 0) {
-        await logInventoryChanges(logs);
-      }
-    }
-  } catch (logError) {
-    console.error('Failed to log inventory changes for sale:', logError);
-    // Don't fail the sale creation
-  }
-
-  // Map database response back to frontend format
-  // Support both new (items) and old (product_id, etc.) formats for backward compatibility
-  if (result.items && Array.isArray(result.items) && result.items.length > 0) {
-    return {
-      id: result.id,
-      items: result.items.map((item) => ({
-        productId: item.productId || item.product_id,
-        size: item.size,
-        quantity: item.quantity,
-        priceSold: item.priceSold || item.price_sold,
-      })),
-      customerName: result.customer_name,
-      date: result.date,
-      saleType: result.sale_type,
-      createdAt: result.created_at,
-    };
-  } else {
-    // Fallback for old format
-    return {
-      id: result.id,
-      items: [
-        {
-          productId: result.product_id,
-          size: result.size,
-          quantity: result.quantity,
-          priceSold: result.price_sold,
-        },
-      ],
-      customerName: result.customer_name,
-      date: result.date,
-      saleType: result.sale_type,
-      createdAt: result.created_at,
-    };
-  }
-}
-
-export async function getSales(filters = {}) {
-  // Default to current month if no date range is provided
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-
-  // Extract filters
-  const startDate = filters.startDate || startOfMonth.toISOString().split('T')[0];
-  const endDate = filters.endDate || endOfMonth.toISOString().split('T')[0];
-  const saleType = filters.saleType; // 'OLX', 'IN-PERSON', or undefined (all)
-
-  // Build query
-  let query = supabase
-    .from('sales')
-    .select('*')
-    .gte('date', startDate)
-    .lte('date', endDate)
-    .order('date', { ascending: false });
-
-  // Add sale type filter if provided
-  if (saleType) {
-    query = query.eq('sale_type', saleType);
-  }
-
-  const { data, error } = await query;
-
-  if (error) throw error;
+// Helper to resolve product details for sales
+async function resolveSalesProducts(sales) {
+  if (!sales || sales.length === 0) return [];
 
   // Collect all unique product IDs from all sales
   const productIds = new Set();
-  (data || []).forEach((sale) => {
+  sales.forEach((sale) => {
     if (sale.items && Array.isArray(sale.items) && sale.items.length > 0) {
       sale.items.forEach((item) => {
         const productId = item.productId || item.product_id;
@@ -1929,64 +1820,23 @@ export async function getSales(filters = {}) {
     }
   });
 
-  // Fetch all products in one query if we have any product IDs
+  // Fetch all products in one query
   let productsMap = new Map();
   if (productIds.size > 0) {
     const { data: productsData, error: productsError } = await supabase
       .from('products')
-      .select(
-        `
+      .select(`
         *,
-        product_images (
-          id,
-          product_id,
-          image_url,
-          thumbnail_url,
-          medium_url,
-          large_url,
-          alt_text,
-          is_primary,
-          display_order,
-          created_at
-        ),
-        namesets (
-          id,
-          player_name,
-          number,
-          season,
-          quantity,
-          price,
-          kit_type_id,
-          location,
-          created_at
-        ),
-        teams (
-          id,
-          name,
-          leagues,
-          created_at
-        ),
-        kit_types (
-          id,
-          name,
-          created_at
-        ),
-        badges (
-          id,
-          name,
-          season,
-          quantity,
-          price,
-          location,
-          created_at
-        )
-      `
-      )
+        product_images (id, product_id, image_url, thumbnail_url, medium_url, large_url, alt_text, is_primary, display_order, created_at),
+        namesets (id, player_name, number, season, quantity, price, kit_type_id, location, created_at),
+        teams (id, name, leagues, created_at),
+        kit_types (id, name, created_at),
+        badges (id, name, season, quantity, price, location, created_at)
+      `)
       .in('id', Array.from(productIds));
 
     if (productsError) throw productsError;
 
-    // Map products by ID for quick lookup
     (productsData || []).forEach((item) => {
       productsMap.set(item.id, {
         id: item.id,
@@ -2015,110 +1865,176 @@ export async function getSales(filters = {}) {
           displayOrder: img.display_order,
           createdAt: img.created_at,
         })),
-        nameset: item.namesets
-          ? {
-            id: item.namesets.id,
-            playerName: item.namesets.player_name,
-            number: item.namesets.number,
-            season: item.namesets.season,
-            quantity: item.namesets.quantity,
-            price: item.namesets.price,
-            kitTypeId: item.namesets.kit_type_id,
-            location: item.namesets.location || undefined,
-            createdAt: item.namesets.created_at,
-          }
-          : null,
-        team: item.teams
-          ? {
-            id: item.teams.id,
-            name: item.teams.name,
-            leagues: item.teams.leagues || [],
-            createdAt: item.teams.created_at,
-          }
-          : null,
-        kitType: item.kit_types
-          ? {
-            id: item.kit_types.id,
-            name: item.kit_types.name,
-            createdAt: item.kit_types.created_at,
-          }
-          : null,
-        badge: item.badges
-          ? {
-            id: item.badges.id,
-            name: item.badges.name,
-            season: item.badges.season,
-            quantity: item.badges.quantity,
-            price: item.badges.price,
-            location: item.badges.location || undefined,
-            createdAt: item.badges.created_at,
-          }
-          : null,
+        nameset: item.namesets ? {
+          id: item.namesets.id,
+          playerName: item.namesets.player_name,
+          number: item.namesets.number,
+          season: item.namesets.season,
+          quantity: item.namesets.quantity,
+          price: item.namesets.price,
+          kitTypeId: item.namesets.kit_type_id,
+          location: item.namesets.location || undefined,
+          createdAt: item.namesets.created_at,
+        } : null,
+        team: item.teams ? {
+          id: item.teams.id,
+          name: item.teams.name,
+          leagues: item.teams.leagues || [],
+          createdAt: item.teams.created_at,
+        } : null,
+        kitType: item.kit_types ? {
+          id: item.kit_types.id,
+          name: item.kit_types.name,
+          createdAt: item.kit_types.created_at,
+        } : null,
+        badge: item.badges ? {
+          id: item.badges.id,
+          name: item.badges.name,
+          season: item.badges.season,
+          quantity: item.badges.quantity,
+          price: item.badges.price,
+          location: item.badges.location || undefined,
+          createdAt: item.badges.created_at,
+        } : null,
       });
     });
   }
 
-  // Map database fields to frontend format
-  // Support both new (items) and old (product_id, etc.) formats for backward compatibility
-  return (data || []).map((sale) => {
+  return sales.map((sale) => {
+    let saleItems = [];
     if (sale.items && Array.isArray(sale.items) && sale.items.length > 0) {
-      return {
-        id: sale.id,
-        items: sale.items.map((item) => {
-          const productId = item.productId || item.product_id;
-          return {
-            productId: productId,
-            size: item.size,
-            quantity: item.quantity,
-            priceSold: item.priceSold || item.price_sold,
-            product: productsMap.get(productId) || null,
-          };
-        }),
-        customerName: sale.customer_name,
-        date: sale.date,
-        saleType: sale.sale_type,
-        createdAt: sale.created_at,
-      };
+      saleItems = sale.items.map((item) => {
+        const productId = item.productId || item.product_id;
+        return {
+          productId: productId,
+          size: item.size,
+          quantity: item.quantity,
+          priceSold: item.priceSold || item.price_sold || 0,
+          product: productsMap.get(productId) || null,
+        };
+      });
     } else {
-      // Fallback for old format
       const productId = sale.product_id;
-      return {
-        id: sale.id,
-        items: [
-          {
-            productId: productId,
-            size: sale.size,
-            quantity: sale.quantity,
-            priceSold: sale.price_sold,
-            product: productsMap.get(productId) || null,
-          },
-        ],
-        customerName: sale.customer_name,
-        date: sale.date,
-        saleType: sale.sale_type,
-        createdAt: sale.created_at,
-      };
+      saleItems = [{
+        productId: productId,
+        size: sale.size,
+        quantity: sale.quantity,
+        priceSold: sale.price_sold || 0,
+        product: productsMap.get(productId) || null,
+      }];
     }
+
+    return {
+      id: sale.id,
+      items: saleItems,
+      customerName: sale.customer_name,
+      date: sale.date,
+      saleType: sale.sale_type,
+      createdAt: sale.created_at,
+    };
   });
 }
 
-export async function updateSale(id, updates) {
-  // Map frontend data to database schema
-  const dbUpdates = {};
+export async function createSale(data) {
+  if (!data.items || !Array.isArray(data.items) || data.items.length === 0) {
+    throw new Error('Sale must have at least one item');
+  }
 
-  if (updates.items !== undefined) {
-    if (!Array.isArray(updates.items) || updates.items.length === 0) {
-      throw new Error('Sale must have at least one item');
+  const itemsData = data.items.map((item) => ({
+    productId: item.productId,
+    size: item.size,
+    quantity: item.quantity,
+    priceSold: item.priceSold,
+  }));
+
+  const dbData = {
+    items: itemsData,
+    customer_name: data.customerName,
+    date: data.date,
+    sale_type: data.saleType,
+    created_at: data.createdAt || new Date().toISOString(),
+  };
+
+  if (data.items.length > 0) {
+    const firstItem = data.items[0];
+    dbData.product_id = firstItem.productId;
+    dbData.size = firstItem.size;
+    dbData.quantity = firstItem.quantity;
+    dbData.price_sold = firstItem.priceSold;
+  }
+
+  const { data: result, error } = await supabase.from('sales').insert([dbData]).select().single();
+  if (error) throw error;
+
+  // Log inventory changes (using the same logic)
+  try {
+    const productIds = [...new Set(data.items.map(i => i.productId))];
+    const { data: products } = await supabase.from('products').select('id, name, sizes, teams(name)').in('id', productIds);
+    if (products) {
+      const logs = [];
+      data.items.forEach(item => {
+        const product = products.find(p => p.id === item.productId);
+        if (product) {
+          const productName = product.teams?.name ? `${product.teams.name} - ${product.name}` : product.name;
+          const sizeObj = product.sizes?.find(s => s.size === item.size);
+          const currentQuantity = sizeObj ? (sizeObj.quantity || 0) : 0;
+          logs.push({
+            entityType: 'product',
+            entityId: item.productId,
+            entityName: productName,
+            size: item.size,
+            changeType: 'sale',
+            quantityBefore: currentQuantity + item.quantity,
+            quantityChange: -item.quantity,
+            quantityAfter: currentQuantity,
+            reason: `Sale (${data.saleType}) to ${data.customerName}`,
+            referenceId: result.id,
+            referenceType: 'sale'
+          });
+        }
+      });
+      if (logs.length > 0) await logInventoryChanges(logs);
     }
-    // Map frontend items to database JSONB format
+  } catch (e) { }
+
+  const resolved = await resolveSalesProducts([result]);
+  return resolved[0];
+}
+
+export async function getSales(filters = {}) {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+  const startDate = filters.startDate || startOfMonth.toISOString().split('T')[0];
+  const endDate = filters.endDate || endOfMonth.toISOString().split('T')[0];
+  const saleType = filters.saleType;
+
+  let query = supabase
+    .from('sales')
+    .select('*')
+    .gte('date', startDate)
+    .lte('date', endDate)
+    .order('date', { ascending: false });
+
+  if (saleType) query = query.eq('sale_type', saleType);
+
+  const { data, error } = await query;
+  if (error) throw error;
+
+  return await resolveSalesProducts(data);
+}
+
+export async function updateSale(id, updates) {
+  const dbUpdates = {};
+  if (updates.items !== undefined) {
+    if (!Array.isArray(updates.items) || updates.items.length === 0) throw new Error('Sale must have at least one item');
     dbUpdates.items = updates.items.map((item) => ({
       productId: item.productId,
       size: item.size,
       quantity: item.quantity,
       priceSold: item.priceSold,
     }));
-
-    // Backward compatibility: update old columns from first item
     if (updates.items.length > 0) {
       const firstItem = updates.items[0];
       dbUpdates.product_id = firstItem.productId;
@@ -2127,84 +2043,38 @@ export async function updateSale(id, updates) {
       dbUpdates.price_sold = firstItem.priceSold;
     }
   }
-
-  // Backward compatibility: handle old format updates
   if (updates.productId !== undefined) {
     dbUpdates.product_id = updates.productId;
-    // If items array exists, update first item
-    if (dbUpdates.items && dbUpdates.items.length > 0) {
-      dbUpdates.items[0].productId = updates.productId;
-    }
+    if (dbUpdates.items && dbUpdates.items.length > 0) dbUpdates.items[0].productId = updates.productId;
   }
   if (updates.size !== undefined) {
     dbUpdates.size = updates.size;
-    if (dbUpdates.items && dbUpdates.items.length > 0) {
-      dbUpdates.items[0].size = updates.size;
-    }
+    if (dbUpdates.items && dbUpdates.items.length > 0) dbUpdates.items[0].size = updates.size;
   }
   if (updates.quantity !== undefined) {
     dbUpdates.quantity = parseInt(updates.quantity);
-    if (dbUpdates.items && dbUpdates.items.length > 0) {
-      dbUpdates.items[0].quantity = parseInt(updates.quantity);
-    }
+    if (dbUpdates.items && dbUpdates.items.length > 0) dbUpdates.items[0].quantity = parseInt(updates.quantity);
   }
   if (updates.priceSold !== undefined) {
     dbUpdates.price_sold = parseFloat(updates.priceSold);
-    if (dbUpdates.items && dbUpdates.items.length > 0) {
-      dbUpdates.items[0].priceSold = parseFloat(updates.priceSold);
-    }
+    if (dbUpdates.items && dbUpdates.items.length > 0) dbUpdates.items[0].priceSold = parseFloat(updates.priceSold);
   }
-
-  if (updates.customerName !== undefined) {
-    dbUpdates.customer_name = updates.customerName;
-  }
-  if (updates.date !== undefined) {
-    dbUpdates.date = updates.date;
-  }
-  if (updates.saleType !== undefined) {
-    dbUpdates.sale_type = updates.saleType;
-  }
+  if (updates.customerName !== undefined) dbUpdates.customer_name = updates.customerName;
+  if (updates.date !== undefined) dbUpdates.date = updates.date;
+  if (updates.saleType !== undefined) dbUpdates.sale_type = updates.saleType;
 
   const { data, error } = await supabase.from('sales').update(dbUpdates).eq('id', id).select().single();
-
   if (error) throw error;
 
-  // Map database response back to frontend format
-  if (data.items && Array.isArray(data.items) && data.items.length > 0) {
-    return {
-      id: data.id,
-      items: data.items.map((item) => ({
-        productId: item.productId || item.product_id,
-        size: item.size,
-        quantity: item.quantity,
-        priceSold: item.priceSold || item.price_sold,
-      })),
-      customerName: data.customer_name,
-      date: data.date,
-      saleType: data.sale_type,
-      createdAt: data.created_at,
-    };
-  } else {
-    // Fallback for old format
-    return {
-      id: data.id,
-      items: [
-        {
-          productId: data.product_id,
-          size: data.size,
-          quantity: data.quantity,
-          priceSold: data.price_sold,
-        },
-      ],
-      customerName: data.customer_name,
-      date: data.date,
-      saleType: data.sale_type,
-      createdAt: data.created_at,
-    };
-  }
+  const resolved = await resolveSalesProducts([data]);
+  return resolved[0];
 }
 
 export async function deleteSale(id) {
+  // Delink any order that references this sale before deleting
+  // (avoids FK constraint 409 conflict)
+  await supabase.from('orders').update({ sale_id: null }).eq('sale_id', id);
+
   const { error } = await supabase.from('sales').delete().eq('id', id);
 
   if (error) throw error;
@@ -2319,6 +2189,10 @@ export async function reverseSale(id) {
       await logInventoryChanges(inventoryChanges);
     }
   }
+
+  // Delink any order that references this sale before deleting
+  // (avoids FK constraint 409 conflict)
+  await supabase.from('orders').update({ sale_id: null }).eq('sale_id', id);
 
   // Delete the sale after restoring quantities
   const { error: deleteError } = await supabase.from('sales').delete().eq('id', id);
@@ -2571,6 +2445,10 @@ export async function returnSale(saleId) {
     .single();
 
   if (returnError) throw returnError;
+
+  // Delink any order that references this sale before deleting
+  // (avoids FK constraint 409 conflict; return record tracks original_sale_id for traceability)
+  await supabase.from('orders').update({ sale_id: null }).eq('sale_id', saleId);
 
   // Delete the sale after creating return and restoring quantities
   const { error: deleteError } = await supabase.from('sales').delete().eq('id', saleId);
@@ -3479,7 +3357,7 @@ export async function deleteOrder(id) {
 
   if (fetchError) throw fetchError;
 
-  if (order.finished_at) throw new Error('Cannot delete a finished order');
+
   if (order.sale_id) throw new Error('Cannot delete order: it has a linked sale');
 
   const { error } = await supabase.from('orders').delete().eq('id', id);

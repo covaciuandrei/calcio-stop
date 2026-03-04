@@ -86,7 +86,7 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
 
     // Validate sale price
     if (isOnSale) {
-      if (salePrice === '' || salePrice === null || salePrice === undefined) {
+      if (salePrice === '' || salePrice === null) {
         newErrors.salePrice = 'Sale price is required when product is on sale';
       } else {
         const salePriceNum = Number(salePrice);
@@ -110,15 +110,6 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
 
     setErrors({});
 
-    // Prepare sale price: if on sale and has value, use it; if not on sale, clear it
-    let finalSalePrice: number | undefined = undefined;
-    if (isOnSale) {
-      finalSalePrice = salePrice !== '' ? Number(salePrice) : undefined;
-    } else {
-      // If turning off sale, explicitly clear the sale price by setting to undefined
-      finalSalePrice = undefined;
-    }
-
     updateProduct(editingProduct.id, {
       name: name.trim() || '',
       type,
@@ -128,10 +119,10 @@ const EditProductModal: React.FC<Props> = ({ editingProduct, setEditingProduct }
       kitTypeId: selectedKitTypeId,
       badgeId: selectedBadgeId,
       price: Number(price) || 0,
-      olxLink: olxLink.trim() || undefined,
-      location: location.trim() || undefined,
+      olxLink: olxLink.trim() || null,
+      location: location.trim() || null,
       isOnSale: isOnSale,
-      salePrice: finalSalePrice,
+      salePrice: isOnSale && salePrice !== '' ? Number(salePrice) : null,
     });
 
     // Note: Badge and nameset quantities are not updated when editing products

@@ -21,6 +21,7 @@ interface Props {
   onArchive: (id: string) => void;
   searchTerm?: string;
   isReadOnly?: boolean;
+  isArchived?: boolean;
   products?: any[]; // Products list for displaying product names
 }
 
@@ -31,6 +32,7 @@ const SellersTableList: React.FC<Props> = ({
   onArchive,
   searchTerm = '',
   isReadOnly = false,
+  isArchived = false,
   products = [],
 }) => {
   const navigate = useNavigate();
@@ -181,12 +183,20 @@ const SellersTableList: React.FC<Props> = ({
               </td>
               {!isReadOnly && (
                 <td onClick={(e) => e.stopPropagation()}>
-                  <button onClick={() => onEdit(s)} className="btn btn-icon btn-success" title="Edit">
-                    ✏️
-                  </button>
-                  <button onClick={() => onArchive(s.id)} className="btn btn-icon btn-secondary" title="Archive">
-                    📦
-                  </button>
+                  {!isArchived && (
+                    <button onClick={() => onEdit(s)} className="btn btn-icon btn-success" title="Edit">
+                      ✏️
+                    </button>
+                  )}
+                  {isArchived ? (
+                    <button onClick={() => onArchive(s.id)} className="btn btn-icon btn-success" title="Undo Archive">
+                      ↩️
+                    </button>
+                  ) : (
+                    <button onClick={() => onArchive(s.id)} className="btn btn-icon btn-secondary" title="Archive">
+                      📦
+                    </button>
+                  )}
                   {onDelete && (
                     <button onClick={() => onDelete(s.id)} className="btn btn-icon btn-danger" title="Delete">
                       🗑️
@@ -250,12 +260,20 @@ const SellersTableList: React.FC<Props> = ({
 
             {!isReadOnly && (
               <div className="mobile-card-actions" onClick={(e) => e.stopPropagation()}>
-                <button onClick={() => onEdit(s)} className="btn btn-success" title="Edit">
-                  Edit
-                </button>
-                <button onClick={() => onArchive(s.id)} className="btn btn-secondary" title="Archive">
-                  Archive
-                </button>
+                {!isArchived && (
+                  <button onClick={() => onEdit(s)} className="btn btn-success" title="Edit">
+                    Edit
+                  </button>
+                )}
+                {isArchived ? (
+                  <button onClick={() => onArchive(s.id)} className="btn btn-success" title="Undo Archive">
+                    Undo Archive
+                  </button>
+                ) : (
+                  <button onClick={() => onArchive(s.id)} className="btn btn-secondary" title="Archive">
+                    Archive
+                  </button>
+                )}
                 {onDelete && (
                   <button onClick={() => onDelete(s.id)} className="btn btn-danger" title="Delete">
                     Delete

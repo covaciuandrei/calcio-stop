@@ -42,10 +42,10 @@ export interface Product {
   kitTypeId: string; // reference to kit type (required, defaults to '1st Kit')
   badgeId: string | null; // reference to badge, null if no badge
   price: number; // default price per unit
-  olxLink?: string; // OLX listing URL
-  location?: string; // location where the product is stored
+  olxLink?: string | null; // OLX listing URL
+  location?: string | null; // location where the product is stored
   isOnSale?: boolean; // whether the product is on sale
-  salePrice?: number; // special sale price (only used when isOnSale is true)
+  salePrice?: number | null; // special sale price (only used when isOnSale is true)
   createdAt: string; // ISO date string
   images?: ProductImage[]; // product images
   nameset?: Nameset | null; // full nameset object (fetched in same request)

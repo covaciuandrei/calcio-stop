@@ -17,13 +17,15 @@ function extractAndPopulateRelatedData(products: Product[], isArchived: boolean)
       // Dynamically import stores to avoid circular dependencies
       const { useTeamsStore } = await import('./teamsStore');
       const { useNamesetsStore } = await import('./namesetsStore');
-      const { useKitTypesStore } = await import('./kitTypesStore');
       const { useBadgesStore } = await import('./badgesStore');
 
       // Extract unique entities from products
+      // NOTE: Kit types are intentionally excluded here. They must be loaded via
+      // loadKitTypes() to get the full list. Partial population from product relations
+      // would cause the isDataLoaded check in useRouteData to skip loadKitTypes(),
+      // resulting in missing default kit types (2nd Kit, 3rd Kit, None) in pickers.
       const teamsMap = new Map<string, any>();
       const namesetsMap = new Map<string, any>();
-      const kitTypesMap = new Map<string, any>();
       const badgesMap = new Map<string, any>();
 
       products.forEach((product) => {
@@ -33,9 +35,6 @@ function extractAndPopulateRelatedData(products: Product[], isArchived: boolean)
         if (product.nameset && product.nameset.id) {
           namesetsMap.set(product.nameset.id, product.nameset);
         }
-        if (product.kitType && product.kitType.id) {
-          kitTypesMap.set(product.kitType.id, product.kitType);
-        }
         if (product.badge && product.badge.id) {
           badgesMap.set(product.badge.id, product.badge);
         }
@@ -44,21 +43,16 @@ function extractAndPopulateRelatedData(products: Product[], isArchived: boolean)
       // Get current store states
       const teamsState = useTeamsStore.getState();
       const namesetsState = useNamesetsStore.getState();
-      const kitTypesState = useKitTypesStore.getState();
       const badgesState = useBadgesStore.getState();
 
       // Merge with existing data (only add if not already present)
       const existingTeams = isArchived ? teamsState.archivedTeams : teamsState.teams;
       const existingNamesets = isArchived ? namesetsState.archivedNamesets : namesetsState.namesets;
-      const existingKitTypes = isArchived ? kitTypesState.archivedKitTypes : kitTypesState.kitTypes;
       const existingBadges = isArchived ? badgesState.archivedBadges : badgesState.badges;
 
       const newTeams = Array.from(teamsMap.values()).filter((team) => !existingTeams.some((t) => t.id === team.id));
       const newNamesets = Array.from(namesetsMap.values()).filter(
         (nameset) => !existingNamesets.some((n) => n.id === nameset.id)
-      );
-      const newKitTypes = Array.from(kitTypesMap.values()).filter(
-        (kitType) => !existingKitTypes.some((kt) => kt.id === kitType.id)
       );
       const newBadges = Array.from(badgesMap.values()).filter(
         (badge) => !existingBadges.some((b) => b.id === badge.id)
@@ -78,14 +72,6 @@ function extractAndPopulateRelatedData(products: Product[], isArchived: boolean)
           useNamesetsStore.getState().setArchivedNamesets([...existingNamesets, ...newNamesets]);
         } else {
           useNamesetsStore.getState().setNamesets([...existingNamesets, ...newNamesets]);
-        }
-      }
-
-      if (newKitTypes.length > 0) {
-        if (isArchived) {
-          useKitTypesStore.getState().setArchivedKitTypes([...existingKitTypes, ...newKitTypes]);
-        } else {
-          useKitTypesStore.getState().setKitTypes([...existingKitTypes, ...newKitTypes]);
         }
       }
 

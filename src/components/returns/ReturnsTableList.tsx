@@ -53,7 +53,7 @@ const ReturnsTableList: React.FC<Props> = ({ returns, onDelete, searchTerm = '' 
 
   // Calculate total for a return
   const getReturnTotal = (returnRecord: Return): number => {
-    return returnRecord.items.reduce((total, item) => total + item.priceSold * item.quantity, 0);
+    return returnRecord.items.reduce((total, item) => total + Number(item.priceSold || 0) * (item.quantity || 0), 0);
   };
 
   // Filter returns based on search term
@@ -63,8 +63,8 @@ const ReturnsTableList: React.FC<Props> = ({ returns, onDelete, searchTerm = '' 
       return (
         productDetails.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.size.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.quantity.toString().includes(searchTerm) ||
-        item.priceSold.toString().includes(searchTerm)
+        String(item.quantity).includes(searchTerm) ||
+        String(item.priceSold).includes(searchTerm)
       );
     });
     return (
@@ -105,7 +105,7 @@ const ReturnsTableList: React.FC<Props> = ({ returns, onDelete, searchTerm = '' 
                   {r.items.map((item, idx) => (
                     <div key={idx} style={{ fontSize: '0.875rem' }}>
                       {getProductDetails(item.productId)} - Size: {item.size} - Qty: {item.quantity} -{' '}
-                      {item.priceSold.toFixed(2)} RON
+                      {Number(item.priceSold || 0).toFixed(2)} RON
                     </div>
                   ))}
                 </div>
@@ -145,7 +145,7 @@ const ReturnsTableList: React.FC<Props> = ({ returns, onDelete, searchTerm = '' 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
                   {r.items.map((item, idx) => (
                     <div key={idx} style={{ fontSize: '0.875rem' }}>
-                      {getProductDetails(item.productId)} - {item.size} x{item.quantity} - {item.priceSold.toFixed(2)}{' '}
+                      {getProductDetails(item.productId)} - {item.size} x{item.quantity} - {Number(item.priceSold || 0).toFixed(2)}{' '}
                       RON
                     </div>
                   ))}
