@@ -1,5 +1,5 @@
 import React, { Suspense, useEffect, useState } from 'react';
-import { NavLink, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
+import { Link, NavLink, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
 import './App.css';
 import { AuthGuard } from './components/auth/AuthGuard';
 import { UserMenu } from './components/auth/UserMenu';
@@ -199,13 +199,9 @@ const App: React.FC = () => {
                           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
                         </svg>
                       </button>
-                      <button
+                      <NavLink
+                        to="/admin/orders"
                         className="settings-button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          window.location.href = '/admin/orders';
-                        }}
                         title="Orders"
                         aria-label="Orders"
                       >
@@ -223,14 +219,10 @@ const App: React.FC = () => {
                           <polyline points="3.27,6.96 12,12.01 20.73,6.96" />
                           <line x1="12" y1="22.08" x2="12" y2="12" />
                         </svg>
-                      </button>
-                      <button
+                      </NavLink>
+                      <NavLink
+                        to="/admin/stats"
                         className="settings-button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          window.location.href = '/admin/stats';
-                        }}
                         title="Statistics"
                         aria-label="Statistics"
                       >
@@ -247,7 +239,7 @@ const App: React.FC = () => {
                           <path d="M3 3v18h18" />
                           <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
                         </svg>
-                      </button>
+                      </NavLink>
                       <UserMenu />
                     </div>
                   </nav>
