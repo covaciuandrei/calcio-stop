@@ -1643,14 +1643,44 @@ export async function updateProduct(id, updates) {
 }
 
 export async function deleteProduct(id) {
-  // First check if there are any references to this product
-  const { data: sales, error: salesError } = await supabase.from('sales').select('id').eq('product_id', id).limit(1);
+  // 1. Check sales by old product_id column
+  const { data: salesByCol, error: salesColError } = await supabase.from('sales').select('id').eq('product_id', id).limit(1);
+  if (salesColError) throw salesColError;
 
-  if (salesError) throw salesError;
-
-  // If there are references, throw an error
-  if (sales && sales.length > 0) {
+  if (salesByCol && salesByCol.length > 0) {
     throw new Error('Cannot delete product: it is referenced by sales');
+  }
+
+  // 2. Check sales by items JSONB (contains)
+  const { data: salesByItems, error: salesItemsError } = await supabase
+    .from('sales')
+    .select('id')
+    .contains('items', [{ productId: id }])
+    .limit(1);
+
+  if (salesItemsError) {
+    // Fallback if contains is unsupported
+    const { data: allSales } = await supabase.from('sales').select('id, items');
+    const inSales = allSales?.some(s => s.items?.some(i => i.productId === id));
+    if (inSales) throw new Error('Cannot delete product: it is referenced by sales');
+  } else if (salesByItems && salesByItems.length > 0) {
+    throw new Error('Cannot delete product: it is referenced by sales');
+  }
+
+  // 3. Check reservations by items JSONB
+  const { data: resByItems, error: resItemsError } = await supabase
+    .from('reservations')
+    .select('id')
+    .contains('items', [{ productId: id }])
+    .limit(1);
+
+  if (resItemsError) {
+    // Fallback if contains is unsupported
+    const { data: allRes } = await supabase.from('reservations').select('id, items');
+    const inRes = allRes?.some(r => r.items?.some(i => i.productId === id));
+    if (inRes) throw new Error('Cannot delete product: it is referenced by reservations');
+  } else if (resByItems && resByItems.length > 0) {
+    throw new Error('Cannot delete product: it is referenced by reservations');
   }
 
   // If no references, proceed with deletion
