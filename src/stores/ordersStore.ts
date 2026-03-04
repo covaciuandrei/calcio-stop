@@ -73,6 +73,7 @@ export const useOrdersStore = create<OrdersState>()(
             error: error instanceof Error ? error.message : 'Failed to add order',
             isLoading: false,
           });
+          throw error;
         }
       },
 
@@ -96,6 +97,7 @@ export const useOrdersStore = create<OrdersState>()(
             error: error instanceof Error ? error.message : 'Failed to update order',
             isLoading: false,
           });
+          throw error;
         }
       },
 
@@ -124,6 +126,7 @@ export const useOrdersStore = create<OrdersState>()(
             error: error instanceof Error ? error.message : 'Failed to archive order',
             isLoading: false,
           });
+          throw error;
         }
       },
 
@@ -152,6 +155,7 @@ export const useOrdersStore = create<OrdersState>()(
             error: error instanceof Error ? error.message : 'Failed to unarchive order',
             isLoading: false,
           });
+          throw error;
         }
       },
 
@@ -170,6 +174,7 @@ export const useOrdersStore = create<OrdersState>()(
             error: error instanceof Error ? error.message : 'Failed to delete order',
             isLoading: false,
           });
+          throw error;
         }
       },
 
@@ -191,6 +196,7 @@ export const useOrdersStore = create<OrdersState>()(
             error: error instanceof Error ? error.message : 'Failed to update order status',
             isLoading: false,
           });
+          throw error;
         }
       },
     }),

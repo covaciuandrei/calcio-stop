@@ -1,5 +1,5 @@
 import React, { Suspense, useEffect, useState } from 'react';
-import { Link, NavLink, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
+import { NavLink, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
 import './App.css';
 import { AuthGuard } from './components/auth/AuthGuard';
 import { UserMenu } from './components/auth/UserMenu';
