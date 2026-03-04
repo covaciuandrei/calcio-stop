@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useBadgesActions } from '../../stores';
 import { Badge } from '../../types';
 import { generateSeasons } from '../../utils/utils';
+import BadgeImageManager from './BadgeImageManager';
 
 interface Props {
   editingBadge: Badge | null;
@@ -60,7 +61,7 @@ const EditBadgeModal: React.FC<Props> = ({ editingBadge, setEditingBadge, onSucc
       season,
       quantity: Number(quantity),
       price: Number(price),
-      location: location.trim() || undefined,
+      location: location.trim(),
     });
     setEditingBadge(null);
     if (onSuccess) onSuccess();
@@ -153,6 +154,12 @@ const EditBadgeModal: React.FC<Props> = ({ editingBadge, setEditingBadge, onSucc
                 onChange={(e) => setLocation(e.target.value)}
               />
             </label>
+          </div>
+
+          {/* Badge Images */}
+          <div className="form-group">
+            <label>Images:</label>
+            <BadgeImageManager badgeId={editingBadge.id} isAdmin={true} />
           </div>
 
           <div className="modal-buttons">

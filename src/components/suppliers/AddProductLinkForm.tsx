@@ -41,9 +41,9 @@ const AddProductLinkForm: React.FC<Props> = ({ onAdd }) => {
 
     const newProductLink: Omit<ProductLink, 'id' | 'createdAt'> = {
       productId: productId!,
-      sellerId: sellerId || undefined,
+      sellerId: sellerId,
       url: url.trim(),
-      label: label.trim() || undefined,
+      label: label.trim(),
     };
 
     addProductLink(newProductLink);

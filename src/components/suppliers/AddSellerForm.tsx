@@ -38,8 +38,8 @@ const AddSellerForm: React.FC<Props> = ({ onAdd }) => {
 
     const newSeller: Omit<Seller, 'id' | 'createdAt'> = {
       name: name.trim(),
-      websiteUrl: websiteUrl.trim() || undefined,
-      specialNotes: specialNotes.trim() || undefined,
+      websiteUrl: websiteUrl.trim(),
+      specialNotes: specialNotes.trim(),
       productIds: productIds,
     };
 

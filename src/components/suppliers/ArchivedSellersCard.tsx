@@ -7,7 +7,7 @@ const ArchivedSellersCard: React.FC = () => {
   // Get data from store
   const archivedSellers = useArchivedSellers();
   const products = useProductsList();
-  const { restoreSeller } = useSuppliersActions();
+  const { restoreSeller, deleteSeller } = useSuppliersActions();
   const [isArchivedSellersExpanded, setIsArchivedSellersExpanded] = useState(false);
   const [archivedSellersSearchTerm, setArchivedSellersSearchTerm] = useState('');
 
@@ -19,6 +19,13 @@ const ArchivedSellersCard: React.FC = () => {
   const handleRestore = (id: string) => {
     restoreSeller(id);
     setArchivedSellersSearchTerm('');
+  };
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('Are you sure you want to permanently delete this seller?')) {
+      deleteSeller(id);
+      setArchivedSellersSearchTerm('');
+    }
   };
 
   return (
@@ -54,10 +61,12 @@ const ArchivedSellersCard: React.FC = () => {
               <div className={styles.tableContainer}>
                 <SellersTableList
                   sellers={sortedArchivedSellers}
-                  onEdit={() => {}} // Archived items can't be edited
+                  onEdit={() => { }}
+                  onDelete={handleDelete}
                   onArchive={handleRestore}
                   searchTerm={archivedSellersSearchTerm}
                   isReadOnly={false}
+                  isArchived={true}
                   products={products}
                 />
               </div>

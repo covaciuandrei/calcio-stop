@@ -55,9 +55,9 @@ const EditProductLinkModal: React.FC<Props> = ({ editingProductLink, setEditingP
 
     updateProductLink(editingProductLink.id, {
       productId: productId!,
-      sellerId: sellerId || undefined,
+      sellerId: sellerId,
       url: url.trim(),
-      label: label.trim() || undefined,
+      label: label.trim(),
     });
     setEditingProductLink(null);
   };

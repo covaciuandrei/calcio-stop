@@ -161,7 +161,7 @@ const EditReservationModal: React.FC<Props> = ({ editingReservation, setEditingR
       items: reservationItems,
       customerName: customerName.trim(),
       expiringDate: expiringDateTime.toISOString(),
-      location: location.trim() || undefined,
+      location: location.trim(),
       dateTime: dateTime || undefined,
       saleType,
     });
